@@ -106,8 +106,8 @@ CREATE TABLE IF NOT EXISTS bookings (
 
 | Route | File | Description |
 |---|---|---|
-| `/` | `app/page.tsx` *(replace)* | Hero tagline → "Which domain you want be helped with" label → skill chip filter → 2-column mentor card grid |
-| `/mentor/[id]` | `app/mentor/[id]/page.tsx` *(new)* | Back button → mentor name → skill chips in circular-avatar row → bio → slot picker → PAY button |
+| `/` | `app/page.tsx` *(replace)* | Hero tagline → "Which domain you want be helped with" label → text search + skill chip filter → 2-column mentor card grid |
+| `/mentor/[id]` | `app/mentor/[id]/page.tsx` *(new)* | Back button → mentor name → skill chips in circular-avatar row → bio → slot picker → PAY button (slot must be selected first) |
 | `/mentor/register` | `app/mentor/register/page.tsx` *(new)* | Self-registration form (wallet required) |
 | `/history` | `app/history/page.tsx` *(new)* | "Your last calls" — past bookings + TRUST buttons |
 | `/admin` | `app/admin/page.tsx` *(new)* | Organiser dashboard — mentor list, booking overview, tag management |
@@ -136,10 +136,11 @@ CREATE TABLE IF NOT EXISTS bookings (
 | Component | Path | Notes |
 |---|---|---|
 | `MentorCard` | `components/mentors/MentorCard.tsx` | Avatar (Circles profile image), name, skill chips, CRC price, Book link |
+| `MentorSearch` | `components/mentors/MentorSearch.tsx` | Text input; client-side filters mentor list by name, bio, and skill tags; works in combination with `SkillFilter` |
 | `SkillFilter` | `components/mentors/SkillFilter.tsx` | Horizontal chip row driven by `skill_tags` table; active chip filters grid |
 | `MentorDetail` | `components/mentors/MentorDetail.tsx` | Mentor name → skills as circular avatar-style badges in a row → bio → `SlotPicker` → `PayButton` |
-| `SlotPicker` | `components/mentors/SlotPicker.tsx` | Visual time-slot grid (days × times). For MVP renders a static grid; on slot select opens `mentor.calendar_link` in a new tab. Full Google Calendar API integration is a post-MVP upgrade. |
-| `PayButton` | `components/mentors/PayButton.tsx` | Client component; `sendTransactions` → POST booking → open cal link |
+| `SlotPicker` | `components/mentors/SlotPicker.tsx` | Visual time-slot grid (days × times). Selecting a slot enables the PAY button. After successful payment, opens `mentor.calendar_link` in a new tab to finalise the actual calendar booking. Full Google Calendar API integration is post-MVP. |
+| `PayButton` | `components/mentors/PayButton.tsx` | Enabled only once a slot is selected; calls `sendTransactions`; if the Circles SDK/host does not surface a clear "insufficient balance" error natively, show an error toast "Not enough CRC"; on success POST booking |
 | `BookingHistory` | `components/bookings/BookingHistory.tsx` | List of past bookings with mentor info and TRUST button |
 | `TrustButton` | `components/bookings/TrustButton.tsx` | `sdk.getAvatar(me).trust.add(mentor)` on click |
 | `RegisterForm` | `components/mentors/RegisterForm.tsx` | Controlled form; guarded by wallet connection; POSTs to `/api/mentors` |
@@ -164,6 +165,17 @@ export const NAV = [
 ---
 
 ## Key Implementation Details
+
+### Booking flow (corrected order)
+```
+1. User selects a slot in SlotPicker → PAY button becomes active
+2. User clicks PAY
+3. sendTransactions([{ to: <contract>, data: <encoded CRC transfer> }])
+4. If the SDK/host returns an insufficient-balance error → show toast "Not enough CRC"
+   (probe first: check whether the Safe tx rejection already surfaces a clear message before adding custom guard)
+5. On success → POST /api/bookings { mentor_id, booker_address, tx_hash }
+6. Open mentor.calendar_link in new tab
+```
 
 ### Home page copy (from wireframe)
 The browse page opens with two lines of hero text above the filter:
@@ -278,16 +290,16 @@ Tasks are grouped by wave. All tasks within a wave can run in parallel. A wave s
 - Replace `app/page.tsx`
 - Hero text: "Get a call with a mentor, Pay in CRC, help someone get a free bootcamp tuition"
 - Filter label: "Which domain do you want help with?"
-- `SkillFilter` chip row (fetches from `/api/tags`)
-- 2-column `MentorCard` grid (fetches from `/api/mentors?skill=`)
+- `MentorSearch` text input + `SkillFilter` chip row (both filter the client-side list; tags fetched from `/api/tags`)
+- 2-column `MentorCard` grid (fetches from `/api/mentors`)
 - `MentorCard`: avatar placeholder, name, skill chips, CRC price, link to `/mentor/[id]`
 - _Depends on: T04, T07, T03_
 
 **T09 — Mentor detail page `/mentor/[id]`**
 - `app/mentor/[id]/page.tsx` — fetches mentor from `/api/mentors/[id]`
 - `MentorDetail`: back button, mentor name, circular-avatar skill badges row, bio
-- `SlotPicker`: static visual time-slot grid; selecting a slot enables the pay button and stores the chosen slot; opens `mentor.calendar_link` in new tab after payment
-- `PayButton`: uses CRC encoding from T02; calls `sendTransactions`; on success POSTs to `/api/bookings`; opens cal link
+- `SlotPicker`: static visual time-slot grid; selecting a slot enables the PAY button
+- `PayButton`: enabled only after slot selected; uses CRC encoding from T02; calls `sendTransactions`; if SDK doesn't surface a clear balance error natively, show toast "Not enough CRC"; on success POSTs to `/api/bookings` then opens `mentor.calendar_link`
 - _Depends on: T04, T06, T02_
 
 **T10 — Register page `/mentor/register`**
