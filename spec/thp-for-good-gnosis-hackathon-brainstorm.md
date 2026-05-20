@@ -5,7 +5,9 @@
 | **Branche** | **`mestryx`** |
 | **Remote** | [gnosis-box/THP-for-Good](https://github.com/gnosis-box/THP-for-Good) |
 | **Guide code** | [`AGENTS.md`](../AGENTS.md) |
-| **Dernière revue** | 2026-05-20 |
+| **Dernière revue** | 2026-05-21 |
+| **Commits MVP** | `a6dc292` (MVP + Docker) · `41175b4` (fix pnpm workspace build) |
+| **Deploy** | ✅ **Coolify org fonctionnel** (Gnosis apps) |
 
 > Document de référence produit + technique. Les choix validés sont en **§3** ; la faisabilité est vérifiée contre la stack **déjà présente** en **§5**.
 
@@ -27,21 +29,25 @@ Parcourir → (trustStats) → Book + PAY 100 CRC → fondation
 
 ---
 
-## 2. Stack existante (vérifiée dans le repo)
+## 2. Stack existante (état repo `mestryx` — 2026-05-21)
 
-| Couche | Présent aujourd’hui | Fichiers / paquets |
-|--------|---------------------|-------------------|
-| Framework | Next.js **16** App Router | `app/`, `next.config.ts` |
-| UI | Tailwind **v4**, shadcn (Base UI) | `app/globals.css`, `components/ui/*` |
-| Wallet host | `@aboutcircles/miniapp-sdk` **^0.1.30** | `components/wallet/WalletProvider.tsx` — `onWalletChange`, `isMiniappMode` |
-| Données Circles | `@aboutcircles/sdk` **^0.1.30** | `components/profile/ProfileLookup.tsx` — `getProfileView`, balances, trust counts |
-| Tx host | `sendTransactions` (doc + placeholder) | `app/actions/page.tsx` |
-| Iframe CSP | `frame-ancestors` gnosis.io + vercel.app | `next.config.ts` |
-| Nav | Dashboard, Profile, Actions | `lib/nav.ts` |
+| Couche | Statut | Fichiers / paquets |
+|--------|--------|-------------------|
+| Framework | ✅ | Next.js **16** App Router — `app/`, `next.config.ts` (`output: 'standalone'`) |
+| UI | ✅ | Tailwind **v4**, shadcn (Base UI) — `app/globals.css`, `components/ui/*` |
+| Wallet host | ✅ | `@aboutcircles/miniapp-sdk` **^0.1.30** — `WalletProvider`, `OpenInCirclesHint` |
+| Données Circles | ✅ | `@aboutcircles/sdk` — `useCrcBalance`, `useMentorCirclesOverlay`, `lib/crc-transfer.ts`, `lib/trust-transfer.ts` |
+| Tx host | ✅ | `sendTransactions` branché dans `MentorDetail` (PAY) et `TrustTagPicker` (TRUST) |
+| Iframe CSP | ✅ | `frame-ancestors` gnosis.io + vercel.app + `NEXT_PUBLIC_FRAME_ANCESTOR_ORIGIN` |
+| Nav | ✅ | `Mentors` / `My Calls` — `lib/nav.ts` ; sidebar desktop retirée (`AppShell`) |
+| Données mentors | ✅ | `data/mentors.json` + `lib/mentors.ts` |
+| Persistance MVP | ✅ | `lib/bookings-storage.ts`, `lib/trust-storage.ts` (`localStorage`) |
+| Routes MVP | ✅ | `/`, `/mentors/[id]`, `/calls`, `app/api/notify-booking` |
+| Deploy | ✅ | Coolify org **Gnosis apps** — Dockerfile, healthcheck OK (`41175b4`) |
 
-**Absent (à ajouter pour le MVP)** : `data/mentors.json`, routes `/mentors`, `/mentors/[id]`, `/calls`, helpers booking / payment / trust, éventuellement `app/api/notify-booking`.
+**Toujours absent (hors scope MVP ou post-MVP)** : SDK Intuition, Cal.com, push notification API Circles, `/my-slots` (P2b), wallets mentors réels, workflow n8n prod.
 
-**Absent (hors dépendances)** : SDK Intuition, Cal.com, push notification API Circles documentée.
+**Legacy conservé (non linké dans nav)** : `/profile`, `/actions` (boilerplate).
 
 ---
 
@@ -155,43 +161,45 @@ Parcourir → (trustStats) → Book + PAY 100 CRC → fondation
 
 ---
 
-## 5. Matrice de faisabilité (stack actuelle)
+## 5. Matrice de faisabilité (état implémentation)
 
-Légende : ✅ prêt ou pattern existant · 🟡 à implémenter (faisable) · 🔴 spike / blocage · ⏳ post-MVP
+Légende : ✅ fait · 🟡 partiel / à valider en prod · 🔴 non résolu · ⏳ post-MVP
 
-| Fonctionnalité | Statut | Alignement stack | Notes |
-|----------------|--------|------------------|-------|
-| Wallet injecté host | ✅ | `WalletProvider` + `useWallet` | Pas de bouton Connect (AGENTS.md) |
-| Badge adresse / demo mode | ✅ | `WalletStatus`, `isMiniappHost` | |
-| Lecture solde CRC | ✅ | `ProfileLookup` → `v2Balance` | Ne pas diviser par 1e18 à l’affichage |
-| PAY grisé si &lt; 100 CRC | 🟡 | Même pattern RPC + `useEffect([address])` | Colle **C12b** |
-| Liste mentors JSON | 🟡 | Import statique ou fetch `public/data/` | Pas de CMS dans le repo |
-| Overlay `trustStats` | 🟡 | Copier logique `ProfileLookup` par `walletAddress` | 1 RPC / mentor au scroll (acceptable MVP) |
-| Recherche client | 🟡 | React state + filter | Pas de deps supplémentaires |
-| Grille mobile 2×2 | 🟡 | shadcn `Card`, `Badge` | Simplifier `AppShell` / retirer sidebar desktop |
-| Page `/mentors/[id]` + slots | 🟡 | Nouvelle route App Router | |
-| **`sendTransactions` 100 CRC → fondation** | 🔴 | `miniapp-sdk` + encoder via `@aboutcircles/sdk` | **Risque #1** — spike playground avant P1 |
-| Écran succès + GnosisScan | 🟡 | Lien `https://gnosisscan.io/tx/{hash}` | |
-| Bookings `localStorage` | 🟡 | Client-only | Prototype mono-navigateur — assumer en démo |
-| **`trust.add` mentor** | 🟡 | `getAvatar` écriture + dynamic import | Student doit être avatar Circles enregistré |
-| Trust **par tag** (sémantique) | 🟡 | Index `localStorage` + 1× `trust.add` / relation | Transparent jury : tag = couche app |
-| Écran `/calls` + choix tag | 🟡 | Nouvelle route | D13–D15 en implémentation |
-| API route notif email | 🟡 | Next 16 `app/api/*` | Secret Vercel ; pas dans repo actuellement |
-| n8n webhook | 🟡 | `fetch` depuis API route | Infra externe Hermes — compatible |
-| Push notification Circles | 🔴 | Non exposé dans SDK listé | Demander à gnosis-box ; ne pas bloquer P0 |
-| `signMessage` session | ⏳ | `SignInDemo` existe | **Non requis** pour book/trust MVP |
-| Intuition Trust/NoTrust | ⏳ | Pas de package Intuition | Phase P4 |
-| Agenda mentor / Cal.com | ⏳ | Backend + OAuth | Après hackathon |
-| A1b vue mentor slots | ⏳ | Détection `address ∈ mentors.json` | Si temps |
+| Fonctionnalité | Statut | Fichiers / notes |
+|----------------|--------|------------------|
+| Wallet injecté host | ✅ | `WalletProvider` + `useWallet` |
+| Badge adresse / demo mode | ✅ | `WalletStatus`, `OpenInCirclesHint`, `isMiniappHost` |
+| Lecture solde CRC | ✅ | `hooks/use-crc-balance.ts` |
+| PAY grisé si &lt; 100 CRC | ✅ | `MentorDetail` — **C12b** |
+| Liste mentors JSON | ✅ | `data/mentors.json`, `MentorGrid`, `MentorCard` |
+| Overlay `trustStats` | ✅ | `useMentorCirclesOverlay` sur cartes + fiche |
+| Recherche client | ✅ | `MentorSearch` + `filterMentors` — **B7e** |
+| Grille mobile 2×2 | ✅ | `MentorGrid` ; sidebar retirée |
+| Page `/mentors/[id]` + slots | ✅ | `SlotPicker`, `MentorDetail` |
+| **`sendTransactions` 100 CRC → fondation** | 🟡 | `lib/crc-transfer.ts` (capture runner + `transfer.advanced`) — **encodage OK en CLI** ; **tx réelle playground non validée** |
+| Écran succès + GnosisScan | ✅ | `BookingSuccess` + `GNOSISSCAN_TX_URL` — **C11b** |
+| Bookings `localStorage` | ✅ | `lib/bookings-storage.ts` — clé `thp-bookings-v1` |
+| **`trust.add` mentor** | 🟡 | `lib/trust-transfer.ts` + `TrustTagPicker` via `sendTransactions` — **à valider playground** |
+| Trust **par tag** (sémantique) | ✅ | `lib/trust-storage.ts` — clé `thp-tag-trust-v1` |
+| Écran `/calls` + choix tag | ✅ | `CallList`, `TrustTagPicker` |
+| API route notif | ✅ | `app/api/notify-booking/route.ts` |
+| n8n webhook | 🟡 | Route prête ; **workflow n8n + secret Coolify non configurés** |
+| Push notification Circles | 🔴 | Non exposé SDK — spike gnosis-box non fait |
+| Deploy HTTPS (Coolify) | ✅ | App live sur FQDN org — build Docker OK |
+| Rehearsal playground E2E | 🟡 | PAY + TRUST + GnosisScan — **non testé en conditions réelles** |
+| `signMessage` session | ⏳ | `SignInDemo` existe, non requis MVP |
+| Intuition Trust/NoTrust | ⏳ | Phase P4 |
+| Agenda mentor / Cal.com | ⏳ | Post-hackathon |
+| A1b vue mentor `/my-slots` | ⏳ | Non implémenté (P2b) |
 
 ### Cohérence globale
 
 | Critère | Verdict |
 |---------|---------|
-| Colle au boilerplate Circles | **Oui** — wallet host, dynamic import SDK, pas de connect custom |
-| Colle aux maquettes | **Oui** — grille, search, slots 3×4, PAY 100 CRC, TRUST post-call |
-| Scope réaliste 48–72 h | **Oui** si spike C10 jour 1 ; **Non** si C10 non résolu avant P1 |
-| Dette assumée | `localStorage`, tags off-chain, notif optionnelle |
+| Colle au boilerplate Circles | **Oui** |
+| Colle aux maquettes | **Oui** (écarts documentés §7) |
+| Scope MVP code + deploy | **~95 %** — reste rehearsal playground on-chain + données mentors réelles |
+| Dette assumée | `localStorage`, tags off-chain, mentors placeholder, notif optionnelle |
 
 ---
 
@@ -229,15 +237,13 @@ flowchart TB
 
 ### Routes cibles (`lib/nav.ts`)
 
-| Route | Rôle | Phase |
-|-------|------|-------|
-| `/` | Liste mentors + recherche | P0 |
-| `/mentors/[id]` | Profil, slots, PAY | P1 |
-| `/calls` | Historique + TRUST [tag] | P2 |
-| `/profile` | Profil Circles connecté (existant) | P2 optionnel |
-| `/my-slots` | Vue mentor | P2b si temps |
-
-Remplacer le dashboard placeholder et ajuster `NAV` (retirer ou masquer sidebar desktop pour mobile-first).
+| Route | Rôle | Phase | Statut |
+|-------|------|-------|--------|
+| `/` | Liste mentors + recherche | P0 | ✅ |
+| `/mentors/[id]` | Profil, slots, PAY | P1 | ✅ |
+| `/calls` | Historique + TRUST [tag] | P2 | ✅ |
+| `/profile` | Profil Circles connecté (existant) | optionnel | ✅ (legacy, hors nav) |
+| `/my-slots` | Vue mentor | P2b | ⏳ non fait |
 
 ---
 
@@ -255,45 +261,64 @@ Assets session : `assets/image-fe9b936e…` (accueil), `image-359cc526…` (book
 
 ## 8. Plan d’implémentation
 
-| Phase | Livrable | Bloquant |
-|-------|----------|----------|
-| **Spike** | Transfer **1 puis 100 CRC** → fondation dans [playground](https://circles.gnosis.io/playground) | **Oui** |
-| **P0** | `mentors.json`, shell mobile, grille, B7e, overlay Circles léger | Adresses fondation + mentors |
-| **P1** | Booking, PAY grisé C12, succès C11, notif (n8n/Resend ou `mailto:`) | Spike C10 OK |
-| **P2** | `/calls`, trust.add + index tag, trustStats sur fiche | — |
-| **P2b** | `/my-slots` (A1b) | Optionnel |
-| **P3** | Deploy Vercel + rehearsal playground | HTTPS requis |
-| **P4** | Intuition mainnet, NoTrust, agenda, cal externe | Post-hackathon |
-
-```text
-Jour 1 : Spike C10 + P0
-Jour 2 : P1
-Jour 3 : P2 + deploy playground
-```
+| Phase | Livrable | Statut | Notes |
+|-------|----------|--------|-------|
+| **Spike** | Transfer CRC → fondation via playground | 🟡 | Encodage implémenté (`lib/crc-transfer.ts`, `scripts/probe-crc-transfer.mjs`) — **tx réelle non validée** |
+| **P0** | `mentors.json`, shell mobile, grille, B7e, overlay | ✅ | Commit `a6dc292` |
+| **P1** | Booking, PAY grisé, succès, notif | ✅ | API + fallback `mailto:` ; n8n prod à brancher |
+| **P2** | `/calls`, trust.add + index tag, trustStats | ✅ | Trust via `sendTransactions` (pas runner direct) |
+| **P2b** | `/my-slots` (A1b) | ⏳ | Optionnel — non fait |
+| **P3** | Deploy Coolify + rehearsal playground | 🟡 | **Deploy ✅** ; rehearsal PAY/TRUST playground **restant** |
+| **P4** | Intuition, NoTrust, agenda, cal externe | ⏳ | Post-hackathon |
 
 ### Checklist spike C10
 
-- [ ] Méthode transfer dans `@aboutcircles/sdk` (`.d.ts`)
-- [ ] Encodage montant 100 CRC (≠ format affichage `v2Balance`)
-- [ ] `sendTransactions([{ to: foundation, data }])` dans playground
-- [ ] Hash visible sur GnosisScan
+- [x] Méthode transfer dans `@aboutcircles/sdk` — `avatar.transfer.advanced()` + pathfinder (`CommonAvatar.d.ts`)
+- [x] Encodage montant 100 CRC — via SDK (nombre CRC, ≠ `v2Balance` affiché) ; helper `buildCrcPaymentTransactions`
+- [ ] `sendTransactions([{ to, data, value }])` **validé dans playground** avec wallet Circles réel
+- [ ] Hash visible sur **GnosisScan** après PAY test
+
+### Checklist deploy P3 (Coolify org)
+
+- [x] `Dockerfile` + `.dockerignore` + `output: 'standalone'`
+- [x] Fix build Docker (`pnpm-workspace.yaml` → `packages: ['.']`)
+- [x] Push branche `mestryx` sur `gnosis-box/THP-for-Good`
+- [x] Deploy Coolify **green** (healthcheck `GET /` → 200)
+- [x] HTTPS actif sur FQDN org
+- [ ] `NEXT_PUBLIC_FRAME_ANCESTOR_ORIGIN` = FQDN HTTPS prod — **à confirmer si iframe Circles OK**
+- [ ] Rehearsal : `https://circles.gnosis.io/playground?url=https://<FQDN>/`
+
+### Checklist demo hackathon (§3 Phase 3)
+
+- [x] HTTPS actif sur FQDN org
+- [ ] Wallet injecté dans playground
+- [ ] PAY 100 CRC → booking `localStorage` + GnosisScan
+- [ ] TRUST post-call + tag indexé
+- [ ] Notif mentor (n8n ou `mailto:`) testée
 
 ---
 
 ## 9. Variables d’environnement
 
 ```bash
-# .env.example (à compléter)
-NEXT_PUBLIC_FOUNDATION_ADDRESS=0x…
+# .env.example (complété — commit a6dc292)
+NEXT_PUBLIC_FOUNDATION_ADDRESS=0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00
 NEXT_PUBLIC_BOOKING_PRICE_CRC=100
 
-# Optionnel P1 — notif
-RESEND_API_KEY=…
-# ou
+# Coolify — CSP iframe (build + runtime)
+NEXT_PUBLIC_FRAME_ANCESTOR_ORIGIN=https://<fqdn-coolify-org>
+
+# Runtime only — Coolify secrets (ne pas committer)
 N8N_NOTIFY_WEBHOOK_URL=…
+# RESEND_API_KEY=…
 ```
 
-**À fournir par l’équipe** : adresse Safe fondation, wallets mentors réels, emails/webhooks notif.
+**Encore à fournir par l’équipe** :
+
+- [ ] Wallets Circles **réels** des mentors (remplacer placeholders `0x…0001`–`0004` dans `data/mentors.json`)
+- [ ] Emails mentors réels (au lieu de `@example.com`)
+- [ ] FQDN Coolify + `NEXT_PUBLIC_FRAME_ANCESTOR_ORIGIN` au **build** (si iframe Circles bloqué)
+- [ ] Webhook n8n ou clé Resend en prod
 
 ---
 
@@ -334,6 +359,11 @@ N8N_NOTIFY_WEBHOOK_URL=…
 | 2026-05-20 | C : C9a, C10a (spike), C11b + notif mentor, C12b PAY grisé |
 | 2026-05-20 | D : trust/tag Gnosis MVP · Intuition post-MVP mainnet |
 | 2026-05-20 | Revue faisabilité : aligné boilerplate ; C10 + push Circles = spikes |
+| 2026-05-21 | **Implémentation MVP** P0–P2 sur `mestryx` (`a6dc292`) |
+| 2026-05-21 | Deploy **Coolify org** (Dockerfile) — remplace Vercel du plan initial |
+| 2026-05-21 | Fix build Docker : `pnpm-workspace.yaml` `packages: ['.']` (`41175b4`) |
+| 2026-05-21 | PAY/TRUST via `sendTransactions` + capture runner SDK (miniapp-safe) |
+| 2026-05-21 | **Deploy Coolify Gnosis apps fonctionnel** — P3 infra OK |
 
 ---
 
@@ -342,10 +372,61 @@ N8N_NOTIFY_WEBHOOK_URL=…
 ```bash
 cd /home/mestryx/WorkSpace/repositories/THP-for-Good
 git checkout mestryx
-pnpm install
-pnpm dev
-# Démo réelle :
-# https://circles.gnosis.io/playground?url=https://<preview>.vercel.app
+pnpm install          # Node 22 requis
+pnpm dev              # http://localhost:3000 — UI seulement hors iframe
+
+pnpm build
+node .next/standalone/server.js   # prod local
+
+# Spike encodage CRC (adresse Circles valide requise)
+node scripts/probe-crc-transfer.mjs 0x<avatar> 100
+
+# Démo réelle (HTTPS obligatoire)
+# Coolify : https://circles.gnosis.io/playground?url=https://<fqdn-coolify>/
+# Tunnel local : cloudflared tunnel --url http://localhost:3000
 ```
 
-**Prochaine action code** : spike **C10** → **P0** sur `mestryx`.
+**Prochaine action** : **rehearsal playground** Circles (PAY + TRUST + GnosisScan) → remplacer mentors placeholder → n8n notif si besoin.
+
+---
+
+## 14. Avancement détaillé — fait / reste à faire
+
+### ✅ Fait (code livré sur `mestryx`)
+
+| Domaine | Détail |
+|---------|--------|
+| **Front P0** | `MentorGrid`, `MentorSearch`, `MentorCard`, grille 2×2, hero copy, nav mobile |
+| **Front P1** | `MentorDetail`, `SlotPicker`, PAY 100 CRC, `BookingSuccess`, solde grisé |
+| **Front P2** | `CallList`, `TrustTagPicker`, trustback (`trustedByCount`) sur fiche |
+| **Libs** | `lib/crc-transfer.ts`, `lib/trust-transfer.ts`, `lib/bookings-storage.ts`, `lib/trust-storage.ts`, `lib/config.ts`, `lib/types.ts` |
+| **API** | `POST /api/notify-booking` (n8n webhook ou réponse `no_webhook_configured`) |
+| **UX Circles** | `OpenInCirclesHint`, dynamic import SDK, pas de bouton Connect |
+| **Infra** | `Dockerfile`, `.dockerignore`, `next.config.ts` standalone + CSP extensible |
+| **Deploy** | Coolify org **Gnosis apps** — live HTTPS |
+| **Données** | `data/mentors.json` (4 mentors placeholder), `.env.example` |
+
+### 🟡 Partiel / à valider
+
+| Item | Bloquant demo ? | Action |
+|------|-----------------|--------|
+| Rehearsal playground E2E | **Oui** | `playground?url=<FQDN>` — PAY + TRUST |
+| `NEXT_PUBLIC_FRAME_ANCESTOR_ORIGIN` | Si iframe blanc | Ajouter FQDN au build + redeploy |
+| PAY 100 CRC playground | Oui | Tester avec wallet Circles + CRC ≥ 100 |
+| TRUST `trust.add` playground | Oui | Student doit être avatar Circles enregistré |
+| GnosisScan hash | Non (preuve demo) | Capturer tx PAY + TRUST pour jury |
+| n8n notif prod | Non | Créer workflow + `N8N_NOTIFY_WEBHOOK_URL` Coolify |
+| Spike push Circles | Non | Escalade gnosis-box si besoin |
+
+### ⏳ Reste à faire (MVP demo ou post-MVP)
+
+| Item | Priorité | Phase |
+|------|----------|-------|
+| Wallets + emails mentors réels | **Haute** | Avant demo |
+| Rehearsal E2E playground | **Haute** | P3 — **dernière étape avant demo jury** |
+| `/my-slots` vue mentor | Basse | P2b |
+| Polish FR/EN, copy jury | Basse | Polish |
+| PR `CirclesMiniapps` marketplace | Basse | Post-hackathon |
+| Intuition, NoTrust, Cal.com | — | P4 |
+| D14 explicite « trust seulement si booking payé » | Basse | Implicite via `localStorage` bookings |
+| D15 plusieurs tags / un call | Basse | UI actuelle : 1 tag choisi par trust |
