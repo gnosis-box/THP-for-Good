@@ -6,6 +6,7 @@ import type { NextConfig } from "next";
 const FRAME_ANCESTORS = [
   "'self'",
   "https://*.gnosis.io",
+  "https://*.gnosis.box",
   "https://*.vercel.app",
 ].join(" ");
 

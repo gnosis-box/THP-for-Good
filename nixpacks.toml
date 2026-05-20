@@ -1,0 +1,12 @@
+# Coolify uses Nixpacks by default. This project uses pnpm (pnpm-lock.yaml).
+[phases.setup]
+nixPkgs = ["nodejs", "pnpm"]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile"]
+
+[phases.build]
+cmds = ["pnpm build"]
+
+[start]
+cmd = "HOSTNAME=0.0.0.0 PORT=3000 pnpm start"
