@@ -1,0 +1,58 @@
+{
+  "mentors": [
+    {
+      "id": "zet",
+      "name": "Zet",
+      "walletAddress": "0x0000000000000000000000000000000000000001",
+      "bio": "CTO @THP, contributor web3 on Intuition",
+      "tags": ["AI", "Dev"],
+      "notifyEmail": "zet@example.com",
+      "slots": [
+        { "id": "zet-1", "label": "Mon 10:00", "available": true },
+        { "id": "zet-2", "label": "Mon 14:00", "available": true },
+        { "id": "zet-3", "label": "Tue 10:00", "available": true },
+        { "id": "zet-4", "label": "Tue 15:00", "available": true }
+      ]
+    },
+    {
+      "id": "flo",
+      "name": "Flo",
+      "walletAddress": "0x0000000000000000000000000000000000000002",
+      "bio": "Full-stack mentor, Ruby and React",
+      "tags": ["Dev", "Backend", "RoR"],
+      "notifyEmail": "flo@example.com",
+      "slots": [
+        { "id": "flo-1", "label": "Wed 09:00", "available": true },
+        { "id": "flo-2", "label": "Wed 11:00", "available": true },
+        { "id": "flo-3", "label": "Thu 10:00", "available": true },
+        { "id": "flo-4", "label": "Fri 14:00", "available": true }
+      ]
+    },
+    {
+      "id": "dimitry",
+      "name": "Dimitry",
+      "walletAddress": "0x0000000000000000000000000000000000000003",
+      "bio": "Data and ML mentor",
+      "tags": ["AI", "Data"],
+      "notifyEmail": "dimitry@example.com",
+      "slots": [
+        { "id": "dim-1", "label": "Mon 16:00", "available": true },
+        { "id": "dim-2", "label": "Wed 14:00", "available": true },
+        { "id": "dim-3", "label": "Thu 11:00", "available": true }
+      ]
+    },
+    {
+      "id": "vincent",
+      "name": "Vincent",
+      "walletAddress": "0x0000000000000000000000000000000000000004",
+      "bio": "Legal and product strategy for social impact projects",
+      "tags": ["Legal", "Product"],
+      "notifyEmail": "vincent@example.com",
+      "slots": [
+        { "id": "vin-1", "label": "Tue 09:00", "available": true },
+        { "id": "vin-2", "label": "Thu 15:00", "available": true },
+        { "id": "vin-3", "label": "Fri 10:00", "available": true }
+      ]
+    }
+  ]
+}
