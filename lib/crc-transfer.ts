@@ -1,4 +1,5 @@
 import { BOOKING_PRICE_CRC, FOUNDATION_ADDRESS } from '@/lib/config';
+import { resolveFoundationSink } from '@/lib/foundation-sink';
 
 import type { ContractRunner } from '@aboutcircles/sdk';
 
@@ -43,12 +44,14 @@ export async function buildCrcPaymentTransactions(
     },
   } as unknown as ContractRunner;
 
+  const sinkAddress = await resolveFoundationSink(toAddress);
+
   const { Sdk } = await import('@aboutcircles/sdk');
   const sdk = new Sdk(undefined, runner);
   const avatar = await sdk.getAvatar(fromAddress);
 
   try {
-    await avatar.transfer.advanced(toAddress, amountCrc, {
+    await avatar.transfer.advanced(sinkAddress, amountCrc, {
       useWrappedBalances: true,
     });
   } catch (error) {

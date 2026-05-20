@@ -4,8 +4,34 @@
  */
 import { Sdk } from '@aboutcircles/sdk';
 
-const FOUNDATION = process.env.NEXT_PUBLIC_FOUNDATION_ADDRESS ??
-  '0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00';
+const GROUP = '0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00';
+const TREASURY = '0xA98e85AECCfa98220aB20ce60169115C350F09b8';
+const configured = process.env.NEXT_PUBLIC_FOUNDATION_ADDRESS?.trim() || TREASURY;
+
+async function resolveSink(address) {
+  const sdk = new Sdk();
+  const info = await sdk.rpc.token.getTokenInfo(address.toLowerCase());
+  if (info?.isGroup) {
+    const call = await fetch('https://rpc.gnosischain.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_call',
+        params: [{ to: address, data: '0xdcdcbb3a' }, 'latest'],
+      }),
+    });
+    const payload = await call.json();
+    return `0x${payload.result.slice(-40)}`;
+  }
+  return address;
+}
+
+const FOUNDATION = await resolveSink(configured);
+if (configured.toLowerCase() === GROUP.toLowerCase()) {
+  console.error(`Note: group ${GROUP} is not a valid sink; using treasury ${FOUNDATION}`);
+}
 const from = process.argv[2];
 const amount = Number(process.argv[3] ?? '100');
 
