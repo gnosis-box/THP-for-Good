@@ -195,11 +195,37 @@ pnpm lint         # ESLint (the script is just `eslint`; `next lint` is removed 
 
 There is no test suite yet. If you add one, the conventional script name is `pnpm test`.
 
+## Deployment — Coolify (self-hosted)
+
+This app is deployed on **Coolify** (self-hosted PaaS, not Vercel). Key implications:
+
+- **SQLite persists** — Coolify runs a long-lived container, so `data/thp.db` survives between deployments as long as you mount a volume. Configure a persistent volume in Coolify pointing to `/app/data` (or wherever `process.cwd()/data` resolves inside the container).
+- **`better-sqlite3` native build** — Coolify builds a Docker image on Linux; `pnpm install` triggers the native compilation there without macOS C++ header issues. The `.node` binding is compiled fresh in the container.
+- **Environment variables** — set `ADMIN_ADDRESSES` and `NEXT_PUBLIC_ADMIN_ADDRESSES` in the Coolify service environment panel (not in `.env` files).
+- **CSP frame-ancestors** — `next.config.ts` must include the Coolify domain in `frame-ancestors` so the Circles host can iframe the app. Update the `FRAME_ANCESTORS` list in `next.config.ts` when the production domain is known.
+- **Port** — Coolify expects the app to listen on `3000` (Next.js default). No `PORT` override needed.
+
+### Local dev on macOS — `better-sqlite3` native binding
+
+On macOS, `pnpm rebuild better-sqlite3` may fail with `'climits' file not found` if node-gyp picks up the wrong SDK. Fix:
+
+```bash
+# Run once to compile the native addon
+npm rebuild better-sqlite3
+```
+
+If that still fails, ensure Xcode Command Line Tools are up to date:
+```bash
+xcode-select --install
+```
+
+`serverExternalPackages: ['better-sqlite3']` is already set in `next.config.ts` so Turbopack doesn't try to bundle the native module — it's loaded directly from `node_modules` at runtime.
+
 ## Running inside the Circles playground
 
 The host iframes any HTTPS URL pasted into https://circles.gnosis.io/playground. To test:
 
-1. Deploy to Vercel (or any HTTPS host).
+1. Deploy to Coolify (or any HTTPS host).
 2. Open `https://circles.gnosis.io/playground?url=<your-deploy-url>`.
 3. The host injects a Safe address. `onWalletChange` fires, the badge flips, `signMessage` and `sendTransactions` start working.
 
