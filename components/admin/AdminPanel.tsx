@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
+import { toHttpImageUrl } from '@/lib/utils';
 import { PromoteSection } from './PromoteSection';
 import type { MentorRow, TagRow, AdminRow } from '@/lib/db';
 
@@ -14,7 +15,8 @@ export function AdminPanel() {
   const [mentors, setMentors] = useState<MentorRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
   const [dbAdmins, setDbAdmins] = useState<AdminRow[]>([]);
-  const [adminNames, setAdminNames] = useState<Record<string, string>>({});
+  type AdminProfile = { name: string; imageUrl?: string; trustedByCount: number };
+  const [adminProfiles, setAdminProfiles] = useState<Record<string, AdminProfile>>({});
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,10 +61,14 @@ export function AdminPanel() {
       const entries = await Promise.all(
         dbAdmins.map(async (a) => {
           const view = await sdk.rpc.profile.getProfileView(a.circles_address as `0x${string}`);
-          return [a.circles_address, view.profile?.name ?? ''] as const;
+          return [a.circles_address, {
+            name: view.profile?.name ?? '',
+            imageUrl: toHttpImageUrl(view.profile?.previewImageUrl ?? view.profile?.imageUrl),
+            trustedByCount: view.trustStats.trustedByCount,
+          }] as const;
         }),
       );
-      setAdminNames(Object.fromEntries(entries));
+      setAdminProfiles(Object.fromEntries(entries));
     })();
   }, [dbAdmins]);
 
@@ -174,13 +180,24 @@ export function AdminPanel() {
           {dbAdmins.length === 0 && (
             <p className="text-sm text-muted-foreground">No DB admins yet. Add via env var ADMIN_ADDRESSES or promote a member above.</p>
           )}
-          {dbAdmins.map((admin) => (
+          {dbAdmins.map((admin) => {
+            const p = adminProfiles[admin.circles_address];
+            return (
             <div key={admin.id} className="flex items-center justify-between gap-4 rounded-xl border border-border p-4">
-              <div className="flex flex-col gap-0.5 min-w-0">
-                <span className="font-medium truncate">
-                  {adminNames[admin.circles_address] ?? '…'}
-                </span>
-                <p className="text-xs text-muted-foreground font-mono truncate">{admin.circles_address}</p>
+              <div className="flex items-center gap-3 min-w-0">
+                {p?.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={p.imageUrl} alt={p.name} className="size-10 shrink-0 rounded-full object-cover" />
+                ) : (
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground select-none">
+                    {(p?.name ?? admin.circles_address).charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className="font-medium truncate">{p?.name ?? '…'}</span>
+                  <p className="text-xs text-muted-foreground font-mono truncate">{admin.circles_address}</p>
+                  {p && <span className="text-xs text-muted-foreground">{p.trustedByCount} trusted by</span>}
+                </div>
               </div>
               <Button
                 type="button"
@@ -192,7 +209,8 @@ export function AdminPanel() {
                 Remove
               </Button>
             </div>
-          ))}
+          );
+          })}
 
         </div>
       </section>

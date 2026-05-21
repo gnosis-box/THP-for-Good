@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow, TagRow } from '@/lib/db';
 
 type MemberEntry = {
   address: `0x${string}`;
   name: string;
+  imageUrl: string | undefined;
+  trustedByCount: number;
 };
 
 type PromoteFormState = {
@@ -65,7 +67,12 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
         result.results.map(async (row) => {
           const view = await sdk.rpc.profile.getProfileView(row.member);
           const name = view.profile?.name ?? row.member.slice(0, 8) + '…';
-          return { address: row.member, name };
+          return {
+            address: row.member,
+            name,
+            imageUrl: toHttpImageUrl(view.profile?.previewImageUrl ?? view.profile?.imageUrl),
+            trustedByCount: view.trustStats.trustedByCount,
+          };
         }),
       );
 
@@ -208,9 +215,20 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
             return (
               <div key={member.address} className="flex flex-col gap-3 rounded-xl border border-border p-4">
                 <div className="flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="font-medium truncate">{member.name}</span>
-                    <span className="text-xs text-muted-foreground font-mono truncate">{member.address}</span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {member.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={member.imageUrl} alt={member.name} className="size-10 shrink-0 rounded-full object-cover" />
+                    ) : (
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground select-none">
+                        {member.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="font-medium truncate">{member.name}</span>
+                      <span className="text-xs text-muted-foreground font-mono truncate">{member.address}</span>
+                      <span className="text-xs text-muted-foreground">{member.trustedByCount} trusted by</span>
+                    </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     {isMentor ? (

@@ -10,3 +10,10 @@ export function shortenAddress(address: string, chars = 4): string {
   const head = address.startsWith("0x") ? 2 + chars : chars;
   return `${address.slice(0, head)}…${address.slice(-chars)}`;
 }
+
+export function toHttpImageUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith('https://') || url.startsWith('http://')) return url;
+  if (url.startsWith('ipfs://')) return `https://cloudflare-ipfs.com/ipfs/${url.slice(7)}`;
+  return undefined;
+}
