@@ -14,6 +14,7 @@ export function AdminPanel() {
   const [mentors, setMentors] = useState<MentorRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
   const [dbAdmins, setDbAdmins] = useState<AdminRow[]>([]);
+  const [adminNames, setAdminNames] = useState<Record<string, string>>({});
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +50,21 @@ export function AdminPanel() {
   }, [address, headers]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (dbAdmins.length === 0) return;
+    (async () => {
+      const { Sdk } = await import('@aboutcircles/sdk');
+      const sdk = new Sdk();
+      const entries = await Promise.all(
+        dbAdmins.map(async (a) => {
+          const view = await sdk.rpc.profile.getProfileView(a.circles_address as `0x${string}`);
+          return [a.circles_address, view.profile?.name ?? ''] as const;
+        }),
+      );
+      setAdminNames(Object.fromEntries(entries));
+    })();
+  }, [dbAdmins]);
 
   async function toggleActive(mentor: MentorRow) {
     await fetch(`/api/mentors/${mentor.id}`, {
@@ -160,7 +176,12 @@ export function AdminPanel() {
           )}
           {dbAdmins.map((admin) => (
             <div key={admin.id} className="flex items-center justify-between gap-4 rounded-xl border border-border p-4">
-              <p className="text-xs text-muted-foreground font-mono truncate">{admin.circles_address}</p>
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="font-medium truncate">
+                  {adminNames[admin.circles_address] ?? '…'}
+                </span>
+                <p className="text-xs text-muted-foreground font-mono truncate">{admin.circles_address}</p>
+              </div>
               <Button
                 type="button"
                 variant="outline"
@@ -172,6 +193,7 @@ export function AdminPanel() {
               </Button>
             </div>
           ))}
+
         </div>
       </section>
 
