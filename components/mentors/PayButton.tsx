@@ -21,7 +21,8 @@ export function PayButton({ mentor, selectedSlot }: PayButtonProps) {
   const { address, isConnected } = useWallet();
   const [state, setState] = useState<PayState>({ kind: 'idle' });
 
-  const isDisabled = !selectedSlot || !isConnected || state.kind === 'loading';
+  const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
+  const isDisabled = !selectedSlot || !isConnected || state.kind === 'loading' || isSelf;
 
   async function handlePay() {
     if (!selectedSlot || !address) return;
@@ -115,6 +116,11 @@ export function PayButton({ mentor, selectedSlot }: PayButtonProps) {
           ? 'Processing…'
           : `PAY ${mentor.price_crc} CRC to book`}
       </Button>
+      {isSelf && (
+        <p className="text-xs text-muted-foreground text-center">
+          You can't book your own session.
+        </p>
+      )}
       {!isConnected && (
         <p className="text-xs text-muted-foreground text-center">
           Connect your wallet to book a session
