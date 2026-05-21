@@ -2,18 +2,18 @@
 
 import { useCallback, useState } from "react";
 
-import { useCirclesAvatar } from "@/hooks/use-circles-avatar";
 import { useSignIn } from "@/hooks/use-sign-in";
 import { useWallet } from "@/hooks/use-wallet";
 import { trackEvent } from "@/lib/analytics";
 import { addBooking } from "@/lib/bookings-storage";
 import { humanizeCirclesError } from "@/lib/circles-errors";
 import {
-  BOOKING_AMOUNT_ATTO,
-  type Mentor,
-  type TimeSlot,
-  isMentorConfigured,
-} from "@/lib/mentors";
+  BOOKING_PRICE_CRC,
+  FOUNDATION_ADDRESS,
+  isFoundationConfigured,
+} from "@/lib/config";
+import { buildCrcPaymentTransactions } from "@/lib/crc-transfer";
+import { type Mentor, type TimeSlot } from "@/lib/mentors";
 
 type BookStatus =
   | { kind: "idle" }
@@ -24,7 +24,6 @@ type BookStatus =
 export function useBookCall(mentor: Mentor, selectedSlot: TimeSlot | null) {
   const { address } = useWallet();
   const { signedIn, canSignIn, isMiniappHost } = useSignIn();
-  const { avatar, ready } = useCirclesAvatar();
   const [status, setStatus] = useState<BookStatus>({ kind: "idle" });
 
   const book = useCallback(async () => {
@@ -36,32 +35,29 @@ export function useBookCall(mentor: Mentor, selectedSlot: TimeSlot | null) {
       });
       return;
     }
-    if (!isMentorConfigured(mentor)) {
+    if (!isFoundationConfigured()) {
       setStatus({
         kind: "error",
-        error: "Adresse Circles du mentor non configurée (voir .env.example).",
+        error: "Adresse fondation THP non configurée (voir .env.example).",
       });
-      return;
-    }
-    if (!avatar || !ready) {
-      setStatus({ kind: "error", error: "Avatar Circles non disponible." });
       return;
     }
 
     setStatus({ kind: "pending" });
     try {
-      const recipient = mentor.circlesAddress!;
-      let receipt;
-      try {
-        receipt = await avatar.transfer.direct(recipient, BOOKING_AMOUNT_ATTO);
-      } catch {
-        receipt = await avatar.transfer.advanced(
-          recipient,
-          BOOKING_AMOUNT_ATTO,
-        );
+      const txs = await buildCrcPaymentTransactions(
+        address as `0x${string}`,
+        FOUNDATION_ADDRESS,
+        BOOKING_PRICE_CRC,
+      );
+
+      const { sendTransactions } = await import("@aboutcircles/miniapp-sdk");
+      const hashes = await sendTransactions(txs);
+      const txHash = hashes[hashes.length - 1] ?? hashes[0];
+      if (!txHash) {
+        throw new Error("Paiement réussi mais aucun hash de transaction.");
       }
 
-      const txHash = receipt.transactionHash;
       addBooking(address, {
         mentorSlug: mentor.slug,
         mentorName: mentor.name,
@@ -79,7 +75,7 @@ export function useBookCall(mentor: Mentor, selectedSlot: TimeSlot | null) {
         error: humanizeCirclesError(err),
       });
     }
-  }, [address, avatar, mentor, ready, selectedSlot, signedIn]);
+  }, [address, mentor, selectedSlot, signedIn]);
 
   const canBook =
     !!address &&
@@ -87,8 +83,7 @@ export function useBookCall(mentor: Mentor, selectedSlot: TimeSlot | null) {
     signedIn &&
     canSignIn &&
     isMiniappHost &&
-    isMentorConfigured(mentor) &&
-    ready;
+    isFoundationConfigured();
 
   return { book, status, canBook, signedIn };
 }

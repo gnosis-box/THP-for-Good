@@ -5,7 +5,8 @@ import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useBookCall } from "@/hooks/use-book-call";
-import { BOOKING_AMOUNT_CRC, type Mentor, type TimeSlot } from "@/lib/mentors";
+import { BOOKING_PRICE_CRC } from "@/lib/config";
+import { type Mentor, type TimeSlot } from "@/lib/mentors";
 import { shortenAddress } from "@/lib/utils";
 
 export function BookCallButton({
@@ -35,7 +36,7 @@ export function BookCallButton({
       >
         {status.kind === "pending"
           ? "En attente de l'hôte…"
-          : `PAY ${BOOKING_AMOUNT_CRC} CRC to book`}
+          : `PAY ${BOOKING_PRICE_CRC} CRC to THP for Good`}
       </Button>
       {!selectedSlot && (
         <p className="text-center text-xs text-muted-foreground">
