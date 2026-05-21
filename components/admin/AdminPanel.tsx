@@ -15,7 +15,7 @@ export function AdminPanel() {
   const [mentors, setMentors] = useState<MentorRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
   const [dbAdmins, setDbAdmins] = useState<AdminRow[]>([]);
-  type AdminProfile = { name: string; imageUrl?: string; trustedByCount: number };
+  type AdminProfile = { name: string; imageUrl?: string; networkReach: number };
   const [adminProfiles, setAdminProfiles] = useState<Record<string, AdminProfile>>({});
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
@@ -60,11 +60,15 @@ export function AdminPanel() {
       const sdk = new Sdk();
       const entries = await Promise.all(
         dbAdmins.map(async (a) => {
-          const view = await sdk.rpc.profile.getProfileView(a.circles_address as `0x${string}`);
+          const addr = a.circles_address as `0x${string}`;
+          const [view, summary] = await Promise.all([
+            sdk.rpc.profile.getProfileView(addr),
+            sdk.rpc.sdk.getTrustNetworkSummary(addr),
+          ]);
           return [a.circles_address, {
             name: view.profile?.name ?? '',
             imageUrl: toHttpImageUrl(view.profile?.previewImageUrl ?? view.profile?.imageUrl),
-            trustedByCount: view.trustStats.trustedByCount,
+            networkReach: summary.networkReach,
           }] as const;
         }),
       );
@@ -196,7 +200,7 @@ export function AdminPanel() {
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="font-medium truncate">{p?.name ?? '…'}</span>
                   <p className="text-xs text-muted-foreground font-mono truncate">{admin.circles_address}</p>
-                  {p && <span className="text-xs text-muted-foreground">{p.trustedByCount} trusted by</span>}
+                  {p && <span className="text-xs text-muted-foreground">Trust score: {p.networkReach}</span>}
                 </div>
               </div>
               <Button

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
-type CirclesData = { imageUrl?: string; trustedByCount: number };
+type CirclesData = { imageUrl?: string; networkReach: number };
 
 export function MentorCard({ mentor }: { mentor: MentorRow }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
@@ -16,10 +16,14 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
     (async () => {
       const { Sdk } = await import('@aboutcircles/sdk');
       const sdk = new Sdk();
-      const view = await sdk.rpc.profile.getProfileView(mentor.circles_address as `0x${string}`);
+      const addr = mentor.circles_address as `0x${string}`;
+      const [view, summary] = await Promise.all([
+        sdk.rpc.profile.getProfileView(addr),
+        sdk.rpc.sdk.getTrustNetworkSummary(addr),
+      ]);
       setCircles({
         imageUrl: toHttpImageUrl(view.profile?.previewImageUrl ?? view.profile?.imageUrl),
-        trustedByCount: view.trustStats.trustedByCount,
+        networkReach: summary.networkReach,
       });
     })();
   }, [mentor.circles_address]);
@@ -45,7 +49,7 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
               <CardTitle className="text-base font-semibold">{mentor.name}</CardTitle>
               {circles !== null && (
                 <span className="text-xs text-muted-foreground">
-                  {circles.trustedByCount} trusted by
+                  Trust score: {circles.networkReach}
                 </span>
               )}
             </div>

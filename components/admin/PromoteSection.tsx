@@ -9,7 +9,7 @@ type MemberEntry = {
   address: `0x${string}`;
   name: string;
   imageUrl: string | undefined;
-  trustedByCount: number;
+  networkReach: number;
 };
 
 type PromoteFormState = {
@@ -65,13 +65,16 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
 
       const profiles = await Promise.allSettled(
         result.results.map(async (row) => {
-          const view = await sdk.rpc.profile.getProfileView(row.member);
+          const [view, summary] = await Promise.all([
+            sdk.rpc.profile.getProfileView(row.member),
+            sdk.rpc.sdk.getTrustNetworkSummary(row.member),
+          ]);
           const name = view.profile?.name ?? row.member.slice(0, 8) + '…';
           return {
             address: row.member,
             name,
             imageUrl: toHttpImageUrl(view.profile?.previewImageUrl ?? view.profile?.imageUrl),
-            trustedByCount: view.trustStats.trustedByCount,
+            networkReach: summary.networkReach,
           };
         }),
       );
@@ -227,7 +230,7 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
                     <div className="flex flex-col gap-0.5 min-w-0">
                       <span className="font-medium truncate">{member.name}</span>
                       <span className="text-xs text-muted-foreground font-mono truncate">{member.address}</span>
-                      <span className="text-xs text-muted-foreground">{member.trustedByCount} trusted by</span>
+                      <span className="text-xs text-muted-foreground">Trust score: {member.networkReach}</span>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
