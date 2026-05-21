@@ -55,9 +55,7 @@ const sdk = new Sdk(undefined, runner);
 const avatar = await sdk.getAvatar(from);
 
 try {
-  await avatar.transfer.advanced(FOUNDATION, BigInt(amount) * BigInt(10 ** 18), {
-    useWrappedBalances: true,
-  });
+  await avatar.transfer.direct(FOUNDATION, BigInt(amount) * BigInt(10 ** 18));
 } catch (error) {
   if (!(error instanceof Error && error.message === TX_CAPTURED)) {
     console.error('Probe failed:', error);
