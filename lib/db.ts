@@ -110,6 +110,10 @@ export function insertMentor(data: InsertMentorData): number {
     VALUES (@circles_address, @name, @bio, @calendar_link, @price_crc)
   `);
 
+  const upsertTagStmt = db.prepare(`
+    INSERT OR IGNORE INTO skill_tags (label) VALUES (?)
+  `);
+
   const insertSkillStmt = db.prepare(`
     INSERT OR IGNORE INTO mentor_skills (mentor_id, tag_id)
     SELECT ?, id FROM skill_tags WHERE label = ?
@@ -132,6 +136,7 @@ export function insertMentor(data: InsertMentorData): number {
     const mentorId = row.id;
 
     for (const skill of data.skills) {
+      upsertTagStmt.run(skill);
       insertSkillStmt.run(mentorId, skill);
     }
 

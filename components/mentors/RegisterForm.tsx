@@ -12,6 +12,8 @@ export function RegisterForm() {
   const router = useRouter();
 
   const [tags, setTags] = useState<TagRow[]>([]);
+  const [tagsLoading, setTagsLoading] = useState(true);
+  const [newSkill, setNewSkill] = useState('');
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [calendarLink, setCalendarLink] = useState('');
@@ -24,15 +26,32 @@ export function RegisterForm() {
     fetch('/api/tags')
       .then((res) => res.json())
       .then((data: TagRow[]) => setTags(data))
-      .catch(() => {
-        // Non-blocking — skills selector will be empty
-      });
+      .catch(() => {})
+      .finally(() => setTagsLoading(false));
   }, []);
 
   function toggleSkill(label: string) {
     setSelectedSkills((prev) =>
       prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]
     );
+  }
+
+  function addNewSkill() {
+    const label = newSkill.trim();
+    if (!label) return;
+    const exists = tags.some((t) => t.label.toLowerCase() === label.toLowerCase());
+    if (!exists) {
+      setTags((prev) => [...prev, { id: -(prev.length + 1), label }]);
+    }
+    setSelectedSkills((prev) => (prev.includes(label) ? prev : [...prev, label]));
+    setNewSkill('');
+  }
+
+  function handleNewSkillKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addNewSkill();
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -120,7 +139,7 @@ export function RegisterForm() {
         <span className="text-sm font-medium">
           Skills <span className="text-destructive">*</span>
         </span>
-        {tags.length === 0 ? (
+        {tagsLoading ? (
           <p className="text-xs text-muted-foreground">Loading skills…</p>
         ) : (
           <div className="flex flex-wrap gap-2">
@@ -144,6 +163,24 @@ export function RegisterForm() {
             })}
           </div>
         )}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newSkill}
+            onChange={(e) => setNewSkill(e.target.value)}
+            onKeyDown={handleNewSkillKey}
+            placeholder="Add a skill…"
+            className="h-8 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          />
+          <button
+            type="button"
+            onClick={addNewSkill}
+            disabled={!newSkill.trim()}
+            className="h-8 rounded-lg border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40"
+          >
+            Add
+          </button>
+        </div>
       </div>
 
       {/* Calendar link */}
