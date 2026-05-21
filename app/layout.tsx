@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Miniapp Boilerplate",
-  description: "Next.js + shadcn starter for Circles miniapps",
+  title: "THP for Good",
+  description: "Book mentor calls with CRC — Circles miniapp for THP for Good",
 };
 
 export default function RootLayout({
