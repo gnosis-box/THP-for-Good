@@ -4,9 +4,11 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# Miniapps Boilerplate — Agent Guide
+# THP for Good — Agent Guide
 
-This is a starter template for building [Circles](https://aboutcircles.com) miniapps. A miniapp is a web app that loads inside the Circles host (https://circles.gnosis.io/playground) via an iframe; the host injects a wallet and your app drives interactions through the SDK. The boilerplate ships with the minimum plumbing — wallet provider, sign-in demo, profile lookup, layout — so a developer can clone it and start writing business logic immediately.
+This repo is a [Circles](https://aboutcircles.com) miniapp for **THP for Good** (mentor marketplace, CRC payments to the group treasury). Human-readable docs (French, diagrams, history): **[docs/README.md](docs/README.md)**.
+
+It started from the Circles miniapps boilerplate below; core wallet/SDK rules still apply. A miniapp is a web app that loads inside the Circles host (https://circles.gnosis.io/playground) via an iframe; the host injects a wallet and your app drives interactions through the SDK. The boilerplate ships with the minimum plumbing — wallet provider, sign-in demo, profile lookup, layout — so a developer can clone it and start writing business logic immediately.
 
 ## Stack
 
@@ -25,11 +27,14 @@ This is a starter template for building [Circles](https://aboutcircles.com) mini
 app/
   layout.tsx                    Root: <WalletProvider><AppShell>{children}
   page.tsx                      Dashboard (ConnectionCard + SignInDemo + NavCards)
-  profile/page.tsx              Profile lookup
+  mentors/                      Mentor list + [slug] booking + CRC pay
+  calls/page.tsx                Booking history (localStorage) + Trust
+  api/mentors/route.ts          GET mentors enriched from Circles RPC (cached)
+  profile/page.tsx              Profile lookup (boilerplate demo)
   actions/page.tsx              sendTransactions code sample
   globals.css                   Tailwind v4 + shadcn tokens (light only)
-  icon.svg                      Favicon (Circles brand glyph)
 components/
+  mentors/                      BookCallButton, SlotGrid, MentorsProvider, …
   brand/CirclesLogo.tsx         Inline-SVG brand mark
   layout/
     AppShell.tsx                Grid: header (col-span-full) + sidebar (md+) + main
@@ -49,9 +54,18 @@ components/
   ui/                           shadcn primitives — DO NOT hand-edit; regenerate via the CLI
 hooks/
   use-wallet.ts                 Re-export of useWallet
+  use-book-call.ts              CRC payment + localStorage booking
+  use-trust-mentor.ts           Post-call trust.add
+  use-sign-in.ts                signMessage session before pay/trust
 lib/
+  mentors.ts                    Mentor seeds, slots, domain filter
+  crc-transfer.ts               Build CRC txs via transfer.direct capture
+  foundation-sink.ts            Resolve THP group → treasury
+  bookings-storage.ts           localStorage per wallet
+  config.ts                     THP group/treasury addresses, booking price
   utils.ts                      cn() + shortenAddress(addr, chars=4)
   nav.ts                        NAV array — single source of truth for the sidebar/drawer/page-nav
+docs/                           Product & technical documentation (French)
 next.config.ts                  CSP frame-ancestors header for the Circles playground iframe
 ```
 
