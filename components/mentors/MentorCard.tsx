@@ -4,26 +4,27 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { toHttpImageUrl } from '@/lib/utils';
+import { toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
-type CirclesData = { imageUrl?: string; networkReach: number };
+type CirclesData = { imageUrl?: string; trustsReceivedCount: number; score: number | null };
 
 export function MentorCard({ mentor }: { mentor: MentorRow }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
 
   useEffect(() => {
     (async () => {
-      const { Sdk } = await import('@aboutcircles/sdk');
-      const sdk = new Sdk();
-      const addr = mentor.circles_address as `0x${string}`;
-      const [view, summary] = await Promise.all([
-        sdk.rpc.profile.getProfileView(addr),
-        sdk.rpc.sdk.getTrustNetworkSummary(addr),
+      const [{ Sdk }, score] = await Promise.all([
+        import('@aboutcircles/sdk'),
+        fetchCirclesScore(mentor.circles_address),
       ]);
+      const sdk = new Sdk();
+      const view = await sdk.rpc.profile.getProfileView(mentor.circles_address as `0x${string}`);
+      const raw = view.profile as (typeof view.profile & { trustsReceivedCount?: number; picture?: string });
       setCircles({
-        imageUrl: toHttpImageUrl(view.profile?.previewImageUrl ?? view.profile?.imageUrl),
-        networkReach: summary.networkReach,
+        imageUrl: toHttpImageUrl(raw?.picture ?? view.profile?.previewImageUrl ?? view.profile?.imageUrl),
+        trustsReceivedCount: raw?.trustsReceivedCount ?? 0,
+        score,
       });
     })();
   }, [mentor.circles_address]);
@@ -49,7 +50,9 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
               <CardTitle className="text-base font-semibold">{mentor.name}</CardTitle>
               {circles !== null && (
                 <span className="text-xs text-muted-foreground">
-                  Trust score: {circles.networkReach}
+                  {circles.score !== null
+                    ? `Score: ${circles.score}/100`
+                    : `${circles.trustsReceivedCount} trusted by`}
                 </span>
               )}
             </div>

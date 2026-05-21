@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { cn, toHttpImageUrl } from '@/lib/utils';
+import { cn, toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
 import type { MentorRow, TagRow } from '@/lib/db';
 
 type MemberEntry = {
   address: `0x${string}`;
   name: string;
   imageUrl: string | undefined;
-  networkReach: number;
+  trustsReceivedCount: number;
+  score: number | null;
 };
 
 type PromoteFormState = {
@@ -65,16 +66,18 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
 
       const profiles = await Promise.allSettled(
         result.results.map(async (row) => {
-          const [view, summary] = await Promise.all([
+          const [view, score] = await Promise.all([
             sdk.rpc.profile.getProfileView(row.member),
-            sdk.rpc.sdk.getTrustNetworkSummary(row.member),
+            fetchCirclesScore(row.member),
           ]);
-          const name = view.profile?.name ?? row.member.slice(0, 8) + '…';
+          const raw = view.profile as (typeof view.profile & { trustsReceivedCount?: number; picture?: string });
+          const name = raw?.name ?? row.member.slice(0, 8) + '…';
           return {
             address: row.member,
             name,
-            imageUrl: toHttpImageUrl(view.profile?.previewImageUrl ?? view.profile?.imageUrl),
-            networkReach: summary.networkReach,
+            imageUrl: toHttpImageUrl(raw?.picture ?? raw?.previewImageUrl ?? raw?.imageUrl),
+            trustsReceivedCount: raw?.trustsReceivedCount ?? 0,
+            score,
           };
         }),
       );
@@ -230,7 +233,9 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
                     <div className="flex flex-col gap-0.5 min-w-0">
                       <span className="font-medium truncate">{member.name}</span>
                       <span className="text-xs text-muted-foreground font-mono truncate">{member.address}</span>
-                      <span className="text-xs text-muted-foreground">Trust score: {member.networkReach}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {member.score !== null ? `Score: ${member.score}/100` : `${member.trustsReceivedCount} trusted by`}
+                      </span>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">

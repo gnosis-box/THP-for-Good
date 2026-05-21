@@ -17,3 +17,19 @@ export function toHttpImageUrl(url: string | undefined | null): string | undefin
   if (url.startsWith('ipfs://')) return `https://cloudflare-ipfs.com/ipfs/${url.slice(7)}`;
   return undefined;
 }
+
+const CIRCLES_SCORE_BASE = 'https://rpc.staging.aboutcircles.com/score-groups';
+const CIRCLES_SCORE_GROUP = '0x7CadB2E92295F3E4fA65D3d4E7265E2e05d7a783';
+
+export async function fetchCirclesScore(address: string): Promise<number | null> {
+  try {
+    const res = await fetch(`${CIRCLES_SCORE_BASE}/groups/${CIRCLES_SCORE_GROUP}/proof/${address}`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as { scoreRaw?: string; error?: unknown };
+    if (data.error) return null;
+    const score = parseInt(data.scoreRaw ?? '0', 10);
+    return score > 0 ? score : null;
+  } catch {
+    return null;
+  }
+}

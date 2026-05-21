@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
-import { toHttpImageUrl } from '@/lib/utils';
+import { toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
 import { PromoteSection } from './PromoteSection';
 import type { MentorRow, TagRow, AdminRow } from '@/lib/db';
 
@@ -15,7 +15,7 @@ export function AdminPanel() {
   const [mentors, setMentors] = useState<MentorRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
   const [dbAdmins, setDbAdmins] = useState<AdminRow[]>([]);
-  type AdminProfile = { name: string; imageUrl?: string; networkReach: number };
+  type AdminProfile = { name: string; imageUrl?: string; trustsReceivedCount: number; score: number | null };
   const [adminProfiles, setAdminProfiles] = useState<Record<string, AdminProfile>>({});
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
@@ -60,15 +60,16 @@ export function AdminPanel() {
       const sdk = new Sdk();
       const entries = await Promise.all(
         dbAdmins.map(async (a) => {
-          const addr = a.circles_address as `0x${string}`;
-          const [view, summary] = await Promise.all([
-            sdk.rpc.profile.getProfileView(addr),
-            sdk.rpc.sdk.getTrustNetworkSummary(addr),
+          const [view, score] = await Promise.all([
+            sdk.rpc.profile.getProfileView(a.circles_address as `0x${string}`),
+            fetchCirclesScore(a.circles_address),
           ]);
+          const raw = view.profile as (typeof view.profile & { trustsReceivedCount?: number; picture?: string });
           return [a.circles_address, {
-            name: view.profile?.name ?? '',
-            imageUrl: toHttpImageUrl(view.profile?.previewImageUrl ?? view.profile?.imageUrl),
-            networkReach: summary.networkReach,
+            name: raw?.name ?? '',
+            imageUrl: toHttpImageUrl(raw?.picture ?? raw?.previewImageUrl ?? raw?.imageUrl),
+            trustsReceivedCount: raw?.trustsReceivedCount ?? 0,
+            score,
           }] as const;
         }),
       );
@@ -200,7 +201,11 @@ export function AdminPanel() {
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="font-medium truncate">{p?.name ?? '…'}</span>
                   <p className="text-xs text-muted-foreground font-mono truncate">{admin.circles_address}</p>
-                  {p && <span className="text-xs text-muted-foreground">Trust score: {p.networkReach}</span>}
+                  {p && (
+                    <span className="text-xs text-muted-foreground">
+                      {p.score !== null ? `Score: ${p.score}/100` : `${p.trustsReceivedCount} trusted by`}
+                    </span>
+                  )}
                 </div>
               </div>
               <Button
