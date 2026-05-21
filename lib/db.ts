@@ -55,7 +55,7 @@ db.pragma('journal_mode = WAL');
 const schema = fs.readFileSync(path.join(process.cwd(), 'lib', 'schema.sql'), 'utf-8');
 db.exec(schema);
 
-export function getAllMentors(skillFilter?: string): MentorRow[] {
+export function getAllMentors(skillFilter?: string, includeInactive = false): MentorRow[] {
   let sql = `
     SELECT
       m.*,
@@ -63,7 +63,7 @@ export function getAllMentors(skillFilter?: string): MentorRow[] {
     FROM mentors m
     LEFT JOIN mentor_skills ms ON ms.mentor_id = m.id
     LEFT JOIN skill_tags st ON st.id = ms.tag_id
-    WHERE m.active = 1
+    WHERE ${includeInactive ? '1=1' : 'm.active = 1'}
   `;
   const params: string[] = [];
 
