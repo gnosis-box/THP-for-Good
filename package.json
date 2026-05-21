@@ -15,7 +15,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "tsx scripts/seed.ts && next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts"
   },
