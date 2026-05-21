@@ -3,67 +3,64 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
+import { PromoteSection } from './PromoteSection';
 import type { MentorRow, TagRow } from '@/lib/db';
-
-const ADMIN_ADDRESSES = (process.env.NEXT_PUBLIC_ADMIN_ADDRESSES ?? '')
-  .toLowerCase()
-  .split(',')
-  .filter(Boolean);
-
-function useAdminFetch(address: string | null) {
-  const headers = useCallback(
-    () => ({ 'Content-Type': 'application/json', 'x-wallet-address': address ?? '' }),
-    [address],
-  );
-  return headers;
-}
 
 export function AdminPanel() {
   const { address, isConnected } = useWallet();
-  const isAdmin = !!address && ADMIN_ADDRESSES.includes(address.toLowerCase());
-  const getHeaders = useAdminFetch(address);
 
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [mentors, setMentors] = useState<MentorRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const headers = useCallback(
+    () => ({ 'Content-Type': 'application/json', 'x-wallet-address': address ?? '' }),
+    [address],
+  );
+
   const load = useCallback(async () => {
-    if (!isAdmin) return;
+    if (!address) return;
     setLoading(true);
     try {
-      const [mRes, tRes] = await Promise.all([
-        fetch('/api/mentors?all=1', { headers: getHeaders() }),
-        fetch('/api/tags', { headers: getHeaders() }),
+      const [checkRes, mRes, tRes] = await Promise.all([
+        fetch('/api/admin/check', { headers: headers() }),
+        fetch('/api/mentors?all=1', { headers: headers() }),
+        fetch('/api/tags', { headers: headers() }),
       ]);
-      setMentors(await mRes.json());
-      setTags(await tRes.json());
+      const { isAdmin: admin } = (await checkRes.json()) as { isAdmin: boolean };
+      setIsAdmin(admin);
+      if (admin) {
+        setMentors(await mRes.json());
+        setTags(await tRes.json());
+      }
     } catch {
       setError('Failed to load data.');
     } finally {
       setLoading(false);
     }
-  }, [isAdmin, getHeaders]);
+  }, [address, headers]);
 
   useEffect(() => { load(); }, [load]);
 
   async function toggleActive(mentor: MentorRow) {
     await fetch(`/api/mentors/${mentor.id}`, {
       method: 'PATCH',
-      headers: getHeaders(),
+      headers: headers(),
       body: JSON.stringify({ active: mentor.active ? 0 : 1 }),
     });
     load();
   }
 
   async function deleteMentor(id: number) {
-    await fetch(`/api/mentors/${id}`, { method: 'DELETE', headers: getHeaders() });
+    await fetch(`/api/mentors/${id}`, { method: 'DELETE', headers: headers() });
     load();
   }
 
   async function deleteTag(id: number) {
-    await fetch(`/api/tags/${id}`, { method: 'DELETE', headers: getHeaders() });
+    await fetch(`/api/tags/${id}`, { method: 'DELETE', headers: headers() });
     load();
   }
 
@@ -72,7 +69,7 @@ export function AdminPanel() {
     if (!label) return;
     await fetch('/api/tags', {
       method: 'POST',
-      headers: getHeaders(),
+      headers: headers(),
       body: JSON.stringify({ label }),
     });
     setNewTag('');
@@ -83,16 +80,16 @@ export function AdminPanel() {
     return <p className="text-sm text-muted-foreground">Connect your wallet to access the admin panel.</p>;
   }
 
-  if (!isAdmin) {
-    return <p className="text-sm text-destructive">Access denied — your wallet is not an admin address.</p>;
-  }
-
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading…</p>;
   }
 
   if (error) {
     return <p className="text-sm text-destructive">{error}</p>;
+  }
+
+  if (!isAdmin) {
+    return <p className="text-sm text-destructive">Access denied — your wallet is not an admin address.</p>;
   }
 
   return (
@@ -132,6 +129,14 @@ export function AdminPanel() {
           </Button>
         </div>
       </section>
+
+      {/* Group members → promote */}
+      <PromoteSection
+        tags={tags}
+        mentors={mentors}
+        walletAddress={address ?? ''}
+        onMentorAdded={load}
+      />
 
       {/* Mentors */}
       <section className="flex flex-col gap-4">
