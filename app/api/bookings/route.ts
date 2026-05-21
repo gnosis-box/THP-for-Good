@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db, { insertBooking } from '@/lib/db';
+import db, { insertBooking, getMentorById } from '@/lib/db';
 
 function isAdmin(req: Request): boolean {
   const admins = (process.env.ADMIN_ADDRESSES ?? '').toLowerCase().split(',').filter(Boolean);
@@ -60,15 +60,37 @@ export async function POST(request: NextRequest) {
     mentor_id: number;
     booker_address: string;
     tx_hash?: string;
+    slot_time?: string;
   };
+
+  let calendarEventUrl: string | null = null;
+
+  if (data.slot_time) {
+    const mentor = getMentorById(data.mentor_id);
+    if (mentor?.google_calendar_id) {
+      try {
+        const { createBookingEvent } = await import('@/lib/googleCalendar');
+        calendarEventUrl = await createBookingEvent(
+          mentor.google_calendar_id,
+          data.slot_time,
+          data.booker_address,
+          mentor.name,
+        );
+      } catch (err) {
+        console.error('[api/bookings] calendar event creation failed:', err);
+      }
+    }
+  }
 
   try {
     const id = insertBooking({
       mentor_id: data.mentor_id,
       booker_address: data.booker_address,
       tx_hash: data.tx_hash,
+      slot_time: data.slot_time,
+      calendar_event_url: calendarEventUrl ?? undefined,
     });
-    return NextResponse.json({ id }, { status: 201 });
+    return NextResponse.json({ id, calendar_event_url: calendarEventUrl }, { status: 201 });
   } catch (err) {
     console.error('[api/bookings POST]', err);
     return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });

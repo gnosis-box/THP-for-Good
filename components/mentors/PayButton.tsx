@@ -5,17 +5,26 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import type { MentorRow } from '@/lib/db';
 
-
 type PayState =
   | { kind: 'idle' }
   | { kind: 'loading' }
-  | { kind: 'success'; hash: string }
+  | { kind: 'success'; hash: string; calendarEventUrl: string | null; slotTime: string }
   | { kind: 'error'; message: string };
 
 type PayButtonProps = {
   mentor: MentorRow;
   selectedSlot: string | null;
 };
+
+function formatSlot(iso: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(iso));
+}
 
 export function PayButton({ mentor, selectedSlot }: PayButtonProps) {
   const { address, isConnected } = useWallet();
@@ -55,21 +64,27 @@ export function PayButton({ mentor, selectedSlot }: PayButtonProps) {
 
       const txHash = hashes[0];
 
-      // Record booking
-      await fetch('/api/bookings', {
+      const res = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mentor_id: mentor.id,
           booker_address: address,
           tx_hash: txHash,
+          slot_time: selectedSlot,
         }),
       });
 
-      setState({ kind: 'success', hash: txHash });
+      const json = (await res.json()) as { id: number; calendar_event_url: string | null };
+
+      setState({
+        kind: 'success',
+        hash: txHash,
+        calendarEventUrl: json.calendar_event_url,
+        slotTime: selectedSlot,
+      });
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'An unexpected error occurred';
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
       setState({ kind: 'error', message });
     }
   }
@@ -77,10 +92,9 @@ export function PayButton({ mentor, selectedSlot }: PayButtonProps) {
   if (state.kind === 'success') {
     return (
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/50 p-4">
-        <p className="text-sm font-medium text-foreground">Booking confirmed!</p>
+        <p className="text-sm font-medium text-foreground">Session booked!</p>
         <p className="text-sm text-muted-foreground">
-          Your slot:{' '}
-          <span className="font-medium text-foreground">{selectedSlot}</span>
+          <span className="font-medium text-foreground">{formatSlot(state.slotTime)}</span>
         </p>
         <p className="text-xs text-muted-foreground break-all">
           Tx:{' '}
@@ -93,13 +107,23 @@ export function PayButton({ mentor, selectedSlot }: PayButtonProps) {
             {state.hash.slice(0, 10)}…{state.hash.slice(-8)}
           </a>
         </p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => window.open(mentor.calendar_link, '_blank', 'noopener,noreferrer')}
-        >
-          Open calendar link
-        </Button>
+        {state.calendarEventUrl ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.open(state.calendarEventUrl!, '_blank', 'noopener,noreferrer')}
+          >
+            View in Google Calendar
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.open(mentor.calendar_link, '_blank', 'noopener,noreferrer')}
+          >
+            Open calendar link
+          </Button>
+        )}
       </div>
     );
   }
@@ -118,7 +142,7 @@ export function PayButton({ mentor, selectedSlot }: PayButtonProps) {
       </Button>
       {isSelf && (
         <p className="text-xs text-muted-foreground text-center">
-          You can't book your own session.
+          You can&apos;t book your own session.
         </p>
       )}
       {!isConnected && (

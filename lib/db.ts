@@ -13,6 +13,7 @@ export type MentorRow = {
   name: string;
   bio: string | null;
   calendar_link: string;
+  google_calendar_id: string | null;
   price_crc: number;
   active: number;
   created_at: string;
@@ -24,6 +25,8 @@ export type BookingRow = {
   mentor_id: number;
   booker_address: string;
   tx_hash: string | null;
+  slot_time: string | null;
+  calendar_event_url: string | null;
   created_at: string;
 };
 
@@ -32,6 +35,7 @@ export type InsertMentorData = {
   name: string;
   bio?: string;
   calendar_link: string;
+  google_calendar_id?: string;
   price_crc?: number;
   skills: string[];
 };
@@ -40,6 +44,8 @@ export type InsertBookingData = {
   mentor_id: number;
   booker_address: string;
   tx_hash?: string;
+  slot_time?: string;
+  calendar_event_url?: string;
 };
 
 type MentorRowRaw = Omit<MentorRow, 'skills'> & { skills: string };
@@ -54,6 +60,15 @@ db.pragma('journal_mode = WAL');
 
 const schema = fs.readFileSync(path.join(process.cwd(), 'lib', 'schema.sql'), 'utf-8');
 db.exec(schema);
+
+// Idempotent column migrations for existing databases
+for (const sql of [
+  'ALTER TABLE mentors ADD COLUMN google_calendar_id TEXT',
+  'ALTER TABLE bookings ADD COLUMN slot_time TEXT',
+  'ALTER TABLE bookings ADD COLUMN calendar_event_url TEXT',
+]) {
+  try { db.exec(sql); } catch { /* column already exists */ }
+}
 
 export function getAllMentors(skillFilter?: string, includeInactive = false): MentorRow[] {
   let sql = `
@@ -106,8 +121,8 @@ export function getMentorById(id: number): MentorRow | undefined {
 
 export function insertMentor(data: InsertMentorData): number {
   const insertMentorStmt = db.prepare(`
-    INSERT OR IGNORE INTO mentors (circles_address, name, bio, calendar_link, price_crc)
-    VALUES (@circles_address, @name, @bio, @calendar_link, @price_crc)
+    INSERT OR IGNORE INTO mentors (circles_address, name, bio, calendar_link, google_calendar_id, price_crc)
+    VALUES (@circles_address, @name, @bio, @calendar_link, @google_calendar_id, @price_crc)
   `);
 
   const upsertTagStmt = db.prepare(`
@@ -129,6 +144,7 @@ export function insertMentor(data: InsertMentorData): number {
       name: data.name,
       bio: data.bio ?? null,
       calendar_link: data.calendar_link,
+      google_calendar_id: data.google_calendar_id ?? null,
       price_crc: data.price_crc ?? 100,
     });
 
@@ -152,13 +168,15 @@ export function getAllTags(): TagRow[] {
 
 export function insertBooking(data: InsertBookingData): number {
   const stmt = db.prepare(`
-    INSERT INTO bookings (mentor_id, booker_address, tx_hash)
-    VALUES (@mentor_id, @booker_address, @tx_hash)
+    INSERT INTO bookings (mentor_id, booker_address, tx_hash, slot_time, calendar_event_url)
+    VALUES (@mentor_id, @booker_address, @tx_hash, @slot_time, @calendar_event_url)
   `);
   const result = stmt.run({
     mentor_id: data.mentor_id,
     booker_address: data.booker_address,
     tx_hash: data.tx_hash ?? null,
+    slot_time: data.slot_time ?? null,
+    calendar_event_url: data.calendar_event_url ?? null,
   });
   return result.lastInsertRowid as number;
 }

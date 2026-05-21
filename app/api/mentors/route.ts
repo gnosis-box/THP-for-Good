@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     name: string;
     bio?: string;
     calendar_link: string;
+    google_calendar_id?: string;
     price_crc?: number;
     skills: string[];
   };
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
       name: data.name.trim(),
       bio: data.bio?.trim(),
       calendar_link: data.calendar_link.trim(),
+      google_calendar_id: data.google_calendar_id?.trim() || undefined,
       price_crc: data.price_crc,
       skills: data.skills,
     });

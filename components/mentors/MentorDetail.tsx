@@ -52,7 +52,7 @@ export function MentorDetail({ mentor }: MentorDetailProps) {
       <Separator />
 
       {/* Slot picker */}
-      <SlotPicker onSelect={setSelectedSlot} selected={selectedSlot} />
+      <SlotPicker mentorId={mentor.id} onSelect={setSelectedSlot} selected={selectedSlot} />
 
       <Separator />
 
