@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
 import { PromoteSection } from './PromoteSection';
-import type { MentorRow, TagRow } from '@/lib/db';
+import type { MentorRow, TagRow, AdminRow } from '@/lib/db';
 
 export function AdminPanel() {
   const { address, isConnected } = useWallet();
@@ -13,6 +13,7 @@ export function AdminPanel() {
   const [groupAddress, setGroupAddress] = useState<string | null>(null);
   const [mentors, setMentors] = useState<MentorRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
+  const [dbAdmins, setDbAdmins] = useState<AdminRow[]>([]);
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,10 +27,11 @@ export function AdminPanel() {
     if (!address) return;
     setLoading(true);
     try {
-      const [checkRes, mRes, tRes] = await Promise.all([
+      const [checkRes, mRes, tRes, aRes] = await Promise.all([
         fetch('/api/admin/check', { headers: headers() }),
         fetch('/api/mentors?all=1', { headers: headers() }),
         fetch('/api/tags', { headers: headers() }),
+        fetch('/api/admin/admins', { headers: headers() }),
       ]);
       const { isAdmin: admin, groupAddress: ga } = (await checkRes.json()) as { isAdmin: boolean; groupAddress: string | null };
       setIsAdmin(admin);
@@ -37,6 +39,7 @@ export function AdminPanel() {
       if (admin) {
         setMentors(await mRes.json());
         setTags(await tRes.json());
+        setDbAdmins(await aRes.json());
       }
     } catch {
       setError('Failed to load data.');
@@ -63,6 +66,11 @@ export function AdminPanel() {
 
   async function deleteTag(id: number) {
     await fetch(`/api/tags/${id}`, { method: 'DELETE', headers: headers() });
+    load();
+  }
+
+  async function removeAdmin(id: number) {
+    await fetch(`/api/admin/admins/${id}`, { method: 'DELETE', headers: headers() });
     load();
   }
 
@@ -136,10 +144,36 @@ export function AdminPanel() {
       <PromoteSection
         tags={tags}
         mentors={mentors}
+        admins={dbAdmins.map((a) => a.circles_address)}
         walletAddress={address ?? ''}
         initialGroupAddress={groupAddress}
         onMentorAdded={load}
+        onAdminAdded={load}
       />
+
+      {/* Admins */}
+      <section className="flex flex-col gap-4">
+        <h2 className="text-base font-semibold">Admins</h2>
+        <div className="flex flex-col gap-3">
+          {dbAdmins.length === 0 && (
+            <p className="text-sm text-muted-foreground">No DB admins yet. Add via env var ADMIN_ADDRESSES or promote a member above.</p>
+          )}
+          {dbAdmins.map((admin) => (
+            <div key={admin.id} className="flex items-center justify-between gap-4 rounded-xl border border-border p-4">
+              <p className="text-xs text-muted-foreground font-mono truncate">{admin.circles_address}</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:bg-destructive/10"
+                onClick={() => removeAdmin(admin.id)}
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Mentors */}
       <section className="flex flex-col gap-4">

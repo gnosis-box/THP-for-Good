@@ -27,12 +27,14 @@ function defaultForm(name: string): PromoteFormState {
 type Props = {
   tags: TagRow[];
   mentors: MentorRow[];
+  admins: string[];
   walletAddress: string;
   initialGroupAddress: string | null;
   onMentorAdded: () => void;
+  onAdminAdded: () => void;
 };
 
-export function PromoteSection({ tags, mentors, walletAddress, initialGroupAddress, onMentorAdded }: Props) {
+export function PromoteSection({ tags, mentors, admins, walletAddress, initialGroupAddress, onMentorAdded, onAdminAdded }: Props) {
   const [groupAddress, setGroupAddress] = useState(initialGroupAddress ?? '');
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [members, setMembers] = useState<MemberEntry[] | null>(null);
@@ -156,6 +158,16 @@ export function PromoteSection({ tags, mentors, walletAddress, initialGroupAddre
   }
 
   const mentorAddresses = new Set(mentors.map((m) => m.circles_address.toLowerCase()));
+  const adminAddresses = new Set(admins.map((a) => a.toLowerCase()));
+
+  async function makeAdmin(address: string) {
+    await fetch('/api/admin/admins', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-wallet-address': walletAddress },
+      body: JSON.stringify({ address }),
+    });
+    onAdminAdded();
+  }
 
   return (
     <section className="flex flex-col gap-4">
@@ -190,6 +202,7 @@ export function PromoteSection({ tags, mentors, walletAddress, initialGroupAddre
         <div className="flex flex-col gap-3">
           {members.map((member) => {
             const isMentor = mentorAddresses.has(member.address.toLowerCase());
+            const isAdmin = adminAddresses.has(member.address.toLowerCase());
             const isPromoting = promotingAddress === member.address;
 
             return (
@@ -199,20 +212,36 @@ export function PromoteSection({ tags, mentors, walletAddress, initialGroupAddre
                     <span className="font-medium truncate">{member.name}</span>
                     <span className="text-xs text-muted-foreground font-mono truncate">{member.address}</span>
                   </div>
-                  {isMentor ? (
-                    <span className="shrink-0 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">
-                      Mentor
-                    </span>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => (isPromoting ? cancelPromote() : startPromote(member))}
-                    >
-                      {isPromoting ? 'Cancel' : 'Promote'}
-                    </Button>
-                  )}
+                  <div className="flex shrink-0 items-center gap-2">
+                    {isMentor ? (
+                      <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">
+                        Mentor
+                      </span>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => (isPromoting ? cancelPromote() : startPromote(member))}
+                      >
+                        {isPromoting ? 'Cancel' : 'Promote mentor'}
+                      </Button>
+                    )}
+                    {isAdmin ? (
+                      <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800">
+                        Admin
+                      </span>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => makeAdmin(member.address)}
+                      >
+                        Make admin
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {isPromoting && form && (

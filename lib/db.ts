@@ -163,6 +163,28 @@ export function insertBooking(data: InsertBookingData): number {
   return result.lastInsertRowid as number;
 }
 
+export type AdminRow = { id: number; circles_address: string; created_at: string };
+
+export function getDbAdmins(): AdminRow[] {
+  return db.prepare('SELECT * FROM admins ORDER BY created_at DESC').all() as AdminRow[];
+}
+
+export function addDbAdmin(address: string): void {
+  db.prepare('INSERT OR IGNORE INTO admins (circles_address) VALUES (?)').run(address.toLowerCase());
+}
+
+export function removeDbAdmin(id: number): void {
+  db.prepare('DELETE FROM admins WHERE id = ?').run(id);
+}
+
+export function isAdminAddress(address: string): boolean {
+  const envAdmins = (process.env.ADMIN_ADDRESSES ?? '').toLowerCase().split(',').filter(Boolean);
+  const addr = address.toLowerCase();
+  if (envAdmins.includes(addr)) return true;
+  const row = db.prepare('SELECT id FROM admins WHERE circles_address = ?').get(addr);
+  return !!row;
+}
+
 export function getBookingsByAddress(address: string): BookingRow[] {
   return db
     .prepare('SELECT * FROM bookings WHERE booker_address = ? ORDER BY created_at DESC')

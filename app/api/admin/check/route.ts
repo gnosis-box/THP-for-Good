@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
+import { isAdminAddress } from '@/lib/db';
 
 export function GET(request: Request) {
-  const admins = (process.env.ADMIN_ADDRESSES ?? '').toLowerCase().split(',').filter(Boolean);
-  const caller = (request.headers.get('x-wallet-address') ?? '').toLowerCase();
+  const caller = request.headers.get('x-wallet-address') ?? '';
   return NextResponse.json({
-    isAdmin: admins.includes(caller),
+    isAdmin: caller ? isAdminAddress(caller) : false,
     groupAddress: process.env.GROUP_ADDRESS ?? null,
   });
 }

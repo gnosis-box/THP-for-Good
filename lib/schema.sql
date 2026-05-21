@@ -28,6 +28,12 @@ CREATE TABLE IF NOT EXISTS bookings (
   created_at      TEXT    DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS admins (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  circles_address TEXT    UNIQUE NOT NULL,
+  created_at      TEXT    DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS trust_attestations (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   booking_id    INTEGER NOT NULL REFERENCES bookings(id),
