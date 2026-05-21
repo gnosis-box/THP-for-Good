@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getAllMentors, getAllTags } from '@/lib/db';
 import { MentorBrowser } from '@/components/mentors/MentorBrowser';
 

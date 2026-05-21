@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import type { MentorRow } from '@/lib/db';
 
-const TREASURY = '0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00';
 
 type PayState =
   | { kind: 'idle' }
@@ -41,7 +40,7 @@ export function PayButton({ mentor, selectedSlot }: PayButtonProps) {
 
       const txs = await builder.constructAdvancedTransfer(
         address as `0x${string}`,
-        TREASURY as `0x${string}`,
+        mentor.circles_address as `0x${string}`,
         amount
       );
 
