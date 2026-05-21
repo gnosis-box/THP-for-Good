@@ -1,0 +1,41 @@
+{
+  "focus": "Merger persistance serveur (branche zet) avec l'UI mentors/calls actuelle",
+  "items": [
+    {
+      "id": "merge-sqlite",
+      "priority": "P0",
+      "title": "Fusionner SQLite + API CRUD (zet) avec routes /mentors ToXY",
+      "detect": "lib/db.ts"
+    },
+    {
+      "id": "api-bookings",
+      "priority": "P1",
+      "title": "POST /api/bookings — remplacer localStorage seul",
+      "detect": "app/api/bookings/route.ts"
+    },
+    {
+      "id": "register-mentor",
+      "priority": "P1",
+      "title": "Page inscription mentor /mentor/register",
+      "detect": "app/mentor/register/page.tsx"
+    },
+    {
+      "id": "admin-panel",
+      "priority": "P1",
+      "title": "Panneau admin mentors + tags",
+      "detect": "app/admin/page.tsx"
+    },
+    {
+      "id": "calendar-link",
+      "priority": "P2",
+      "title": "Ouvrir calendar_link mentor après paiement",
+      "detect": null
+    },
+    {
+      "id": "turso",
+      "priority": "P2",
+      "title": "Migration Turso pour déploiement Vercel",
+      "detect": null
+    }
+  ]
+}

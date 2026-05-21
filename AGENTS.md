@@ -8,6 +8,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This repo is a [Circles](https://aboutcircles.com) miniapp for **THP for Good** (mentor marketplace, CRC payments to the group treasury). Human-readable docs (French, diagrams, history): **[docs/README.md](docs/README.md)**.
 
+**Before changing code:** read **[docs/05-etat-projet.md](docs/05-etat-projet.md)** (project status & where to resume). After app changes, run **`pnpm docs:status`** to refresh the auto section (or rely on the `.cursor/hooks` `afterFileEdit` hook).
+
 It started from the Circles miniapps boilerplate below; core wallet/SDK rules still apply. A miniapp is a web app that loads inside the Circles host (https://circles.gnosis.io/playground) via an iframe; the host injects a wallet and your app drives interactions through the SDK. The boilerplate ships with the minimum plumbing — wallet provider, sign-in demo, profile lookup, layout — so a developer can clone it and start writing business logic immediately.
 
 ## Stack

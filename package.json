@@ -12,7 +12,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "docs:status": "node scripts/update-status-doc.mjs"
   },
   "dependencies": {
     "@aboutcircles/miniapp-sdk": "^0.1.30",

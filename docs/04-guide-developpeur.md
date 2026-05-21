@@ -1,6 +1,6 @@
 # Guide développeur
 
-[← Guide utilisateur](./03-guide-utilisateur.md) · [Documentation](./README.md) · [Historique →](./05-historique.md)
+[← Guide utilisateur](./03-guide-utilisateur.md) · [Documentation](./README.md) · [État du projet →](./05-etat-projet.md)
 
 ## Table des matières
 
@@ -209,4 +209,4 @@ PR sur [aboutcircles/CirclesMiniapps](https://github.com/aboutcircles/CirclesMin
 
 ---
 
-[← Guide utilisateur](./03-guide-utilisateur.md) · [Historique →](./05-historique.md)
+[← Guide utilisateur](./03-guide-utilisateur.md) · [État du projet →](./05-etat-projet.md)

@@ -17,7 +17,7 @@ Documentation officielle du miniapp **THP for Good** — marketplace de mentorat
 | 2 | [**Architecture technique**](./02-architecture.md) | Développeurs | Stack, schémas, flux CRC, intégration Circles |
 | 3 | [**Guide utilisateur**](./03-guide-utilisateur.md) | Utilisateurs | Réserver, payer, trust, prérequis hôte |
 | 4 | [**Guide développeur**](./04-guide-developpeur.md) | Contributeurs | Installation, config, déploiement |
-| 5 | [**Historique & roadmap**](./05-historique.md) | Produit | Chronologie Git, branches, évolutions |
+| 5 | [**État du projet**](./05-etat-projet.md) | **Tous / agents** | **Reprendre le travail** — auto-mis à jour |
 
 ## Ressources annexes
 
@@ -34,7 +34,7 @@ Documentation officielle du miniapp **THP for Good** — marketplace de mentorat
 > **Branche `ToXY` (courante)** — portage Gnosis-App : mentors en `.env`, réservations `localStorage`, enrichissement Circles côté serveur.
 
 > [!NOTE]
-> **Branche `zet`** — SQLite, inscription mentor, admin, API complètes. Détails : [Historique & roadmap](./05-historique.md).
+> **Branche `zet`** — SQLite, inscription mentor, admin, API complètes. **Reprise de travail :** [05-etat-projet.md](./05-etat-projet.md) · mise à jour : `pnpm docs:status`
 
 ## Navigation rapide
 
@@ -45,7 +45,7 @@ docs/
 ├── 02-architecture.md
 ├── 03-guide-utilisateur.md
 ├── 04-guide-developpeur.md
-├── 05-historique.md
+├── 05-etat-projet.md
 ├── assets/
 │   └── mockup-wireframe.png
 └── spec/

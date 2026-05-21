@@ -3,7 +3,7 @@
 [← Documentation](../README.md) · [Présentation](../01-presentation.md) · [Architecture](../02-architecture.md)
 
 > [!NOTE]
-> Document de référence hackathon (branche `zet`). L’implémentation courante sur `ToXY` peut diverger — voir le [tableau comparatif](../05-historique.md#écarts-produit-toxy-vs-prd-zet).
+> Document de référence hackathon (branche `zet`). L’implémentation courante sur `ToXY` peut diverger — voir [État du projet](../05-etat-projet.md#reprise-automatique).
 
 ## What is THP for Good
 

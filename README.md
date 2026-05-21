@@ -10,7 +10,8 @@ Mini-application [Circles](https://aboutcircles.com) pour le fonds **THP for Goo
 
 | Langue | Lien |
 |--------|------|
-| **Français (complète)** | **[`docs/`](./docs/README.md)** — présentation, architecture, guides, historique |
+| **Français (complète)** | **[`docs/`](./docs/README.md)** — présentation, architecture, guides |
+| **Reprise de travail** | [`docs/05-etat-projet.md`](./docs/05-etat-projet.md) — auto via `pnpm docs:status` |
 | PRD hackathon | [`docs/spec/PRD.md`](./docs/spec/PRD.md) |
 | Agents IA | [`AGENTS.md`](./AGENTS.md) |
 
