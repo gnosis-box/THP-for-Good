@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { MentorRow, TagRow } from '@/lib/db';
@@ -28,11 +28,12 @@ type Props = {
   tags: TagRow[];
   mentors: MentorRow[];
   walletAddress: string;
+  initialGroupAddress: string | null;
   onMentorAdded: () => void;
 };
 
-export function PromoteSection({ tags, mentors, walletAddress, onMentorAdded }: Props) {
-  const [groupAddress, setGroupAddress] = useState('');
+export function PromoteSection({ tags, mentors, walletAddress, initialGroupAddress, onMentorAdded }: Props) {
+  const [groupAddress, setGroupAddress] = useState(initialGroupAddress ?? '');
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [members, setMembers] = useState<MemberEntry[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -40,6 +41,11 @@ export function PromoteSection({ tags, mentors, walletAddress, onMentorAdded }: 
   const [form, setForm] = useState<PromoteFormState | null>(null);
   const [newSkill, setNewSkill] = useState('');
   const [localTags, setLocalTags] = useState<TagRow[]>(tags);
+
+  useEffect(() => {
+    if (initialGroupAddress) loadMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialGroupAddress]);
 
   async function loadMembers() {
     const addr = groupAddress.trim();
@@ -155,19 +161,24 @@ export function PromoteSection({ tags, mentors, walletAddress, onMentorAdded }: 
     <section className="flex flex-col gap-4">
       <h2 className="text-base font-semibold">Promote Group Member to Mentor</h2>
 
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={groupAddress}
-          onChange={(e) => setGroupAddress(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && loadMembers()}
-          placeholder="Circles group address (0x…)"
-          className="h-9 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-        />
-        <Button type="button" variant="outline" size="sm" onClick={loadMembers} disabled={loadingMembers || !groupAddress.trim()}>
-          {loadingMembers ? 'Loading…' : 'Load'}
-        </Button>
-      </div>
+      {!initialGroupAddress && (
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={groupAddress}
+            onChange={(e) => setGroupAddress(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && loadMembers()}
+            placeholder="Circles group address (0x…)"
+            className="h-9 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          />
+          <Button type="button" variant="outline" size="sm" onClick={loadMembers} disabled={loadingMembers || !groupAddress.trim()}>
+            {loadingMembers ? 'Loading…' : 'Load'}
+          </Button>
+        </div>
+      )}
+      {initialGroupAddress && loadingMembers && (
+        <p className="text-sm text-muted-foreground">Loading members…</p>
+      )}
 
       {loadError && <p className="text-sm text-destructive">{loadError}</p>}
 

@@ -10,6 +10,7 @@ export function AdminPanel() {
   const { address, isConnected } = useWallet();
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [groupAddress, setGroupAddress] = useState<string | null>(null);
   const [mentors, setMentors] = useState<MentorRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
   const [newTag, setNewTag] = useState('');
@@ -30,8 +31,9 @@ export function AdminPanel() {
         fetch('/api/mentors?all=1', { headers: headers() }),
         fetch('/api/tags', { headers: headers() }),
       ]);
-      const { isAdmin: admin } = (await checkRes.json()) as { isAdmin: boolean };
+      const { isAdmin: admin, groupAddress: ga } = (await checkRes.json()) as { isAdmin: boolean; groupAddress: string | null };
       setIsAdmin(admin);
+      setGroupAddress(ga);
       if (admin) {
         setMentors(await mRes.json());
         setTags(await tRes.json());
@@ -135,6 +137,7 @@ export function AdminPanel() {
         tags={tags}
         mentors={mentors}
         walletAddress={address ?? ''}
+        initialGroupAddress={groupAddress}
         onMentorAdded={load}
       />
 
