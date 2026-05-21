@@ -16,6 +16,12 @@ export type MiniappTransaction = {
 };
 
 const TX_CAPTURED = 'THP_TX_CAPTURED';
+const ATTO_PER_CRC = BigInt(10 ** 18);
+
+/** SDK transfer.advanced expects atto-CRC, not a human CRC count. */
+function crcToAttoCircles(amountCrc: number): bigint {
+  return BigInt(Math.trunc(amountCrc)) * ATTO_PER_CRC;
+}
 
 function toMiniappTransactions(txs: RawTx[]): MiniappTransaction[] {
   return txs.map((tx) => ({
@@ -51,7 +57,7 @@ export async function buildCrcPaymentTransactions(
   const avatar = await sdk.getAvatar(fromAddress);
 
   try {
-    await avatar.transfer.advanced(sinkAddress, amountCrc, {
+    await avatar.transfer.advanced(sinkAddress, crcToAttoCircles(amountCrc), {
       useWrappedBalances: true,
     });
   } catch (error) {
