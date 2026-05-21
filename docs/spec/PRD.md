@@ -1,5 +1,10 @@
 # THP for Good — Product & Implementation Plan
 
+[← Documentation](../README.md) · [Présentation](../01-presentation.md) · [Architecture](../02-architecture.md)
+
+> [!NOTE]
+> Document de référence hackathon (branche `zet`). L’implémentation courante sur `ToXY` peut diverger — voir le [tableau comparatif](../05-historique.md#écarts-produit-toxy-vs-prd-zet).
+
 ## What is THP for Good
 
 THP for Good is a community fund created to promote coding for projects of common interest. Its mission: remove the financial and technical barriers that prevent talented people with social-impact ideas from pursuing them.

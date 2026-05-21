@@ -1,123 +1,93 @@
 # THP for Good — Circles Miniapp
 
+[![Circles](https://img.shields.io/badge/Circles-miniapp-7c3aed)](https://docs.aboutcircles.com/miniapps/embedded-mini-apps)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 **Book mentor calls. Pay in CRC. Fund free bootcamp places.**
 
-Mini-application [Circles](https://aboutcircles.com) pour le fonds [THP for Good](https://aboutcircles.com) : marketplace de mentorat où les réservations sont payées en **CRC** et reversées au trésor du groupe Circles THP for Good.
+Mini-application [Circles](https://aboutcircles.com) pour le fonds **THP for Good** : marketplace de mentorat où les réservations sont payées en **CRC** et reversées au trésor du groupe Circles.
 
-> Documentation complète (français, schémas, historique) : **[docs/README.md](./docs/README.md)**
+## Documentation
+
+| Langue | Lien |
+|--------|------|
+| **Français (complète)** | **[`docs/`](./docs/README.md)** — présentation, architecture, guides, historique |
+| PRD hackathon | [`docs/spec/PRD.md`](./docs/spec/PRD.md) |
+| Agents IA | [`AGENTS.md`](./AGENTS.md) |
 
 ## Quickstart
 
 ```bash
+git clone https://github.com/gnosis-box/THP-for-Good.git
+cd THP-for-Good
 pnpm install
-cp .env.example .env.local   # mentor Circles addresses + foundation
+cp .env.example .env.local
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Wallet stays disconnected outside the Circles host — expected.
+| Étape | Détail |
+|-------|--------|
+| Local | [http://localhost:3000](http://localhost:3000) — wallet déconnecté hors iframe : **normal** |
+| Circles host | `https://circles.gnosis.io/playground?url=<your-deploy-url>` |
 
-Test in the host: [Circles playground](https://circles.gnosis.io/playground?url=<your-https-deploy-url>).
+> [!IMPORTANT]
+> Pas de bouton « Connect wallet » : le host Circles injecte le Safe via `onWalletChange`.
 
 ## Features (branch `ToXY`)
 
-| Route | Purpose |
-|-------|---------|
-| `/mentors` | Browse mentors, filter by domain |
-| `/mentors/[slug]` | Pick a slot, sign in, pay **100 CRC** to THP for Good |
-| `/calls` | Booking history + **TRUST** mentor on Circles |
-| `/` | Wallet connection demo (boilerplate) |
-| `/profile`, `/actions` | SDK demos from the starter template |
+| Route | Description |
+|-------|-------------|
+| [`/mentors`](./app/mentors/page.tsx) | Catalogue mentors, filtre par domaine |
+| [`/mentors/[slug]`](./app/mentors) | Créneau + paiement **100 CRC** |
+| [`/calls`](./app/calls/page.tsx) | Historique + **TRUST** mentor |
+| `/` | Démo connexion (boilerplate) |
 
-Payments resolve the THP **group** address to its on-chain **treasury** before `transfer.direct`. Bookings are stored in `localStorage` per wallet (server DB on branch `zet`).
+Paiements : groupe THP → trésor on-chain → `transfer.direct`. Réservations : `localStorage` (SQLite sur branche `zet`).
 
 ## Stack
 
-Next.js 16 · React 19 · Tailwind v4 · shadcn/ui · `@aboutcircles/miniapp-sdk` · `@aboutcircles/sdk` · TanStack Query · viem
+`Next.js 16` · `React 19` · `Tailwind v4` · `shadcn/ui` · `@aboutcircles/miniapp-sdk` · `@aboutcircles/sdk` · `TanStack Query` · `viem`
 
 ## Configuration
 
-See [`.env.example`](./.env.example) and [docs/04-guide-developpeur.md](./docs/04-guide-developpeur.md).
+Voir [`.env.example`](./.env.example) et le [guide développeur](./docs/04-guide-developpeur.md).
 
-| Variable | Role |
-|----------|------|
-| `NEXT_PUBLIC_FOUNDATION_ADDRESS` | THP group (`0x2b5E…`) — auto-resolved to treasury |
-| `NEXT_PUBLIC_MENTOR_*_ADDRESS` | Circles avatar per mentor (profiles + trust) |
-| `NEXT_PUBLIC_BOOKING_PRICE_CRC` | Default `100` |
+```dotenv
+NEXT_PUBLIC_FOUNDATION_ADDRESS=0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00
+NEXT_PUBLIC_MENTOR_ZET_ADDRESS=0x…
+```
 
 ## Scripts
 
-| Command | Action |
-|---------|--------|
-| `pnpm dev` | Dev server `:3000` |
-| `pnpm build` | Production build |
-| `pnpm start` | Run production server |
-| `pnpm lint` | ESLint |
+```bash
+pnpm dev      # :3000
+pnpm build
+pnpm start
+pnpm lint
+```
 
-## Documentation
-
-| Doc | Description |
-|-----|-------------|
-| [docs/01-presentation.md](./docs/01-presentation.md) | Mission, features, mockup |
-| [docs/02-architecture.md](./docs/02-architecture.md) | Diagrams, CRC flow, SDK rules |
-| [docs/03-guide-utilisateur.md](./docs/03-guide-utilisateur.md) | End-user booking guide |
-| [docs/04-guide-developpeur.md](./docs/04-guide-developpeur.md) | Setup, structure, deploy |
-| [docs/05-historique.md](./docs/05-historique.md) | Git timeline, branches, roadmap |
-| [docs/spec/PRD.md](./docs/spec/PRD.md) | Product spec (hackathon) |
-
-## Circles miniapp essentials
-
-- **No Connect button** — the host injects the wallet via `onWalletChange`.
-- **Dynamic-import both SDKs** in client components only (see `WalletProvider.tsx`).
-- **Read profiles** with `sdk.rpc.profile.getProfileView()` — not `getAvatar()` for lookups.
-- **iframe CSP** — `next.config.ts` sets `frame-ancestors` for `*.gnosis.io` and Vercel previews.
-
-Full boilerplate notes (signing, `sendTransactions`, gotchas): still valid below and in [AGENTS.md](./AGENTS.md).
+## Circles essentials
 
 <details>
-<summary>Boilerplate reference (wallet, signing, profile lookup)</summary>
-
-### Wallet connection
+<summary>Wallet, signing, profile lookup (boilerplate)</summary>
 
 ```ts
-import { onWalletChange } from '@aboutcircles/miniapp-sdk';
+import { onWalletChange, signMessage, sendTransactions } from '@aboutcircles/miniapp-sdk';
+import { Sdk } from '@aboutcircles/sdk';
 
-const unsubscribe = onWalletChange((address) => {
-  // Safe address from the host, or null
-});
-```
-
-```tsx
-import { useWallet } from '@/hooks/use-wallet';
-const { address, isConnected, isMiniappHost } = useWallet();
-```
-
-### Sign in
-
-```ts
-const { signature, verified } = await signMessage('Sign in to THP for Good\nNonce: …');
-```
-
-### Profile lookup
-
-```ts
 const sdk = new Sdk();
 const view = await sdk.rpc.profile.getProfileView(address);
 ```
 
-### Send transactions
-
-```ts
-const txHashes = await sendTransactions([{ to: '0x…', data: '0x…', value: '0' }]);
-```
+Règles détaillées : [`AGENTS.md`](./AGENTS.md) · [`docs/02-architecture.md`](./docs/02-architecture.md).
 
 </details>
 
-## Learn more
+## Links
 
 - [Embedded miniapps docs](https://docs.aboutcircles.com/miniapps/embedded-mini-apps)
 - [Circles playground](https://circles.gnosis.io/playground)
-- [CirclesMiniapps marketplace repo](https://github.com/aboutcircles/CirclesMiniapps)
+- [CirclesMiniapps marketplace](https://github.com/aboutcircles/CirclesMiniapps)
 
 ## License
 
-MIT
+MIT (voir historique du dépôt).

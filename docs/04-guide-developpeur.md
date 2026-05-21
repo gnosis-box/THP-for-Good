@@ -1,23 +1,37 @@
-# 04 — Guide développeur
+# Guide développeur
+
+[← Guide utilisateur](./03-guide-utilisateur.md) · [Documentation](./README.md) · [Historique →](./05-historique.md)
+
+## Table des matières
+
+- [Démarrage rapide](#démarrage-rapide)
+- [Configuration](#configuration-env)
+- [Structure du projet](#structure-du-projet)
+- [Ajouter un mentor](#ajouter-un-mentor-branche-toxy)
+- [Patterns de code](#patterns-de-code-à-respecter)
+- [Tester dans Circles](#tester-dans-le-playground-circles)
+- [Déploiement](#déploiement-coolify)
+- [Pièges connus](#pièges-connus)
+
+---
 
 ## Démarrage rapide
 
 ```bash
-git clone <repo-url> THP-for-Good
+git clone https://github.com/gnosis-box/THP-for-Good.git
 cd THP-for-Good
 pnpm install
-cp .env.example .env.local   # adapter les adresses mentors
+cp .env.example .env.local
 pnpm dev
 ```
 
-Ouvrir http://localhost:3000 — le badge affichera « Not connected » (normal).
+Ouvrir `http://localhost:3000` — le badge affiche « Not connected » (normal hors iframe).
 
 ### Vérification avant merge
 
 ```bash
 pnpm lint
 pnpm build
-# Optionnel : smoke test CSP + page d'accueil
 pnpm dev &
 curl -s -D - http://localhost:3000/ | grep -i frame-ancestors
 pkill -f "next dev"
@@ -25,68 +39,72 @@ pkill -f "next dev"
 
 ## Configuration (`.env`)
 
+Copier [`.env.example`](../.env.example) vers `.env.local`.
+
 | Variable | Obligatoire | Description |
-|----------|-------------|-------------|
-| `NEXT_PUBLIC_FOUNDATION_ADDRESS` | Recommandé | Adresse groupe THP (`0x2b5E…`) — résolue vers trésor au paiement |
+|----------|:-----------:|-------------|
+| `NEXT_PUBLIC_FOUNDATION_ADDRESS` | Recommandé | Groupe THP — résolu vers trésor au paiement |
 | `NEXT_PUBLIC_BOOKING_PRICE_CRC` | Non | Défaut `100` |
-| `NEXT_PUBLIC_MENTOR_*_ADDRESS` | Pour profils live | Adresse Circles par mentor (`ZET`, `FLO`, `DIMITRY`, `VINCENT`) |
-| `NEXT_PUBLIC_MENTOR_DEFAULT_ADDRESS` | Alternative | Même adresse pour tous les mentors sans override |
-| `NEXT_PUBLIC_RPC_URL` | Non | RPC Gnosis pour receipts (`https://rpc.gnosischain.com`) |
+| `NEXT_PUBLIC_MENTOR_*_ADDRESS` | Pour profils live | Adresse Circles par mentor |
+| `NEXT_PUBLIC_MENTOR_DEFAULT_ADDRESS` | Alternative | Même adresse pour tous les mentors |
+| `NEXT_PUBLIC_RPC_URL` | Non | RPC Gnosis pour receipts |
 
 Exemple minimal :
 
-```env
+```dotenv
 NEXT_PUBLIC_FOUNDATION_ADDRESS=0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00
 NEXT_PUBLIC_MENTOR_ZET_ADDRESS=0xVotreAdresseChecksummed
 ```
 
-### Adresses on-chain de référence
+### Adresses on-chain
 
 | Rôle | Adresse |
 |------|---------|
 | Groupe THP for Good | `0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00` |
 | Trésor (BASE_TREASURY) | `0xA98e85AECCfa98220aB20ce60169115C350F09b8` |
 
-Définies aussi dans `lib/config.ts`.
+Constantes : [`lib/config.ts`](../lib/config.ts).
 
 ## Structure du projet
 
-```
+<details>
+<summary>Arborescence principale</summary>
+
+```text
 app/
-  layout.tsx              # WalletProvider + AppShell, metadata THP
-  page.tsx                # Dashboard (démo connexion)
+  layout.tsx
+  page.tsx
   mentors/
-    layout.tsx            # MentorsShell (Query + Provider)
-    page.tsx              # Liste + filtre
-    [slug]/page.tsx       # Détail + BookCallButton
-  calls/page.tsx          # Historique localStorage
-  api/mentors/route.ts    # GET mentors enrichis
+    layout.tsx
+    page.tsx
+    [slug]/page.tsx
+  calls/page.tsx
+  api/mentors/route.ts
 components/
-  mentors/                # UI métier mentorat
-  wallet/                 # WalletProvider, SignInDemo
-  layout/                 # Shell, nav, sidebar
-  profile/                # Démo boilerplate
+  mentors/
+  wallet/
+  layout/
 hooks/
-  use-book-call.ts        # Paiement CRC
-  use-trust-mentor.ts     # Trust post-appel
-  use-sign-in.ts          # Session signMessage
-  use-mentors.ts          # Context mentors (réexport)
+  use-book-call.ts
+  use-trust-mentor.ts
+  use-sign-in.ts
 lib/
-  mentors.ts              # Seeds, créneaux, filtres
-  mentor-profiles.server.ts  # Enrichissement Circles (cache)
-  crc-transfer.ts         # Construction transactions
-  foundation-sink.ts      # Résolution trésor
-  bookings-storage.ts     # localStorage
-  config.ts               # Constantes THP
-  nav.ts                  # Navigation
-docs/                     # Cette documentation
+  mentors.ts
+  mentor-profiles.server.ts
+  crc-transfer.ts
+  foundation-sink.ts
+  bookings-storage.ts
+  config.ts
+docs/
 ```
+
+</details>
 
 ## Ajouter un mentor (branche `ToXY`)
 
-1. Ajouter une entrée dans `MENTOR_SEEDS` (`lib/mentors.ts`) : `slug`, `name`, `tags`, `bio`.
-2. Définir `NEXT_PUBLIC_MENTOR_<SLUG>_ADDRESS` en majuscules dans `.env`.
-3. Redémarrer `pnpm dev` — l’API `/api/mentors` revalide le cache toutes les 5 minutes.
+1. Entrée dans `MENTOR_SEEDS` — [`lib/mentors.ts`](../lib/mentors.ts).
+2. Variable `NEXT_PUBLIC_MENTOR_<SLUG>_ADDRESS` dans `.env.local`.
+3. Redémarrer `pnpm dev` — cache API `/api/mentors` : 5 minutes.
 
 ## Patterns de code à respecter
 
@@ -94,6 +112,9 @@ docs/                     # Cette documentation
 
 ```tsx
 'use client';
+
+import { useEffect } from 'react';
+
 useEffect(() => {
   import('@aboutcircles/miniapp-sdk').then(({ onWalletChange }) => {
     const unsub = onWalletChange(setAddress);
@@ -102,9 +123,9 @@ useEffect(() => {
 }, []);
 ```
 
-Voir `components/wallet/WalletProvider.tsx`.
+Référence : [`components/wallet/WalletProvider.tsx`](../components/wallet/WalletProvider.tsx).
 
-### Probe RPC avant nouvelle méthode
+### Probe RPC
 
 ```bash
 curl -s -X POST https://rpc.aboutcircles.com/ \
@@ -112,7 +133,7 @@ curl -s -X POST https://rpc.aboutcircles.com/ \
   -d '{"jsonrpc":"2.0","id":1,"method":"circles_getProfileView","params":["0x…"]}'
 ```
 
-### Script Node de debug (racine projet)
+### Script Node de debug
 
 ```bash
 cat > probe.mjs <<'EOF'
@@ -127,37 +148,37 @@ node probe.mjs && rm probe.mjs
 
 ```mermaid
 flowchart LR
-  A[pnpm build + deploy HTTPS] --> B[Playground Circles]
-  B --> C[Wallet injecté]
-  C --> D[Login + PAY + TRUST]
+  A[pnpm build deploy HTTPS] --> B[Playground Circles]
+  B --> C[Wallet injecte]
+  C --> D[Login PAY TRUST]
 ```
 
-1. `git push` → URL Vercel/Coolify.
+1. `git push` → URL Vercel ou Coolify.
 2. `https://circles.gnosis.io/playground?url=<deploy-url>`
-3. Vérifier header : adresse wallet + boutons actifs sur `/mentors/[slug]`.
+3. Vérifier wallet + boutons sur `/mentors/[slug]`.
 
 ## Déploiement Coolify
 
-Le fichier `nixpacks.toml` configure :
+Config : [`nixpacks.toml`](../nixpacks.toml).
 
-- Node.js + pnpm
-- `pnpm install --frozen-lockfile`
-- `pnpm build`
-- `HOSTNAME=0.0.0.0 PORT=3000 pnpm start`
+| Phase | Commande |
+|-------|----------|
+| Install | `pnpm install --frozen-lockfile` |
+| Build | `pnpm build` |
+| Start | `HOSTNAME=0.0.0.0 PORT=3000 pnpm start` |
 
-**Note historique** : le commit `6af1786` a retiré `pnpm-workspace.yaml` pour corriger l’install Coolify.
+> [!NOTE]
+> Le commit `6af1786` a retiré `pnpm-workspace.yaml` pour corriger l’install Coolify.
 
-Pour SQLite (branche `zet`), préférer un VPS avec volume persistant — les fonctions serverless Vercel ne conservent pas le fichier DB.
+### Déploiement Vercel
 
-## Déploiement Vercel
-
-- Compatible pour la branche `ToXY` (pas de DB fichier).
-- Ajouter le domaine preview dans `frame-ancestors` si nécessaire (`next.config.ts`).
+- Compatible branche `ToXY` (pas de fichier SQLite).
 - Variables `NEXT_PUBLIC_*` dans le dashboard Vercel.
+- Domaine preview autorisé dans `frame-ancestors` si besoin.
 
-## Marketplace Circles
+### Marketplace Circles
 
-Pour une entrée permanente dans le catalogue host, PR sur [aboutcircles/CirclesMiniapps](https://github.com/aboutcircles/CirclesMiniapps) → `static/miniapps.json`.
+PR sur [aboutcircles/CirclesMiniapps](https://github.com/aboutcircles/CirclesMiniapps) → `static/miniapps.json`.
 
 ## Commandes
 
@@ -166,22 +187,26 @@ Pour une entrée permanente dans le catalogue host, PR sur [aboutcircles/Circles
 | `pnpm dev` | Serveur dev `:3000` |
 | `pnpm build` | Build production |
 | `pnpm start` | Serveur production |
-| `pnpm lint` | ESLint (pas `next lint` en v16) |
+| `pnpm lint` | ESLint |
 
 ## Pièges connus
 
 | Piège | Solution |
 |-------|----------|
-| `window is not defined` | Import dynamique SDK côté client uniquement |
-| Bouton Connect maison | Utiliser `onWalletChange` — le host est le wallet |
-| `getAvatar()` pour lecture seule | Préférer `getProfileView()` |
+| `window is not defined` | Import dynamique SDK, client only |
+| Bouton Connect maison | `onWalletChange` — le host est le wallet |
+| `getAvatar()` en lecture seule | `getProfileView()` |
 | Diviser `v2Balance` par 1e18 | Déjà une chaîne décimale |
-| Paiement vers adresse groupe | `resolveFoundationSink()` avant transfert |
-| Éditer `components/ui/*` à la main | Regénérer via `pnpm dlx shadcn@latest add … --overwrite` |
-| Dev server orphelin | `pkill -f "next dev"` en fin de session |
+| Paiement vers groupe | `resolveFoundationSink()` |
+| Éditer `components/ui/*` | `pnpm dlx shadcn@latest add … --overwrite` |
+| Dev server orphelin | `pkill -f "next dev"` |
 
-## Ressources internes
+## Ressources
 
-- [AGENTS.md](../AGENTS.md) — guide agents IA
-- [02 — Architecture](./02-architecture.md) — schémas flux CRC
-- [spec/PRD.md](./spec/PRD.md) — cible produit complète
+- [AGENTS.md](../AGENTS.md)
+- [Architecture](./02-architecture.md)
+- [PRD](./spec/PRD.md)
+
+---
+
+[← Guide utilisateur](./03-guide-utilisateur.md) · [Historique →](./05-historique.md)

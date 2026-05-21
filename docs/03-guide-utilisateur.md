@@ -1,100 +1,130 @@
-# 03 — Guide utilisateur
+# Guide utilisateur
 
-Ce guide décrit l’usage de **THP for Good** dans le host Circles (playground ou production). Hors iframe, la connexion wallet et les paiements ne fonctionnent pas — c’est le comportement attendu.
+[← Architecture](./02-architecture.md) · [Documentation](./README.md) · [Guide développeur →](./04-guide-developpeur.md)
+
+## Table des matières
+
+- [Prérequis](#prérequis)
+- [Réserver un appel](#parcours--réserver-un-appel)
+- [Mes appels et Trust](#parcours--mes-appels--trust)
+- [Messages d’erreur](#messages-derreur-courants)
+- [Tarification](#tarification)
+- [FAQ](#faq)
+
+---
+
+Ce guide décrit l’usage de **THP for Good** dans le host Circles (playground ou production).
+
+> [!IMPORTANT]
+> Hors iframe Circles, la connexion wallet et les paiements **ne fonctionnent pas**. C’est le comportement attendu.
 
 ## Prérequis
 
 | Prérequis | Détail |
 |-----------|--------|
 | Compte Circles | Safe accessible dans le host |
-| CRC | ~100 CRC disponibles (non wrappés de préférence — voir message d’erreur pathfinder) |
-| Navigateur | URL HTTPS de l’app (Vercel, Coolify, etc.) |
+| CRC | ~100 CRC disponibles (de préférence non wrappés) |
+| Navigateur | URL **HTTPS** de l’app (Vercel, Coolify, etc.) |
 | Host | [circles.gnosis.io/playground](https://circles.gnosis.io/playground) |
 
 ## Parcours : réserver un appel
 
 ```mermaid
-journey
-  title Réservation mentor
-  section Découverte
-    Ouvrir Mentors: 5: Utilisateur
-    Filtrer par domaine: 4: Utilisateur
-    Choisir un mentor: 5: Utilisateur
-  section Réservation
-    Login (signature): 4: Utilisateur
-    Choisir un créneau: 5: Utilisateur
-    Payer 100 CRC: 3: Utilisateur
-  section Après
-    Voir Mes appels: 5: Utilisateur
-    TRUST le mentor: 4: Utilisateur
+flowchart TD
+  A[Ouvrir Mentors] --> B[Filtrer par domaine]
+  B --> C[Choisir un mentor]
+  C --> D[Login signature]
+  D --> E[Choisir un creneau]
+  E --> F[Payer 100 CRC]
+  F --> G[Mes appels]
+  G --> H[TRUST mentor]
 ```
 
 ### Étape 1 — Ouvrir l’app dans Circles
 
-1. Déployez ou utilisez l’URL de l’app.
-2. Collez l’URL dans le playground : `https://circles.gnosis.io/playground?url=<votre-app>`
+1. Déployez ou utilisez l’URL HTTPS de l’application.
+2. Ouvrez le playground avec votre URL :
+   ```
+   https://circles.gnosis.io/playground?url=<votre-app>
+   ```
 3. Le badge en-tête affiche une adresse raccourcie (Safe connecté).
 
 ### Étape 2 — Parcourir les mentors
 
 Menu **Mentors** :
 
-- Texte d’accroche : *Get a call with a mentor, Pay in CRC, help someone get a free bootcamp tuition.*
+- Accroche : *Get a call with a mentor, Pay in CRC, help someone get a free bootcamp tuition.*
 - Champ **Which domain you want be helped with** — ex. `AI`, `Legal`, `Dev` (séparateurs `;` ou `,`).
-- Grille de cartes : photo Circles si l’adresse mentor est configurée, nom, tags.
+- Grille de cartes : photo Circles, nom, tags (si adresse mentor configurée).
 
 ### Étape 3 — Fiche mentor
 
 1. Cliquez sur un mentor.
-2. Lisez la bio et les statistiques trust (si profil Circles chargé).
-3. **Sélectionnez un créneau** dans la grille (jours ouvrés, 10h ou 14h).
-4. Cliquez sur **Login** si le bandeau l’indique — signez le message dans le host.
-5. Appuyez sur **PAY 100 CRC to THP for Good**.
-6. Confirmez la transaction dans le host Circles.
-7. Redirection automatique vers **Mes appels** après succès.
+2. Consultez la bio et les statistiques trust.
+3. **Sélectionnez un créneau** (jours ouvrés, 10h ou 14h).
+4. **Login** — signez le message dans le host si demandé.
+5. **PAY 100 CRC to THP for Good** — confirmez dans le host.
+6. Redirection vers **Mes appels** après succès.
 
-### Écran récapitulatif (wireframe)
-
-![Écrans liste, détail et paiement](./assets/mockup-wireframe.png)
+<p align="center">
+  <img src="./assets/mockup-wireframe.png" alt="Wireframe liste mentors, detail et paiement" width="480" />
+</p>
 
 ## Parcours : Mes appels & Trust
 
-Menu **Mes appels** :
-
 | Élément | Description |
 |---------|-------------|
-| Liste | Chaque réservation : mentor, tags, créneau, date |
-| TRUST | Endosse le mentor sur le graphe Circles (nécessite Login + avatar Circles) |
-| Vide | Lien vers Mentors si aucune réservation |
+| **Liste** | Réservations : mentor, tags, créneau, date |
+| **TRUST** | Endosse le mentor sur Circles (Login + avatar requis) |
+| **Vide** | Lien vers Mentors si aucune réservation |
 
-Le trust renforce la réputation du mentor dans l’économie Circles ; il est distinct du paiement (qui va au fonds, pas au mentor individuellement).
+> [!NOTE]
+> Le trust renforce la réputation du mentor. Le paiement CRC va au **fonds THP**, pas au mentor individuellement.
 
 ## Messages d’erreur courants
 
-| Message (FR) | Cause probable | Action |
-|--------------|----------------|--------|
-| Ouvrez dans l'hôte Circles | App ouverte en onglet seul | Utiliser le playground |
-| Connectez-vous via Login | Session signature absente | Bouton Login sur la fiche mentor |
-| Solde CRC insuffisant | Pathfinder < 100 CRC | Déwrapper CRC dans Circles, vérifier trust vers trésor |
+| Message | Cause probable | Action |
+|---------|----------------|--------|
+| Ouvrez dans l'hôte Circles | App hors iframe | Utiliser le [playground](https://circles.gnosis.io/playground) |
+| Connectez-vous via Login | Pas de session signature | Bouton **Login** sur la fiche mentor |
+| Solde CRC insuffisant | Pathfinder &lt; 100 CRC | Déwrapper CRC dans Circles |
 | Transaction annulée | Refus dans le host | Réessayer |
-| Adresse fondation non configurée | `.env` manquant côté déploiement | Contacter l’équipe technique |
+| Adresse fondation non configurée | `.env` manquant | Contacter l’équipe technique |
 
 ## Tarification
 
-- **Montant par défaut** : 100 CRC (variable `NEXT_PUBLIC_BOOKING_PRICE_CRC`).
-- **Bénéficiaire** : trésor du groupe THP for Good (pas le mentor directement).
-- Les mentors sont rémunérés hors app (modèle hackathon) ; l’app collecte pour le **fonds formation**.
+| Élément | Valeur |
+|---------|--------|
+| Montant par défaut | **100 CRC** (`NEXT_PUBLIC_BOOKING_PRICE_CRC`) |
+| Bénéficiaire | Trésor du groupe THP for Good |
+| Rémunération mentor | Hors app (modèle hackathon) |
 
 ## FAQ
 
-**Puis-je réserver sans compte Circles ?**  
-Non — le wallet est injecté par le host ; sans Safe connecté, le bouton de paiement reste inactif.
+<details>
+<summary><strong>Puis-je réserver sans compte Circles ?</strong></summary>
 
-**Les créneaux sont-ils synchronisés avec Google Calendar ?**  
-Sur la branche `ToXY`, les créneaux sont **indicatifs** (génération locale). La branche `zet` prévoit l’ouverture d’un lien calendrier mentor après paiement.
+Non. Le wallet est injecté par le host ; sans Safe connecté, le paiement reste inactif.
+</details>
 
-**Où sont stockées mes réservations ?**  
-Dans le navigateur (`localStorage`), clé par adresse wallet. Effacer les données du site supprime l’historique.
+<details>
+<summary><strong>Les créneaux sont-ils liés à Google Calendar ?</strong></summary>
 
-**Le paiement va-t-il au mentor ?**  
-Non — il alimente le fonds THP for Good (trésor du groupe Circles).
+Sur la branche <code>ToXY</code>, les créneaux sont <strong>indicatifs</strong> (génération locale). La branche <code>zet</code> ouvre un lien calendrier mentor après paiement.
+</details>
+
+<details>
+<summary><strong>Où sont stockées mes réservations ?</strong></summary>
+
+Dans le navigateur (<code>localStorage</code>), par adresse wallet. Effacer les données du site supprime l’historique.
+</details>
+
+<details>
+<summary><strong>Le paiement va-t-il au mentor ?</strong></summary>
+
+Non. Il alimente le fonds THP for Good (trésor du groupe Circles).
+</details>
+
+---
+
+[← Architecture](./02-architecture.md) · [Guide développeur →](./04-guide-developpeur.md)

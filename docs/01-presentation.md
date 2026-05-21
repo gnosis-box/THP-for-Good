@@ -1,4 +1,17 @@
-# 01 — Présentation
+# Présentation
+
+[← Documentation](./README.md) · [Architecture technique →](./02-architecture.md)
+
+## Table des matières
+
+- [Qu’est-ce que THP for Good ?](#quest-ce-que-thp-for-good-)
+- [Proposition de valeur](#proposition-de-valeur)
+- [Fonctionnalités](#fonctionnalités-branche-courante-toxy)
+- [Maquette produit](#maquette-produit)
+- [Où utiliser l’application ?](#où-utiliser-lapplication-)
+- [Liens utiles](#liens-utiles)
+
+---
 
 ## Qu’est-ce que THP for Good ?
 
@@ -15,12 +28,12 @@ flowchart LR
     M[Liste mentors]
     B[Réservation + paiement CRC]
   end
-  subgraph On-chain
-    T[Trésor THP for Good]
+  subgraph Onchain
+    T[Tresor THP for Good]
     TR[Trust mentor]
   end
   subgraph Impact
-    F[Formations financées]
+    F[Formations financees]
   end
   U --> M --> B --> T
   B --> F
@@ -31,7 +44,7 @@ flowchart LR
 
 | Acteur | Bénéfice |
 |--------|----------|
-| **Mentoré** | Accès rapide à un expert (IA, legal, design, photo, dev…) sans barrière bancaire classique — paiement en monnaie Circles |
+| **Mentoré** | Accès rapide à un expert (IA, legal, design, photo, dev…) — paiement en monnaie Circles |
 | **Mentor** | Visibilité, renforcement du graphe de confiance Circles via TRUST post-appel |
 | **Fonds THP for Good** | Flux de revenus on-chain récurrents pour financer des bourses |
 | **Écosystème Circles** | Cas d’usage concret : Safe hôte, transferts CRC, profils avatar |
@@ -39,33 +52,38 @@ flowchart LR
 ## Fonctionnalités (branche courante `ToXY`)
 
 | Fonctionnalité | Statut | Description |
-|----------------|--------|-------------|
-| Catalogue mentors | ✅ | Quatre mentors seed (Zet, Flo, Dimitry, Vincent) + filtres par domaine |
-| Profils Circles | ✅ | Avatar, bio, stats trust via RPC `getProfileView` (cache serveur 5 min) |
-| Créneaux | ✅ | Grille sur 5 jours ouvrés (10h / 14h), générée côté client |
-| Connexion wallet | ✅ | Injection par l’hôte Circles (`onWalletChange`) — pas de bouton « Connect » |
-| Login (signature) | ✅ | `signMessage` EIP-1271 avant paiement ou trust |
-| Paiement 100 CRC | ✅ | Vers fondation THP ; résolution automatique groupe → trésor |
-| Historique appels | ✅ | `localStorage` par adresse wallet |
-| Trust mentor | ✅ | `avatar.trust.add` après réservation |
-| Inscription mentor | 🔜 | Prévu branche `zet` (formulaire + SQLite) |
-| Admin | 🔜 | Prévu branche `zet` (whitelist organisateurs) |
+|----------------|:------:|-------------|
+| Catalogue mentors | Done | Quatre mentors seed (Zet, Flo, Dimitry, Vincent) + filtres par domaine |
+| Profils Circles | Done | Avatar, bio, stats trust via `getProfileView` (cache serveur 5 min) |
+| Créneaux | Done | Grille sur 5 jours ouvrés (10h / 14h), générée côté client |
+| Connexion wallet | Done | Injection par l’hôte Circles (`onWalletChange`) |
+| Login (signature) | Done | `signMessage` EIP-1271 avant paiement ou trust |
+| Paiement 100 CRC | Done | Vers fondation THP ; résolution groupe → trésor |
+| Historique appels | Done | `localStorage` par adresse wallet |
+| Trust mentor | Done | `avatar.trust.add` après réservation |
+| Inscription mentor | Planned | Branche `zet` (formulaire + SQLite) |
+| Admin | Planned | Branche `zet` (whitelist organisateurs) |
 
 ## Maquette produit
 
 Wireframe cible du parcours (hackathon) :
 
-![Maquette wireframe — parcours mentor](./assets/mockup-wireframe.png)
+<p align="center">
+  <img src="./assets/mockup-wireframe.png" alt="Maquette wireframe — liste mentors, fiche détail et paiement CRC" width="480" />
+</p>
 
-*Source : `spec/mockup.png` sur la branche `zet`.*
+<p align="center"><em>Source : <code>spec/mockup.png</code> sur la branche <code>zet</code></em></p>
 
 ## Où utiliser l’application ?
 
-1. **Développement local** — `pnpm dev` → http://localhost:3000 (wallet déconnecté : normal hors iframe).
-2. **Playground Circles** — https://circles.gnosis.io/playground?url=<votre-url-https>
-3. **Production** — déploiement Coolify / Vercel (voir [04 — Guide développeur](./04-guide-developpeur.md))
+| Environnement | URL / commande |
+|---------------|----------------|
+| Développement local | `pnpm dev` → `http://localhost:3000` (wallet déconnecté hors iframe : normal) |
+| Playground Circles | `https://circles.gnosis.io/playground?url=<votre-url-https>` |
+| Production | Déploiement Coolify ou Vercel — voir [Guide développeur](./04-guide-developpeur.md) |
 
-L’application est conçue pour tourner **dans l’iframe** du host Circles : le Safe de l’utilisateur est injecté ; les transactions passent par `sendTransactions`.
+> [!IMPORTANT]
+> L’application est conçue pour tourner **dans l’iframe** du host Circles. Le Safe utilisateur est injecté par le host ; les transactions passent par `sendTransactions`.
 
 ## Liens utiles
 
@@ -73,3 +91,7 @@ L’application est conçue pour tourner **dans l’iframe** du host Circles : l
 - [Playground Circles](https://circles.gnosis.io/playground)
 - [RPC Circles (indexer)](https://rpc.aboutcircles.com/)
 - Groupe THP on-chain : `0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00`
+
+---
+
+[← Documentation](./README.md) · [Architecture technique →](./02-architecture.md)
