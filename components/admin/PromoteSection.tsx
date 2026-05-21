@@ -17,7 +17,6 @@ type PromoteFormState = {
   name: string;
   bio: string;
   calendarLink: string;
-  googleCalendarId: string;
   priceCrc: number;
   selectedSkills: string[];
   submitting: boolean;
@@ -25,7 +24,7 @@ type PromoteFormState = {
 };
 
 function defaultForm(name: string): PromoteFormState {
-  return { name, bio: '', calendarLink: '', googleCalendarId: '', priceCrc: 100, selectedSkills: [], submitting: false, error: null };
+  return { name, bio: '', calendarLink: '', priceCrc: 100, selectedSkills: [], submitting: false, error: null };
 }
 
 type Props = {
@@ -150,7 +149,6 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
           name: form.name.trim(),
           bio: form.bio.trim() || undefined,
           calendar_link: form.calendarLink.trim(),
-          google_calendar_id: form.googleCalendarId.trim() || undefined,
           price_crc: form.priceCrc,
           skills: form.selectedSkills,
         }),
@@ -350,19 +348,6 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
                         placeholder="https://calendar.app.google/…"
                         className="h-8 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                       />
-                    </div>
-
-                    {/* Google Calendar ID */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-medium">Google Calendar ID</label>
-                      <input
-                        type="text"
-                        value={form.googleCalendarId}
-                        onChange={(e) => setForm((prev) => prev && { ...prev, googleCalendarId: e.target.value })}
-                        placeholder="mentor@gmail.com or …@group.calendar.google.com"
-                        className="h-8 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                      />
-                      <p className="text-xs text-muted-foreground">Mentor must share their calendar with the service account. Required for availability &amp; auto-booking.</p>
                     </div>
 
                     {/* Price */}
