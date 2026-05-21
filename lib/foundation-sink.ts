@@ -46,8 +46,11 @@ export async function resolveFoundationSink(
   const { Sdk } = await import('@aboutcircles/sdk');
   const sdk = new Sdk();
   const tokenInfo = await sdk.rpc.token.getTokenInfo(normalized);
+  const isGroupToken =
+    tokenInfo?.tokenType === 'CrcV2_RegisterGroup' ||
+    normalized.toLowerCase() === THP_GROUP_ADDRESS.toLowerCase();
 
-  if (tokenInfo?.isGroup) {
+  if (isGroupToken) {
     cachedSink = await readGroupTreasury(normalized);
     return cachedSink;
   }
