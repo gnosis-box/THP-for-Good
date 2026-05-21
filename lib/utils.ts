@@ -11,9 +11,9 @@ export function shortenAddress(address: string, chars = 4): string {
   return `${address.slice(0, head)}…${address.slice(-chars)}`;
 }
 
-export function toHttpImageUrl(url: string | undefined): string | undefined {
+export function toHttpImageUrl(url: string | undefined | null): string | undefined {
   if (!url) return undefined;
-  if (url.startsWith('https://') || url.startsWith('http://')) return url;
+  if (url.startsWith('data:') || url.startsWith('https://') || url.startsWith('http://')) return url;
   if (url.startsWith('ipfs://')) return `https://cloudflare-ipfs.com/ipfs/${url.slice(7)}`;
   return undefined;
 }
