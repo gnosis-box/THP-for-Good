@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CalConnect } from '@/components/mentors/CalConnect';
+import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
 import type { MentorRow, TagRow } from '@/lib/db';
 
 type MemberEntry = {
@@ -18,6 +19,7 @@ type PromoteFormState = {
   name: string;
   bio: string;
   calEventTypeId: number | null;
+  mentorShare: 0 | 10 | 20 | 30 | 50;
   priceCrc: number;
   selectedSkills: string[];
   submitting: boolean;
@@ -25,7 +27,7 @@ type PromoteFormState = {
 };
 
 function defaultForm(name: string): PromoteFormState {
-  return { name, bio: '', calEventTypeId: null, priceCrc: 100, selectedSkills: [], submitting: false, error: null };
+  return { name, bio: '', calEventTypeId: null, mentorShare: 20, priceCrc: 100, selectedSkills: [], submitting: false, error: null };
 }
 
 type Props = {
@@ -153,6 +155,7 @@ export function PromoteSection({
           name: form.name.trim(),
           bio: form.bio.trim() || undefined,
           cal_event_type_id: form.calEventTypeId ?? undefined,
+          mentor_share_percent: form.mentorShare,
           price_crc: form.priceCrc,
           skills: form.selectedSkills,
         }),
@@ -368,6 +371,28 @@ export function PromoteSection({
                       {form.calEventTypeId && (
                         <p className="text-xs text-muted-foreground">Event type ID: {form.calEventTypeId}</p>
                       )}
+                    </div>
+
+                    {/* Payment split */}
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-xs font-medium">Payment split</span>
+                      <div className="flex flex-wrap gap-2">
+                        {MENTOR_SHARE_OPTIONS.map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => setForm((prev) => prev && { ...prev, mentorShare: clampMentorShare(opt) })}
+                            className={cn(
+                              'rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors border',
+                              form.mentorShare === opt
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'border-border bg-background hover:bg-muted',
+                            )}
+                          >
+                            {opt}% me · {100 - opt}% THP
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Price */}

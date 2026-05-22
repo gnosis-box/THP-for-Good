@@ -66,8 +66,11 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
           </CardContent>
         )}
 
-        <CardFooter className="text-sm text-muted-foreground">
-          {mentor.price_crc} CRC / session
+        <CardFooter className="flex flex-col items-start gap-0.5">
+          <span className="text-sm text-muted-foreground">{mentor.price_crc} CRC / session</span>
+          <span className="text-xs text-muted-foreground">
+            {mentor.mentor_share_percent ?? 20}% to mentor · {100 - (mentor.mentor_share_percent ?? 20)}% to THP for Good
+          </span>
         </CardFooter>
       </Card>
     </Link>

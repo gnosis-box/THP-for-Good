@@ -2,7 +2,7 @@
 export const FOUNDATION_ADDRESS =
   '0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00' as const;
 
-export const MENTOR_SHARE_OPTIONS = [10, 20, 30, 50] as const;
+export const MENTOR_SHARE_OPTIONS = [0, 10, 20, 30, 50] as const;
 export type MentorSharePercent = (typeof MENTOR_SHARE_OPTIONS)[number];
 
 export function clampMentorShare(percent: number): MentorSharePercent {
@@ -37,18 +37,13 @@ export async function buildSplitPayTransactions(
   const totalWei = BigInt(totalCrc) * 10n ** 18n;
   const { mentorWei, foundationWei } = splitAmounts(totalWei, mentorPercent);
 
-  // Try split payment; if foundation address isn't a Circles avatar yet, fall back to 100% to mentor
-  let txs;
-  try {
-    const [toMentor, toFoundation] = await Promise.all([
-      builder.constructAdvancedTransfer(from, mentor, mentorWei),
-      builder.constructAdvancedTransfer(from, FOUNDATION_ADDRESS, foundationWei),
-    ]);
-    txs = [...toMentor, ...toFoundation];
-  } catch {
-    const toMentor = await builder.constructAdvancedTransfer(from, mentor, totalWei);
-    txs = toMentor;
-  }
+  const legPromises = [
+    builder.constructAdvancedTransfer(from, FOUNDATION_ADDRESS, foundationWei),
+    ...(mentorWei > 0n ? [builder.constructAdvancedTransfer(from, mentor, mentorWei)] : []),
+  ];
+
+  const results = await Promise.all(legPromises);
+  const txs = results.flat();
 
   return txs.map((tx) => ({
     to: tx.to,

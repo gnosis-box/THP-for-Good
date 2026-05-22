@@ -285,6 +285,9 @@ export function AdminPanel() {
                   {mentor.skills.length > 0 && (
                     <p className="text-xs text-muted-foreground">{mentor.skills.join(', ')}</p>
                   )}
+                  <p className="text-xs text-muted-foreground">
+                    {mentor.price_crc} CRC · {mentor.mentor_share_percent ?? 20}% mentor / {100 - (mentor.mentor_share_percent ?? 20)}% foundation
+                  </p>
                   {mentor.cal_event_type_id && (
                     <p className="text-xs text-muted-foreground">Cal.com event type: {mentor.cal_event_type_id}</p>
                   )}

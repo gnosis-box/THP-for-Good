@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CalConnect } from '@/components/mentors/CalConnect';
+import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
 import type { MentorRow, TagRow } from '@/lib/db';
 
 type Props = {
@@ -20,6 +21,7 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
   const [selectedSkills, setSelectedSkills] = useState<string[]>(mentor.skills);
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(mentor.cal_event_type_id);
   const [priceCrc, setPriceCrc] = useState(mentor.price_crc);
+  const [mentorShare, setMentorShare] = useState(clampMentorShare(mentor.mentor_share_percent ?? 20));
   const [newSkill, setNewSkill] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +61,7 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
           bio: bio.trim() || null,
           cal_event_type_id: calEventTypeId,
           price_crc: priceCrc,
+          mentor_share_percent: mentorShare,
           skills: selectedSkills,
         }),
       });
@@ -147,6 +150,28 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
           <p className="text-xs text-muted-foreground">Current ID: {calEventTypeId}</p>
         )}
         <CalConnect onConnect={setCalEventTypeId} />
+      </div>
+
+      {/* Payment split */}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-xs font-medium">Payment split</span>
+        <div className="flex flex-wrap gap-2">
+          {MENTOR_SHARE_OPTIONS.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => setMentorShare(clampMentorShare(opt))}
+              className={cn(
+                'rounded-full px-3 py-1 text-xs font-medium transition-colors border',
+                mentorShare === opt
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'border-border bg-background hover:bg-muted',
+              )}
+            >
+              {opt}% me · {100 - opt}% THP for Good
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Price */}
