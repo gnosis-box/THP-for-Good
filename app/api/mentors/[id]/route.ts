@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db, { getMentorById } from '@/lib/db';
-import { isAdminRequest } from '@/lib/admin';
+import { isAdminRequest } from '@/lib/api-auth';
+import { clampMentorShare } from '@/lib/crc-pay';
 
 export async function GET(
   _request: NextRequest,
@@ -53,11 +54,15 @@ export async function PATCH(
   const fields: string[] = [];
   const values: unknown[] = [];
 
-  const allowed = ['name', 'bio', 'calendar_link', 'price_crc', 'active'] as const;
+  const allowed = ['name', 'bio', 'calendar_link', 'price_crc', 'active', 'mentor_share_percent'] as const;
   for (const key of allowed) {
     if (key in patch) {
       fields.push(`${key} = ?`);
-      values.push(patch[key]);
+      values.push(
+        key === 'mentor_share_percent'
+          ? clampMentorShare(Number(patch[key]))
+          : patch[key],
+      );
     }
   }
 

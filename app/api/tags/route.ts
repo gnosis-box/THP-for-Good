@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db, { getAllTags } from '@/lib/db';
-import { isAdminRequest } from '@/lib/admin';
+import { isAdminRequest } from '@/lib/api-auth';
 
-export function GET() {
-  return NextResponse.json(getAllTags());
+export function GET(request: NextRequest) {
+  const includePending = isAdminRequest(request);
+  return NextResponse.json(getAllTags(includePending));
 }
 
 export async function POST(request: NextRequest) {
@@ -30,8 +31,10 @@ export async function POST(request: NextRequest) {
   const { label } = body as { label: string };
 
   try {
-    const result = db.prepare('INSERT INTO skill_tags (label) VALUES (?)').run(label.trim());
-    return NextResponse.json({ id: result.lastInsertRowid, label: label.trim() }, { status: 201 });
+    const result = db
+      .prepare("INSERT INTO skill_tags (label, status) VALUES (?, 'approved')")
+      .run(label.trim());
+    return NextResponse.json({ id: result.lastInsertRowid, label: label.trim(), status: 'approved' }, { status: 201 });
   } catch (err) {
     console.error('[api/tags POST]', err);
     return NextResponse.json({ error: 'Failed to insert tag' }, { status: 500 });

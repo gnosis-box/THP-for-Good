@@ -4,8 +4,7 @@ export type NavItem = {
 };
 
 export const NAV: NavItem[] = [
-  { href: "/", label: "Mentors" },
-  { href: "/history", label: "My Calls" },
-  { href: "/mentor/register", label: "Become a Mentor" },
-  { href: "/admin", label: "Admin" },
+  { href: "/", label: "Experts" },
+  { href: "/calls", label: "Calls" },
+  { href: "/mentor/register", label: "Offer your expertise" },
 ];

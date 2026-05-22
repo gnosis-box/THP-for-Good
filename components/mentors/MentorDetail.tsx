@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -9,6 +10,7 @@ import type { MentorRow } from '@/lib/db';
 
 export function MentorDetail({ mentor }: { mentor: MentorRow }) {
   const router = useRouter();
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -37,11 +39,15 @@ export function MentorDetail({ mentor }: { mentor: MentorRow }) {
 
       <Separator />
 
-      <SlotPicker calendarLink={mentor.calendar_link} />
+      {mentor.cal_event_type_id ? (
+        <SlotPicker mentorId={mentor.id} selected={selectedSlot} onSelect={setSelectedSlot} />
+      ) : (
+        <p className="text-sm text-muted-foreground">Availability not configured for this mentor yet.</p>
+      )}
 
       <Separator />
 
-      <PayButton mentor={mentor} />
+      <PayButton mentor={mentor} selectedSlot={selectedSlot} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS skill_tags (
-  id    INTEGER PRIMARY KEY AUTOINCREMENT,
-  label TEXT    UNIQUE NOT NULL
+  id     INTEGER PRIMARY KEY AUTOINCREMENT,
+  label  TEXT    UNIQUE NOT NULL,
+  status TEXT    NOT NULL DEFAULT 'approved'
 );
 
 CREATE TABLE IF NOT EXISTS mentors (
@@ -10,8 +11,10 @@ CREATE TABLE IF NOT EXISTS mentors (
   bio                TEXT,
   calendar_link      TEXT    NOT NULL,
   google_calendar_id TEXT,
-  price_crc          INTEGER DEFAULT 100,
-  active             INTEGER DEFAULT 1,
+  cal_event_type_id  INTEGER,
+  price_crc            INTEGER DEFAULT 100,
+  mentor_share_percent INTEGER DEFAULT 20,
+  active               INTEGER DEFAULT 1,
   created_at         TEXT    DEFAULT (datetime('now'))
 );
 
@@ -28,6 +31,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   tx_hash             TEXT,
   slot_time           TEXT,
   calendar_event_url  TEXT,
+  cal_booking_uid     TEXT,
   created_at          TEXT    DEFAULT (datetime('now'))
 );
 

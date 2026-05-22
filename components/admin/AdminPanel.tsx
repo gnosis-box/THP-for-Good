@@ -171,6 +171,21 @@ export function AdminPanel() {
               className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm"
             >
               {tag.label}
+              {tag.status === 'pending' && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await fetch(`/api/tags/${tag.id}/approve`, {
+                      method: 'POST',
+                      headers: headers(),
+                    });
+                    load();
+                  }}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Approve
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => deleteTag(tag.id)}

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/db';
+import { approveSkillTag } from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
 
-export async function DELETE(
-  request: NextRequest,
+export async function POST(
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!isAdminRequest(request)) {
+  if (!isAdminRequest(_request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -16,6 +16,6 @@ export async function DELETE(
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }
 
-  db.prepare('DELETE FROM skill_tags WHERE id = ?').run(id);
+  approveSkillTag(id);
   return NextResponse.json({ ok: true });
 }

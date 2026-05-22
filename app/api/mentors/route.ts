@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllMentors, insertMentor } from '@/lib/db';
-import { isAdminRequest } from '@/lib/admin';
+import { getAllMentors, getMentorByCirclesAddress, insertMentor } from '@/lib/db';
+import { isAdminRequest } from '@/lib/api-auth';
+import { clampMentorShare } from '@/lib/crc-pay';
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const circlesAddress = searchParams.get('circles_address');
+  if (circlesAddress) {
+    const mentor = getMentorByCirclesAddress(circlesAddress);
+    if (!mentor) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    return NextResponse.json(mentor);
+  }
+
   const skill = searchParams.get('skill') ?? undefined;
   const q = searchParams.get('q')?.toLowerCase();
   const all = searchParams.get('all') === '1' && isAdminRequest(request);
@@ -35,7 +45,6 @@ export async function POST(request: NextRequest) {
     body === null ||
     typeof (body as Record<string, unknown>).circles_address !== 'string' ||
     typeof (body as Record<string, unknown>).name !== 'string' ||
-    typeof (body as Record<string, unknown>).calendar_link !== 'string' ||
     !Array.isArray((body as Record<string, unknown>).skills)
   ) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -45,9 +54,11 @@ export async function POST(request: NextRequest) {
     circles_address: string;
     name: string;
     bio?: string;
-    calendar_link: string;
+    calendar_link?: string;
     google_calendar_id?: string;
+    cal_event_type_id?: number;
     price_crc?: number;
+    mentor_share_percent?: number;
     skills: string[];
   };
 
@@ -57,21 +68,20 @@ export async function POST(request: NextRequest) {
   if (!data.name.trim()) {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 });
   }
-  if (!data.calendar_link.trim()) {
-    return NextResponse.json({ error: 'Calendar link is required' }, { status: 400 });
-  }
   if (!data.skills.every((s) => typeof s === 'string')) {
     return NextResponse.json({ error: 'skills must be an array of strings' }, { status: 400 });
   }
 
   try {
     const id = insertMentor({
-      circles_address: data.circles_address,
+      circles_address: data.circles_address.trim().toLowerCase(),
       name: data.name.trim(),
       bio: data.bio?.trim(),
-      calendar_link: data.calendar_link.trim(),
+      calendar_link: data.calendar_link?.trim() ?? '',
       google_calendar_id: data.google_calendar_id?.trim() || undefined,
+      cal_event_type_id: data.cal_event_type_id,
       price_crc: data.price_crc,
+      mentor_share_percent: clampMentorShare(data.mentor_share_percent ?? 20),
       skills: data.skills,
     });
     return NextResponse.json({ id }, { status: 201 });

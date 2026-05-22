@@ -5,6 +5,7 @@ import path from 'path';
 export type TagRow = {
   id: number;
   label: string;
+  status: 'approved' | 'pending';
 };
 
 export type MentorRow = {
@@ -14,7 +15,9 @@ export type MentorRow = {
   bio: string | null;
   calendar_link: string;
   google_calendar_id: string | null;
+  cal_event_type_id: number | null;
   price_crc: number;
+  mentor_share_percent: number;
   active: number;
   created_at: string;
   skills: string[];
@@ -27,6 +30,7 @@ export type BookingRow = {
   tx_hash: string | null;
   slot_time: string | null;
   calendar_event_url: string | null;
+  cal_booking_uid: string | null;
   created_at: string;
 };
 
@@ -36,7 +40,9 @@ export type InsertMentorData = {
   bio?: string;
   calendar_link: string;
   google_calendar_id?: string;
+  cal_event_type_id?: number;
   price_crc?: number;
+  mentor_share_percent?: number;
   skills: string[];
 };
 
@@ -46,6 +52,7 @@ export type InsertBookingData = {
   tx_hash?: string;
   slot_time?: string;
   calendar_event_url?: string;
+  cal_booking_uid?: string;
 };
 
 type MentorRowRaw = Omit<MentorRow, 'skills'> & { skills: string };
@@ -64,8 +71,12 @@ db.exec(schema);
 // Idempotent column migrations for existing databases
 for (const sql of [
   'ALTER TABLE mentors ADD COLUMN google_calendar_id TEXT',
+  'ALTER TABLE mentors ADD COLUMN cal_event_type_id INTEGER',
   'ALTER TABLE bookings ADD COLUMN slot_time TEXT',
   'ALTER TABLE bookings ADD COLUMN calendar_event_url TEXT',
+  'ALTER TABLE bookings ADD COLUMN cal_booking_uid TEXT',
+  "ALTER TABLE skill_tags ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'",
+  'ALTER TABLE mentors ADD COLUMN mentor_share_percent INTEGER DEFAULT 20',
 ]) {
   try { db.exec(sql); } catch { /* column already exists */ }
 }
@@ -119,10 +130,26 @@ export function getMentorById(id: number): MentorRow | undefined {
   return { ...row, skills: row.skills ? row.skills.split(',') : [] };
 }
 
+export function getMentorByCirclesAddress(address: string): MentorRow | undefined {
+  const sql = `
+    SELECT
+      m.*,
+      GROUP_CONCAT(st.label) AS skills
+    FROM mentors m
+    LEFT JOIN mentor_skills ms ON ms.mentor_id = m.id
+    LEFT JOIN skill_tags st ON st.id = ms.tag_id
+    WHERE LOWER(m.circles_address) = LOWER(?)
+    GROUP BY m.id
+  `;
+  const row = db.prepare(sql).get(address) as MentorRowRaw | undefined;
+  if (!row) return undefined;
+  return { ...row, skills: row.skills ? row.skills.split(',') : [] };
+}
+
 export function insertMentor(data: InsertMentorData): number {
   const insertMentorStmt = db.prepare(`
-    INSERT OR IGNORE INTO mentors (circles_address, name, bio, calendar_link, google_calendar_id, price_crc)
-    VALUES (@circles_address, @name, @bio, @calendar_link, @google_calendar_id, @price_crc)
+    INSERT OR IGNORE INTO mentors (circles_address, name, bio, calendar_link, google_calendar_id, cal_event_type_id, price_crc, mentor_share_percent)
+    VALUES (@circles_address, @name, @bio, @calendar_link, @google_calendar_id, @cal_event_type_id, @price_crc, @mentor_share_percent)
   `);
 
   const upsertTagStmt = db.prepare(`
@@ -145,7 +172,9 @@ export function insertMentor(data: InsertMentorData): number {
       bio: data.bio ?? null,
       calendar_link: data.calendar_link,
       google_calendar_id: data.google_calendar_id ?? null,
+      cal_event_type_id: data.cal_event_type_id ?? null,
       price_crc: data.price_crc ?? 100,
+      mentor_share_percent: data.mentor_share_percent ?? 20,
     });
 
     const row = getMentorIdStmt.get(data.circles_address) as { id: number };
@@ -162,14 +191,41 @@ export function insertMentor(data: InsertMentorData): number {
   return run() as number;
 }
 
-export function getAllTags(): TagRow[] {
-  return db.prepare('SELECT id, label FROM skill_tags ORDER BY label').all() as TagRow[];
+export function getAllTags(includePending = false): TagRow[] {
+  if (includePending) {
+    return db
+      .prepare('SELECT id, label, COALESCE(status, \'approved\') AS status FROM skill_tags ORDER BY label')
+      .all() as TagRow[];
+  }
+  return db
+    .prepare(
+      "SELECT id, label, COALESCE(status, 'approved') AS status FROM skill_tags WHERE COALESCE(status, 'approved') = 'approved' ORDER BY label",
+    )
+    .all() as TagRow[];
+}
+
+export function proposeSkillTag(label: string): number {
+  const existing = db
+    .prepare('SELECT id, status FROM skill_tags WHERE LOWER(label) = LOWER(?)')
+    .get(label) as { id: number; status: string } | undefined;
+  if (existing) {
+    if (existing.status === 'approved') return existing.id;
+    return existing.id;
+  }
+  const result = db
+    .prepare("INSERT INTO skill_tags (label, status) VALUES (?, 'pending')")
+    .run(label.trim());
+  return result.lastInsertRowid as number;
+}
+
+export function approveSkillTag(id: number): void {
+  db.prepare("UPDATE skill_tags SET status = 'approved' WHERE id = ?").run(id);
 }
 
 export function insertBooking(data: InsertBookingData): number {
   const stmt = db.prepare(`
-    INSERT INTO bookings (mentor_id, booker_address, tx_hash, slot_time, calendar_event_url)
-    VALUES (@mentor_id, @booker_address, @tx_hash, @slot_time, @calendar_event_url)
+    INSERT INTO bookings (mentor_id, booker_address, tx_hash, slot_time, calendar_event_url, cal_booking_uid)
+    VALUES (@mentor_id, @booker_address, @tx_hash, @slot_time, @calendar_event_url, @cal_booking_uid)
   `);
   const result = stmt.run({
     mentor_id: data.mentor_id,
@@ -177,6 +233,7 @@ export function insertBooking(data: InsertBookingData): number {
     tx_hash: data.tx_hash ?? null,
     slot_time: data.slot_time ?? null,
     calendar_event_url: data.calendar_event_url ?? null,
+    cal_booking_uid: data.cal_booking_uid ?? null,
   });
   return result.lastInsertRowid as number;
 }
@@ -207,6 +264,20 @@ export function getBookingsByAddress(address: string): BookingRow[] {
   return db
     .prepare('SELECT * FROM bookings WHERE booker_address = ? ORDER BY created_at DESC')
     .all(address) as BookingRow[];
+}
+
+export type BookingWithMentorName = BookingRow & { mentor_name: string };
+
+export function getBookingsByProviderAddress(providerAddress: string): BookingWithMentorName[] {
+  return db
+    .prepare(
+      `SELECT b.*, m.name AS mentor_name
+       FROM bookings b
+       JOIN mentors m ON m.id = b.mentor_id
+       WHERE LOWER(m.circles_address) = LOWER(?)
+       ORDER BY b.created_at DESC`,
+    )
+    .all(providerAddress) as BookingWithMentorName[];
 }
 
 export default db;
