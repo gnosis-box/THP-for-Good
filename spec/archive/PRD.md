@@ -1,5 +1,7 @@
 # THP for Good — Product & Implementation Plan
 
+> **Archivé (2026-05-21).** Spec active : [`../PRD-MVP.md`](../PRD-MVP.md). Brouillon upstream d’origine (T01–T16).
+
 ## What is THP for Good
 
 THP for Good is a community fund created to promote coding for projects of common interest. Its mission: remove the financial and technical barriers that prevent talented people with social-impact ideas from pursuing them.
