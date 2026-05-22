@@ -29,7 +29,7 @@ export function MentorBrowser({ mentors, tags }: Props) {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8">
       <section className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Get a call with a mentor</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Get a call with an Expert</h1>
         <p className="text-sm text-muted-foreground">
           Pay in CRC, help someone get a free bootcamp tuition
         </p>
