@@ -1,14 +1,18 @@
 import type { ReactNode } from 'react';
 
 import { Header } from '@/components/layout/Header';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { OpenInCirclesHint } from '@/components/wallet/OpenInCirclesHint';
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="grid min-h-screen grid-rows-[3.5rem_1fr] md:grid-cols-[240px_1fr]">
+    <div className="flex min-h-screen flex-col">
       <Header />
-      <Sidebar />
-      <main className="overflow-auto p-6">{children}</main>
+      <main className="flex-1 overflow-auto p-4 md:p-6">
+        <div className="mx-auto flex max-w-4xl flex-col gap-4">
+          <OpenInCirclesHint />
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

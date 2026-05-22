@@ -11,6 +11,8 @@ const FRAME_ANCESTORS = [
 ].join(" ");
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  serverExternalPackages: ['better-sqlite3'],
   async headers() {
     return [
       {
@@ -18,7 +20,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: `frame-ancestors ${FRAME_ANCESTORS};`,
+            value: `frame-ancestors ${FRAME_ANCESTORS}; frame-src https://calendar.google.com;`,
           },
         ],
       },

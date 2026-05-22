@@ -17,7 +17,7 @@ function buildSignInMessage(address: string): string {
   const nonce = Math.random().toString(36).slice(2, 10);
   const issuedAt = new Date().toISOString();
   return [
-    'Sign in to Miniapp Boilerplate.',
+    'Sign in to THP for Good.',
     '',
     `Address: ${address}`,
     `Nonce: ${nonce}`,
