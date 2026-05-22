@@ -1,15 +1,16 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
-
-function playgroundUrl() {
-  if (typeof window === 'undefined') return 'https://circles.gnosis.io/playground';
-  const appUrl = encodeURIComponent(window.location.origin);
-  return `https://circles.gnosis.io/playground?url=${appUrl}`;
-}
 
 export function OpenInCirclesHint() {
   const { isMiniappHost } = useWallet();
+  const [href, setHref] = useState('https://circles.gnosis.io/playground');
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHref(`https://circles.gnosis.io/playground?url=${encodeURIComponent(window.location.origin)}`);
+  }, []);
 
   if (isMiniappHost) return null;
 
@@ -23,7 +24,7 @@ export function OpenInCirclesHint() {
         Connect your wallet and pay in CRC inside the Circles miniapp.
       </p>
       <a
-        href={playgroundUrl()}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-2 inline-block text-sm font-medium text-primary underline underline-offset-2"
