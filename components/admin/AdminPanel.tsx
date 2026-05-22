@@ -197,27 +197,12 @@ export function AdminPanel() {
         </div>
       </section>
 
-      {/* Group members → promote */}
-      <PromoteSection
-        tags={tags}
-        mentors={mentors}
-        admins={dbAdmins.map((a) => a.circles_address)}
-        walletAddress={address ?? ''}
-        initialGroupAddress={groupAddress}
-        members={groupMembers}
-        membersError={membersError}
-        membersLoading={loading}
-        onMentorAdded={load}
-        onAdminAdded={load}
-        onReloadMembers={load}
-      />
-
       {/* Admins */}
       <section className="flex flex-col gap-4">
         <h2 className="text-base font-semibold">Admins</h2>
         <div className="flex flex-col gap-3">
           {dbAdmins.length === 0 && (
-            <p className="text-sm text-muted-foreground">No DB admins yet. Add via env var ADMIN_ADDRESSES or promote a member above.</p>
+            <p className="text-sm text-muted-foreground">No DB admins yet. Add via env var ADMIN_ADDRESSES or promote a member below.</p>
           )}
           {dbAdmins.map((admin) => {
             const p = adminProfiles[admin.circles_address];
@@ -311,6 +296,21 @@ export function AdminPanel() {
           ))}
         </div>
       </section>
+
+      {/* Group members → promote */}
+      <PromoteSection
+        tags={tags}
+        mentors={mentors}
+        admins={dbAdmins.map((a) => a.circles_address)}
+        walletAddress={address ?? ''}
+        initialGroupAddress={groupAddress}
+        members={groupMembers}
+        membersError={membersError}
+        membersLoading={loading}
+        onMentorAdded={load}
+        onAdminAdded={load}
+        onReloadMembers={load}
+      />
     </div>
   );
 }
