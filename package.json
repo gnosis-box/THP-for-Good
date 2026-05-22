@@ -25,6 +25,7 @@
     "@aboutcircles/sdk-transfers": "^0.1.32",
     "@aboutcircles/sdk-utils": "^0.1.32",
     "@base-ui/react": "^1.4.1",
+    "@calcom/atoms": "^2.11.0",
     "better-sqlite3": "^12.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

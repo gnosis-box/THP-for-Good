@@ -6,6 +6,7 @@ import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { TagRow } from '@/lib/db';
+import { CalConnect } from '@/components/mentors/CalConnect';
 
 export function RegisterForm() {
   const { address, isConnected } = useWallet();
@@ -16,7 +17,7 @@ export function RegisterForm() {
   const [newSkill, setNewSkill] = useState('');
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
-  const [calendarLink, setCalendarLink] = useState('');
+  const [calEventTypeId, setCalEventTypeId] = useState<number | null>(null);
   const [priceCrc, setPriceCrc] = useState(100);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -73,7 +74,7 @@ export function RegisterForm() {
           circles_address: address,
           name: name.trim(),
           bio: bio.trim() || undefined,
-          calendar_link: calendarLink.trim(),
+          cal_event_type_id: calEventTypeId ?? undefined,
           price_crc: priceCrc,
           skills: selectedSkills,
         }),
@@ -183,20 +184,13 @@ export function RegisterForm() {
         </div>
       </div>
 
-      {/* Calendar link */}
+      {/* Cal.com connect */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="calendar" className="text-sm font-medium">
-          Google Calendar link <span className="text-destructive">*</span>
-        </label>
-        <input
-          id="calendar"
-          type="url"
-          required
-          value={calendarLink}
-          onChange={(e) => setCalendarLink(e.target.value)}
-          placeholder="https://calendar.google.com/…"
-          className="h-9 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
-        />
+        <span className="text-sm font-medium">Availability (Cal.com)</span>
+        <CalConnect onConnect={setCalEventTypeId} />
+        {calEventTypeId && (
+          <p className="text-xs text-muted-foreground">Event type ID: {calEventTypeId}</p>
+        )}
       </div>
 
       {/* Price */}
