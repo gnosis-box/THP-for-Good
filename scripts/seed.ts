@@ -14,7 +14,7 @@ const MENTORS = [
     bio: "CTO @The Hacking Project. Contributor @Intuition protocol and @Intuition.box\nI don't believe in miracles -- only in decentralization.",
     skills: ['Web3', 'Relative Trust', 'Transitie Trust', 'DeGov', 'Delegation', 'Circles'],
     calendar_link: 'https://calendar.app.google/ZzmogbPxm9MbXt2WA',
-    price_crc: 50,
+    price_crc: 10,
   },
 ];
 
