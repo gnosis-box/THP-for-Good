@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 
 type EnrichedBooking = BookingRow & { mentor: MentorRow };
 type ReceivedBooking = BookingRow & { mentor_name: string };
+type EnrichedReceivedBooking = ReceivedBooking & { booker_name: string | null; booker_avatar: string | null };
 
 type Tab = 'emitted' | 'received';
 
@@ -27,13 +28,14 @@ export function CallsView() {
   const { address, isConnected } = useWallet();
   const [tab, setTab] = useState<Tab>('emitted');
   const [emitted, setEmitted] = useState<EnrichedBooking[]>([]);
-  const [received, setReceived] = useState<ReceivedBooking[]>([]);
+  const [received, setReceived] = useState<EnrichedReceivedBooking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!address) return;
     const controller = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
 
@@ -58,8 +60,27 @@ export function CallsView() {
           }),
         );
 
+        const { Sdk } = await import('@aboutcircles/sdk');
+        const sdk = new Sdk();
+        const enrichedReceived = await Promise.all(
+          receivedRows.map(async (booking) => {
+            try {
+              const view = await sdk.rpc.profile.getProfileView(booking.booker_address as `0x${string}`);
+              if (view?.avatarInfo?.cidV0) {
+                const profile = await sdk.rpc.profile.getProfileByCid(view.avatarInfo.cidV0);
+                return {
+                  ...booking,
+                  booker_name: profile?.name ?? null,
+                  booker_avatar: profile?.previewImageUrl ?? profile?.imageUrl ?? null,
+                };
+              }
+            } catch { /* ignore */ }
+            return { ...booking, booker_name: null, booker_avatar: null };
+          }),
+        );
+
         setEmitted(enriched);
-        setReceived(receivedRows);
+        setReceived(enrichedReceived);
       })
       .catch((err: unknown) => {
         if (err instanceof Error && err.name === 'AbortError') return;
@@ -187,7 +208,7 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
   );
 }
 
-function CallsReceivedList({ bookings }: { bookings: ReceivedBooking[] }) {
+function CallsReceivedList({ bookings }: { bookings: EnrichedReceivedBooking[] }) {
   if (bookings.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -201,9 +222,21 @@ function CallsReceivedList({ bookings }: { bookings: ReceivedBooking[] }) {
       {bookings.map((booking) => (
         <Card key={booking.id}>
           <CardHeader>
-            <CardTitle className="text-base font-semibold">
-              Booking from {shortenAddress(booking.booker_address, 6)}
-            </CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-full bg-muted overflow-hidden shrink-0 flex items-center justify-center">
+                {booking.booker_avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={booking.booker_avatar} alt={booking.booker_name ?? ''} className="size-full object-cover" />
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="size-5 text-muted-foreground">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                )}
+              </div>
+              <CardTitle className="text-base font-semibold">
+                {booking.booker_name ?? shortenAddress(booking.booker_address, 6)}
+              </CardTitle>
+            </div>
           </CardHeader>
           <CardContent className="flex flex-col gap-1.5 text-sm text-muted-foreground">
             <span>{fmtDate(booking.created_at)}</span>
