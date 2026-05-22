@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { CalConnect } from '@/components/mentors/CalConnect';
 import type { MentorRow, TagRow } from '@/lib/db';
 
 type MemberEntry = {
@@ -16,7 +17,7 @@ type MemberEntry = {
 type PromoteFormState = {
   name: string;
   bio: string;
-  calEventTypeId: string;
+  calEventTypeId: number | null;
   priceCrc: number;
   selectedSkills: string[];
   submitting: boolean;
@@ -24,7 +25,7 @@ type PromoteFormState = {
 };
 
 function defaultForm(name: string): PromoteFormState {
-  return { name, bio: '', calEventTypeId: '', priceCrc: 100, selectedSkills: [], submitting: false, error: null };
+  return { name, bio: '', calEventTypeId: null, priceCrc: 100, selectedSkills: [], submitting: false, error: null };
 }
 
 type Props = {
@@ -151,7 +152,7 @@ export function PromoteSection({
           circles_address: promotingAddress,
           name: form.name.trim(),
           bio: form.bio.trim() || undefined,
-          cal_event_type_id: form.calEventTypeId.trim() ? parseInt(form.calEventTypeId.trim(), 10) : undefined,
+          cal_event_type_id: form.calEventTypeId ?? undefined,
           price_crc: form.priceCrc,
           skills: form.selectedSkills,
         }),
@@ -358,18 +359,15 @@ export function PromoteSection({
                       </div>
                     </div>
 
-                    {/* Cal.com event type ID */}
+                    {/* Cal.com */}
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-medium">Cal.com event type ID</label>
-                      <input
-                        type="number"
-                        min={1}
-                        value={form.calEventTypeId}
-                        onChange={(e) => setForm((prev) => prev && { ...prev, calEventTypeId: e.target.value })}
-                        placeholder="e.g. 12345 (from Cal.com dashboard URL)"
-                        className="h-8 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                      <span className="text-xs font-medium">Availability (Cal.com)</span>
+                      <CalConnect
+                        onConnect={(id) => setForm((prev) => prev && { ...prev, calEventTypeId: id })}
                       />
-                      <p className="text-xs text-muted-foreground">Find it in your Cal.com dashboard under Event Types → the number in the URL.</p>
+                      {form.calEventTypeId && (
+                        <p className="text-xs text-muted-foreground">Event type ID: {form.calEventTypeId}</p>
+                      )}
                     </div>
 
                     {/* Price */}
