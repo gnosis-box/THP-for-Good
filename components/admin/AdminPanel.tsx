@@ -22,6 +22,8 @@ export function AdminPanel() {
   type AdminProfile = { name: string; imageUrl?: string; trustsReceivedCount: number; score: number | null };
   const [adminProfiles, setAdminProfiles] = useState<Record<string, AdminProfile>>({});
   const [editingMentorId, setEditingMentorId] = useState<number | null>(null);
+  const [editingTagId, setEditingTagId] = useState<number | null>(null);
+  const [editingTagLabel, setEditingTagLabel] = useState('');
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -128,6 +130,17 @@ export function AdminPanel() {
     load();
   }
 
+  async function renameTag(id: number, label: string) {
+    if (!label.trim()) return;
+    await fetch(`/api/tags/${id}`, {
+      method: 'PATCH',
+      headers: headers(),
+      body: JSON.stringify({ label: label.trim() }),
+    });
+    setEditingTagId(null);
+    load();
+  }
+
   async function removeAdmin(id: number) {
     await fetch(`/api/admin/admins/${id}`, { method: 'DELETE', headers: headers() });
     load();
@@ -167,37 +180,60 @@ export function AdminPanel() {
       <section className="flex flex-col gap-4">
         <h2 className="text-base font-semibold">Skill Tags</h2>
         <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <span
-              key={tag.id}
-              className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm"
-            >
-              {tag.label}
-              {tag.status === 'pending' && (
+          {tags.map((tag) =>
+            editingTagId === tag.id ? (
+              <span key={tag.id} className="flex items-center gap-1 rounded-full border border-ring bg-background px-2 py-0.5">
+                <input
+                  autoFocus
+                  type="text"
+                  value={editingTagLabel}
+                  onChange={(e) => setEditingTagLabel(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); void renameTag(tag.id, editingTagLabel); }
+                    if (e.key === 'Escape') setEditingTagId(null);
+                  }}
+                  className="w-28 bg-transparent text-sm outline-none"
+                />
+                <button type="button" onClick={() => void renameTag(tag.id, editingTagLabel)} className="text-xs font-medium text-primary hover:underline">Save</button>
+                <button type="button" onClick={() => setEditingTagId(null)} className="text-muted-foreground hover:text-destructive leading-none">×</button>
+              </span>
+            ) : (
+              <span
+                key={tag.id}
+                className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm"
+              >
+                {tag.label}
+                {tag.status === 'pending' && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await fetch(`/api/tags/${tag.id}/approve`, { method: 'POST', headers: headers() });
+                      load();
+                    }}
+                    className="text-xs font-medium text-primary hover:underline"
+                  >
+                    Approve
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={async () => {
-                    await fetch(`/api/tags/${tag.id}/approve`, {
-                      method: 'POST',
-                      headers: headers(),
-                    });
-                    load();
-                  }}
-                  className="text-xs font-medium text-primary hover:underline"
+                  onClick={() => { setEditingTagId(tag.id); setEditingTagLabel(tag.label); }}
+                  className="text-muted-foreground hover:text-foreground transition-colors leading-none text-xs"
+                  aria-label={`Rename ${tag.label}`}
                 >
-                  Approve
+                  ✎
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={() => deleteTag(tag.id)}
-                className="text-muted-foreground hover:text-destructive transition-colors leading-none"
-                aria-label={`Delete ${tag.label}`}
-              >
-                ×
-              </button>
-            </span>
-          ))}
+                <button
+                  type="button"
+                  onClick={() => deleteTag(tag.id)}
+                  className="text-muted-foreground hover:text-destructive transition-colors leading-none"
+                  aria-label={`Delete ${tag.label}`}
+                >
+                  ×
+                </button>
+              </span>
+            )
+          )}
         </div>
         <div className="flex gap-2">
           <input

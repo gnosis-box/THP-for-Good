@@ -9,6 +9,7 @@ import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { useCirclesProfile } from '@/hooks/use-circles-profile';
 import type { TagRow } from '@/lib/db';
 import { CalConnect } from '@/components/mentors/CalConnect';
+import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
 
 export function RegisterForm() {
   const { address, isConnected } = useWallet();
@@ -25,6 +26,7 @@ export function RegisterForm() {
   const [bio, setBio] = useState('');
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(null);
   const [priceCrc, setPriceCrc] = useState(100);
+  const [mentorShare, setMentorShare] = useState(clampMentorShare(20));
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,37 +81,20 @@ export function RegisterForm() {
     );
   }
 
-  async function addNewSkill() {
+  function addNewSkill() {
     const label = newSkill.trim();
     if (!label) return;
-    const exists = tags.some((t) => t.label.toLowerCase() === label.toLowerCase());
-    if (!exists) {
-      try {
-        const res = await fetch('/api/tags/proposals', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-wallet-address': address ?? '',
-          },
-          body: JSON.stringify({ label }),
-        });
-        if (res.ok) {
-          setError('Skill submitted for admin approval. You can select it once approved.');
-        }
-      } catch {
-        setError('Could not submit skill proposal.');
-      }
+    if (!tags.some((t) => t.label.toLowerCase() === label.toLowerCase())) {
+      setTags((prev) => [...prev, { id: -(prev.length + 1), label, status: 'approved' as const }]);
     }
-    if (exists) {
-      setSelectedSkills((prev) => (prev.includes(label) ? prev : [...prev, label]));
-    }
+    setSelectedSkills((prev) => (prev.includes(label) ? prev : [...prev, label]));
     setNewSkill('');
   }
 
   function handleNewSkillKey(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       e.preventDefault();
-      void addNewSkill();
+      addNewSkill();
     }
   }
 
@@ -142,6 +127,7 @@ export function RegisterForm() {
           bio: bio.trim() || undefined,
           cal_event_type_id: calEventTypeId ?? undefined,
           price_crc: priceCrc,
+          mentor_share_percent: mentorShare,
           skills: selectedSkills,
         }),
       });
@@ -282,16 +268,16 @@ export function RegisterForm() {
             value={newSkill}
             onChange={(e) => setNewSkill(e.target.value)}
             onKeyDown={handleNewSkillKey}
-            placeholder="Propose a new skill…"
+            placeholder="Add a skill…"
             className="h-8 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
           <button
             type="button"
-            onClick={() => void addNewSkill()}
+            onClick={addNewSkill}
             disabled={!newSkill.trim()}
             className="h-8 rounded-lg border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40"
           >
-            Propose
+            Add
           </button>
         </div>
       </div>
@@ -318,6 +304,28 @@ export function RegisterForm() {
           onChange={(e) => setPriceCrc(parseInt(e.target.value, 10) || 1)}
           className="h-9 w-32 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium">Payment split</span>
+        <p className="text-xs text-muted-foreground">Your share — at least 50% always goes to THP for Good.</p>
+        <div className="flex flex-wrap gap-2">
+          {MENTOR_SHARE_OPTIONS.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => setMentorShare(clampMentorShare(opt))}
+              className={cn(
+                'rounded-full px-3 py-1 text-sm font-medium transition-colors border',
+                mentorShare === opt
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'border-border bg-background hover:bg-muted',
+              )}
+            >
+              {opt}% me · {100 - opt}% THP
+            </button>
+          ))}
+        </div>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
