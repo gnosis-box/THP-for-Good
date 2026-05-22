@@ -37,12 +37,20 @@ export async function buildSplitPayTransactions(
   const totalWei = BigInt(totalCrc) * 10n ** 18n;
   const { mentorWei, foundationWei } = splitAmounts(totalWei, mentorPercent);
 
-  const [toMentor, toFoundation] = await Promise.all([
-    builder.constructAdvancedTransfer(from, mentor, mentorWei),
-    builder.constructAdvancedTransfer(from, FOUNDATION_ADDRESS, foundationWei),
-  ]);
+  // Try split payment; if foundation address isn't a Circles avatar yet, fall back to 100% to mentor
+  let txs;
+  try {
+    const [toMentor, toFoundation] = await Promise.all([
+      builder.constructAdvancedTransfer(from, mentor, mentorWei),
+      builder.constructAdvancedTransfer(from, FOUNDATION_ADDRESS, foundationWei),
+    ]);
+    txs = [...toMentor, ...toFoundation];
+  } catch {
+    const toMentor = await builder.constructAdvancedTransfer(from, mentor, totalWei);
+    txs = toMentor;
+  }
 
-  return [...toMentor, ...toFoundation].map((tx) => ({
+  return txs.map((tx) => ({
     to: tx.to,
     data: tx.data,
     value: tx.value.toString(),
