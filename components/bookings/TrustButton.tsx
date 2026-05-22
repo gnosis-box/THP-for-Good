@@ -24,9 +24,22 @@ export function TrustButton({ mentorAddress, mentorName, bookingId }: Props) {
     setError(null);
 
     try {
-      // Dynamic import: SDK touches window/parent and must not run on the server.
-      const { Sdk } = await import('@aboutcircles/sdk');
-      const sdk = new Sdk();
+      const [{ Sdk }, { circlesConfig }, { sendTransactions }] = await Promise.all([
+        import('@aboutcircles/sdk'),
+        import('@aboutcircles/sdk-utils'),
+        import('@aboutcircles/miniapp-sdk'),
+      ]);
+
+      // contractRunner bridges sdk write calls → miniapp-sdk sendTransactions
+      const contractRunner = {
+        address: address as `0x${string}`,
+        publicClient: null as unknown,
+        init: async () => {},
+        sendTransaction: (txs: { to: string; data: string; value?: bigint }[]) =>
+          sendTransactions(txs.map((tx) => ({ to: tx.to, data: tx.data, value: String(tx.value ?? '0') }))),
+      };
+
+      const sdk = new Sdk(circlesConfig[100], contractRunner);
       const avatar = await sdk.getAvatar(address as `0x${string}`);
       await avatar.trust.add(mentorAddress as `0x${string}`);
 
