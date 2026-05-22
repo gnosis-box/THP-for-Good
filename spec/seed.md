@@ -46,7 +46,7 @@ I don't believe in miracles -- only in decentralization.
 https://calendar.app.google/ZzmogbPxm9MbXt2WA
 
 ## Price
-50
+10
 
 
 

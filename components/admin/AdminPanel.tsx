@@ -5,6 +5,7 @@ import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
 import { toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
 import { PromoteSection } from './PromoteSection';
+import type { GroupMemberDto } from '@/lib/admin';
 import type { MentorRow, TagRow, AdminRow } from '@/lib/db';
 
 export function AdminPanel() {
@@ -15,6 +16,8 @@ export function AdminPanel() {
   const [mentors, setMentors] = useState<MentorRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
   const [dbAdmins, setDbAdmins] = useState<AdminRow[]>([]);
+  const [groupMembers, setGroupMembers] = useState<GroupMemberDto[]>([]);
+  const [membersError, setMembersError] = useState<string | null>(null);
   type AdminProfile = { name: string; imageUrl?: string; trustsReceivedCount: number; score: number | null };
   const [adminProfiles, setAdminProfiles] = useState<Record<string, AdminProfile>>({});
   const [newTag, setNewTag] = useState('');
@@ -27,22 +30,49 @@ export function AdminPanel() {
   );
 
   const load = useCallback(async () => {
-    if (!address) return;
+    if (!address) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
+    setError(null);
+    setMembersError(null);
     try {
-      const [checkRes, mRes, tRes, aRes] = await Promise.all([
-        fetch('/api/admin/check', { headers: headers() }),
-        fetch('/api/mentors?all=1', { headers: headers() }),
-        fetch('/api/tags', { headers: headers() }),
-        fetch('/api/admin/admins', { headers: headers() }),
-      ]);
-      const { isAdmin: admin, groupAddress: ga } = (await checkRes.json()) as { isAdmin: boolean; groupAddress: string | null };
+      const hdrs = headers();
+      const checkRes = await fetch('/api/admin/check', { headers: hdrs });
+      const { isAdmin: admin, groupAddress: ga } = (await checkRes.json()) as {
+        isAdmin: boolean;
+        groupAddress: string | null;
+      };
       setIsAdmin(admin);
       setGroupAddress(ga);
-      if (admin) {
-        setMentors(await mRes.json());
-        setTags(await tRes.json());
-        setDbAdmins(await aRes.json());
+
+      if (!admin) return;
+
+      const [mRes, tRes, aRes, memRes] = await Promise.all([
+        fetch('/api/mentors?all=1', { headers: hdrs }),
+        fetch('/api/tags', { headers: hdrs }),
+        fetch('/api/admin/admins', { headers: hdrs }),
+        ga
+          ? fetch(`/api/admin/members?group=${encodeURIComponent(ga)}`, { headers: hdrs })
+          : Promise.resolve(null),
+      ]);
+
+      const mentorsJson = await mRes.json();
+      setMentors(Array.isArray(mentorsJson) ? mentorsJson : []);
+      setTags(await tRes.json());
+      setDbAdmins(await aRes.json());
+
+      if (memRes) {
+        const memJson = (await memRes.json()) as { members?: GroupMemberDto[]; error?: string };
+        if (!memRes.ok) {
+          setGroupMembers([]);
+          setMembersError(memJson.error ?? 'Failed to load group members');
+        } else {
+          setGroupMembers(memJson.members ?? []);
+        }
+      } else {
+        setGroupMembers([]);
       }
     } catch {
       setError('Failed to load data.');
@@ -141,6 +171,21 @@ export function AdminPanel() {
               className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm"
             >
               {tag.label}
+              {tag.status === 'pending' && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await fetch(`/api/tags/${tag.id}/approve`, {
+                      method: 'POST',
+                      headers: headers(),
+                    });
+                    load();
+                  }}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Approve
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => deleteTag(tag.id)}
@@ -167,23 +212,12 @@ export function AdminPanel() {
         </div>
       </section>
 
-      {/* Group members → promote */}
-      <PromoteSection
-        tags={tags}
-        mentors={mentors}
-        admins={dbAdmins.map((a) => a.circles_address)}
-        walletAddress={address ?? ''}
-        initialGroupAddress={groupAddress}
-        onMentorAdded={load}
-        onAdminAdded={load}
-      />
-
       {/* Admins */}
       <section className="flex flex-col gap-4">
         <h2 className="text-base font-semibold">Admins</h2>
         <div className="flex flex-col gap-3">
           {dbAdmins.length === 0 && (
-            <p className="text-sm text-muted-foreground">No DB admins yet. Add via env var ADMIN_ADDRESSES or promote a member above.</p>
+            <p className="text-sm text-muted-foreground">No DB admins yet. Add via env var ADMIN_ADDRESSES or promote a member below.</p>
           )}
           {dbAdmins.map((admin) => {
             const p = adminProfiles[admin.circles_address];
@@ -277,6 +311,21 @@ export function AdminPanel() {
           ))}
         </div>
       </section>
+
+      {/* Group members → promote */}
+      <PromoteSection
+        tags={tags}
+        mentors={mentors}
+        admins={dbAdmins.map((a) => a.circles_address)}
+        walletAddress={address ?? ''}
+        initialGroupAddress={groupAddress}
+        members={groupMembers}
+        membersError={membersError}
+        membersLoading={loading}
+        onMentorAdded={load}
+        onAdminAdded={load}
+        onReloadMembers={load}
+      />
     </div>
   );
 }

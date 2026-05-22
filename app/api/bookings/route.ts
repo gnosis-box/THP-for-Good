@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db, { insertBooking, getMentorById } from '@/lib/db';
-
-function isAdmin(req: Request): boolean {
-  const admins = (process.env.ADMIN_ADDRESSES ?? '').toLowerCase().split(',').filter(Boolean);
-  const caller = (req.headers.get('x-wallet-address') ?? '').toLowerCase();
-  return admins.includes(caller);
-}
+import db, { insertBooking, getMentorById, getBookingsByProviderAddress } from '@/lib/db';
+import { isAdminRequest } from '@/lib/api-auth';
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const address = searchParams.get('address');
+  const providerAddress = searchParams.get('provider_address');
+
+  if (providerAddress) {
+    const bookings = getBookingsByProviderAddress(providerAddress);
+    return NextResponse.json(bookings);
+  }
 
   if (address) {
     const bookings = db
@@ -24,7 +25,7 @@ export function GET(request: NextRequest) {
     return NextResponse.json(bookings);
   }
 
-  if (!isAdmin(request)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

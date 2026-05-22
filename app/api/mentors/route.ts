@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllMentors, insertMentor } from '@/lib/db';
-
-function isAdmin(req: Request): boolean {
-  const admins = (process.env.ADMIN_ADDRESSES ?? '').toLowerCase().split(',').filter(Boolean);
-  const caller = (req.headers.get('x-wallet-address') ?? '').toLowerCase();
-  return admins.includes(caller);
-}
+import { getAllMentors, getMentorByCirclesAddress, insertMentor } from '@/lib/db';
+import { isAdminRequest } from '@/lib/api-auth';
+import { clampMentorShare } from '@/lib/crc-pay';
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const circlesAddress = searchParams.get('circles_address');
+  if (circlesAddress) {
+    const mentor = getMentorByCirclesAddress(circlesAddress);
+    if (!mentor) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    return NextResponse.json(mentor);
+  }
+
   const skill = searchParams.get('skill') ?? undefined;
   const q = searchParams.get('q')?.toLowerCase();
-  const all = searchParams.get('all') === '1' && isAdmin(request);
+  const all = searchParams.get('all') === '1' && isAdminRequest(request);
 
   let mentors = getAllMentors(skill, all);
 
@@ -53,6 +58,7 @@ export async function POST(request: NextRequest) {
     google_calendar_id?: string;
     cal_event_type_id?: number;
     price_crc?: number;
+    mentor_share_percent?: number;
     skills: string[];
   };
 
@@ -68,13 +74,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const id = insertMentor({
-      circles_address: data.circles_address,
+      circles_address: data.circles_address.trim().toLowerCase(),
       name: data.name.trim(),
       bio: data.bio?.trim(),
       calendar_link: data.calendar_link?.trim() ?? '',
       google_calendar_id: data.google_calendar_id?.trim() || undefined,
       cal_event_type_id: data.cal_event_type_id,
       price_crc: data.price_crc,
+      mentor_share_percent: clampMentorShare(data.mentor_share_percent ?? 20),
       skills: data.skills,
     });
     return NextResponse.json({ id }, { status: 201 });

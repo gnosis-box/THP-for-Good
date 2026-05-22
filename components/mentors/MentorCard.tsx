@@ -4,27 +4,26 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
+import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
-type CirclesData = { imageUrl?: string; trustsReceivedCount: number; score: number | null };
+type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 
 export function MentorCard({ mentor }: { mentor: MentorRow }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
 
   useEffect(() => {
     (async () => {
-      const [{ Sdk }, score] = await Promise.all([
-        import('@aboutcircles/sdk'),
-        fetchCirclesScore(mentor.circles_address),
-      ]);
+      const { Sdk } = await import('@aboutcircles/sdk');
       const sdk = new Sdk();
       const view = await sdk.rpc.profile.getProfileView(mentor.circles_address as `0x${string}`);
+      const stats = view.trustStats as { trustedByCount?: number } | undefined;
       const raw = view.profile as (typeof view.profile & { trustsReceivedCount?: number; picture?: string });
+      const trustedBy =
+        stats?.trustedByCount ?? raw?.trustsReceivedCount ?? null;
       setCircles({
         imageUrl: toHttpImageUrl(raw?.picture ?? view.profile?.previewImageUrl ?? view.profile?.imageUrl),
-        trustsReceivedCount: raw?.trustsReceivedCount ?? 0,
-        score,
+        trustedByCount: typeof trustedBy === 'number' ? trustedBy : null,
       });
     })();
   }, [mentor.circles_address]);
@@ -48,11 +47,9 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
             )}
             <div className="flex flex-col gap-0.5 min-w-0">
               <CardTitle className="text-base font-semibold">{mentor.name}</CardTitle>
-              {circles !== null && (
+              {circles !== null && circles.trustedByCount !== null && (
                 <span className="text-xs text-muted-foreground">
-                  {circles.score !== null
-                    ? `Score: ${circles.score}/100`
-                    : `${circles.trustsReceivedCount} trusted by`}
+                  Trusted by {circles.trustedByCount}
                 </span>
               )}
             </div>

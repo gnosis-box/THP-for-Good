@@ -126,6 +126,10 @@ export function RegisterForm() {
       setError('Please select at least one skill.');
       return;
     }
+    if (!calEventTypeId) {
+      setError('Select a Cal.com event type for your availability.');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -293,7 +297,9 @@ export function RegisterForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium">Availability (Cal.com)</span>
+        <span className="text-sm font-medium">
+          Availability (Cal.com) <span className="text-destructive">*</span>
+        </span>
         <CalConnect onConnect={setCalEventTypeId} />
         {calEventTypeId && (
           <p className="text-xs text-muted-foreground">Event type ID: {calEventTypeId}</p>
@@ -318,7 +324,9 @@ export function RegisterForm() {
 
       <Button
         type="submit"
-        disabled={submitting || profile.status !== 'found' || !name.trim()}
+        disabled={
+          submitting || profile.status !== 'found' || !name.trim() || !calEventTypeId
+        }
         className="w-fit"
       >
         {submitting ? 'Registering…' : 'Register as Mentor'}

@@ -534,23 +534,23 @@ Miniapp **Circles** : échanges d’**expertise** au sein de THP for Good (pas u
 
 | IMPL ID | Sujet | Depuis DIV | Issue | Board |
 |---------|--------|------------|-------|-------|
-| IMPL-L0-02 | Dockerfile + `output: 'standalone'` + volume Coolify `/app/data` + CSP iframe | DIV-L0-02 | *à créer* | Triage |
-| IMPL-L0-03 | Route `/calls`, redirect `/history`, nav `Calls` | DIV-L0-03 | *à créer* | Triage |
-| IMPL-L1-08 | `/calls` : sections **Emitted** / **Received** + API bookings expert | DIV-L1-08 | *à créer* | Triage |
-| IMPL-L1-09 | Toast erreur solde CRC au clic PAY (`PayButton`) | DIV-L1-09 | *à créer* | Triage |
-| SPIKE-L2-01 | **Faisabilité split PAY** : SDK `TransferBuilder` + `sendTransactions` vs 2 legs / viem | DIV-L2-01 | [#30](https://github.com/gnosis-box/THP-for-Good/issues/30) | Triage |
-| SPIKE-L4-01 | **Faisabilité cal.diy** : self-host, API v2, lien expert vs `calendar_link` manuel | DIV-L1-05 | [#31](https://github.com/gnosis-box/THP-for-Good/issues/31) | Triage |
-| IMPL-L1-02 | Split PAY (expert + fondation) — **bloqué par #30** | DIV-L1-02 + L2-01 | *à créer* | Triage (blocked) |
-| IMPL-L1-03 | Tags : proposition mentor + modération admin | DIV-L1-03 | *à créer* | Triage |
+| IMPL-L0-02 | Dockerfile + `output: 'standalone'` + volume Coolify `/app/data` + CSP iframe | DIV-L0-02 | [#33](https://github.com/gnosis-box/THP-for-Good/issues/33) | Done |
+| IMPL-L0-03 | Route `/calls`, redirect `/history`, nav `Calls` | DIV-L0-03 | [#34](https://github.com/gnosis-box/THP-for-Good/issues/34) | Done |
+| IMPL-L1-08 | `/calls` : sections **Emitted** / **Received** + API bookings expert | DIV-L1-08 | [#35](https://github.com/gnosis-box/THP-for-Good/issues/35) | Done |
+| IMPL-L1-09 | Toast erreur solde CRC au clic PAY (`PayButton`) | DIV-L1-09 | [#39](https://github.com/gnosis-box/THP-for-Good/issues/39) | Done |
+| SPIKE-L2-01 | **Faisabilité split PAY** : SDK `TransferBuilder` + `sendTransactions` vs 2 legs / viem | DIV-L2-01 | [#30](https://github.com/gnosis-box/THP-for-Good/issues/30) | Done |
+| SPIKE-L4-01 | **Faisabilité cal.diy** : self-host, API v2, lien expert vs `calendar_link` manuel | DIV-L1-05 | [#31](https://github.com/gnosis-box/THP-for-Good/issues/31) | Done |
+| IMPL-L1-02 | Split PAY (expert + fondation) — **bloqué par #30** | DIV-L1-02 + L2-01 | [#38](https://github.com/gnosis-box/THP-for-Good/issues/38) | Done |
+| IMPL-L1-03 | Tags : proposition mentor + modération admin | DIV-L1-03 | [#40](https://github.com/gnosis-box/THP-for-Good/issues/40) | Done |
 | IMPL-L1-04 | TRUST MVP `trust.add(expert)` sur `/calls` Émis | DIV-L1-04 | *optionnel* — déjà en place ; **pas** trust par domaine | — |
 | IMPL-L1-05 | Persister `bookings.slot_label` | DIV-L1-05 | *optionnel / plus tard* | — |
-| IMPL-L1-07 | Retirer lien Admin de `lib/nav.ts` | DIV-L1-07 | *à créer* | Triage |
-| IMPL-L2-03 | Unifier gate admin API sur `isAdminAddress()` | DIV-L2-03 | *à créer* | Triage |
-| IMPL-L3-01 | Layout mobile-first : retirer sidebar desktop, nav header/menu | DIV-L3-01 | *à créer* | Triage |
-| IMPL-L3-02 | `OpenInCirclesHint` hors iframe (lien playground) | DIV-L3-02 | *à créer* | Triage |
-| IMPL-L3-05 | Overlay `trustedByCount` sur `MentorCard` (`getProfileView`) | DIV-L3-05 | *à créer* | Triage |
+| IMPL-L1-07 | Retirer lien Admin de `lib/nav.ts` | DIV-L1-07 | [#36](https://github.com/gnosis-box/THP-for-Good/issues/36) | Done |
+| IMPL-L2-03 | Unifier gate admin API sur `isAdminAddress()` | DIV-L2-03 | [#37](https://github.com/gnosis-box/THP-for-Good/issues/37) | Done |
+| IMPL-L3-01 | Layout mobile-first : retirer sidebar desktop, nav header/menu | DIV-L3-01 | [#41](https://github.com/gnosis-box/THP-for-Good/issues/41) | Done |
+| IMPL-L3-02 | `OpenInCirclesHint` hors iframe (lien playground) | DIV-L3-02 | [#42](https://github.com/gnosis-box/THP-for-Good/issues/42) | Done |
+| IMPL-L3-05 | Overlay `trustedByCount` sur `MentorCard` (`getProfileView`) | DIV-L3-05 | [#43](https://github.com/gnosis-box/THP-for-Good/issues/43) | Done |
 
-*Pas d’IMPL pour clôture DIV : **L2-04**, **L2-05** (A minimal), **L3-03** (EN déjà cible), **L3-04** (B déjà dans `PayButton`).*
+*Pas d’IMPL pour clôture DIV : **L2-04**, **L2-05** (A minimal), **L3-03** (EN déjà cible). **L3-04** : écran succès PAY avec GnosisScan + bouton calendrier — livré dans `PayButton` (fix sprint MVP).*
 *IMPL **prioritaires** : **#30 SPIKE-L2-01**, **L0-02/03**, **L1-02** (après spike), **L1-03**, **L1-07**, **L1-08**, **L1-09**, **L2-03**, **L3-01/02/05**.*
 
 Quand une issue est créée, remplacer *à créer* par le lien `#NN` et ne plus en ouvrir une seconde pour le même sujet.
@@ -578,24 +578,25 @@ Quand une issue est créée, remplacer *à créer* par le lien `#NN` et ne plus 
 | **DB** | **SQLite + API** ([DIV-L0-01](https://github.com/gnosis-box/THP-for-Good/issues/6) = **A**) | ✅ tranché |
 | Auth | Wallet Circles host uniquement | ✅ |
 | **Routes** | `/`, `/mentor/[id]`, `/mentor/register`, **`/calls`**, `/admin` ([#8](https://github.com/gnosis-box/THP-for-Good/issues/8) = **A′**) | ✅ tranché |
-| **Deploy** | **Coolify + Docker + volume SQLite** ([#7](https://github.com/gnosis-box/THP-for-Good/issues/7) = **A**) | ✅ tranché (Dockerfile à ajouter) |
+| **Deploy** | **Coolify + Docker + volume SQLite** ([#7](https://github.com/gnosis-box/THP-for-Good/issues/7) = **A**) | ✅ `Dockerfile` + `output: 'standalone'` — monter `/app/data` pour persistance SQLite |
 
 Schéma SQL de référence : [`lib/schema.sql`](../lib/schema.sql) — ajuster selon [#22](https://github.com/gnosis-box/THP-for-Good/issues/22), [#21](https://github.com/gnosis-box/THP-for-Good/issues/21), [#12](https://github.com/gnosis-box/THP-for-Good/issues/12).
 
 ---
 
-## Audit du code (`zet`) — écarts connus
+## Audit du code (`Dev`) — écarts résolus (sprint MVP 2026-05-22)
 
-À traiter après fermeture des issues liées.
-
-| Issue | Écart | Fichier |
-|-------|-------|---------|
-| [#10](https://github.com/gnosis-box/THP-for-Good/issues/10) | PAY 100% mentor — besoin **split DIV-L1-02 D** | `PayButton.tsx` → [IMPL-L1-02](#backlog-dimplémentation) |
-| [#15](https://github.com/gnosis-box/THP-for-Good/issues/15) | Admin encore dans `NAV` — retirer | `lib/nav.ts` → [IMPL-L1-07](#backlog-dimplémentation) |
-| [#17](https://github.com/gnosis-box/THP-for-Good/issues/17) | Erreur inline, pas toast solde | `PayButton.tsx` → [IMPL-L1-09](#backlog-dimplémentation) |
-| [#12](https://github.com/gnosis-box/THP-for-Good/issues/12) | TRUST doit être **mentor-only** (pas tag picker) | `TrustButton`, `trust_attestations` → [IMPL-L1-04](#backlog-dimplémentation) |
-| [#20](https://github.com/gnosis-box/THP-for-Good/issues/20) | Table `admins` + promote | `app/admin`, API admins |
-| [#27](https://github.com/gnosis-box/THP-for-Good/issues/27) | Pas de `trustedByCount` sur cartes | `MentorCard.tsx` → [IMPL-L3-05](#backlog-dimplémentation) |
+| Issue | Écart | Statut |
+|-------|-------|--------|
+| [#10](https://github.com/gnosis-box/THP-for-Good/issues/10) / [#38](https://github.com/gnosis-box/THP-for-Good/issues/38) | Split PAY expert + fondation | ✅ `lib/crc-pay.ts`, `PayButton.tsx` |
+| [#15](https://github.com/gnosis-box/THP-for-Good/issues/15) / [#36](https://github.com/gnosis-box/THP-for-Good/issues/36) | Admin hors `NAV` | ✅ `lib/nav.ts` |
+| [#17](https://github.com/gnosis-box/THP-for-Good/issues/17) / [#39](https://github.com/gnosis-box/THP-for-Good/issues/39) | Toast solde CRC | ✅ `components/ui/toast.tsx` |
+| [#12](https://github.com/gnosis-box/THP-for-Good/issues/12) | TRUST mentor-only | ✅ déjà conforme |
+| [#20](https://github.com/gnosis-box/THP-for-Good/issues/20) | Table `admins` + promote | ✅ en place |
+| [#27](https://github.com/gnosis-box/THP-for-Good/issues/27) / [#43](https://github.com/gnosis-box/THP-for-Good/issues/43) | `trustedByCount` sur cartes | ✅ `MentorCard.tsx` |
+| [#8](https://github.com/gnosis-box/THP-for-Good/issues/8) / [#34](https://github.com/gnosis-box/THP-for-Good/issues/34)–[#35](https://github.com/gnosis-box/THP-for-Good/issues/35) | `/calls` + redirect `/history` | ✅ `app/calls`, `CallsView` |
+| [#7](https://github.com/gnosis-box/THP-for-Good/issues/7) / [#33](https://github.com/gnosis-box/THP-for-Good/issues/33) | Docker standalone | ✅ `Dockerfile` |
+| [#31](https://github.com/gnosis-box/THP-for-Good/issues/31) | Calendrier | ⏸ Cal.com conservé — voir [`docs/spike-cal-diy.md`](../docs/spike-cal-diy.md) |
 
 ---
 
