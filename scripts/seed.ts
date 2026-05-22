@@ -1,10 +1,11 @@
-import { insertMentor } from '../lib/db';
-import Database from 'better-sqlite3';
-import path from 'path';
+import { insertMentor, addDbAdmin } from '../lib/db';
 
-const dataDir = path.join(process.cwd(), 'data');
-const dbPath = path.join(dataDir, 'thp.db');
-const db = new Database(dbPath);
+/** Default admins — see spec/seed.md */
+const ADMINS = [
+  '0x7C40dCa0e48BE4E0D218869a788eAf9F91dE3ad0',
+  '0xEE4DE7682d5aCd906F7DcbBbD776554bD2DfB4A2',
+  '0xa3bA0574518c689a9C48a217fD4624a0f1fA32c7',
+];
 
 const MENTORS = [
   {
@@ -13,9 +14,14 @@ const MENTORS = [
     bio: "CTO @The Hacking Project. Contributor @Intuition protocol and @Intuition.box\nI don't believe in miracles -- only in decentralization.",
     skills: ['Web3', 'Relative Trust', 'Transitie Trust', 'DeGov', 'Delegation', 'Circles'],
     calendar_link: 'https://calendar.app.google/ZzmogbPxm9MbXt2WA',
-    price_crc: 50,
+    price_crc: 10,
   },
 ];
+
+for (const address of ADMINS) {
+  addDbAdmin(address);
+  console.log(`Seeded admin: ${address.toLowerCase()}`);
+}
 
 for (const mentor of MENTORS) {
   const id = insertMentor(mentor);
