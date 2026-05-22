@@ -4,7 +4,7 @@ import { useWallet } from '@/components/wallet/WalletProvider';
 
 function playgroundUrl() {
   if (typeof window === 'undefined') return 'https://circles.gnosis.io/playground';
-  const appUrl = encodeURIComponent(window.location.href);
+  const appUrl = encodeURIComponent(window.location.origin);
   return `https://circles.gnosis.io/playground?url=${appUrl}`;
 }
 
