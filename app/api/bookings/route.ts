@@ -78,7 +78,8 @@ export async function POST(request: NextRequest) {
           slotTime: data.slot_time,
           attendeeName: data.attendee_name ?? data.booker_address,
           attendeeEmail: data.attendee_email,
-          notes: `CRC payment tx: ${data.tx_hash ?? 'pending'}`,
+          mentorName: mentor.name,
+          txHash: data.tx_hash,
         });
         calBookingUid = result?.uid;
       } catch (err) {

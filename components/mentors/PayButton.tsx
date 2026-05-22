@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { useWallet } from '@/components/wallet/WalletProvider';
@@ -46,7 +46,25 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
   const { showToast } = useToast();
   const balance = useCrcBalance(address);
   const [email, setEmail] = useState('');
+  const [bookerName, setBookerName] = useState<string | null>(null);
   const [state, setState] = useState<PayState>({ kind: 'idle' });
+
+  useEffect(() => {
+    if (!address) return;
+    (async () => {
+      try {
+        const { Sdk } = await import('@aboutcircles/sdk');
+        const sdk = new Sdk();
+        const view = await sdk.rpc.profile.getProfileView(address as `0x${string}`);
+        if (view?.avatarInfo?.cidV0) {
+          const profile = await sdk.rpc.profile.getProfileByCid(view.avatarInfo.cidV0);
+          if (profile?.name) setBookerName(profile.name);
+        }
+      } catch {
+        // fall back to address
+      }
+    })();
+  }, [address]);
 
   const sharePercent = clampMentorShare(mentor.mentor_share_percent ?? 20) as MentorSharePercent;
   const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
@@ -85,7 +103,7 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
           tx_hash: txHash,
           slot_time: selectedSlot,
           attendee_email: email.trim(),
-          attendee_name: address,
+          attendee_name: bookerName ?? address,
         }),
       });
 
