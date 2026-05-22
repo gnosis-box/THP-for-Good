@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllMentors, insertMentor } from '@/lib/db';
-
-function isAdmin(req: Request): boolean {
-  const admins = (process.env.ADMIN_ADDRESSES ?? '').toLowerCase().split(',').filter(Boolean);
-  const caller = (req.headers.get('x-wallet-address') ?? '').toLowerCase();
-  return admins.includes(caller);
-}
+import { isAdminRequest } from '@/lib/api-auth';
+import { clampMentorShare } from '@/lib/crc-pay';
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const skill = searchParams.get('skill') ?? undefined;
   const q = searchParams.get('q')?.toLowerCase();
-  const all = searchParams.get('all') === '1' && isAdmin(request);
+  const all = searchParams.get('all') === '1' && isAdminRequest(request);
 
   let mentors = getAllMentors(skill, all);
 
@@ -53,6 +49,7 @@ export async function POST(request: NextRequest) {
     google_calendar_id?: string;
     cal_event_type_id?: number;
     price_crc?: number;
+    mentor_share_percent?: number;
     skills: string[];
   };
 
@@ -75,6 +72,7 @@ export async function POST(request: NextRequest) {
       google_calendar_id: data.google_calendar_id?.trim() || undefined,
       cal_event_type_id: data.cal_event_type_id,
       price_crc: data.price_crc,
+      mentor_share_percent: clampMentorShare(data.mentor_share_percent ?? 20),
       skills: data.skills,
     });
     return NextResponse.json({ id }, { status: 201 });

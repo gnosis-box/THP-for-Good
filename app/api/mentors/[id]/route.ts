@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db, { getMentorById } from '@/lib/db';
-
-function isAdmin(req: Request): boolean {
-  const admins = (process.env.ADMIN_ADDRESSES ?? '').toLowerCase().split(',').filter(Boolean);
-  const caller = (req.headers.get('x-wallet-address') ?? '').toLowerCase();
-  return admins.includes(caller);
-}
+import { isAdminRequest } from '@/lib/api-auth';
+import { clampMentorShare } from '@/lib/crc-pay';
 
 export async function GET(
   _request: NextRequest,
@@ -27,7 +23,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!isAdmin(request)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -58,11 +54,15 @@ export async function PATCH(
   const fields: string[] = [];
   const values: unknown[] = [];
 
-  const allowed = ['name', 'bio', 'calendar_link', 'price_crc', 'active'] as const;
+  const allowed = ['name', 'bio', 'calendar_link', 'price_crc', 'active', 'mentor_share_percent'] as const;
   for (const key of allowed) {
     if (key in patch) {
       fields.push(`${key} = ?`);
-      values.push(patch[key]);
+      values.push(
+        key === 'mentor_share_percent'
+          ? clampMentorShare(Number(patch[key]))
+          : patch[key],
+      );
     }
   }
 
@@ -93,7 +93,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!isAdmin(request)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
