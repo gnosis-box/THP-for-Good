@@ -17,6 +17,7 @@ type PromoteFormState = {
   name: string;
   bio: string;
   calendarLink: string;
+  calEventTypeId: string;
   priceCrc: number;
   selectedSkills: string[];
   submitting: boolean;
@@ -24,7 +25,7 @@ type PromoteFormState = {
 };
 
 function defaultForm(name: string): PromoteFormState {
-  return { name, bio: '', calendarLink: '', priceCrc: 100, selectedSkills: [], submitting: false, error: null };
+  return { name, bio: '', calendarLink: '', calEventTypeId: '', priceCrc: 100, selectedSkills: [], submitting: false, error: null };
 }
 
 type Props = {
@@ -149,6 +150,7 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
           name: form.name.trim(),
           bio: form.bio.trim() || undefined,
           calendar_link: form.calendarLink.trim(),
+          cal_event_type_id: form.calEventTypeId.trim() ? parseInt(form.calEventTypeId.trim(), 10) : undefined,
           price_crc: form.priceCrc,
           skills: form.selectedSkills,
         }),
@@ -340,14 +342,28 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
 
                     {/* Calendar link */}
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-medium">Google Calendar embed URL (iframe src) *</label>
+                      <label className="text-xs font-medium">Calendar link (optional)</label>
                       <input
                         type="url"
                         value={form.calendarLink}
                         onChange={(e) => setForm((prev) => prev && { ...prev, calendarLink: e.target.value })}
-                        placeholder="https://calendar.google.com/calendar/appointments/schedules/…?gv=true"
+                        placeholder="https://cal.com/mentor-name"
                         className="h-8 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                       />
+                    </div>
+
+                    {/* Cal.com event type ID */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-medium">Cal.com event type ID</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={form.calEventTypeId}
+                        onChange={(e) => setForm((prev) => prev && { ...prev, calEventTypeId: e.target.value })}
+                        placeholder="e.g. 12345 (from Cal.com dashboard URL)"
+                        className="h-8 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                      />
+                      <p className="text-xs text-muted-foreground">Find it in your Cal.com dashboard under Event Types → the number in the URL.</p>
                     </div>
 
                     {/* Price */}
@@ -370,7 +386,7 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
                       type="button"
                       size="sm"
                       onClick={submitPromote}
-                      disabled={form.submitting || !form.calendarLink.trim() || !form.name.trim()}
+                      disabled={form.submitting || !form.name.trim()}
                       className="w-fit"
                     >
                       {form.submitting ? 'Saving…' : 'Confirm & promote'}

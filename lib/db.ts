@@ -14,6 +14,7 @@ export type MentorRow = {
   bio: string | null;
   calendar_link: string;
   google_calendar_id: string | null;
+  cal_event_type_id: number | null;
   price_crc: number;
   active: number;
   created_at: string;
@@ -27,6 +28,7 @@ export type BookingRow = {
   tx_hash: string | null;
   slot_time: string | null;
   calendar_event_url: string | null;
+  cal_booking_uid: string | null;
   created_at: string;
 };
 
@@ -36,6 +38,7 @@ export type InsertMentorData = {
   bio?: string;
   calendar_link: string;
   google_calendar_id?: string;
+  cal_event_type_id?: number;
   price_crc?: number;
   skills: string[];
 };
@@ -46,6 +49,7 @@ export type InsertBookingData = {
   tx_hash?: string;
   slot_time?: string;
   calendar_event_url?: string;
+  cal_booking_uid?: string;
 };
 
 type MentorRowRaw = Omit<MentorRow, 'skills'> & { skills: string };
@@ -64,8 +68,10 @@ db.exec(schema);
 // Idempotent column migrations for existing databases
 for (const sql of [
   'ALTER TABLE mentors ADD COLUMN google_calendar_id TEXT',
+  'ALTER TABLE mentors ADD COLUMN cal_event_type_id INTEGER',
   'ALTER TABLE bookings ADD COLUMN slot_time TEXT',
   'ALTER TABLE bookings ADD COLUMN calendar_event_url TEXT',
+  'ALTER TABLE bookings ADD COLUMN cal_booking_uid TEXT',
 ]) {
   try { db.exec(sql); } catch { /* column already exists */ }
 }
@@ -121,8 +127,8 @@ export function getMentorById(id: number): MentorRow | undefined {
 
 export function insertMentor(data: InsertMentorData): number {
   const insertMentorStmt = db.prepare(`
-    INSERT OR IGNORE INTO mentors (circles_address, name, bio, calendar_link, google_calendar_id, price_crc)
-    VALUES (@circles_address, @name, @bio, @calendar_link, @google_calendar_id, @price_crc)
+    INSERT OR IGNORE INTO mentors (circles_address, name, bio, calendar_link, google_calendar_id, cal_event_type_id, price_crc)
+    VALUES (@circles_address, @name, @bio, @calendar_link, @google_calendar_id, @cal_event_type_id, @price_crc)
   `);
 
   const upsertTagStmt = db.prepare(`
@@ -145,6 +151,7 @@ export function insertMentor(data: InsertMentorData): number {
       bio: data.bio ?? null,
       calendar_link: data.calendar_link,
       google_calendar_id: data.google_calendar_id ?? null,
+      cal_event_type_id: data.cal_event_type_id ?? null,
       price_crc: data.price_crc ?? 100,
     });
 
@@ -168,8 +175,8 @@ export function getAllTags(): TagRow[] {
 
 export function insertBooking(data: InsertBookingData): number {
   const stmt = db.prepare(`
-    INSERT INTO bookings (mentor_id, booker_address, tx_hash, slot_time, calendar_event_url)
-    VALUES (@mentor_id, @booker_address, @tx_hash, @slot_time, @calendar_event_url)
+    INSERT INTO bookings (mentor_id, booker_address, tx_hash, slot_time, calendar_event_url, cal_booking_uid)
+    VALUES (@mentor_id, @booker_address, @tx_hash, @slot_time, @calendar_event_url, @cal_booking_uid)
   `);
   const result = stmt.run({
     mentor_id: data.mentor_id,
@@ -177,6 +184,7 @@ export function insertBooking(data: InsertBookingData): number {
     tx_hash: data.tx_hash ?? null,
     slot_time: data.slot_time ?? null,
     calendar_event_url: data.calendar_event_url ?? null,
+    cal_booking_uid: data.cal_booking_uid ?? null,
   });
   return result.lastInsertRowid as number;
 }

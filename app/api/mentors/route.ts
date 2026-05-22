@@ -40,7 +40,6 @@ export async function POST(request: NextRequest) {
     body === null ||
     typeof (body as Record<string, unknown>).circles_address !== 'string' ||
     typeof (body as Record<string, unknown>).name !== 'string' ||
-    typeof (body as Record<string, unknown>).calendar_link !== 'string' ||
     !Array.isArray((body as Record<string, unknown>).skills)
   ) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -50,8 +49,9 @@ export async function POST(request: NextRequest) {
     circles_address: string;
     name: string;
     bio?: string;
-    calendar_link: string;
+    calendar_link?: string;
     google_calendar_id?: string;
+    cal_event_type_id?: number;
     price_crc?: number;
     skills: string[];
   };
@@ -62,9 +62,6 @@ export async function POST(request: NextRequest) {
   if (!data.name.trim()) {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 });
   }
-  if (!data.calendar_link.trim()) {
-    return NextResponse.json({ error: 'Calendar link is required' }, { status: 400 });
-  }
   if (!data.skills.every((s) => typeof s === 'string')) {
     return NextResponse.json({ error: 'skills must be an array of strings' }, { status: 400 });
   }
@@ -74,8 +71,9 @@ export async function POST(request: NextRequest) {
       circles_address: data.circles_address,
       name: data.name.trim(),
       bio: data.bio?.trim(),
-      calendar_link: data.calendar_link.trim(),
+      calendar_link: data.calendar_link?.trim() ?? '',
       google_calendar_id: data.google_calendar_id?.trim() || undefined,
+      cal_event_type_id: data.cal_event_type_id,
       price_crc: data.price_crc,
       skills: data.skills,
     });

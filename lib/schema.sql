@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS mentors (
   bio                TEXT,
   calendar_link      TEXT    NOT NULL,
   google_calendar_id TEXT,
+  cal_event_type_id  INTEGER,
   price_crc          INTEGER DEFAULT 100,
   active             INTEGER DEFAULT 1,
   created_at         TEXT    DEFAULT (datetime('now'))
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   tx_hash             TEXT,
   slot_time           TEXT,
   calendar_event_url  TEXT,
+  cal_booking_uid     TEXT,
   created_at          TEXT    DEFAULT (datetime('now'))
 );
 
