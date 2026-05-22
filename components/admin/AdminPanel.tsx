@@ -5,6 +5,7 @@ import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
 import { toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
 import { PromoteSection } from './PromoteSection';
+import { MentorEditForm } from '@/components/mentors/MentorEditForm';
 import type { GroupMemberDto } from '@/lib/admin';
 import type { MentorRow, TagRow, AdminRow } from '@/lib/db';
 
@@ -20,6 +21,7 @@ export function AdminPanel() {
   const [membersError, setMembersError] = useState<string | null>(null);
   type AdminProfile = { name: string; imageUrl?: string; trustsReceivedCount: number; score: number | null };
   const [adminProfiles, setAdminProfiles] = useState<Record<string, AdminProfile>>({});
+  const [editingMentorId, setEditingMentorId] = useState<number | null>(null);
   const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -266,47 +268,63 @@ export function AdminPanel() {
             <p className="text-sm text-muted-foreground">No mentors yet.</p>
           )}
           {mentors.map((mentor) => (
-            <div
-              key={mentor.id}
-              className="flex items-start justify-between gap-4 rounded-xl border border-border p-4"
-            >
-              <div className="flex flex-col gap-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium truncate">{mentor.name}</span>
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                      mentor.active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {mentor.active ? 'Active' : 'Inactive'}
-                  </span>
+            <div key={mentor.id} className="flex flex-col gap-3 rounded-xl border border-border p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium truncate">{mentor.name}</span>
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                        mentor.active ? 'bg-green-100 text-green-800' : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {mentor.active ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground font-mono truncate">{mentor.circles_address}</p>
+                  {mentor.skills.length > 0 && (
+                    <p className="text-xs text-muted-foreground">{mentor.skills.join(', ')}</p>
+                  )}
+                  {mentor.cal_event_type_id && (
+                    <p className="text-xs text-muted-foreground">Cal.com event type: {mentor.cal_event_type_id}</p>
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground font-mono truncate">{mentor.circles_address}</p>
-                {mentor.skills.length > 0 && (
-                  <p className="text-xs text-muted-foreground">{mentor.skills.join(', ')}</p>
-                )}
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingMentorId(editingMentorId === mentor.id ? null : mentor.id)}
+                  >
+                    {editingMentorId === mentor.id ? 'Cancel' : 'Edit'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleActive(mentor)}
+                  >
+                    {mentor.active ? 'Deactivate' : 'Activate'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:bg-destructive/10"
+                    onClick={() => deleteMentor(mentor.id)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
-              <div className="flex shrink-0 gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toggleActive(mentor)}
-                >
-                  {mentor.active ? 'Deactivate' : 'Activate'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-destructive hover:bg-destructive/10"
-                  onClick={() => deleteMentor(mentor.id)}
-                >
-                  Delete
-                </Button>
-              </div>
+              {editingMentorId === mentor.id && (
+                <MentorEditForm
+                  mentor={mentor}
+                  walletAddress={address ?? ''}
+                  onSaved={() => { setEditingMentorId(null); load(); }}
+                  onCancel={() => setEditingMentorId(null)}
+                />
+              )}
             </div>
           ))}
         </div>

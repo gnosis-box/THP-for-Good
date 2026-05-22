@@ -23,10 +23,6 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!isAdminRequest(request)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
   const { id: rawId } = await params;
   const id = parseInt(rawId, 10);
   if (isNaN(id)) {
@@ -36,6 +32,12 @@ export async function PATCH(
   const existing = getMentorById(id);
   if (!existing) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  const caller = (request.headers.get('x-wallet-address') ?? '').toLowerCase();
+  const isSelf = !!caller && caller === existing.circles_address.toLowerCase();
+  if (!isAdminRequest(request) && !isSelf) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   let body: unknown;
@@ -54,7 +56,7 @@ export async function PATCH(
   const fields: string[] = [];
   const values: unknown[] = [];
 
-  const allowed = ['name', 'bio', 'calendar_link', 'price_crc', 'active', 'mentor_share_percent'] as const;
+  const allowed = ['name', 'bio', 'calendar_link', 'cal_event_type_id', 'price_crc', 'active', 'mentor_share_percent'] as const;
   for (const key of allowed) {
     if (key in patch) {
       fields.push(`${key} = ?`);

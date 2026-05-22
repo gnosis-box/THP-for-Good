@@ -16,7 +16,6 @@ type MemberEntry = {
 type PromoteFormState = {
   name: string;
   bio: string;
-  calendarLink: string;
   calEventTypeId: string;
   priceCrc: number;
   selectedSkills: string[];
@@ -25,7 +24,7 @@ type PromoteFormState = {
 };
 
 function defaultForm(name: string): PromoteFormState {
-  return { name, bio: '', calendarLink: '', calEventTypeId: '', priceCrc: 100, selectedSkills: [], submitting: false, error: null };
+  return { name, bio: '', calEventTypeId: '', priceCrc: 100, selectedSkills: [], submitting: false, error: null };
 }
 
 type Props = {
@@ -152,7 +151,6 @@ export function PromoteSection({
           circles_address: promotingAddress,
           name: form.name.trim(),
           bio: form.bio.trim() || undefined,
-          calendar_link: form.calendarLink.trim(),
           cal_event_type_id: form.calEventTypeId.trim() ? parseInt(form.calEventTypeId.trim(), 10) : undefined,
           price_crc: form.priceCrc,
           skills: form.selectedSkills,
@@ -358,18 +356,6 @@ export function PromoteSection({
                           Add
                         </button>
                       </div>
-                    </div>
-
-                    {/* Calendar link */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-medium">Calendar link (optional)</label>
-                      <input
-                        type="url"
-                        value={form.calendarLink}
-                        onChange={(e) => setForm((prev) => prev && { ...prev, calendarLink: e.target.value })}
-                        placeholder="https://cal.com/mentor-name"
-                        className="h-8 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                      />
                     </div>
 
                     {/* Cal.com event type ID */}
