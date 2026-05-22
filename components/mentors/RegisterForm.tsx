@@ -36,14 +36,30 @@ export function RegisterForm() {
     );
   }
 
-  function addNewSkill() {
+  async function addNewSkill() {
     const label = newSkill.trim();
     if (!label) return;
     const exists = tags.some((t) => t.label.toLowerCase() === label.toLowerCase());
     if (!exists) {
-      setTags((prev) => [...prev, { id: -(prev.length + 1), label }]);
+      try {
+        const res = await fetch('/api/tags/proposals', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-wallet-address': address ?? '',
+          },
+          body: JSON.stringify({ label }),
+        });
+        if (res.ok) {
+          setError('Skill submitted for admin approval. You can select it once approved.');
+        }
+      } catch {
+        setError('Could not submit skill proposal.');
+      }
     }
-    setSelectedSkills((prev) => (prev.includes(label) ? prev : [...prev, label]));
+    if (exists) {
+      setSelectedSkills((prev) => (prev.includes(label) ? prev : [...prev, label]));
+    }
     setNewSkill('');
   }
 

@@ -123,7 +123,7 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
     const label = newSkill.trim();
     if (!label) return;
     if (!localTags.some((t) => t.label.toLowerCase() === label.toLowerCase())) {
-      setLocalTags((prev) => [...prev, { id: -(prev.length + 1), label }]);
+      setLocalTags((prev) => [...prev, { id: -(prev.length + 1), label, status: 'pending' as const }]);
     }
     setForm((prev) =>
       prev && !prev.selectedSkills.includes(label)
