@@ -46,8 +46,17 @@ export async function createCalBooking(params: {
   slotTime: string;
   attendeeName: string;
   attendeeEmail: string;
-  notes?: string;
+  mentorName: string;
+  txHash?: string;
 }): Promise<{ uid: string } | null> {
+  const title = `[THP For Good] ${params.attendeeName} => ${params.mentorName}`;
+  const notes = [
+    params.txHash
+      ? `CRC payment tx: https://explorer.aboutcircles.com/tx/${params.txHash}/social-graph`
+      : 'CRC payment tx: pending',
+    'Need to reschedule or cancel? ( No refunds )',
+  ].join('\n');
+
   const res = await fetch(`${CAL_API}/bookings`, {
     method: 'POST',
     headers: authHeaders(CAL_BOOKING_VERSION),
@@ -56,10 +65,11 @@ export async function createCalBooking(params: {
       start: params.slotTime,
       timeZone: 'Europe/Paris',
       language: 'en',
+      title,
       responses: {
         name: params.attendeeName,
         email: params.attendeeEmail,
-        ...(params.notes ? { notes: params.notes } : {}),
+        notes,
       },
       metadata: {},
     }),
