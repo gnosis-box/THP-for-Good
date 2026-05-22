@@ -2,13 +2,16 @@
 
 import { usePathname } from 'next/navigation';
 
-import { NAV } from '@/lib/nav';
+import { ADMIN_NAV_ITEM, NAV } from '@/lib/nav';
 
 export function CurrentPage() {
   const pathname = usePathname();
-  const current = NAV.find((item) =>
-    item.href === '/' ? pathname === '/' : pathname.startsWith(item.href),
-  );
+  const current =
+    pathname.startsWith('/admin')
+      ? ADMIN_NAV_ITEM
+      : NAV.find((item) =>
+          item.href === '/' ? pathname === '/' : pathname.startsWith(item.href),
+        );
 
   if (!current) return null;
 
