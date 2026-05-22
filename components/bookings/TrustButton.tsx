@@ -40,8 +40,8 @@ async function queryTrust(truster: string, trustee: string): Promise<boolean> {
       ],
     }),
   });
-  const json = await res.json() as { result?: { Rows?: unknown[][] } };
-  return (json.result?.Rows?.length ?? 0) > 0;
+  const json = await res.json() as { result?: { rows?: unknown[][] } };
+  return (json.result?.rows?.length ?? 0) > 0;
 }
 
 async function buildContractRunner(address: string) {
