@@ -340,12 +340,12 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
 
                     {/* Calendar link */}
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-medium">Google Calendar link *</label>
+                      <label className="text-xs font-medium">Google Calendar embed URL (iframe src) *</label>
                       <input
                         type="url"
                         value={form.calendarLink}
                         onChange={(e) => setForm((prev) => prev && { ...prev, calendarLink: e.target.value })}
-                        placeholder="https://calendar.app.google/…"
+                        placeholder="https://calendar.google.com/calendar/appointments/schedules/…?gv=true"
                         className="h-8 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                       />
                     </div>

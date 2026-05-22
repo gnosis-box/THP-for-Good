@@ -61,7 +61,7 @@ export function PayButton({ mentor }: { mentor: MentorRow }) {
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/50 p-4">
         <p className="text-sm font-medium">Payment confirmed!</p>
         <p className="text-sm text-muted-foreground">
-          Go back to the calendar link and book your slot — your session is reserved once you confirm there.
+          Select your slot in the calendar above to finalise the booking.
         </p>
         <p className="text-xs text-muted-foreground break-all">
           Tx:{' '}
@@ -74,14 +74,6 @@ export function PayButton({ mentor }: { mentor: MentorRow }) {
             {state.hash.slice(0, 10)}…{state.hash.slice(-8)}
           </a>
         </p>
-        <a
-          href={mentor.calendar_link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
-        >
-          Book your slot ↗
-        </a>
       </div>
     );
   }

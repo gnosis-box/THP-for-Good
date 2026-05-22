@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: `frame-ancestors ${FRAME_ANCESTORS};`,
+            value: `frame-ancestors ${FRAME_ANCESTORS}; frame-src https://calendar.google.com;`,
           },
         ],
       },
