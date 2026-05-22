@@ -4,7 +4,8 @@ export type NavItem = {
 };
 
 export const NAV: NavItem[] = [
-  { href: "/", label: "Dashboard" },
-  { href: "/profile", label: "Profile" },
-  { href: "/actions", label: "Actions" },
+  { href: "/", label: "Mentors" },
+  { href: "/history", label: "My Calls" },
+  { href: "/mentor/register", label: "Become a Mentor" },
+  { href: "/admin", label: "Admin" },
 ];
