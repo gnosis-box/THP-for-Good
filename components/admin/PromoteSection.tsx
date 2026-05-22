@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { cn, toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { MentorRow, TagRow } from '@/lib/db';
 
 type MemberEntry = {
@@ -48,45 +48,59 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
   const [localTags, setLocalTags] = useState<TagRow[]>(tags);
 
   useEffect(() => {
-    if (initialGroupAddress) loadMembers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setLocalTags(tags);
+  }, [tags]);
+
+  useEffect(() => {
+    if (initialGroupAddress) setGroupAddress(initialGroupAddress);
   }, [initialGroupAddress]);
 
-  async function loadMembers() {
-    const addr = groupAddress.trim();
+  useEffect(() => {
+    if (!initialGroupAddress || !walletAddress) return;
+    let cancelled = false;
+
+    (async () => {
+      setLoadingMembers(true);
+      setLoadError(null);
+      setMembers(null);
+      try {
+        const res = await fetch(
+          `/api/admin/members?group=${encodeURIComponent(initialGroupAddress)}`,
+          { headers: { 'x-wallet-address': walletAddress } },
+        );
+        const json = (await res.json()) as { members?: MemberEntry[]; error?: string };
+        if (!res.ok) throw new Error(json.error ?? 'Failed to load group members');
+        if (!cancelled) setMembers(json.members ?? []);
+      } catch (err) {
+        if (!cancelled) {
+          setLoadError(err instanceof Error ? err.message : 'Failed to load group members.');
+        }
+      } finally {
+        if (!cancelled) setLoadingMembers(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialGroupAddress, walletAddress]);
+
+  async function loadMembers(addressOverride?: string) {
+    const addr = (addressOverride ?? initialGroupAddress ?? groupAddress).trim();
     if (!addr) return;
     setLoadingMembers(true);
     setLoadError(null);
     setMembers(null);
 
     try {
-      const { Sdk } = await import('@aboutcircles/sdk');
-      const sdk = new Sdk();
-      const result = await sdk.groups.getMembers(addr as `0x${string}`);
-
-      const profiles = await Promise.allSettled(
-        result.results.map(async (row) => {
-          const [view, score] = await Promise.all([
-            sdk.rpc.profile.getProfileView(row.member),
-            fetchCirclesScore(row.member),
-          ]);
-          const raw = view.profile as (typeof view.profile & { trustsReceivedCount?: number; picture?: string });
-          const name = raw?.name ?? row.member.slice(0, 8) + '…';
-          return {
-            address: row.member,
-            name,
-            imageUrl: toHttpImageUrl(raw?.picture ?? raw?.previewImageUrl ?? raw?.imageUrl),
-            trustsReceivedCount: raw?.trustsReceivedCount ?? 0,
-            score,
-          };
-        }),
-      );
-
-      setMembers(
-        profiles
-          .filter((r): r is PromiseFulfilledResult<MemberEntry> => r.status === 'fulfilled')
-          .map((r) => r.value),
-      );
+      const res = await fetch(`/api/admin/members?group=${encodeURIComponent(addr)}`, {
+        headers: { 'x-wallet-address': walletAddress },
+      });
+      const json = (await res.json()) as { members?: MemberEntry[]; error?: string };
+      if (!res.ok) {
+        throw new Error(json.error ?? 'Failed to load group members');
+      }
+      setMembers(json.members ?? []);
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Failed to load group members.');
     } finally {
@@ -196,7 +210,13 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
             placeholder="Circles group address (0x…)"
             className="h-9 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
-          <Button type="button" variant="outline" size="sm" onClick={loadMembers} disabled={loadingMembers || !groupAddress.trim()}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => loadMembers()}
+            disabled={loadingMembers || !groupAddress.trim()}
+          >
             {loadingMembers ? 'Loading…' : 'Load'}
           </Button>
         </div>
