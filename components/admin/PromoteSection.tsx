@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { CalConnect } from '@/components/mentors/CalConnect';
+import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
 import type { MentorRow, TagRow } from '@/lib/db';
 
 type MemberEntry = {
@@ -16,8 +18,8 @@ type MemberEntry = {
 type PromoteFormState = {
   name: string;
   bio: string;
-  calendarLink: string;
-  calEventTypeId: string;
+  calEventTypeId: number | null;
+  mentorShare: 0 | 10 | 20 | 30 | 50;
   priceCrc: number;
   selectedSkills: string[];
   submitting: boolean;
@@ -25,7 +27,7 @@ type PromoteFormState = {
 };
 
 function defaultForm(name: string): PromoteFormState {
-  return { name, bio: '', calendarLink: '', calEventTypeId: '', priceCrc: 100, selectedSkills: [], submitting: false, error: null };
+  return { name, bio: '', calEventTypeId: null, mentorShare: 20, priceCrc: 100, selectedSkills: [], submitting: false, error: null };
 }
 
 type Props = {
@@ -152,8 +154,8 @@ export function PromoteSection({
           circles_address: promotingAddress,
           name: form.name.trim(),
           bio: form.bio.trim() || undefined,
-          calendar_link: form.calendarLink.trim(),
-          cal_event_type_id: form.calEventTypeId.trim() ? parseInt(form.calEventTypeId.trim(), 10) : undefined,
+          cal_event_type_id: form.calEventTypeId ?? undefined,
+          mentor_share_percent: form.mentorShare,
           price_crc: form.priceCrc,
           skills: form.selectedSkills,
         }),
@@ -360,30 +362,37 @@ export function PromoteSection({
                       </div>
                     </div>
 
-                    {/* Calendar link */}
+                    {/* Cal.com */}
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-medium">Calendar link (optional)</label>
-                      <input
-                        type="url"
-                        value={form.calendarLink}
-                        onChange={(e) => setForm((prev) => prev && { ...prev, calendarLink: e.target.value })}
-                        placeholder="https://cal.com/mentor-name"
-                        className="h-8 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                      <span className="text-xs font-medium">Availability (Cal.com)</span>
+                      <CalConnect
+                        onConnect={(id) => setForm((prev) => prev && { ...prev, calEventTypeId: id })}
                       />
+                      {form.calEventTypeId && (
+                        <p className="text-xs text-muted-foreground">Event type ID: {form.calEventTypeId}</p>
+                      )}
                     </div>
 
-                    {/* Cal.com event type ID */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-medium">Cal.com event type ID</label>
-                      <input
-                        type="number"
-                        min={1}
-                        value={form.calEventTypeId}
-                        onChange={(e) => setForm((prev) => prev && { ...prev, calEventTypeId: e.target.value })}
-                        placeholder="e.g. 12345 (from Cal.com dashboard URL)"
-                        className="h-8 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                      />
-                      <p className="text-xs text-muted-foreground">Find it in your Cal.com dashboard under Event Types → the number in the URL.</p>
+                    {/* Payment split */}
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-xs font-medium">Payment split</span>
+                      <div className="flex flex-wrap gap-2">
+                        {MENTOR_SHARE_OPTIONS.map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => setForm((prev) => prev && { ...prev, mentorShare: clampMentorShare(opt) })}
+                            className={cn(
+                              'rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors border',
+                              form.mentorShare === opt
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'border-border bg-background hover:bg-muted',
+                            )}
+                          >
+                            {opt}% me · {100 - opt}% THP
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Price */}
