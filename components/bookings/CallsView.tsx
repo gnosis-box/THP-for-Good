@@ -153,7 +153,7 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
               )}
               {booking.tx_hash && (
                 <a
-                  href={`https://gnosisscan.io/tx/${booking.tx_hash}`}
+                  href={`https://explorer.aboutcircles.com/tx/${booking.tx_hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-mono text-xs text-primary underline-offset-4 hover:underline"
@@ -218,7 +218,7 @@ function CallsReceivedList({ bookings }: { bookings: ReceivedBooking[] }) {
             )}
             {booking.tx_hash && (
               <a
-                href={`https://gnosisscan.io/tx/${booking.tx_hash}`}
+                href={`https://explorer.aboutcircles.com/tx/${booking.tx_hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono text-xs text-primary underline-offset-4 hover:underline"
