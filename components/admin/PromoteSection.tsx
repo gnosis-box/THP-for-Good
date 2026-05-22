@@ -33,15 +33,34 @@ type Props = {
   admins: string[];
   walletAddress: string;
   initialGroupAddress: string | null;
+  members: MemberEntry[];
+  membersError: string | null;
+  membersLoading: boolean;
   onMentorAdded: () => void;
   onAdminAdded: () => void;
+  onReloadMembers: () => void;
 };
 
-export function PromoteSection({ tags, mentors, admins, walletAddress, initialGroupAddress, onMentorAdded, onAdminAdded }: Props) {
+export function PromoteSection({
+  tags,
+  mentors,
+  admins,
+  walletAddress,
+  initialGroupAddress,
+  members,
+  membersError,
+  membersLoading,
+  onMentorAdded,
+  onAdminAdded,
+  onReloadMembers,
+}: Props) {
   const [groupAddress, setGroupAddress] = useState(initialGroupAddress ?? '');
   const [loadingMembers, setLoadingMembers] = useState(false);
-  const [members, setMembers] = useState<MemberEntry[] | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [manualMembers, setManualMembers] = useState<MemberEntry[] | null>(null);
+  const [manualError, setManualError] = useState<string | null>(null);
+  const displayMembers = initialGroupAddress ? members : (manualMembers ?? []);
+  const loadError = initialGroupAddress ? membersError : manualError;
+  const isLoading = initialGroupAddress ? membersLoading : loadingMembers;
   const [promotingAddress, setPromotingAddress] = useState<string | null>(null);
   const [form, setForm] = useState<PromoteFormState | null>(null);
   const [newSkill, setNewSkill] = useState('');
@@ -55,42 +74,12 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
     if (initialGroupAddress) setGroupAddress(initialGroupAddress);
   }, [initialGroupAddress]);
 
-  useEffect(() => {
-    if (!initialGroupAddress || !walletAddress) return;
-    let cancelled = false;
-
-    (async () => {
-      setLoadingMembers(true);
-      setLoadError(null);
-      setMembers(null);
-      try {
-        const res = await fetch(
-          `/api/admin/members?group=${encodeURIComponent(initialGroupAddress)}`,
-          { headers: { 'x-wallet-address': walletAddress } },
-        );
-        const json = (await res.json()) as { members?: MemberEntry[]; error?: string };
-        if (!res.ok) throw new Error(json.error ?? 'Failed to load group members');
-        if (!cancelled) setMembers(json.members ?? []);
-      } catch (err) {
-        if (!cancelled) {
-          setLoadError(err instanceof Error ? err.message : 'Failed to load group members.');
-        }
-      } finally {
-        if (!cancelled) setLoadingMembers(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [initialGroupAddress, walletAddress]);
-
   async function loadMembers(addressOverride?: string) {
-    const addr = (addressOverride ?? initialGroupAddress ?? groupAddress).trim();
-    if (!addr) return;
+    const addr = (addressOverride ?? groupAddress).trim();
+    if (!addr || !walletAddress) return;
     setLoadingMembers(true);
-    setLoadError(null);
-    setMembers(null);
+    setManualError(null);
+    setManualMembers(null);
 
     try {
       const res = await fetch(`/api/admin/members?group=${encodeURIComponent(addr)}`, {
@@ -100,9 +89,9 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
       if (!res.ok) {
         throw new Error(json.error ?? 'Failed to load group members');
       }
-      setMembers(json.members ?? []);
+      setManualMembers(json.members ?? []);
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : 'Failed to load group members.');
+      setManualError(err instanceof Error ? err.message : 'Failed to load group members.');
     } finally {
       setLoadingMembers(false);
     }
@@ -184,7 +173,9 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
     }
   }
 
-  const mentorAddresses = new Set(mentors.map((m) => m.circles_address.toLowerCase()));
+  const mentorAddresses = new Set(
+    (Array.isArray(mentors) ? mentors : []).map((m) => m.circles_address.toLowerCase()),
+  );
   const adminAddresses = new Set(admins.map((a) => a.toLowerCase()));
 
   async function makeAdmin(address: string) {
@@ -221,19 +212,28 @@ export function PromoteSection({ tags, mentors, admins, walletAddress, initialGr
           </Button>
         </div>
       )}
-      {initialGroupAddress && loadingMembers && (
+      {isLoading && (
         <p className="text-sm text-muted-foreground">Loading members…</p>
       )}
 
-      {loadError && <p className="text-sm text-destructive">{loadError}</p>}
+      {loadError && (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-destructive">{loadError}</p>
+          {initialGroupAddress && (
+            <Button type="button" variant="outline" size="sm" className="w-fit" onClick={onReloadMembers}>
+              Retry
+            </Button>
+          )}
+        </div>
+      )}
 
-      {members !== null && members.length === 0 && (
+      {!isLoading && !loadError && displayMembers.length === 0 && initialGroupAddress && (
         <p className="text-sm text-muted-foreground">No members found in this group.</p>
       )}
 
-      {members !== null && members.length > 0 && (
+      {!isLoading && displayMembers.length > 0 && (
         <div className="flex flex-col gap-3">
-          {members.map((member) => {
+          {displayMembers.map((member) => {
             const isMentor = mentorAddresses.has(member.address.toLowerCase());
             const isAdmin = adminAddresses.has(member.address.toLowerCase());
             const isPromoting = promotingAddress === member.address;

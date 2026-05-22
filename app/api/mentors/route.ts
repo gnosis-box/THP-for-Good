@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllMentors, insertMentor } from '@/lib/db';
-
-function isAdmin(req: Request): boolean {
-  const admins = (process.env.ADMIN_ADDRESSES ?? '').toLowerCase().split(',').filter(Boolean);
-  const caller = (req.headers.get('x-wallet-address') ?? '').toLowerCase();
-  return admins.includes(caller);
-}
+import { isAdminRequest } from '@/lib/admin';
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const skill = searchParams.get('skill') ?? undefined;
   const q = searchParams.get('q')?.toLowerCase();
-  const all = searchParams.get('all') === '1' && isAdmin(request);
+  const all = searchParams.get('all') === '1' && isAdminRequest(request);
 
   let mentors = getAllMentors(skill, all);
 

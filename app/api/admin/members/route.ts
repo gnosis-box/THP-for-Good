@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminAddress } from '@/lib/db';
+import { isAdminRequest, type GroupMemberDto } from '@/lib/admin';
 import { fetchCirclesScore, toHttpImageUrl } from '@/lib/utils';
 
-export type GroupMemberDto = {
-  address: `0x${string}`;
-  name: string;
-  imageUrl: string | undefined;
-  trustsReceivedCount: number;
-  score: number | null;
-};
-
 export async function GET(request: NextRequest) {
-  const caller = request.headers.get('x-wallet-address') ?? '';
-  if (!caller || !isAdminAddress(caller)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
