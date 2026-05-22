@@ -110,7 +110,7 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
         <p className="text-xs text-muted-foreground break-all">
           Tx:{' '}
           <a
-            href={`https://gnosisscan.io/tx/${state.hash}`}
+            href={`https://explorer.aboutcircles.com/tx/${state.hash}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary underline underline-offset-2"
