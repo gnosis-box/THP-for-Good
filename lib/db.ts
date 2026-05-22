@@ -130,6 +130,22 @@ export function getMentorById(id: number): MentorRow | undefined {
   return { ...row, skills: row.skills ? row.skills.split(',') : [] };
 }
 
+export function getMentorByCirclesAddress(address: string): MentorRow | undefined {
+  const sql = `
+    SELECT
+      m.*,
+      GROUP_CONCAT(st.label) AS skills
+    FROM mentors m
+    LEFT JOIN mentor_skills ms ON ms.mentor_id = m.id
+    LEFT JOIN skill_tags st ON st.id = ms.tag_id
+    WHERE LOWER(m.circles_address) = LOWER(?)
+    GROUP BY m.id
+  `;
+  const row = db.prepare(sql).get(address) as MentorRowRaw | undefined;
+  if (!row) return undefined;
+  return { ...row, skills: row.skills ? row.skills.split(',') : [] };
+}
+
 export function insertMentor(data: InsertMentorData): number {
   const insertMentorStmt = db.prepare(`
     INSERT OR IGNORE INTO mentors (circles_address, name, bio, calendar_link, google_calendar_id, cal_event_type_id, price_crc, mentor_share_percent)

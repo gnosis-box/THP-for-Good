@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllMentors, insertMentor } from '@/lib/db';
+import { getAllMentors, getMentorByCirclesAddress, insertMentor } from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
 import { clampMentorShare } from '@/lib/crc-pay';
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const circlesAddress = searchParams.get('circles_address');
+  if (circlesAddress) {
+    const mentor = getMentorByCirclesAddress(circlesAddress);
+    if (!mentor) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    return NextResponse.json(mentor);
+  }
+
   const skill = searchParams.get('skill') ?? undefined;
   const q = searchParams.get('q')?.toLowerCase();
   const all = searchParams.get('all') === '1' && isAdminRequest(request);
@@ -65,7 +74,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const id = insertMentor({
-      circles_address: data.circles_address,
+      circles_address: data.circles_address.trim().toLowerCase(),
       name: data.name.trim(),
       bio: data.bio?.trim(),
       calendar_link: data.calendar_link?.trim() ?? '',

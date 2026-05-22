@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { useWallet } from '@/components/wallet/WalletProvider';
+import { useCrcBalance } from '@/hooks/use-crc-balance';
 import {
   buildSplitPayTransactions,
   clampMentorShare,
@@ -43,12 +44,22 @@ function mapPayError(err: unknown): string {
 export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selectedSlot: string | null }) {
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
+  const balance = useCrcBalance(address);
   const [email, setEmail] = useState('');
   const [state, setState] = useState<PayState>({ kind: 'idle' });
 
   const sharePercent = clampMentorShare(mentor.mentor_share_percent ?? 20) as MentorSharePercent;
   const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
-  const canPay = isConnected && !!selectedSlot && !!email.trim() && !isSelf && state.kind !== 'loading';
+  const insufficientBalance =
+    balance.status === 'ready' && balance.balance < mentor.price_crc;
+  const canPay =
+    isConnected &&
+    !!selectedSlot &&
+    !!email.trim() &&
+    !isSelf &&
+    state.kind !== 'loading' &&
+    balance.status === 'ready' &&
+    !insufficientBalance;
 
   async function handlePay() {
     if (!selectedSlot || !address) return;
@@ -122,6 +133,22 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
 
   return (
     <div className="flex flex-col gap-3">
+      {balance.status === 'ready' && (
+        <p className="text-sm text-muted-foreground">
+          Your balance: <strong>{balance.formatted} CRC</strong>
+        </p>
+      )}
+      {balance.status === 'not-registered' && (
+        <p className="text-sm text-amber-700">
+          Your wallet is not a registered Circles avatar. Open the app in the Circles playground to
+          pay with CRC.
+        </p>
+      )}
+      {insufficientBalance && (
+        <p className="text-sm text-destructive">
+          You need at least {mentor.price_crc} CRC to book this call.
+        </p>
+      )}
       <p className="text-xs text-muted-foreground">
         Payment split: {sharePercent}% to expert, {100 - sharePercent}% to foundation.
       </p>
