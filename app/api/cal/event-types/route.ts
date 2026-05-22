@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       `https://api.cal.com/v2/event-types?username=${encodeURIComponent(username)}`,
       {
         headers: {
-          'cal-api-version': '2024-08-13',
+          'cal-api-version': '2024-06-14',
           ...(key ? { Authorization: `Bearer ${key}` } : {}),
         },
       },
