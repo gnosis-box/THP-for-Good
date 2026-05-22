@@ -1,6 +1,6 @@
-/** THP for Good foundation treasury (DIV-L1-02). */
+/** THP for Good foundation treasury — Circles organization (DIV-L1-02). */
 export const FOUNDATION_ADDRESS =
-  '0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00' as const;
+  '0xc02D5aaCA64dE428D571dA42538232C431E0CDeD' as const;
 
 export const MENTOR_SHARE_OPTIONS = [0, 10, 20, 30, 50] as const;
 export type MentorSharePercent = (typeof MENTOR_SHARE_OPTIONS)[number];
