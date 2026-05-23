@@ -1,7 +1,7 @@
 # Analytics & statistics strategy — THP for Good
 
 Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Good/issues/61).  
-**Status:** Phase 1 **implemented** on branch `impl/l4-03-analytics` — pending rebase on `dev` + merge ([#67](https://github.com/gnosis-box/THP-for-Good/pull/67)). Infra Umami prod : `https://stats.thp.gnosis.box` (Coolify env **production**, credentials partagés sur tous les envs app).
+**Status:** Phase 1 **merged to `dev`** (PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67)). Phase 2 app scope **implemented** on `impl/l4-03-analytics` — pending PR → `dev` + Coolify rebuild. Infra Umami prod : `https://stats.thp.gnosis.box`.
 
 **Core principle:** CRC volume, payment splits, treasury inflows, and TRUST edges are **on-chain facts**. SQLite and Umami add **context** (who booked whom, which skill, UX funnel) — they must not be the source of truth for money metrics.
 
@@ -214,18 +214,20 @@ Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnos
 | **Recent PAY txs** | SQLite `bookings` with `tx_hash` → explorer `/tx/{hash}` (no booker address) | ✅ |
 | **Reconciliation alert** | Count only: bookings without `tx_hash` > 24h | ✅ |
 | **Tags / active experts** | SQLite aggregates (labeled off-chain) | ✅ |
-| **Umami** | Public share link on `/stats` (`NEXT_PUBLIC_UMAMI_SHARE_URL`) | ✅ code ; ⬜ Coolify var + rebuild all envs |
+| **Umami** | Share iframe + link on `/stats` | ✅ |
 | **Group CRC balance** | RPC `getProfileView(GROUP_ADDRESS)` | ✅ |
-| **Expert CRC balances** | RPC per active expert | ⬜ §7.1 P2 |
-| **Dune (optional)** | External link on `/stats` (Gnosis overview) | ✅ link ; ⬜ iframe |
+| **Expert CRC balances** | RPC per active expert (`THP_STATS_MAX_EXPERT_BALANCES`) | ✅ |
+| **Dune** | Link + optional embed (`NEXT_PUBLIC_DUNE_*_EMBED_URL`) + cached API KPIs | ✅ code ; ⬜ Dune queries + Coolify env |
 
 ### API
 
 | Route | Auth | Source |
 |-------|------|--------|
-| `GET /api/stats` | Public | Treasury RPC + explorer URLs + `getStatsEnrichment()` + `getStatsReconcile()` |
+| `GET /api/stats` | Public | Treasury + group RPC, expert balances, explorer URLs, enrichment, reconcile, optional Dune cache |
+| `GET /api/me/stats` | Wallet header (`x-wallet-address`) | Expert self-service stats (active mentors only) |
+| `POST /api/trust` | Public | Persists `trust_attestations` (+ optional `trust_tx_hash`) |
 
-Implementation: [`app/api/stats/route.ts`](../app/api/stats/route.ts), [`lib/analytics-explorer.ts`](../lib/analytics-explorer.ts), [`components/stats/StatsDashboard.tsx`](../components/stats/StatsDashboard.tsx).
+Implementation: [`app/api/stats/route.ts`](../app/api/stats/route.ts), [`app/api/me/stats/route.ts`](../app/api/me/stats/route.ts), [`lib/analytics-explorer.ts`](../lib/analytics-explorer.ts), [`lib/dune-cache.ts`](../lib/dune-cache.ts), [`components/stats/StatsDashboard.tsx`](../components/stats/StatsDashboard.tsx), [`components/profile/ExpertStatsPanel.tsx`](../components/profile/ExpertStatsPanel.tsx).
 
 No custom on-chain indexer. **No `SUM(price_crc)` as KPI.** Reconcile detail with wallet addresses remains admin-only future work if needed.
 
@@ -257,24 +259,24 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | **1 — P1 UX** | Show `meta.startBlock` in UI | « Analytics depuis le block … » | ✅ |
 | **1 — P1 links** | « Ecosystem dashboards » block | Dune Gnosis overview + Umami share CTAs | ✅ |
 | **2 — P2 off-chain** | Booking intent count | `bookingIntentCount` in enrichment, labelled off-chain | ✅ |
-| **2 — P2 on-chain** | Expert CRC balances (active only) | RPC per expert ; skip if > ~15 active (perf) | ⬜ optional |
-| **3 — P3** | Dune / Umami iframes | **Skip Phase 1** — link-out is enough | — |
-
-**Out of scope on this branch:** custom on-chain indexer, `SUM(price_crc)`, booker wallets on `/stats`, Phase 2 (`trust_tx_hash`, expert self-service), THP-specific Dune dashboard.
+| **2 — P2 on-chain** | Expert CRC balances (active only) | RPC per expert ; cap via `THP_STATS_MAX_EXPERT_BALANCES` | ✅ |
+| **3 — P3** | Dune / Umami iframes | Embed on `/stats` + CSP `frame-src` | ✅ |
+| **C — Phase 2** | `trust_tx_hash` + `POST /api/trust` | [`TrustButton`](../components/bookings/TrustButton.tsx) | ✅ |
+| **D — Phase 2** | Expert stats `/profile` | `GET /api/me/stats` | ✅ |
+| **E — Phase 2** | Dune cache + embed env | [`lib/dune-client.ts`](../lib/dune-client.ts), [`lib/dune-cache.ts`](../lib/dune-cache.ts) | ✅ code ; ⬜ Dune dashboard + API key |
 
 ### 7.3 Phase 1 definition of done
 
 | Done | Criterion |
 |:----:|-----------|
-| ⬜ | Umami share committed + `NEXT_PUBLIC_UMAMI_SHARE_URL` on Coolify |
-| ✅ | Group balance RPC on `/stats` |
-| ✅ | `startBlock` visible in UI |
-| ✅ | Dune external link on `/stats` |
-| ✅ | Booking intent count (off-chain) |
-| ⬜ | (Optional) Active expert CRC balances |
-| ⬜ | Smoke test `mestryx.thp.gnosis.box/stats` |
-| ⬜ | PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) rebased on `dev` + merged |
-| ⬜ | Rebuild dev + prod — Umami script + `/stats` live |
+| ✅ | Umami share committed + env documented |
+| ⬜ | `NEXT_PUBLIC_UMAMI_SHARE_URL` on all Coolify apps + rebuild |
+| ✅ | Active expert CRC balances |
+| ⬜ | Smoke test dev/prod `/stats` |
+| ✅ | PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) merged to `dev` |
+| ⬜ | Phase 2 PR merged + prod rebuild |
+| ✅ | `trust_tx_hash` persistence |
+| ✅ | Expert self-service stats on `/profile` |
 
 ---
 
@@ -306,20 +308,20 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | ✅ | Umami app code | Script, CSP, events (`expert_view`, `pay_drawer_open`, `pay_success`, `trust_click`) |
 | ✅ | Umami infra prod | Single instance `stats.thp.gnosis.box` ; shared `NEXT_PUBLIC_UMAMI_*` on all Coolify apps |
 | ✅ | Umami public share link (code) | `NEXT_PUBLIC_UMAMI_SHARE_URL` — see §6 |
-| ⬜ | Umami share **deployed** | Coolify var + rebuild ; details §7.2 Lot 0 |
-| ⬜ | **`/stats` UX polish** (see §7.1–§7.2) | Lots 1–2 : group balance, startBlock UI, Dune CTA, booking intent |
-| ⬜ | Merge **`impl/l4-03-analytics` → `dev`** | PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) — rebased on `dev` |
-| ⬜ | Tracking live on **prod** | Needs merge to `master` + rebuild (`thp.gnosis.box`) |
-| ⬜ | Dune dashboard (optional) | Public aggregate chart + link/embed on `/stats` — link-only in Lot 1 |
+| ✅ | Merge **`impl/l4-03-analytics` → `dev`** | PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) |
+| ⬜ | Phase 2 follow-up PR → `dev` | Expert balances, iframes, trust_tx, me/stats, Dune cache |
+| ⬜ | Tracking live on **prod** | Merge `dev` → `master` + rebuild |
+| ✅ | Dune embed + cache (code) | Env: `DUNE_API_KEY`, `DUNE_QUERY_*`, `NEXT_PUBLIC_DUNE_*_EMBED_URL` |
 
 ### Phase 2
 
 | Done | Task | Output |
 |:----:|------|--------|
-| ⬜ | Store `trust_tx_hash` on attest | Full TRUST audit trail |
-| ⬜ | Expert self-service stats | On-chain CRC to their avatar |
-| ⬜ | Automated Dune → cache | Faster load / optional embedded KPIs |
-| ⬜ | Umami iframe embed on `/stats` | Optional — public **share link** is Phase 1 (§6) |
+| ✅ | Store `trust_tx_hash` on attest | [`POST /api/trust`](../app/api/trust/route.ts) + [`TrustButton`](../components/bookings/TrustButton.tsx) |
+| ✅ | Expert self-service stats | [`GET /api/me/stats`](../app/api/me/stats/route.ts) + [`ExpertStatsPanel`](../components/profile/ExpertStatsPanel.tsx) |
+| ✅ | Dune → cache | [`lib/dune-cache.ts`](../lib/dune-cache.ts) (SQLite TTL) |
+| ✅ | Umami iframe embed on `/stats` | Share URL iframe + CSP |
+| ⬜ | THP-specific Dune dashboard | Create on dune.com + set `NEXT_PUBLIC_DUNE_THP_EMBED_URL` |
 
 ---
 
@@ -348,7 +350,7 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | 1 | **On-chain first** for CRC KPIs? | ✅ **Yes** — explorer + RPC ; SQLite reconcile only |
 | 2 | Dune dashboard visibility | ✅ **Public** when built ; link/embed on `/stats` (optional Phase 1) |
 | 3 | Umami scope | ✅ UX events only ; no financial totals |
-| 4 | Phase 1 must-ship | ✅ **`/stats` + `/api/stats` + Umami** (Dune optional) — code done, merge pending |
+| 4 | Phase 1 must-ship | ✅ **Merged to `dev`** — Phase 2 code on branch pending PR |
 | 5 | Expert stats Phase 1? | ✅ No — public `/stats` only ; expert tab Phase 2 |
 
 ---
@@ -367,4 +369,4 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 
 ---
 
-*Last updated: 2026-05-23 — §7.2 sprint plan + DoD ; Umami share URL ; Phase 1 checklist.*
+*Last updated: 2026-05-23 — Phase 2 implemented (expert balances, iframes, trust_tx_hash, me/stats, Dune cache).*

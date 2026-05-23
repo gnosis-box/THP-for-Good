@@ -49,3 +49,9 @@ CREATE TABLE IF NOT EXISTS trust_attestations (
   trust_tx_hash TEXT,
   attested_at   TEXT    DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS dune_cache (
+  cache_key    TEXT PRIMARY KEY,
+  payload_json TEXT NOT NULL,
+  fetched_at   TEXT NOT NULL
+);

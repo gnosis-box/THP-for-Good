@@ -1,4 +1,5 @@
 import { PageNav } from '@/components/layout/PageNav';
+import { ExpertStatsPanel } from '@/components/profile/ExpertStatsPanel';
 import { ProfileLookup } from '@/components/profile/ProfileLookup';
 
 export default function ProfilePage() {
@@ -12,6 +13,8 @@ export default function ProfilePage() {
       </div>
 
       <ProfileLookup />
+
+      <ExpertStatsPanel />
 
       <PageNav />
     </div>

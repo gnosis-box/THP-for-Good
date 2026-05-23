@@ -1,17 +1,25 @@
 async function buildContractRunner(address: string) {
   const { sendTransactions } = await import('@aboutcircles/miniapp-sdk');
+  let lastHashes: string[] = [];
+
   return {
     address: address as `0x${string}`,
     publicClient: null as unknown,
     init: async () => {},
-    sendTransaction: (txs: { to: string; data: string; value?: bigint }[]) =>
-      sendTransactions(
+    sendTransaction: async (txs: { to: string; data: string; value?: bigint }[]) => {
+      lastHashes = await sendTransactions(
         txs.map((tx) => ({ to: tx.to, data: tx.data, value: String(tx.value ?? '0') })),
-      ),
+      );
+      return lastHashes;
+    },
+    getLastHashes: () => lastHashes,
   };
 }
 
-export async function addTrust(viewerAddress: string, expertAddress: string): Promise<void> {
+export async function addTrust(
+  viewerAddress: string,
+  expertAddress: string,
+): Promise<string | null> {
   const [{ Sdk }, { circlesConfig }] = await Promise.all([
     import('@aboutcircles/sdk'),
     import('@aboutcircles/sdk-utils'),
@@ -20,6 +28,8 @@ export async function addTrust(viewerAddress: string, expertAddress: string): Pr
   const sdk = new Sdk(circlesConfig[100], runner);
   const avatar = await sdk.getAvatar(viewerAddress as `0x${string}`);
   await avatar.trust.add(expertAddress as `0x${string}`);
+  const hashes = runner.getLastHashes();
+  return hashes[0] ?? null;
 }
 
 export async function removeTrust(viewerAddress: string, expertAddress: string): Promise<void> {

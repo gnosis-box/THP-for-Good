@@ -497,6 +497,7 @@ export type StatsEnrichment = {
   totalExperts: number;
   tagCounts: StatsTagCount[];
   trustAttestationCount: number;
+  trustAttestationsWithTxHash: number;
   paidBookingCount: number;
   bookingIntentCount: number;
   recentPaidBookings: StatsRecentPaidBooking[];
@@ -525,6 +526,14 @@ export function getStatsEnrichment(): StatsEnrichment {
     .all() as StatsTagCount[];
   const trustAttestationCount = (
     db.prepare('SELECT COUNT(*) AS n FROM trust_attestations').get() as { n: number }
+  ).n;
+  const trustAttestationsWithTxHash = (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM trust_attestations
+         WHERE trust_tx_hash IS NOT NULL AND TRIM(trust_tx_hash) != ''`,
+      )
+      .get() as { n: number }
   ).n;
   const paidBookingCount = (
     db
@@ -558,6 +567,7 @@ export function getStatsEnrichment(): StatsEnrichment {
     totalExperts,
     tagCounts,
     trustAttestationCount,
+    trustAttestationsWithTxHash,
     paidBookingCount,
     bookingIntentCount,
     recentPaidBookings,
@@ -591,6 +601,46 @@ export function getStatsReconcile(): StatsReconcile {
   }
 
   return { pendingTxCount, oldestPendingAgeHours };
+}
+
+export function insertTrustAttestation(bookingId: number, trustTxHash?: string | null): void {
+  db.prepare(
+    `INSERT OR IGNORE INTO trust_attestations (booking_id, trust_tx_hash) VALUES (?, ?)`,
+  ).run(bookingId, trustTxHash?.trim() || null);
+}
+
+export function getMentorPaidBookingCount(mentorId: number): number {
+  return (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM bookings
+         WHERE mentor_id = ? AND tx_hash IS NOT NULL AND TRIM(tx_hash) != ''`,
+      )
+      .get(mentorId) as { n: number }
+  ).n;
+}
+
+export function getMentorTrustAttestationCount(mentorId: number): number {
+  return (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM trust_attestations t
+         JOIN bookings b ON b.id = t.booking_id
+         WHERE b.mentor_id = ?`,
+      )
+      .get(mentorId) as { n: number }
+  ).n;
+}
+
+export function getMentorBookingIntentCount(mentorId: number): number {
+  return (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM bookings
+         WHERE mentor_id = ? AND (tx_hash IS NULL OR TRIM(tx_hash) = '')`,
+      )
+      .get(mentorId) as { n: number }
+  ).n;
 }
 
 export default db;

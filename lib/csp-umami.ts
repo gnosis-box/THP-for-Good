@@ -11,15 +11,17 @@ export function umamiOriginFromEnv(): string | null {
 
 export function buildContentSecurityPolicy(frameAncestors: string): string {
   const umamiOrigin = umamiOriginFromEnv();
-  const parts = [
-    `frame-ancestors ${frameAncestors}`,
-    'frame-src https://calendar.google.com',
-  ];
+  const frameSrc = ['https://calendar.google.com', 'https://dune.com', 'https://*.dune.com'];
+  if (umamiOrigin) frameSrc.push(umamiOrigin);
+
+  const parts = [`frame-ancestors ${frameAncestors}`, `frame-src ${frameSrc.join(' ')}`];
+
   if (umamiOrigin) {
     parts.push(`script-src 'self' 'unsafe-inline' ${umamiOrigin}`);
     parts.push(
       `connect-src 'self' ${umamiOrigin} https://rpc.aboutcircles.com https://explorer.aboutcircles.com`,
     );
   }
+
   return parts.join('; ') + ';';
 }
