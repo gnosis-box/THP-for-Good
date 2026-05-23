@@ -48,7 +48,7 @@ export async function createCalBooking(params: {
   attendeeEmail: string;
   mentorName: string;
   txHash?: string;
-}): Promise<{ uid: string } | null> {
+}): Promise<{ uid: string; meetingUrl?: string } | null> {
   const title = `[THP For Good] ${params.attendeeName} => ${params.mentorName}`;
   const notes = [
     params.txHash
@@ -81,7 +81,19 @@ export async function createCalBooking(params: {
     return null;
   }
 
-  const data = (await res.json()) as { status: string; data?: { uid: string } };
+  const data = (await res.json()) as {
+    status: string;
+    data?: {
+      uid: string;
+      meetingUrl?: string;
+      references?: { meetingUrl?: string }[];
+    };
+  };
   if (data.status !== 'success' || !data.data?.uid) return null;
-  return { uid: data.data.uid };
+
+  const meetingUrl =
+    data.data.meetingUrl ??
+    data.data.references?.find((r) => r.meetingUrl)?.meetingUrl;
+
+  return { uid: data.data.uid, meetingUrl };
 }

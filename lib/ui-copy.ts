@@ -8,6 +8,8 @@ export const UI_COPY = {
     emptySearch: 'No mentors found for this search.',
     searchPlaceholder: 'Search by name, skill or bio…',
     filterAll: 'All',
+    languageFilterLabel: 'Session language',
+    languageFilterAll: 'Any language',
   },
   circlesHint: {
     title: 'Open in Circles to pay with CRC',
@@ -24,6 +26,11 @@ export const UI_COPY = {
     bookSession: 'Book session',
     reviewAndPay: 'Review & pay',
     selectSlotFirst: 'Select a slot above first.',
+    successTrustReminder: (expertName: string) =>
+      `After your call, trust ${expertName} on My Calls to strengthen the Circles network.`,
+    viewMyCalls: 'View my calls',
+    openCalBooking: 'Open Cal.com booking',
+    openExpertCalendar: 'Open expert calendar',
     noCalSelf:
       'No availability configured yet. Click "Edit my profile" to connect your Cal.com.',
     noCalVisitor: 'Availability not configured for this mentor yet.',

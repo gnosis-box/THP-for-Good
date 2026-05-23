@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
   };
 
   let calBookingUid: string | undefined;
+  let calendarEventUrl: string | undefined;
 
   if (data.slot_time && data.attendee_email) {
     const mentor = getMentorById(data.mentor_id);
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
           txHash: data.tx_hash,
         });
         calBookingUid = result?.uid;
+        calendarEventUrl = result?.meetingUrl;
       } catch (err) {
         console.error('[api/bookings] Cal.com booking failed:', err);
       }
@@ -94,9 +96,17 @@ export async function POST(request: NextRequest) {
       booker_address: data.booker_address,
       tx_hash: data.tx_hash,
       slot_time: data.slot_time,
+      calendar_event_url: calendarEventUrl,
       cal_booking_uid: calBookingUid,
     });
-    return NextResponse.json({ id, cal_booking_uid: calBookingUid ?? null }, { status: 201 });
+    return NextResponse.json(
+      {
+        id,
+        cal_booking_uid: calBookingUid ?? null,
+        calendar_event_url: calendarEventUrl ?? null,
+      },
+      { status: 201 },
+    );
   } catch (err) {
     console.error('[api/bookings POST]', err);
     return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });

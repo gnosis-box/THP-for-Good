@@ -37,3 +37,19 @@ export function MentorSplitShare({ expertPercent, className }: SplitShareProps) 
     </div>
   );
 }
+
+type LanguageTagsProps = {
+  languages: string[];
+  className?: string;
+  prefix?: string;
+};
+
+export function MentorLanguageTags({ languages, className, prefix = 'Calls' }: LanguageTagsProps) {
+  if (languages.length === 0) return null;
+
+  return (
+    <p className={cn('text-xs text-muted-foreground', className)}>
+      {prefix}: {languages.map((c) => c.toUpperCase()).join(' · ')}
+    </p>
+  );
+}

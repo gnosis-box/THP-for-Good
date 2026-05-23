@@ -12,6 +12,7 @@ import {
 import { MentorCard } from './MentorCard';
 import { MentorSearch } from './MentorSearch';
 import { SkillFilter } from './SkillFilter';
+import { LanguageFilter } from './LanguageFilter';
 
 type Props = {
   mentors: MentorRow[];
@@ -20,17 +21,22 @@ type Props = {
 
 export function MentorBrowser({ mentors, tags }: Props) {
   const [selectedSkill, setSelectedSkill] = useState('');
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filtered = mentors.filter((m) => {
     const matchSkill = !selectedSkill || m.skills.includes(selectedSkill);
+    const callLanguages = m.call_languages.length > 0 ? m.call_languages : m.spoken_languages;
+    const matchLanguage =
+      selectedLanguages.length === 0 ||
+      selectedLanguages.some((code) => callLanguages.includes(code));
     const q = searchQuery.toLowerCase();
     const matchSearch =
       !q ||
       m.name.toLowerCase().includes(q) ||
       (m.bio ?? '').toLowerCase().includes(q) ||
       m.skills.some((s) => s.toLowerCase().includes(q));
-    return matchSkill && matchSearch;
+    return matchSkill && matchLanguage && matchSearch;
   });
 
   return (
@@ -40,10 +46,11 @@ export function MentorBrowser({ mentors, tags }: Props) {
         <p className="text-sm text-muted-foreground">{UI_COPY.home.subtitle}</p>
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-4">
         <p className="text-sm font-medium">{UI_COPY.home.filterLabel}</p>
         <MentorSearch value={searchQuery} onChange={setSearchQuery} />
         <SkillFilter tags={tags} selected={selectedSkill} onSelect={setSelectedSkill} />
+        <LanguageFilter selected={selectedLanguages} onChange={setSelectedLanguages} />
       </section>
 
       {filtered.length === 0 ? (

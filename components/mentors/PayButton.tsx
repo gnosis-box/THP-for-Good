@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { TrustPathPanel } from '@/components/booking/TrustPathPanel';
@@ -18,12 +19,18 @@ import {
 } from '@/lib/crc-pay';
 import { mapPayError } from '@/lib/pay-copy';
 import { UI_COPY } from '@/lib/ui-copy';
+import { cn } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
 type PayState =
   | { kind: 'idle' }
   | { kind: 'loading' }
-  | { kind: 'success'; hash: string; slotTime: string }
+  | {
+      kind: 'success';
+      hash: string;
+      slotTime: string;
+      calendarEventUrl: string | null;
+    }
   | { kind: 'error' };
 
 function fmtSlot(iso: string) {
@@ -113,7 +120,7 @@ export function PayButton({
       const hashes = await sendTransactions(txs);
       const txHash = hashes[0];
 
-      await fetch('/api/bookings', {
+      const bookingRes = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -126,7 +133,21 @@ export function PayButton({
         }),
       });
 
-      setState({ kind: 'success', hash: txHash, slotTime: selectedSlot });
+      if (!bookingRes.ok) {
+        throw new Error('Payment succeeded but booking could not be saved. Check My Calls or contact support.');
+      }
+
+      const booking = (await bookingRes.json()) as {
+        id: number;
+        calendar_event_url?: string | null;
+      };
+
+      setState({
+        kind: 'success',
+        hash: txHash,
+        slotTime: selectedSlot,
+        calendarEventUrl: booking.calendar_event_url ?? null,
+      });
       onSuccess?.();
     } catch (err) {
       const message = mapPayError(err);
@@ -136,12 +157,14 @@ export function PayButton({
   }
 
   if (state.kind === 'success') {
+    const calUrl = state.calendarEventUrl ?? mentor.calendar_link ?? null;
+
     return (
       <StatusAlert
         variant="success"
         title="Booking confirmed!"
         description={
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <p>{fmtSlot(state.slotTime)}</p>
             <p>
               {mentor.cal_event_type_id
@@ -159,15 +182,44 @@ export function PayButton({
                 {state.hash.slice(0, 10)}…{state.hash.slice(-8)}
               </a>
             </p>
-            {mentor.calendar_link && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(mentor.calendar_link, '_blank', 'noopener,noreferrer')}
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              {state.calendarEventUrl ? (
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="min-h-11"
+                  onClick={() =>
+                    window.open(state.calendarEventUrl!, '_blank', 'noopener,noreferrer')
+                  }
+                >
+                  {UI_COPY.booking.openCalBooking}
+                </Button>
+              ) : null}
+              {mentor.calendar_link ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="min-h-11"
+                  onClick={() => window.open(mentor.calendar_link, '_blank', 'noopener,noreferrer')}
+                >
+                  {UI_COPY.booking.openExpertCalendar}
+                </Button>
+              ) : null}
+              <Link
+                href="/calls"
+                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'min-h-11')}
               >
-                Open calendar link
-              </Button>
+                {UI_COPY.booking.viewMyCalls}
+              </Link>
+            </div>
+            {calUrl ? null : (
+              <p className="text-xs text-muted-foreground">
+                Open your expert&apos;s calendar from My Calls once the invite arrives.
+              </p>
             )}
+            <p className="text-sm text-muted-foreground">
+              {UI_COPY.booking.successTrustReminder(mentor.name)}
+            </p>
           </div>
         }
       />
