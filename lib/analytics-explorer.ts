@@ -5,6 +5,9 @@ export const TREASURY_ORG_ADDRESS = FOUNDATION_ADDRESS;
 export const DEFAULT_GROUP_ADDRESS =
   '0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00' as const;
 
+export const DUNE_GNOSIS_OVERVIEW_URL =
+  'https://dune.com/gnosischain_team/gnosis-app-overview' as const;
+
 const EXPLORER_BASE = 'https://explorer.aboutcircles.com';
 
 export function getAnalyticsStartBlock(): number | null {

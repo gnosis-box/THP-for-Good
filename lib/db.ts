@@ -345,106 +345,6 @@ export function getBookingsByProviderAddress(providerAddress: string): BookingWi
     .all(providerAddress) as BookingWithMentorName[];
 }
 
-export type StatsTagCount = { label: string; count: number };
-
-export type StatsRecentPaidBooking = {
-  id: number;
-  mentorName: string;
-  txHash: string;
-  createdAt: string;
-};
-
-export type StatsEnrichment = {
-  activeExperts: number;
-  totalExperts: number;
-  tagCounts: StatsTagCount[];
-  trustAttestationCount: number;
-  paidBookingCount: number;
-  recentPaidBookings: StatsRecentPaidBooking[];
-};
-
-export type StatsReconcile = {
-  pendingTxCount: number;
-  oldestPendingAgeHours: number | null;
-};
-
-export function getStatsEnrichment(): StatsEnrichment {
-  const activeExperts = (
-    db.prepare('SELECT COUNT(*) AS n FROM mentors WHERE active = 1').get() as { n: number }
-  ).n;
-  const totalExperts = (
-    db.prepare('SELECT COUNT(*) AS n FROM mentors').get() as { n: number }
-  ).n;
-  const tagCounts = db
-    .prepare(
-      `SELECT st.label AS label, COUNT(*) AS count
-       FROM mentor_skills ms
-       JOIN skill_tags st ON st.id = ms.tag_id
-       GROUP BY st.label
-       ORDER BY count DESC, st.label ASC`,
-    )
-    .all() as StatsTagCount[];
-  const trustAttestationCount = (
-    db.prepare('SELECT COUNT(*) AS n FROM trust_attestations').get() as { n: number }
-  ).n;
-  const paidBookingCount = (
-    db
-      .prepare(
-        `SELECT COUNT(*) AS n FROM bookings
-         WHERE tx_hash IS NOT NULL AND TRIM(tx_hash) != ''`,
-      )
-      .get() as { n: number }
-  ).n;
-  const recentPaidBookings = db
-    .prepare(
-      `SELECT b.id AS id, m.name AS mentorName, b.tx_hash AS txHash, b.created_at AS createdAt
-       FROM bookings b
-       JOIN mentors m ON m.id = b.mentor_id
-       WHERE b.tx_hash IS NOT NULL AND TRIM(b.tx_hash) != ''
-       ORDER BY b.created_at DESC
-       LIMIT 10`,
-    )
-    .all() as StatsRecentPaidBooking[];
-
-  return {
-    activeExperts,
-    totalExperts,
-    tagCounts,
-    trustAttestationCount,
-    paidBookingCount,
-    recentPaidBookings,
-  };
-}
-
-export function getStatsReconcile(): StatsReconcile {
-  const pendingTxCount = (
-    db
-      .prepare(
-        `SELECT COUNT(*) AS n FROM bookings
-         WHERE (tx_hash IS NULL OR TRIM(tx_hash) = '')
-           AND datetime(created_at) <= datetime('now', '-24 hours')`,
-      )
-      .get() as { n: number }
-  ).n;
-
-  const oldest = db
-    .prepare(
-      `SELECT MIN(created_at) AS oldest FROM bookings
-       WHERE tx_hash IS NULL OR TRIM(tx_hash) = ''`,
-    )
-    .get() as { oldest: string | null };
-
-  let oldestPendingAgeHours: number | null = null;
-  if (oldest?.oldest) {
-    const ms = Date.now() - new Date(oldest.oldest).getTime();
-    if (Number.isFinite(ms) && ms > 0) {
-      oldestPendingAgeHours = Math.floor(ms / (1000 * 60 * 60));
-    }
-  }
-
-  return { pendingTxCount, oldestPendingAgeHours };
-}
-
 export type AdminHealthStats = {
   bookings: {
     total: number;
@@ -581,6 +481,116 @@ export function getAdminHealthStats(): AdminHealthStats {
       has_trust: row.has_trust === 1,
     })),
   };
+}
+
+export type StatsTagCount = { label: string; count: number };
+
+export type StatsRecentPaidBooking = {
+  id: number;
+  mentorName: string;
+  txHash: string;
+  createdAt: string;
+};
+
+export type StatsEnrichment = {
+  activeExperts: number;
+  totalExperts: number;
+  tagCounts: StatsTagCount[];
+  trustAttestationCount: number;
+  paidBookingCount: number;
+  bookingIntentCount: number;
+  recentPaidBookings: StatsRecentPaidBooking[];
+};
+
+export type StatsReconcile = {
+  pendingTxCount: number;
+  oldestPendingAgeHours: number | null;
+};
+
+export function getStatsEnrichment(): StatsEnrichment {
+  const activeExperts = (
+    db.prepare('SELECT COUNT(*) AS n FROM mentors WHERE active = 1').get() as { n: number }
+  ).n;
+  const totalExperts = (
+    db.prepare('SELECT COUNT(*) AS n FROM mentors').get() as { n: number }
+  ).n;
+  const tagCounts = db
+    .prepare(
+      `SELECT st.label AS label, COUNT(*) AS count
+       FROM mentor_skills ms
+       JOIN skill_tags st ON st.id = ms.tag_id
+       GROUP BY st.label
+       ORDER BY count DESC, st.label ASC`,
+    )
+    .all() as StatsTagCount[];
+  const trustAttestationCount = (
+    db.prepare('SELECT COUNT(*) AS n FROM trust_attestations').get() as { n: number }
+  ).n;
+  const paidBookingCount = (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM bookings
+         WHERE tx_hash IS NOT NULL AND TRIM(tx_hash) != ''`,
+      )
+      .get() as { n: number }
+  ).n;
+  const bookingIntentCount = (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM bookings
+         WHERE tx_hash IS NULL OR TRIM(tx_hash) = ''`,
+      )
+      .get() as { n: number }
+  ).n;
+  const recentPaidBookings = db
+    .prepare(
+      `SELECT b.id AS id, m.name AS mentorName, b.tx_hash AS txHash, b.created_at AS createdAt
+       FROM bookings b
+       JOIN mentors m ON m.id = b.mentor_id
+       WHERE b.tx_hash IS NOT NULL AND TRIM(b.tx_hash) != ''
+       ORDER BY b.created_at DESC
+       LIMIT 10`,
+    )
+    .all() as StatsRecentPaidBooking[];
+
+  return {
+    activeExperts,
+    totalExperts,
+    tagCounts,
+    trustAttestationCount,
+    paidBookingCount,
+    bookingIntentCount,
+    recentPaidBookings,
+  };
+}
+
+export function getStatsReconcile(): StatsReconcile {
+  const pendingTxCount = (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM bookings
+         WHERE (tx_hash IS NULL OR TRIM(tx_hash) = '')
+           AND datetime(created_at) <= datetime('now', '-24 hours')`,
+      )
+      .get() as { n: number }
+  ).n;
+
+  const oldest = db
+    .prepare(
+      `SELECT MIN(created_at) AS oldest FROM bookings
+       WHERE tx_hash IS NULL OR TRIM(tx_hash) = ''`,
+    )
+    .get() as { oldest: string | null };
+
+  let oldestPendingAgeHours: number | null = null;
+  if (oldest?.oldest) {
+    const ms = Date.now() - new Date(oldest.oldest).getTime();
+    if (Number.isFinite(ms) && ms > 0) {
+      oldestPendingAgeHours = Math.floor(ms / (1000 * 60 * 60));
+    }
+  }
+
+  return { pendingTxCount, oldestPendingAgeHours };
 }
 
 export default db;
