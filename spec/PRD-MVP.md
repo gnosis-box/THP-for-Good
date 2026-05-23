@@ -561,6 +561,9 @@ Quand une issue est créée, remplacer *à créer* par le lien `#NN` et ne plus 
 
 | Feature | Description | Liens |
 |---------|-------------|--------|
+| **Analytics & statistics** | Admin/foundation + expert metrics ; SQL aggregations, optional charts | [#61 FEAT-L4-03](https://github.com/gnosis-box/THP-for-Good/issues/61) |
+| **In-app Report issue** | Footer/header link → GitHub Issues ; structured templates | [#62 FEAT-L4-04](https://github.com/gnosis-box/THP-for-Good/issues/62) |
+| **Expert card trust status** | Gnosis-style one-way / two-way trust on `MentorCard` ; reuse `TrustButton` logic | [#63 IMPL-L4-06](https://github.com/gnosis-box/THP-for-Good/issues/63) |
 | **Trust-back par domaine** | Attestation post-call liée aux `skill_tags` ; réputation / crédibilité expert par expertise | [§ FEAT Trust-back](#feat--trust-back-par-domaine-créibilité-expert) |
 | Intuition Trust/NoTrust | Trust on-chain par compétence (mainnet) | [`archive/PRD-Mestryx.md`](archive/PRD-Mestryx.md) |
 | Google Calendar API | Créneaux + notifs | [DIV-L1-05](#détail-div-l1-05) |
@@ -612,6 +615,7 @@ Issues activées sur le repo le 2026-05-21 (`has_issues: true`). Board et issues
 
 ## Liens
 
+- [**Useful links index**](useful-links.md) — repo, deploy, L4 issues, Circles, templates
 - [Project board](https://github.com/orgs/gnosis-box/projects/1/views/1)
 - [Circles playground](https://circles.gnosis.io/playground)
 - Maquette : [`mockup.png`](mockup.png)
