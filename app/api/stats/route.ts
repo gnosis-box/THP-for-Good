@@ -11,7 +11,6 @@ import {
   fetchAvatarBalancesCrc,
   getStatsMaxExpertBalances,
 } from '@/lib/analytics-rpc';
-import { getCachedDuneKpis } from '@/lib/dune-cache';
 import { getAllMentors, getStatsEnrichment, getStatsReconcile } from '@/lib/db';
 import type { StatsApiResponse } from '@/lib/stats-api';
 
@@ -38,11 +37,10 @@ export async function GET() {
     };
   });
 
-  const [treasuryBalanceCrc, groupBalanceCrc, expertBalanceMap, dune] = await Promise.all([
+  const [treasuryBalanceCrc, groupBalanceCrc, expertBalanceMap] = await Promise.all([
     fetchAvatarBalanceCrc(TREASURY_ORG_ADDRESS),
     fetchAvatarBalanceCrc(groupAddress),
     fetchAvatarBalancesCrc(mentorsForBalance.map((m) => m.circles_address)),
-    getCachedDuneKpis(),
   ]);
 
   const experts = expertLinks.map((expert) => ({
@@ -66,7 +64,6 @@ export async function GET() {
     experts,
     enrichment: getStatsEnrichment(),
     reconcile: getStatsReconcile(),
-    dune,
     meta: {
       startBlock: getAnalyticsStartBlock(),
       generatedAt: new Date().toISOString(),

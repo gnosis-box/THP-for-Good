@@ -561,7 +561,7 @@ Quand une issue est créée, remplacer *à créer* par le lien `#NN` et ne plus 
 
 | Feature | Description | Liens |
 |---------|-------------|--------|
-| **Analytics & statistics** | **On-chain first** (Dune + Circles RPC) for CRC/split/TRUST ; Umami UX ; SQLite enrichment only — **Phase 1 merged** ([#67](https://github.com/gnosis-box/THP-for-Good/pull/67)); Phase 2 (expert balances, trust_tx_hash, `/api/me/stats`, Dune cache) on `impl/l4-03-analytics` | [#61](https://github.com/gnosis-box/THP-for-Good/issues/61), [`analytics-strategy.md`](analytics-strategy.md) |
+| **Analytics & statistics** | **On-chain first** (Circles RPC + Explorer) for CRC/split/TRUST ; Umami UX ; SQLite enrichment only — Phase 1 merged ([#67](https://github.com/gnosis-box/THP-for-Good/pull/67)) ; Phase 2 (expert balances, trust_tx_hash, `/api/me/stats`, Umami iframe) on `impl/l4-03-analytics` | [#61](https://github.com/gnosis-box/THP-for-Good/issues/61), [`analytics-strategy.md`](analytics-strategy.md) |
 | **In-app Report issue** | Footer link → GitHub Issues (`user_feedback.yml`) ; templates in `.github/ISSUE_TEMPLATE/` | [#62 FEAT-L4-04](https://github.com/gnosis-box/THP-for-Good/issues/62) | Done |
 | **Expert card trust status** | `ExpertTrustControl` on `MentorCard` + profile hero ; shared `lib/trust-actions.ts` | [#63 IMPL-L4-06](https://github.com/gnosis-box/THP-for-Good/issues/63) | Done |
 | **Expert session languages** | Spoken languages + languages offered for calls ; filter on home | [#64 FEAT-L4-07](https://github.com/gnosis-box/THP-for-Good/issues/64) |

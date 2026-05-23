@@ -14,7 +14,7 @@ Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Goo
 | **Foundation / admin** | **On-chain** CRC volume, expert vs treasury legs, treasury org balance, trust graph growth |
 | **Experts** (optional v2) | **On-chain** CRC received, trusts received (`trustStats`) |
 | **Product** | Funnel browse → PAY → TRUST (Umami); off-chain booking intent vs confirmed txs |
-| **Hackathon / Gnosis** | Public, verifiable dashboards — Dune + Circles explorer |
+| **Hackathon / Gnosis** | Public, verifiable activity — Circles Explorer + `/stats` |
 
 ---
 
@@ -23,7 +23,7 @@ Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Goo
 ```
                     ┌─────────────────────────────────────┐
                     │     ON-CHAIN (primary)              │
-                    │  Dune · Circles RPC · Explorer      │
+                    │  Circles RPC · Explorer              │
                     ├─────────────────────────────────────┤
                     │ CRC transferred (per tx / leg)      │
                     │ Split: expert avatar + org 0xc02D…  │
@@ -46,7 +46,7 @@ Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Goo
 |-------------|----------------|------------------------|
 | **CRC volume** | On-chain transfers | SQLite `bookings.tx_hash` → join |
 | **Expert vs THP split** | Decode split legs from tx batch | `mentor_share_percent` for expected vs actual |
-| **TRUST edges** | `TrustRelations` (Circles RPC / Dune) | `trust_attestations` audit row |
+| **TRUST edges** | `TrustRelations` (Circles RPC) | `trust_attestations` audit row |
 | **Treasury balance** | Org avatar `getProfileView` / RPC | — |
 | **Booking count (paid)** | Count distinct `tx_hash` on-chain | SQLite rows with non-null `tx_hash` |
 | **Top experts by CRC** | Aggregate transfers **to** expert addresses | Map address → `mentors` table |
@@ -59,7 +59,6 @@ Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Goo
 
 | Layer | Tool | Role | Phase |
 |-------|------|------|-------|
-| **On-chain BI** | **[Dune Analytics](https://dune.com/)** | CRC volume, split legs, treasury, public hackathon dashboard | **1** |
 | **Live chain reads** | **Circles RPC** + **Explorer** | Balances, trust state, tx detail, path viewer | **1** |
 | **Web analytics** | **[Umami](https://umami.is/)** | Pages, referrers, UX events (not CRC totals) | **1** |
 | **Admin UI** | **`/stats`** (public) | On-chain links + SQLite enrichment; in [`lib/nav.ts`](../lib/nav.ts) NAV | **1** |
@@ -98,7 +97,7 @@ https://explorer.aboutcircles.com/avatar/0xC19BC204eb1c1D5B3FE500E5E5dfaBaB625F2
 | `/avatar/{address}/graph` | Trust graph |
 | `/tx/{hash}` | Single PAY batch detail (join with `bookings.tx_hash`) |
 
-**Implication for `/stats` (public):** link out to explorer events for treasury org, group, and each expert — do not replicate event ingestion in SQLite or a custom job unless Dune aggregates are required.
+**Implication for `/stats` (public):** link out to explorer events for treasury org, group, and each expert — do not replicate event ingestion in SQLite or a custom job.
 
 ### 4.2 Watch addresses (links only — not a local index)
 
@@ -114,7 +113,6 @@ https://explorer.aboutcircles.com/avatar/0xC19BC204eb1c1D5B3FE500E5E5dfaBaB625F2
 | Tool | URL | Use for |
 |------|-----|---------|
 | **Circles explorer — events** | `…/avatar/{address}/events?startBlock=` | **Default** per-address CRC / activity (no custom indexer) |
-| **Dune — Gnosis overview** | https://dune.com/gnosischain_team/gnosis-app-overview | Optional cross-address charts / public hackathon dashboard |
 | **Circles explorer (tx)** | https://explorer.aboutcircles.com/tx/{hash} | Already linked from `/calls` (`tx_hash`) |
 | **Circles RPC** | https://rpc.aboutcircles.com/ | Live balance (`getProfileView`), `TrustRelations` for trust UI |
 | **Trust path viewer** | https://data.aboutcircles.com/path-viewer | Path capacity / trust-bound transfers |
@@ -130,13 +128,11 @@ https://explorer.aboutcircles.com/avatar/0xC19BC204eb1c1D5B3FE500E5E5dfaBaB625F2
 
 [`PayButton`](../components/mentors/PayButton.tsx) persists **`bookings.tx_hash`** — deep link to [`/tx/{hash}`](https://explorer.aboutcircles.com/) for leg detail; org/expert totals live on each avatar **`/events`** page.
 
-**Dune (optional):** only if we need a single public chart aggregating many addresses — otherwise explorer links + `startBlock` per avatar are enough for Phase 1.
-
 ### 4.5 TRUST on-chain
 
 | Signal | Source |
 |--------|--------|
-| Trust edge booker → expert | `circles_query` / Dune on `TrustRelations` |
+| Trust edge booker → expert | Circles RPC / `TrustRelations` |
 | Trust tx hash (optional) | Extend `POST /api/trust` to store `trust_tx_hash` ([`schema.sql`](../lib/schema.sql) column exists) |
 | Mutual / two-way | Bidirectional query (same as [`TrustButton`](../components/bookings/TrustButton.tsx)) |
 
@@ -149,33 +145,15 @@ https://explorer.aboutcircles.com/avatar/0xC19BC204eb1c1D5B3FE500E5E5dfaBaB625F2
 | Per-expert / org CRC history | **Link** to explorer `/avatar/…/events` — no ingestion |
 | Reconciliation | Compare SQLite `tx_hash` + listed price vs explorer tx page |
 
-Avoid building a server loop that re-indexes explorer events unless Dune aggregate dashboards are in scope.
+Avoid building a server loop that re-indexes explorer events.
 
 ---
 
-## 5. Dune — optional aggregate dashboard
+## 5. Dune — out of scope
 
-**Not required** if Circles Explorer `/events` per avatar + admin deep links are enough.
+**Removed from THP (2026-05-23).** Circles Explorer per-avatar `/events` + RPC balances on `/stats` are sufficient; Dune added ops cost without distinct value for this MVP.
 
-Use Dune when we want one **public hackathon view** crossing treasury + all experts without clicking each explorer URL. Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnosis-app-overview).
-
-### Suggested queries / widgets
-
-| Widget | On-chain logic |
-|--------|----------------|
-| **Total CRC to treasury org** | Sum transfers → `0xc02D…` over time |
-| **CRC to experts** | Sum transfers → known mentor addresses |
-| **Split ratio (actual)** | Expert leg / (expert + treasury) per tx or aggregate |
-| **Paid sessions (tx count)** | Distinct txs matching split-pay pattern from bookers |
-| **Donations** | Transfers → org excluding known booking batch pattern |
-| **Trust edges created** | New `TrustRelations` where trustee ∈ experts |
-| **Top experts by CRC received** | Group by `to` address, join names off-chain |
-
-### Off-chain join (optional Dune spell)
-
-Export `mentors(circles_address, name)` as Dune **seed CSV** or API upload — maps addresses to human-readable expert names on dashboards.
-
-Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnosis-app-overview).
+External reference only (not wired in app): [Gnosis app overview on Dune](https://dune.com/gnosischain_team/gnosis-app-overview).
 
 ---
 
@@ -217,17 +195,16 @@ Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnos
 | **Umami** | Share iframe + link on `/stats` | ✅ |
 | **Group CRC balance** | RPC `getProfileView(GROUP_ADDRESS)` | ✅ |
 | **Expert CRC balances** | RPC per active expert (`THP_STATS_MAX_EXPERT_BALANCES`) | ✅ |
-| **Dune** | Link + optional embed (`NEXT_PUBLIC_DUNE_*_EMBED_URL`) + cached API KPIs | ✅ code ; ⬜ Dune queries + Coolify env |
 
 ### API
 
 | Route | Auth | Source |
 |-------|------|--------|
-| `GET /api/stats` | Public | Treasury + group RPC, expert balances, explorer URLs, enrichment, reconcile, optional Dune cache |
+| `GET /api/stats` | Public | Treasury + group RPC, expert balances, explorer URLs, enrichment, reconcile |
 | `GET /api/me/stats` | Wallet header (`x-wallet-address`) | Expert self-service stats (active mentors only) |
 | `POST /api/trust` | Public | Persists `trust_attestations` (+ optional `trust_tx_hash`) |
 
-Implementation: [`app/api/stats/route.ts`](../app/api/stats/route.ts), [`app/api/me/stats/route.ts`](../app/api/me/stats/route.ts), [`lib/analytics-explorer.ts`](../lib/analytics-explorer.ts), [`lib/dune-cache.ts`](../lib/dune-cache.ts), [`components/stats/StatsDashboard.tsx`](../components/stats/StatsDashboard.tsx), [`components/profile/ExpertStatsPanel.tsx`](../components/profile/ExpertStatsPanel.tsx).
+Implementation: [`app/api/stats/route.ts`](../app/api/stats/route.ts), [`app/api/me/stats/route.ts`](../app/api/me/stats/route.ts), [`lib/analytics-explorer.ts`](../lib/analytics-explorer.ts), [`components/stats/StatsDashboard.tsx`](../components/stats/StatsDashboard.tsx), [`components/profile/ExpertStatsPanel.tsx`](../components/profile/ExpertStatsPanel.tsx).
 
 No custom on-chain indexer. **No `SUM(price_crc)` as KPI.** Reconcile detail with wallet addresses remains admin-only future work if needed.
 
@@ -237,12 +214,11 @@ Priority order (stay **on-chain first** ; no financial KPIs from SQLite/Umami AP
 
 | Priority | Panel / change | Source | Effort |
 |----------|----------------|--------|--------|
-| **P1** | Show `meta.startBlock` + link « Gnosis app overview » (Dune) | env + external URL | S |
+| **P1** | Show `meta.startBlock` in UI | env + `GET /api/stats` meta | S |
 | **P1** | **Group avatar CRC balance** (RPC `getProfileView`) | Same pattern as treasury | S |
 | **P2** | **Per-expert CRC balance** (RPC, active experts only) | Circles RPC — public on-chain | M |
 | **P2** | **Booking intent** count (bookings sans `tx_hash`, all ages) | SQLite — label « off-chain intent » | S |
-| **P3** | Dune iframe embed (when THP-specific or Gnosis overview dashboard exists) | Dune public embed | M |
-| **P3** | Umami **share dashboard** iframe (optional — link-out is enough for Phase 1) | Umami share URL | S |
+| **P3** | Umami **share dashboard** iframe | Umami share URL + CSP `frame-src` | S |
 | **—** | Do **not** expose `booker_address`, Umami API keys, or `SUM(price_crc)` on public `/stats` | Privacy / doctrine | — |
 
 **Already public and sufficient for hackathon transparency:** treasury balance, explorer deep links (org / group / experts / txs), off-chain snapshot (counts, tags), reconcile warning (count only), Umami public share link.
@@ -257,13 +233,11 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | **0 — Ops** | `NEXT_PUBLIC_UMAMI_SHARE_URL` on all Coolify THP apps + rebuild | Link live on mestryx → dev → prod after merge | ⬜ |
 | **1 — P1 on-chain** | Group CRC balance (RPC) | `group.balanceCrc` in `GET /api/stats` + UI | ✅ |
 | **1 — P1 UX** | Show `meta.startBlock` in UI | « Analytics depuis le block … » | ✅ |
-| **1 — P1 links** | « Ecosystem dashboards » block | Dune Gnosis overview + Umami share CTAs | ✅ |
 | **2 — P2 off-chain** | Booking intent count | `bookingIntentCount` in enrichment, labelled off-chain | ✅ |
 | **2 — P2 on-chain** | Expert CRC balances (active only) | RPC per expert ; cap via `THP_STATS_MAX_EXPERT_BALANCES` | ✅ |
-| **3 — P3** | Dune / Umami iframes | Embed on `/stats` + CSP `frame-src` | ✅ |
+| **3 — P3** | Umami iframe on `/stats` | Share URL iframe + CSP | ✅ |
 | **C — Phase 2** | `trust_tx_hash` + `POST /api/trust` | [`TrustButton`](../components/bookings/TrustButton.tsx) | ✅ |
 | **D — Phase 2** | Expert stats `/profile` | `GET /api/me/stats` | ✅ |
-| **E — Phase 2** | Dune cache + embed env | [`lib/dune-client.ts`](../lib/dune-client.ts), [`lib/dune-cache.ts`](../lib/dune-cache.ts) | ✅ code ; ⬜ Dune dashboard + API key |
 
 ### 7.3 Phase 1 definition of done
 
@@ -282,15 +256,15 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 
 ## 8. Tool comparison (revised)
 
-| Capability | On-chain (Dune/RPC) | SQLite | Umami |
-|------------|:-------------------:|:------:|:-----:|
+| Capability | On-chain (RPC/Explorer) | SQLite | Umami |
+|------------|:-----------------------:|:------:|:-----:|
 | CRC volume (truth) | ✅ primary | ⚠️ reconcile only | — |
 | Split expert / treasury | ✅ | expected % only | — |
 | Trust edges | ✅ | audit | — |
 | Treasury balance | ✅ | — | — |
 | Expert name / skills | join | ✅ | — |
 | Page funnel | — | — | ✅ |
-| Public verifiable dashboard | ✅ Dune | — | — |
+| Public verifiable activity | ✅ Explorer links on `/stats` | — | share iframe |
 
 ---
 
@@ -309,9 +283,8 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | ✅ | Umami infra prod | Single instance `stats.thp.gnosis.box` ; shared `NEXT_PUBLIC_UMAMI_*` on all Coolify apps |
 | ✅ | Umami public share link (code) | `NEXT_PUBLIC_UMAMI_SHARE_URL` — see §6 |
 | ✅ | Merge **`impl/l4-03-analytics` → `dev`** | PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) |
-| ⬜ | Phase 2 follow-up PR → `dev` | Expert balances, iframes, trust_tx, me/stats, Dune cache |
+| ⬜ | Phase 2 follow-up PR → `dev` | Expert balances, Umami iframe, trust_tx, me/stats |
 | ⬜ | Tracking live on **prod** | Merge `dev` → `master` + rebuild |
-| ✅ | Dune embed + cache (code) | Env: `DUNE_API_KEY`, `DUNE_QUERY_*`, `NEXT_PUBLIC_DUNE_*_EMBED_URL` |
 
 ### Phase 2
 
@@ -319,9 +292,7 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 |:----:|------|--------|
 | ✅ | Store `trust_tx_hash` on attest | [`POST /api/trust`](../app/api/trust/route.ts) + [`TrustButton`](../components/bookings/TrustButton.tsx) |
 | ✅ | Expert self-service stats | [`GET /api/me/stats`](../app/api/me/stats/route.ts) + [`ExpertStatsPanel`](../components/profile/ExpertStatsPanel.tsx) |
-| ✅ | Dune → cache | [`lib/dune-cache.ts`](../lib/dune-cache.ts) (SQLite TTL) |
 | ✅ | Umami iframe embed on `/stats` | Share URL iframe + CSP |
-| ⬜ | THP-specific Dune dashboard | Create on dune.com + set `NEXT_PUBLIC_DUNE_THP_EMBED_URL` |
 
 ---
 
@@ -329,7 +300,7 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 
 | KPI | Primary | Enrichment |
 |-----|---------|------------|
-| CRC volume (total moved) | **Dune / RPC** | — |
+| CRC volume (total moved) | **Explorer / RPC** | — |
 | CRC to THP org | **On-chain** → `0xc02D…` | — |
 | CRC to experts | **On-chain** → mentor addresses | `mentors.name` |
 | Actual split % | **Decode tx legs** | `mentor_share_percent` expected |
@@ -348,7 +319,7 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | # | Question | Decision |
 |---|----------|----------|
 | 1 | **On-chain first** for CRC KPIs? | ✅ **Yes** — explorer + RPC ; SQLite reconcile only |
-| 2 | Dune dashboard visibility | ✅ **Public** when built ; link/embed on `/stats` (optional Phase 1) |
+| 2 | Dune | ❌ **Out of scope** — removed from app ; Explorer + RPC sufficient |
 | 3 | Umami scope | ✅ UX events only ; no financial totals |
 | 4 | Phase 1 must-ship | ✅ **Merged to `dev`** — Phase 2 code on branch pending PR |
 | 5 | Expert stats Phase 1? | ✅ No — public `/stats` only ; expert tab Phase 2 |
@@ -360,7 +331,6 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | Resource | URL |
 |----------|-----|
 | Umami | https://umami.is/ |
-| Dune — Gnosis app overview | https://dune.com/gnosischain_team/gnosis-app-overview |
 | Circles data / explorer | https://explorer.aboutcircles.com/ |
 | Circles RPC | https://rpc.aboutcircles.com/ |
 | Epic GitHub | [#61 FEAT-L4-03](https://github.com/gnosis-box/THP-for-Good/issues/61) |
@@ -369,4 +339,4 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 
 ---
 
-*Last updated: 2026-05-23 — Phase 2 implemented (expert balances, iframes, trust_tx_hash, me/stats, Dune cache).*
+*Last updated: 2026-05-23 — Dune removed ; stack = Explorer + RPC + Umami + `/stats`.*

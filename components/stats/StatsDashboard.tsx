@@ -6,8 +6,7 @@ import { ExternalLink } from 'lucide-react';
 
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { buttonVariants } from '@/components/ui/button';
-import { buildExplorerTxUrl, DUNE_GNOSIS_OVERVIEW_URL } from '@/lib/analytics-explorer';
-import { getDuneGnosisEmbedUrl, getDuneThpEmbedUrl } from '@/lib/dune-client';
+import { buildExplorerTxUrl } from '@/lib/analytics-explorer';
 import { getUmamiShareUrl } from '@/lib/analytics-umami';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { StatsApiResponse } from '@/lib/stats-api';
@@ -108,8 +107,6 @@ export function StatsDashboard() {
   }
 
   const umamiShareUrl = getUmamiShareUrl();
-  const duneGnosisEmbed = getDuneGnosisEmbedUrl();
-  const duneThpEmbed = getDuneThpEmbedUrl();
 
   return (
     <div className="flex flex-col gap-10">
@@ -140,60 +137,6 @@ export function StatsDashboard() {
           fallbackLabel={copy.openUmamiDashboard}
         />
       </section>
-
-      <section className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:p-5">
-        <h2 className="text-base font-semibold">{copy.ecosystemTitle}</h2>
-        <p className="text-xs text-muted-foreground">{copy.ecosystemNote}</p>
-        {duneThpEmbed ? (
-          <EmbedFrame
-            title={copy.duneThpTitle}
-            src={duneThpEmbed}
-            fallbackHref={duneThpEmbed}
-            fallbackLabel={copy.openDuneThp}
-          />
-        ) : null}
-        {duneGnosisEmbed ? (
-          <EmbedFrame
-            title={copy.duneGnosisTitle}
-            src={duneGnosisEmbed}
-            fallbackHref={DUNE_GNOSIS_OVERVIEW_URL}
-            fallbackLabel={copy.openDuneOverview}
-          />
-        ) : (
-          <ExplorerLink href={DUNE_GNOSIS_OVERVIEW_URL}>{copy.openDuneOverview}</ExplorerLink>
-        )}
-      </section>
-
-      {data.dune && (
-        <section className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4 sm:p-5">
-          <h2 className="text-base font-semibold">{copy.duneAggregateTitle}</h2>
-          <p className="text-xs text-muted-foreground">{copy.duneAggregateNote}</p>
-          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {data.dune.crcToTreasury != null && (
-              <div>
-                <dt className="text-xs text-muted-foreground">{copy.duneCrcTreasury}</dt>
-                <dd className="text-lg font-semibold tabular-nums">
-                  {fmt(data.dune.crcToTreasury)} CRC
-                </dd>
-              </div>
-            )}
-            {data.dune.crcToExperts != null && (
-              <div>
-                <dt className="text-xs text-muted-foreground">{copy.duneCrcExperts}</dt>
-                <dd className="text-lg font-semibold tabular-nums">
-                  {fmt(data.dune.crcToExperts)} CRC
-                </dd>
-              </div>
-            )}
-            {data.dune.paidTxCount != null && (
-              <div>
-                <dt className="text-xs text-muted-foreground">{copy.dunePaidTxCount}</dt>
-                <dd className="text-lg font-semibold tabular-nums">{data.dune.paidTxCount}</dd>
-              </div>
-            )}
-          </dl>
-        </section>
-      )}
 
       {data.reconcile.pendingTxCount > 0 && (
         <StatusAlert

@@ -23,21 +23,12 @@ export type StatsExpertPayload = {
   graphUrl: string;
 };
 
-export type StatsDuneAggregate = {
-  crcToTreasury: number | null;
-  crcToExperts: number | null;
-  paidTxCount: number | null;
-  cachedAt: string | null;
-  source: 'dune';
-};
-
 export type StatsApiResponse = {
   treasury: StatsTreasuryPayload;
   group: StatsGroupPayload;
   experts: StatsExpertPayload[];
   enrichment: StatsEnrichment;
   reconcile: StatsReconcile;
-  dune: StatsDuneAggregate | null;
   meta: {
     startBlock: number | null;
     generatedAt: string;

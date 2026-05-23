@@ -40,7 +40,7 @@ Central index of project, product, and ecosystem URLs.
 | Document | Path / link |
 |----------|-------------|
 | **PRD MVP (source of truth index)** | [`spec/PRD-MVP.md`](PRD-MVP.md) |
-| **Analytics strategy (Umami + admin stats + Dune)** | [`spec/analytics-strategy.md`](analytics-strategy.md) |
+| **Analytics strategy (Umami + `/stats` + Explorer)** | [`spec/analytics-strategy.md`](analytics-strategy.md) |
 | UI redesign decisions | [`spec/UI-REDESIGN.md`](UI-REDESIGN.md) |
 | Design tokens | [`spec/design-tokens.md`](design-tokens.md) |
 | Seed data (admins + mentors) | [`spec/seed.md`](seed.md), [`scripts/seed.ts`](../scripts/seed.ts) |
@@ -109,7 +109,7 @@ Central index of project, product, and ecosystem URLs.
 |----------|-----|-----------|-------|
 | **Circles app dashboard** | https://app.aboutcircles.com/dashboard | **High** | Official wallet / trust / activity UI — reference UX for trust states ([#63](https://github.com/gnosis-box/THP-for-Good/issues/63)) |
 | **Lionfish dashboard** | https://lionfish-app-eypqs.ondigitalocean.app/ | **Low** | Third-party / hackathon dashboard on DigitalOcean — not maintained by THP repo; verify before relying on data |
-| **Dune — Gnosis app overview** | https://dune.com/gnosischain_team/gnosis-app-overview | **Medium** | Ecosystem-level metrics — input for analytics epic ([#61](https://github.com/gnosis-box/THP-for-Good/issues/61)), not THP-specific |
+| **Dune — Gnosis app overview** | https://dune.com/gnosischain_team/gnosis-app-overview | **Low** | External ecosystem dashboard only — **not wired in THP** ([#61](https://github.com/gnosis-box/THP-for-Good/issues/61)) |
 
 ---
 
