@@ -1,4 +1,4 @@
-import { insertMentor, addDbAdmin, syncMentorLanguages } from '../lib/db';
+import { insertExpert, addDbAdmin, syncExpertLanguages } from '../lib/db';
 
 /** Default admins — see spec/seed.md */
 const ADMINS = [
@@ -7,7 +7,7 @@ const ADMINS = [
   '0xa3bA0574518c689a9C48a217fD4624a0f1fA32c7',
 ];
 
-const MENTORS = [
+const EXPERTS = [
   {
     circles_address: '0x3d0987dba0b79526f621eafca648e4d8cb3a4c6c',
     name: 'Zet',
@@ -25,14 +25,14 @@ for (const address of ADMINS) {
   console.log(`Seeded admin: ${address.toLowerCase()}`);
 }
 
-for (const mentor of MENTORS) {
-  const id = insertMentor(mentor);
-  const synced = syncMentorLanguages(
-    mentor.circles_address,
-    [...mentor.spoken_languages],
-    [...mentor.call_languages],
+for (const expert of EXPERTS) {
+  const id = insertExpert(expert);
+  const synced = syncExpertLanguages(
+    expert.circles_address,
+    [...expert.spoken_languages],
+    [...expert.call_languages],
   );
   console.log(
-    `Seeded mentor: ${mentor.name} (id=${id}${synced ? ', languages synced' : ''})`,
+    `Seeded expert: ${expert.name} (id=${id}${synced ? ', languages synced' : ''})`,
   );
 }

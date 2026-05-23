@@ -6,26 +6,26 @@ import { useRouter } from 'next/navigation';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { BookingStepper } from '@/components/booking/BookingStepper';
-import { MentorProfileHero } from '@/components/booking/MentorProfileHero';
+import { ExpertProfileHero } from '@/components/booking/ExpertProfileHero';
 import { PayDrawer } from '@/components/booking/PayDrawer';
 import { StickyPayBar } from '@/components/booking/StickyPayBar';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
-import { SlotPicker } from '@/components/mentors/SlotPicker';
-import { PayButton } from '@/components/mentors/PayButton';
-import { MentorEditForm } from '@/components/mentors/MentorEditForm';
-import { MentorLanguageTags } from '@/components/ui-patterns/MentorMeta';
+import { SlotPicker } from '@/components/experts/SlotPicker';
+import { PayButton } from '@/components/experts/PayButton';
+import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
+import { ExpertLanguageTags } from '@/components/ui-patterns/ExpertMeta';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { UI_COPY } from '@/lib/ui-copy';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
 import { cn } from '@/lib/utils';
-import type { MentorRow } from '@/lib/db';
+import type { ExpertRow } from '@/lib/db';
 
-export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
+export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   const router = useRouter();
   const { address } = useWallet();
   const balance = useCrcBalance(address);
-  const [mentor, setMentor] = useState(initialMentor);
+  const [expert, setExpert] = useState(initialExpert);
   const [editing, setEditing] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [email, setEmail] = useState('');
@@ -35,25 +35,25 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
   useEffect(() => {
     if (expertViewTracked.current) return;
     expertViewTracked.current = true;
-    trackUmamiEvent('expert_view', { mentor_id: mentor.id });
-  }, [mentor.id]);
+    trackUmamiEvent('expert_view', { expert_id: expert.id });
+  }, [expert.id]);
 
   function handleDrawerOpenChange(open: boolean) {
     setDrawerOpen(open);
     if (open) {
-      trackUmamiEvent('pay_drawer_open', { mentor_id: mentor.id });
+      trackUmamiEvent('pay_drawer_open', { expert_id: expert.id });
     }
   }
 
-  const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
+  const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
   const hasSlot = !!selectedSlot;
   const hasEmail = !!email.trim();
 
-  async function reloadMentor() {
-    const res = await fetch(`/api/mentors/${mentor.id}`);
+  async function reloadExpert() {
+    const res = await fetch(`/api/experts/${expert.id}`);
     if (res.ok) {
-      const updated = (await res.json()) as MentorRow;
-      setMentor(updated);
+      const updated = (await res.json()) as ExpertRow;
+      setExpert(updated);
     }
     setEditing(false);
   }
@@ -71,7 +71,7 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
                 {UI_COPY.booking.editProfile}
               </Button>
               <Link
-                href="/mentor/register"
+                href="/expert/register"
                 className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'min-h-11')}
               >
                 {UI_COPY.register.editTitle}
@@ -81,30 +81,30 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
         </div>
 
         {editing ? (
-          <MentorEditForm
-            mentor={mentor}
+          <ExpertEditForm
+            expert={expert}
             walletAddress={address!}
-            onSaved={reloadMentor}
+            onSaved={reloadExpert}
             onCancel={() => setEditing(false)}
             onDeactivated={() => router.push('/')}
           />
         ) : (
           <>
             <BookingStepper hasSlot={hasSlot} hasEmail={hasEmail} />
-            <MentorProfileHero mentor={mentor} />
+            <ExpertProfileHero expert={expert} />
 
-            {mentor.bio && (
+            {expert.bio && (
               <section className="flex flex-col items-center gap-2 text-center">
                 <h2 className="text-center text-sm font-semibold">{UI_COPY.booking.about}</h2>
                 <p className="max-w-lg whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                  {mentor.bio}
+                  {expert.bio}
                 </p>
-                {(mentor.call_languages.length > 0 || mentor.spoken_languages.length > 0) && (
-                  <MentorLanguageTags
+                {(expert.call_languages.length > 0 || expert.spoken_languages.length > 0) && (
+                  <ExpertLanguageTags
                     languages={
-                      mentor.call_languages.length > 0
-                        ? mentor.call_languages
-                        : mentor.spoken_languages
+                      expert.call_languages.length > 0
+                        ? expert.call_languages
+                        : expert.spoken_languages
                     }
                     prefix="Sessions"
                   />
@@ -116,8 +116,8 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
 
             <section className="flex flex-col items-center gap-3">
               <h2 className="text-center text-sm font-semibold">{UI_COPY.booking.availability}</h2>
-              {mentor.cal_event_type_id ? (
-                <SlotPicker mentorId={mentor.id} selected={selectedSlot} onSelect={setSelectedSlot} />
+              {expert.cal_event_type_id ? (
+                <SlotPicker expertId={expert.id} selected={selectedSlot} onSelect={setSelectedSlot} />
               ) : (
                 <p className="text-center text-sm text-muted-foreground">
                   {isSelf ? UI_COPY.booking.noCalSelf : UI_COPY.booking.noCalVisitor}
@@ -129,7 +129,7 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
               <section className="hidden flex-col gap-3 md:flex">
                 <h2 className="text-title text-sm font-semibold">{UI_COPY.booking.bookSession}</h2>
                 <PayButton
-                  mentor={mentor}
+                  expert={expert}
                   selectedSlot={selectedSlot}
                   email={email}
                   onEmailChange={setEmail}
@@ -143,7 +143,7 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
                 <h2 className="text-title text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
                 <PaymentSummary
                   balance={balance}
-                  sharePercent={mentor.mentor_share_percent ?? 20}
+                  sharePercent={expert.expert_share_percent ?? 20}
                   email={email}
                   onEmailChange={setEmail}
                 />
@@ -156,14 +156,14 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
       {!editing && hasSlot && (
         <>
           <StickyPayBar
-            priceCrc={mentor.price_crc}
+            priceCrc={expert.price_crc}
             hasSlot={hasSlot}
             onReview={() => handleDrawerOpenChange(true)}
           />
           <div className="md:hidden">
             <PayDrawer open={drawerOpen} onOpenChange={handleDrawerOpenChange}>
             <PayButton
-              mentor={mentor}
+              expert={expert}
               selectedSlot={selectedSlot}
               email={email}
               onEmailChange={setEmail}

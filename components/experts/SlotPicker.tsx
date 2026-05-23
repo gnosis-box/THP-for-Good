@@ -9,7 +9,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 
 type SlotPickerProps = {
-  mentorId: number;
+  expertId: number;
   selected: string | null;
   onSelect: (slot: string | null) => void;
 };
@@ -40,7 +40,7 @@ function groupByDay(slots: string[]): DayGroup[] {
   return Array.from(map.entries()).map(([label, s]) => ({ label, slots: s }));
 }
 
-export function SlotPicker({ mentorId, selected, onSelect }: SlotPickerProps) {
+export function SlotPicker({ expertId, selected, onSelect }: SlotPickerProps) {
   const [slots, setSlots] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,7 +50,7 @@ export function SlotPicker({ mentorId, selected, onSelect }: SlotPickerProps) {
     setSlots(null);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null);
-    fetch(`/api/mentors/${mentorId}/availability`)
+    fetch(`/api/experts/${expertId}/availability`)
       .then((r) => r.json())
       .then((data: unknown) => {
         if (cancelled) return;
@@ -63,7 +63,7 @@ export function SlotPicker({ mentorId, selected, onSelect }: SlotPickerProps) {
     return () => {
       cancelled = true;
     };
-  }, [mentorId]);
+  }, [expertId]);
 
   if (error) {
     return <StatusAlert variant="error" title="Availability error" description={error} />;

@@ -14,7 +14,7 @@ type Props = {
   onChange: (v: string) => void;
 };
 
-export function MentorSearch({ value, onChange }: Props) {
+export function ExpertSearch({ value, onChange }: Props) {
   return (
     <InputGroup className="min-h-11 h-auto">
       <InputGroupAddon>
@@ -25,7 +25,7 @@ export function MentorSearch({ value, onChange }: Props) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={UI_COPY.home.searchPlaceholder}
-        aria-label="Search mentors"
+        aria-label="Search experts"
       />
     </InputGroup>
   );

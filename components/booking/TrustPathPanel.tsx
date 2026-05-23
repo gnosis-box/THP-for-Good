@@ -47,7 +47,7 @@ type Props = {
   trustEligible: TrustEligibleBalanceState;
   expertLegCrc: number;
   treasuryLegCrc: number;
-  mentorName: string;
+  expertName: string;
   priceCrc: number;
 };
 
@@ -55,7 +55,7 @@ export function TrustPathPanel({
   trustEligible,
   expertLegCrc,
   treasuryLegCrc,
-  mentorName,
+  expertName,
   priceCrc,
 }: Props) {
   if (trustEligible.status === 'loading') {
@@ -84,7 +84,7 @@ export function TrustPathPanel({
       </h3>
       {expertLegCrc > 0 && (
         <LegRow
-          label={mentorName}
+          label={expertName}
           maxFormatted={trustEligible.formatted.expert}
           legCrc={expertLegCrc}
         />

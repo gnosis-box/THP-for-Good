@@ -18,10 +18,10 @@ import { TrustButton } from '@/components/bookings/TrustButton';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { shortenAddress } from '@/lib/utils';
 import { UI_COPY } from '@/lib/ui-copy';
-import type { BookingRow, MentorRow } from '@/lib/db';
+import type { BookingRow, ExpertRow } from '@/lib/db';
 
-type EnrichedBooking = BookingRow & { mentor: MentorRow };
-type ReceivedBooking = BookingRow & { mentor_name: string };
+type EnrichedBooking = BookingRow & { expert: ExpertRow };
+type ReceivedBooking = BookingRow & { expert_name: string };
 type EnrichedReceivedBooking = ReceivedBooking & { booker_name: string | null; booker_avatar: string | null };
 
 function fmtDate(iso: string) {
@@ -58,15 +58,15 @@ export function CallsView() {
       .then(async ([emittedRes, receivedRes]) => {
         if (!emittedRes.ok) throw new Error('Failed to fetch emitted calls');
         if (!receivedRes.ok) throw new Error('Failed to fetch received calls');
-        const emittedRows = (await emittedRes.json()) as (BookingRow & { mentor_name?: string })[];
+        const emittedRows = (await emittedRes.json()) as (BookingRow & { expert_name?: string })[];
         const receivedRows = (await receivedRes.json()) as ReceivedBooking[];
 
         const enriched = await Promise.all(
           emittedRows.map(async (booking) => {
-            const r = await fetch(`/api/mentors/${booking.mentor_id}`, { signal: controller.signal });
-            if (!r.ok) throw new Error(`Mentor ${booking.mentor_id} not found`);
-            const mentor = (await r.json()) as MentorRow;
-            return { ...booking, mentor };
+            const r = await fetch(`/api/experts/${booking.expert_id}`, { signal: controller.signal });
+            if (!r.ok) throw new Error(`Expert ${booking.expert_id} not found`);
+            const expert = (await r.json()) as ExpertRow;
+            return { ...booking, expert };
           }),
         );
 
@@ -172,14 +172,14 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
   return (
     <div className="flex flex-col gap-4">
       {bookings.map((booking) => {
-        const { mentor } = booking;
+        const { expert } = booking;
         return (
           <Card key={booking.id}>
             <CardHeader>
-              <CardTitle className="text-base font-semibold">{mentor.name}</CardTitle>
-              {mentor.skills.length > 0 && (
+              <CardTitle className="text-base font-semibold">{expert.name}</CardTitle>
+              {expert.skills.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {mentor.skills.map((skill) => (
+                  {expert.skills.map((skill) => (
                     <Badge key={skill} variant="secondary">
                       {skill}
                     </Badge>
@@ -208,9 +208,9 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
                   {shortenAddress(booking.tx_hash, 6)}
                 </a>
               )}
-              {mentor.calendar_link && (
+              {expert.calendar_link && (
                 <a
-                  href={mentor.calendar_link}
+                  href={expert.calendar_link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-primary underline-offset-4 hover:underline"
@@ -221,10 +221,10 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
             </CardContent>
             <CardFooter>
               <TrustButton
-                mentorAddress={mentor.circles_address}
-                mentorName={mentor.name}
-                mentorSkills={mentor.skills}
-                mentorId={mentor.id}
+                expertAddress={expert.circles_address}
+                expertName={expert.name}
+                expertSkills={expert.skills}
+                expertId={expert.id}
                 bookingId={booking.id}
               />
             </CardFooter>

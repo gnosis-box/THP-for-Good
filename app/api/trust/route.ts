@@ -6,7 +6,7 @@ import { insertTrustAttestation } from '@/lib/db';
  * POST /api/trust
  * Body: { booking_id: number; trust_tx_hash?: string }
  *
- * Records that the booker trusted the mentor on-chain.
+ * Records that the booker trusted the expert on-chain.
  * Best-effort — the on-chain trust is the source of truth.
  */
 export async function POST(request: NextRequest) {

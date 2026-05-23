@@ -52,7 +52,7 @@ export function serializeCallLanguageCodes(codes: string[]): string | null {
   return unique.length > 0 ? unique.join(',') : null;
 }
 
-export function normalizeMentorLanguages(
+export function normalizeExpertLanguages(
   spokenInput: unknown,
   callInput?: unknown,
 ): { spoken_languages: string[]; call_languages: string[] } | { error: string } {

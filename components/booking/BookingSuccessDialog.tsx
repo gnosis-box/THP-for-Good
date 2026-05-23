@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  mentorName: string;
+  expertName: string;
   slotLabel: string;
   txHash: string;
   calendarEventUrl: string | null;
@@ -24,7 +24,7 @@ type Props = {
 export function BookingSuccessDialog({
   open,
   onOpenChange,
-  mentorName,
+  expertName,
   slotLabel,
   txHash,
   calendarEventUrl,
@@ -78,7 +78,7 @@ export function BookingSuccessDialog({
                 {copy.successDialogTitle}
               </Dialog.Title>
               <Dialog.Description className="text-sm text-muted-foreground">
-                {copy.successDialogSubtitle(mentorName)}
+                {copy.successDialogSubtitle(expertName)}
               </Dialog.Description>
             </div>
 

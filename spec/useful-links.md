@@ -43,7 +43,7 @@ Central index of project, product, and ecosystem URLs.
 | **Analytics strategy (Umami + `/stats` + Explorer)** | [`spec/analytics-strategy.md`](analytics-strategy.md) |
 | UI redesign decisions | [`spec/UI-REDESIGN.md`](UI-REDESIGN.md) |
 | Design tokens | [`spec/design-tokens.md`](design-tokens.md) |
-| Seed data (admins + mentors) | [`spec/seed.md`](seed.md), [`scripts/seed.ts`](../scripts/seed.ts) |
+| Seed data (admins + experts) | [`spec/seed.md`](seed.md), [`scripts/seed.ts`](../scripts/seed.ts) |
 | UI mockup | [`spec/mockup.png`](mockup.png) |
 | shadcn inventory | [`spec/UI-SHADCN-INVENTORY.md`](UI-SHADCN-INVENTORY.md) |
 | cal.diy spike | [`docs/spike-cal-diy.md`](../docs/spike-cal-diy.md) |
@@ -53,8 +53,8 @@ Central index of project, product, and ecosystem URLs.
 | Route | Purpose |
 |-------|---------|
 | `/` | Expert browser (home) |
-| `/mentor/[id]` | Book / PAY flow |
-| `/mentor/register` | Offer expertise (self-register) |
+| `/expert/[id]` | Book / PAY flow |
+| `/expert/register` | Offer expertise (self-register) |
 | `/calls` | Emitted + Received sessions; post-call TRUST |
 | `/admin` | Admin panel (hidden from public nav) |
 | `/about` | Product explainer |
@@ -214,7 +214,7 @@ pnpm tsx scripts/seed.ts
 | Area | Location |
 |------|----------|
 | Trust button (`/calls`) | [`components/bookings/TrustButton.tsx`](../components/bookings/TrustButton.tsx) |
-| Expert card (trustedBy count) | [`components/mentors/MentorCard.tsx`](../components/mentors/MentorCard.tsx) |
+| Expert card (trustedBy count) | [`components/experts/ExpertCard.tsx`](../components/experts/ExpertCard.tsx) |
 | Trust-eligible CRC panel | [`components/booking/TrustPathPanel.tsx`](../components/booking/TrustPathPanel.tsx) |
 | Admin panel | [`components/admin/AdminPanel.tsx`](../components/admin/AdminPanel.tsx) |
 | DB schema | [`lib/schema.sql`](../lib/schema.sql) |

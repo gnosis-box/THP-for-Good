@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db, { getMentorById } from '@/lib/db';
+import db, { getExpertById } from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
-import { clampMentorShare } from '@/lib/crc-pay';
+import { clampExpertShare } from '@/lib/crc-pay';
 import {
-  normalizeMentorLanguages,
+  normalizeExpertLanguages,
   serializeCallLanguageCodes,
   serializeLanguageCodes,
 } from '@/lib/languages';
@@ -17,11 +17,11 @@ export async function GET(
   if (isNaN(id)) {
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }
-  const mentor = getMentorById(id);
-  if (!mentor) {
+  const expert = getExpertById(id);
+  if (!expert) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
-  return NextResponse.json(mentor);
+  return NextResponse.json(expert);
 }
 
 export async function PATCH(
@@ -34,7 +34,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }
 
-  const existing = getMentorById(id);
+  const existing = getExpertById(id);
   if (!existing) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
@@ -68,7 +68,7 @@ export async function PATCH(
     'cal_event_type_id',
     'price_crc',
     'active',
-    'mentor_share_percent',
+    'expert_share_percent',
     'spoken_languages',
     'call_languages',
   ] as const;
@@ -79,8 +79,8 @@ export async function PATCH(
       }
       fields.push(`${key} = ?`);
       values.push(
-        key === 'mentor_share_percent'
-          ? clampMentorShare(Number(patch[key]))
+        key === 'expert_share_percent'
+          ? clampExpertShare(Number(patch[key]))
           : patch[key],
       );
     }
@@ -89,7 +89,7 @@ export async function PATCH(
   if ('spoken_languages' in patch || 'call_languages' in patch) {
     const spokenRaw = patch.spoken_languages ?? existing.spoken_languages;
     const callRaw = patch.call_languages ?? existing.call_languages;
-    const languages = normalizeMentorLanguages(spokenRaw, callRaw);
+    const languages = normalizeExpertLanguages(spokenRaw, callRaw);
     if ('error' in languages) {
       return NextResponse.json({ error: languages.error }, { status: 400 });
     }
@@ -102,7 +102,7 @@ export async function PATCH(
 
   if (fields.length > 0) {
     values.push(id);
-    db.prepare(`UPDATE mentors SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+    db.prepare(`UPDATE experts SET ${fields.join(', ')} WHERE id = ?`).run(...values);
   }
 
   if ('skills' in patch) {
@@ -110,16 +110,16 @@ export async function PATCH(
     if (!Array.isArray(skills) || !skills.every((s) => typeof s === 'string')) {
       return NextResponse.json({ error: 'skills must be an array of strings' }, { status: 400 });
     }
-    db.prepare('DELETE FROM mentor_skills WHERE mentor_id = ?').run(id);
+    db.prepare('DELETE FROM expert_skills WHERE expert_id = ?').run(id);
     const insertSkill = db.prepare(
-      'INSERT OR IGNORE INTO mentor_skills (mentor_id, tag_id) SELECT ?, id FROM skill_tags WHERE label = ?',
+      'INSERT OR IGNORE INTO expert_skills (expert_id, tag_id) SELECT ?, id FROM skill_tags WHERE label = ?',
     );
     for (const skill of skills as string[]) {
       insertSkill.run(id, skill);
     }
   }
 
-  const updated = getMentorById(id);
+  const updated = getExpertById(id);
   return NextResponse.json(updated);
 }
 
@@ -137,6 +137,6 @@ export async function DELETE(
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }
 
-  db.prepare('UPDATE mentors SET active = 0 WHERE id = ?').run(id);
+  db.prepare('UPDATE experts SET active = 0 WHERE id = ?').run(id);
   return NextResponse.json({ ok: true });
 }
