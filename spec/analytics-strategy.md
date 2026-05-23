@@ -1,7 +1,7 @@
 # Analytics & statistics strategy — THP for Good
 
 Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Good/issues/61).  
-**Status:** Phase 1 **merged to `dev`** (PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67)). Phase 2 app scope **implemented** on `impl/l4-03-analytics` — pending PR → `dev` + Coolify rebuild. Infra Umami prod : `https://stats.thp.gnosis.box`.
+**Status:** Phase 1 **merged to `dev`** (PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67)). Phase 2 app scope **implemented** on `impl/l4-03-analytics` — PR [#74](https://github.com/gnosis-box/THP-for-Good/pull/74) → `dev` + Coolify rebuild. Infra Umami prod : `https://stats.thp.gnosis.box`.
 
 **Core principle:** CRC volume, payment splits, treasury inflows, and TRUST edges are **on-chain facts**. SQLite and Umami add **context** (who booked whom, which skill, UX funnel) — they must not be the source of truth for money metrics.
 
@@ -185,24 +185,27 @@ External reference only (not wired in app): [Gnosis app overview on Dune](https:
 
 **Public** transparency page (not admin-gated). In [`lib/nav.ts`](../lib/nav.ts) NAV as **Stats**; also linked from `/about` and `/admin`.
 
-### Layout (implemented)
+### Layout (implemented — PR [#74](https://github.com/gnosis-box/THP-for-Good/pull/74))
 
-| Panel | Source | Phase 1 |
-|-------|--------|:-------:|
+| Panel | Source | Status |
+|-------|--------|:------:|
 | **Treasury org balance** | RPC `getProfileView(FOUNDATION_ADDRESS).v2Balance` via `GET /api/stats` | ✅ |
-| **CRC activity (org, group, experts)** | Deep links → [Circles Explorer `/events`](https://explorer.aboutcircles.com/) per address (`THP_ANALYTICS_START_BLOCK`) | ✅ |
+| **Web analytics (Umami)** | Share API proxy → `webAnalytics` + [`WebAnalyticsPanel`](../components/stats/WebAnalyticsPanel.tsx) + external dashboard link (no iframe) | ✅ |
+| **Active experts** | SQLite **paid session count** per mentor + home-style [`MentorCard`](../components/mentors/MentorCard.tsx) (skills, trust, book link) | ✅ |
+| **Activity snapshot** | SQLite aggregates — paid bookings, booking intent, trust attestations, top skills (labeled off-chain) | ✅ |
 | **Recent PAY txs** | SQLite `bookings` with `tx_hash` → explorer `/tx/{hash}` (no booker address) | ✅ |
 | **Reconciliation alert** | Count only: bookings without `tx_hash` > 24h | ✅ |
-| **Tags / active experts** | SQLite aggregates (labeled off-chain) | ✅ |
-| **Umami** | Native widgets via `GET /api/stats` `webAnalytics` (share API proxy) + external dashboard link | ✅ |
-| **Group CRC balance** | RPC `getProfileView(GROUP_ADDRESS)` | ✅ |
-| **Expert CRC balances** | RPC per active expert (`THP_STATS_MAX_EXPERT_BALANCES`) | ✅ |
+| **`meta.startBlock`** | Env `THP_ANALYTICS_START_BLOCK` — shown in “How to read” | ✅ |
+| **Group CRC balance** | RPC `getProfileView(GROUP_ADDRESS)` on public `/stats` | ⏸ deferred — group activity via [Explorer](https://explorer.aboutcircles.com/) / [`useful-links.md`](useful-links.md) only |
+| **Expert CRC balances (public)** | RPC per expert on `/stats` | ⏸ deferred — **expert self-service** on [`/profile`](../app/profile/page.tsx) via `GET /api/me/stats` instead |
+
+**UX drift (2026-05-23):** public `/stats` favours **paid session counts** and readable mentor cards over N parallel RPC balance reads. On-chain CRC per expert remains verifiable on Circles Explorer; logged-in experts see live balance on `/profile`.
 
 ### API
 
 | Route | Auth | Source |
 |-------|------|--------|
-| `GET /api/stats` | Public | Treasury + group RPC, expert balances, explorer URLs, enrichment, reconcile, **`webAnalytics`** (Umami share API) |
+| `GET /api/stats` | Public | Treasury RPC, expert list + paid session counts, enrichment, reconcile, **`webAnalytics`** (Umami share API) |
 | `GET /api/me/stats` | Wallet header (`x-wallet-address`) | Expert self-service stats (active mentors only) |
 | `POST /api/trust` | Public | Persists `trust_attestations` (+ optional `trust_tx_hash`) |
 
@@ -216,43 +219,42 @@ Priority order (stay **on-chain first** ; no financial KPIs from SQLite/Umami AP
 
 | Priority | Panel / change | Source | Effort |
 |----------|----------------|--------|--------|
-| **P1** | Show `meta.startBlock` in UI | env + `GET /api/stats` meta | S |
-| **P1** | **Group avatar CRC balance** (RPC `getProfileView`) | Same pattern as treasury | S |
-| **P2** | **Per-expert CRC balance** (RPC, active experts only) | Circles RPC — public on-chain | M |
-| **P2** | **Booking intent** count (bookings sans `tx_hash`, all ages) | SQLite — label « off-chain intent » | S |
-| **P3** | Umami **share API proxy** on `/stats` | [`lib/umami-share-client.ts`](../lib/umami-share-client.ts) + `WebAnalyticsPanel` | S |
+| **P1** | Show `meta.startBlock` in UI | env + `GET /api/stats` meta | ✅ |
+| **P1** | **Group avatar CRC balance** (RPC `getProfileView`) | Same pattern as treasury | ⏸ deferred |
+| **P2** | **Per-expert CRC balance** on public `/stats` | Circles RPC | ⏸ deferred — `/profile` + `GET /api/me/stats` instead |
+| **P2** | **Booking intent** count (bookings sans `tx_hash`, all ages) | SQLite — label « off-chain intent » | ✅ |
+| **P3** | Umami **share API proxy** on `/stats` | [`lib/umami-share-client.ts`](../lib/umami-share-client.ts) + `WebAnalyticsPanel` | ✅ |
 | **—** | Do **not** expose `booker_address`, Umami API keys, or `SUM(price_crc)` on public `/stats` | Privacy / doctrine | — |
 
 **Already public and sufficient for hackathon transparency:** treasury balance, explorer deep links (org / group / experts / txs), off-chain snapshot (counts, tags), reconcile warning (count only), Umami UX summary widgets + external dashboard link.
 
-### 7.2 Next sprint — branch `impl/l4-03-analytics`
-
-Continue on this branch **before** rebase/merge to `dev` (blocked until team resolves `dev` branch sync). Order:
+### 7.2 Branch `impl/l4-03-analytics` — PR [#74](https://github.com/gnosis-box/THP-for-Good/pull/74)
 
 | Lot | Task | Output | Status |
 |-----|------|--------|:------:|
-| **0 — Hygiene** | Commit Umami share URL + doc | `getUmamiShareUrl()`, `.env.example`, ui-copy | ⬜ commit |
-| **0 — Ops** | `NEXT_PUBLIC_UMAMI_SHARE_URL` on all Coolify THP apps + rebuild | Link live on mestryx → dev → prod after merge | ⬜ |
-| **1 — P1 on-chain** | Group CRC balance (RPC) | `group.balanceCrc` in `GET /api/stats` + UI | ✅ |
-| **1 — P1 UX** | Show `meta.startBlock` in UI | « Analytics depuis le block … » | ✅ |
-| **2 — P2 off-chain** | Booking intent count | `bookingIntentCount` in enrichment, labelled off-chain | ✅ |
-| **2 — P2 on-chain** | Expert CRC balances (active only) | RPC per expert ; cap via `THP_STATS_MAX_EXPERT_BALANCES` | ✅ |
-| **3 — P3** | Umami widgets on `/stats` | Share API proxy → `webAnalytics` + native UI | ✅ |
+| **0 — Hygiene** | Umami share URL + doc | `getUmamiShareUrl()`, `.env.example`, ui-copy | ✅ |
+| **0 — Ops** | `NEXT_PUBLIC_UMAMI_SHARE_URL` on all Coolify THP apps + rebuild | After merge → dev → prod | ⬜ ops |
+| **1 — P1 UX** | Show `meta.startBlock` in UI | “How to read” bullet | ✅ |
+| **2 — P2 off-chain** | Booking intent count | `bookingIntentCount` in enrichment | ✅ |
+| **3 — P3** | Umami on `/stats` | Share API proxy → `webAnalytics` + `WebAnalyticsPanel` | ✅ |
 | **C — Phase 2** | `trust_tx_hash` + `POST /api/trust` | [`TrustButton`](../components/bookings/TrustButton.tsx) | ✅ |
-| **D — Phase 2** | Expert stats `/profile` | `GET /api/me/stats` | ✅ |
+| **D — Phase 2** | Expert stats `/profile` | `GET /api/me/stats` + [`ExpertStatsPanel`](../components/profile/ExpertStatsPanel.tsx) | ✅ |
+| **E — Cleanup** | Remove Dune from app | Explorer + RPC only ([§5](#5-dune--out-of-scope)) | ✅ |
+| **F — UI** | Design-system harmonization | `PageHeader`, `MetricsPanel`, `ContentSection`, `/stats` layout | ✅ |
+| **— deferred** | Group + public expert CRC balances on `/stats` | Was in early branch commits; replaced by paid sessions + `/profile` balance | ⏸ |
 
-### 7.3 Phase 1 definition of done
+### 7.3 Definition of done (Phase 2)
 
 | Done | Criterion |
 |:----:|-----------|
 | ✅ | Umami share committed + env documented |
 | ⬜ | `NEXT_PUBLIC_UMAMI_SHARE_URL` on all Coolify apps + rebuild |
-| ✅ | Active expert CRC balances |
-| ⬜ | Smoke test dev/prod `/stats` |
-| ✅ | PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) merged to `dev` |
-| ⬜ | Phase 2 PR merged + prod rebuild |
+| ✅ | Umami share API smoke (`scripts/umami-share-smoke.ts`) |
 | ✅ | `trust_tx_hash` persistence |
 | ✅ | Expert self-service stats on `/profile` |
+| ✅ | PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) merged to `dev` |
+| ⬜ | PR [#74](https://github.com/gnosis-box/THP-for-Good/pull/74) merged to `dev` + rebuild |
+| ⬜ | Smoke test `/stats` on dev/prod after merge |
 
 ---
 
@@ -285,7 +287,7 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | ✅ | Umami infra prod | Single instance `stats.thp.gnosis.box` ; shared `NEXT_PUBLIC_UMAMI_*` on all Coolify apps |
 | ✅ | Umami public share link (code) | `NEXT_PUBLIC_UMAMI_SHARE_URL` — see §6 |
 | ✅ | Merge **`impl/l4-03-analytics` → `dev`** | PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) |
-| ⬜ | Phase 2 follow-up PR → `dev` | Expert balances, Umami API widgets, trust_tx, me/stats |
+| ⬜ | Phase 2 PR [#74](https://github.com/gnosis-box/THP-for-Good/pull/74) → `dev` | Umami share API, trust_tx, me/stats, UI polish (no Dune) |
 | ⬜ | Tracking live on **prod** | Merge `dev` → `master` + rebuild |
 
 ### Phase 2
@@ -341,4 +343,4 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 
 ---
 
-*Last updated: 2026-05-23 — Umami iframe replaced by share API proxy on `/stats`.*
+*Last updated: 2026-05-23 — Phase 2 ready in PR #74; public `/stats` uses paid session counts (not expert RPC balances); Dune removed.*
