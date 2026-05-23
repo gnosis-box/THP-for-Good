@@ -1,7 +1,11 @@
 # Analytics & statistics strategy — THP for Good
 
+> **Archived (planning complete — 2026-05-23)**  
+> Epic [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Good/issues/61) is **closed**. Implementation: Phase 1 → [`dev` PR #67](https://github.com/gnosis-box/THP-for-Good/pull/67) ; Phase 2 → [`dev` PR #74](https://github.com/gnosis-box/THP-for-Good/pull/74).  
+> This document stays the **reference** for on-chain-first doctrine, `/stats` layout, and Umami ops. Open follow-ups (Coolify env rebuild, deferred group/expert RPC on public `/stats`) are in §7.1–§7.3.
+
 Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Good/issues/61).  
-**Status:** Phase 1 **merged to `dev`** (PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67)). Phase 2 app scope **implemented** on `impl/l4-03-analytics` — PR [#74](https://github.com/gnosis-box/THP-for-Good/pull/74) → `dev` + Coolify rebuild. Infra Umami prod : `https://stats.thp.gnosis.box`.
+**Status:** **Shipped to `dev`** — PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) (Phase 1) + PR [#74](https://github.com/gnosis-box/THP-for-Good/pull/74) (Phase 2). Infra Umami prod : `https://stats.thp.gnosis.box`.
 
 **Core principle:** CRC volume, payment splits, treasury inflows, and TRUST edges are **on-chain facts**. SQLite and Umami add **context** (who booked whom, which skill, UX funnel) — they must not be the source of truth for money metrics.
 
@@ -343,4 +347,4 @@ Priority order (stay **on-chain first** ; no financial KPIs from SQLite/Umami AP
 
 ---
 
-*Last updated: 2026-05-23 — Phase 2 ready in PR #74; public `/stats` uses paid session counts (not expert RPC balances); Dune removed.*
+*Last updated: 2026-05-23 — Epic #61 closed; planning doc archived; Phase 2 merged via PR #74.*
