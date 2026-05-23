@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
@@ -15,6 +15,7 @@ type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 export function MentorCard({ mentor }: { mentor: MentorRow }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
   const share = mentor.mentor_share_percent ?? 20;
+  const skillsLabel = mentor.skills.join(' · ');
 
   useEffect(() => {
     (async () => {
@@ -38,20 +39,48 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
       aria-label={`Book ${mentor.name}, ${mentor.price_crc} CRC per session`}
       className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <Card className="h-full border-border/80 transition-colors hover:border-primary/30 hover:shadow-md">
-        <CardHeader>
+      <Card className="border-border/80 py-0 transition-colors hover:border-primary/30 hover:shadow-md sm:py-4">
+        {/* Mobile: compact list row */}
+        <div className="flex items-start gap-3 p-3 sm:hidden">
+          <Avatar className="size-11 shrink-0">
+            {circles?.imageUrl ? (
+              <AvatarImage src={circles.imageUrl} alt="" />
+            ) : null}
+            <AvatarFallback className="text-sm font-semibold">
+              {mentor.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex items-start justify-between gap-2">
+              <p className="truncate font-semibold leading-tight">{mentor.name}</p>
+              <CrcAmount amount={mentor.price_crc} variant="badge" />
+            </div>
+            {circles !== null && circles.trustedByCount !== null && (
+              <p className="text-xs text-muted-foreground">Trusted by {circles.trustedByCount}</p>
+            )}
+            {mentor.skills.length > 0 && (
+              <p className="truncate text-xs text-muted-foreground" title={skillsLabel}>
+                {skillsLabel}
+              </p>
+            )}
+            <p className="truncate text-xs text-accent">{splitLine(share, 100 - share)}</p>
+          </div>
+        </div>
+
+        {/* sm+: card with horizontal skill badges */}
+        <div className="hidden flex-col gap-3 px-4 sm:flex">
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-3">
               <Avatar className="size-12 shrink-0">
                 {circles?.imageUrl ? (
-                  <AvatarImage src={circles.imageUrl} alt={mentor.name} />
+                  <AvatarImage src={circles.imageUrl} alt="" />
                 ) : null}
                 <AvatarFallback className="font-semibold">
                   {mentor.name.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex min-w-0 flex-col gap-0.5">
-                <CardTitle className="truncate text-base font-semibold">{mentor.name}</CardTitle>
+                <p className="truncate text-base font-semibold">{mentor.name}</p>
                 {circles !== null && circles.trustedByCount !== null && (
                   <span className="text-xs text-muted-foreground">
                     Trusted by {circles.trustedByCount}
@@ -61,21 +90,21 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
             </div>
             <CrcAmount amount={mentor.price_crc} variant="badge" />
           </div>
-        </CardHeader>
 
-        {mentor.skills.length > 0 && (
-          <CardContent className="flex flex-wrap gap-1.5">
-            {mentor.skills.map((skill) => (
-              <Badge key={skill} variant="secondary">
-                {skill}
-              </Badge>
-            ))}
-          </CardContent>
-        )}
+          {mentor.skills.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {mentor.skills.map((skill) => (
+                <Badge key={skill} variant="secondary">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          )}
 
-        <CardFooter>
-          <span className="text-xs text-accent">{splitLine(share, 100 - share)}</span>
-        </CardFooter>
+          <p className="border-t border-border/80 pt-3 text-xs text-accent">
+            {splitLine(share, 100 - share)}
+          </p>
+        </div>
       </Card>
     </Link>
   );
