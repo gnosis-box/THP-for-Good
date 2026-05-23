@@ -70,39 +70,69 @@ SQLite **`SUM(price_crc)` is deprecated as a KPI** — use only for “listed pr
 
 ## 4. On-chain data sources
 
-### 4.1 Addresses to index
+### 4.1 Per-avatar activity — Circles Explorer (no custom indexer)
 
-| Role | Address | Analytics use |
-|------|---------|---------------|
-| **Treasury org (PAY leg)** | `0xc02D5aaCA64dE428D571dA42538232C431E0CDeD` | Inbound CRC from split PAY + donations ([`FOUNDATION_ADDRESS`](../lib/crc-pay.ts)) |
-| **THP Circles group** | `0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00` | Membership, group policy ([`useful-links.md`](useful-links.md)) |
-| **Expert avatars** | `mentors.circles_address` | Per-expert inbound CRC from bookings |
+**We do not need to build or maintain our own on-chain indexer** for CRC transfers and avatar events. [Circles Explorer](https://explorer.aboutcircles.com/) already indexes activity per avatar.
 
-### 4.2 Tools & endpoints
+**Events feed (primary drill-down):**
+
+```
+https://explorer.aboutcircles.com/avatar/{address}/events?startBlock={block}
+```
+
+Example (THP-related avatar — verify role in ops):
+
+https://explorer.aboutcircles.com/avatar/0xC19BC204eb1c1D5B3FE500E5E5dfaBaB625F286c/events?startBlock=46309369
+
+| Query param | Use |
+|-------------|-----|
+| `{address}` | Org, group, expert, or app avatar |
+| `startBlock` | Cut noise before THP launch / hackathon (set once, document in env or spec) |
+
+**Other explorer routes (same indexer, no app code):**
+
+| Route | Use |
+|-------|-----|
+| `/avatar/{address}` | Profile, balance summary |
+| `/avatar/{address}/events` | Transfers, trust, mint — **CRC volume per address** |
+| `/avatar/{address}/graph` | Trust graph |
+| `/tx/{hash}` | Single PAY batch detail (join with `bookings.tx_hash`) |
+
+**Implication for `/admin/stats`:** link out to explorer events for treasury org, group, and each expert — do not replicate event ingestion in SQLite or a custom job unless Dune aggregates are required.
+
+### 4.2 Watch addresses (links only — not a local index)
+
+| Role | Address | Explorer events |
+|------|---------|-----------------|
+| **Treasury org (PAY leg)** | `0xc02D5aaCA64dE428D571dA42538232C431E0CDeD` | [events](https://explorer.aboutcircles.com/avatar/0xc02d5aac64de428d571da42538232c431e0cded/events) — split PAY + donations ([`FOUNDATION_ADDRESS`](../lib/crc-pay.ts)) |
+| **THP Circles group** | `0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00` | [events](https://explorer.aboutcircles.com/avatar/0x2b5e4045936ef12250a8c01e4cbf71e9bee69e00/events) — membership / group activity |
+| **Expert avatars** | `mentors.circles_address` | `/avatar/{address}/events` — one link per expert from admin |
+| **THP app / ops avatar** (example) | `0xC19BC204eb1c1D5B3FE500E5E5dfaBaB625F286c` | [events from block 46309369](https://explorer.aboutcircles.com/avatar/0xC19BC204eb1c1D5B3FE500E5E5dfaBaB625F286c/events?startBlock=46309369) — confirm ownership in triage |
+
+### 4.3 Tools & endpoints
 
 | Tool | URL | Use for |
 |------|-----|---------|
-| **Dune — Gnosis overview** | https://dune.com/gnosischain_team/gnosis-app-overview | Starting queries, ecosystem patterns |
+| **Circles explorer — events** | `…/avatar/{address}/events?startBlock=` | **Default** per-address CRC / activity (no custom indexer) |
+| **Dune — Gnosis overview** | https://dune.com/gnosischain_team/gnosis-app-overview | Optional cross-address charts / public hackathon dashboard |
 | **Circles explorer (tx)** | https://explorer.aboutcircles.com/tx/{hash} | Already linked from `/calls` (`tx_hash`) |
-| **Circles explorer (avatar)** | https://explorer.aboutcircles.com/avatar/{address}/graph | Trust graph, CRC flow per expert/org |
-| **Circles RPC** | https://rpc.aboutcircles.com/ | `circles_query` → `V_Crc.TrustRelations`, profile views |
+| **Circles RPC** | https://rpc.aboutcircles.com/ | Live balance (`getProfileView`), `TrustRelations` for trust UI |
 | **Trust path viewer** | https://data.aboutcircles.com/path-viewer | Path capacity / trust-bound transfers |
-| **Flow visualization** | https://flow-viz-bm3ge.ondigitalocean.app/flow-visualization/ | CRC flow diagrams (reference UX) |
 | **Group checker** | https://aboutcircles.github.io/CirclesTools/groupChecker.html | Verify group treasury / fee config |
-| **GnosisScan** | https://gnosisscan.io/ | Raw L2 txs if Circles indexer lags |
+| **GnosisScan** | https://gnosisscan.io/ | Raw L2 fallback if explorer lags |
 
-### 4.3 What each PAY stores today
+### 4.4 What each PAY stores today
 
 [`buildSplitPayTransactions`](../lib/crc-pay.ts) emits **one `sendTransactions` batch** with up to two legs:
 
 1. `constructAdvancedTransfer(from → FOUNDATION_ADDRESS, foundationWei)`
 2. `constructAdvancedTransfer(from → mentor, mentorWei)` (if share > 0)
 
-[`PayButton`](../components/mentors/PayButton.tsx) persists **`bookings.tx_hash`** — the join key between app and chain.
+[`PayButton`](../components/mentors/PayButton.tsx) persists **`bookings.tx_hash`** — deep link to [`/tx/{hash}`](https://explorer.aboutcircles.com/) for leg detail; org/expert totals live on each avatar **`/events`** page.
 
-**Dune strategy:** index transfers where `from` = booker Safes and `to` ∈ {`0xc02D…`, expert addresses from a Dune dimension table synced from `mentors.circles_address`}.
+**Dune (optional):** only if we need a single public chart aggregating many addresses — otherwise explorer links + `startBlock` per avatar are enough for Phase 1.
 
-### 4.4 TRUST on-chain
+### 4.5 TRUST on-chain
 
 | Signal | Source |
 |--------|--------|
@@ -110,25 +140,24 @@ SQLite **`SUM(price_crc)` is deprecated as a KPI** — use only for “listed pr
 | Trust tx hash (optional) | Extend `POST /api/trust` to store `trust_tx_hash` ([`schema.sql`](../lib/schema.sql) column exists) |
 | Mutual / two-way | Bidirectional query (same as [`TrustButton`](../components/bookings/TrustButton.tsx)) |
 
-### 4.5 Server-side chain reads (in-app)
+### 4.6 In-app reads (minimal)
 
-For `/admin/stats` without waiting on Dune refresh:
+| Need | Approach |
+|------|----------|
+| Treasury balance on admin home | One RPC `getProfileView(FOUNDATION_ADDRESS)` |
+| Per-booking detail | Link to explorer `/tx/{tx_hash}` — already on `/calls` |
+| Per-expert / org CRC history | **Link** to explorer `/avatar/…/events` — no ingestion |
+| Reconciliation | Compare SQLite `tx_hash` + listed price vs explorer tx page |
 
-```ts
-// Pattern: enrich booking rows from chain
-for (const b of bookingsWithTxHash) {
-  // Circles explorer API or RPC — decode transfer amounts per leg
-  // Compare to mentors.price_crc + mentor_share_percent
-}
-```
-
-Cache results (5–15 min TTL) to avoid hammering RPC. Long-term: **materialized view** fed by Dune API or nightly indexer job.
+Avoid building a server loop that re-indexes explorer events unless Dune aggregate dashboards are in scope.
 
 ---
 
-## 5. Dune — primary financial dashboard
+## 5. Dune — optional aggregate dashboard
 
-**Phase 1 deliverable** (not Phase 2): public dashboard **“THP for Good — on-chain activity”**.
+**Not required** if Circles Explorer `/events` per avatar + admin deep links are enough.
+
+Use Dune when we want one **public hackathon view** crossing treasury + all experts without clicking each explorer URL. Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnosis-app-overview).
 
 ### Suggested queries / widgets
 
@@ -177,20 +206,23 @@ Admin-gated ([DIV-L1-07](https://github.com/gnosis-box/THP-for-Good/issues/15)).
 
 | Panel | Source |
 |-------|--------|
-| **CRC volume (chain)** | Dune embed iframe **or** `GET /api/admin/stats/onchain` (RPC/cache) |
-| **Treasury org balance** | `getProfileView(FOUNDATION_ADDRESS).v2Balance` |
-| **Recent PAY txs** | List `bookings` where `tx_hash` set → link to Circles explorer |
-| **Reconciliation alert** | SQLite booking without `tx_hash` > 24h, or chain amount ≠ listed price |
+| **Treasury org balance** | RPC `getProfileView(FOUNDATION_ADDRESS).v2Balance` |
+| **CRC activity (org, group, experts)** | Deep links → [Circles Explorer `/events`](https://explorer.aboutcircles.com/) per address (`startBlock` from env) |
+| **Recent PAY txs** | SQLite `bookings` with `tx_hash` → link `/tx/{hash}` |
+| **Reconciliation alert** | Booking without `tx_hash` > 24h |
 | **Tags / active experts** | SQLite only |
-| **Umami snapshot** | Link out to Umami dashboard (or iframe if auth allows) |
+| **Umami** | Link out to Umami dashboard |
+| **Dune (optional)** | Embed iframe if aggregate public dashboard exists |
 
 ### API sketch
 
 | Route | Source |
 |-------|--------|
-| `GET /api/admin/stats/onchain?from=&to=` | RPC + optional Dune API |
 | `GET /api/admin/stats/enrichment` | SQLite tags, mentors, booking metadata |
-| `GET /api/admin/stats/reconcile` | Diff chain vs DB |
+| `GET /api/admin/stats/reconcile` | Bookings missing `tx_hash` |
+| `GET /api/admin/stats/explorer-links` | Built URLs: org, group, mentors → `/avatar/…/events?startBlock=` |
+
+No `GET /api/admin/stats/onchain` event ingestion — use explorer links instead.
 
 **No `SUM(price_crc)` in API responses** unless labeled `"listed price (off-chain)"`.
 
@@ -216,11 +248,11 @@ Admin-gated ([DIV-L1-07](https://github.com/gnosis-box/THP-for-Good/issues/15)).
 
 | Task | Output |
 |------|--------|
-| **Dune dashboard** THP for Good | Public CRC / treasury / expert transfers |
-| Dune seed: expert addresses | Named widgets |
-| `/admin/stats` on-chain panel | RPC balance + tx list + Dune embed |
-| Reconciliation job | Flag DB vs chain mismatches |
-| Umami deploy + events | UX funnel only |
+| Explorer deep links in `/admin/stats` | Org, group, each expert `/events?startBlock=` |
+| Document `THP_ANALYTICS_START_BLOCK` env | Shared `startBlock` for all explorer URLs |
+| `/admin/stats` enrichment + reconcile | SQLite tags + missing `tx_hash` alerts |
+| Umami deploy + events | UX funnel |
+| Dune dashboard (optional) | Public aggregate chart if needed |
 
 ### Phase 2
 
@@ -257,7 +289,7 @@ Admin-gated ([DIV-L1-07](https://github.com/gnosis-box/THP-for-Good/issues/15)).
 | 1 | **On-chain first** for CRC KPIs? | **A) Yes** — Dune + RPC primary; SQLite reconcile only |
 | 2 | Dune dashboard visibility | **Public** for hackathon + embed in admin |
 | 3 | Umami scope | UX events only; no financial totals |
-| 4 | Phase 1 must-ship | **Dune + admin on-chain panel + Umami** |
+| 4 | Phase 1 must-ship | **Explorer links + admin panel + Umami** (Dune optional) |
 | 5 | Expert stats Phase 1? | No — admin only; expert tab uses on-chain in Phase 2 |
 
 ---
@@ -276,4 +308,4 @@ Admin-gated ([DIV-L1-07](https://github.com/gnosis-box/THP-for-Good/issues/15)).
 
 ---
 
-*Last updated: 2026-05-21 — on-chain first for CRC/financial metrics; Umami for UX only.*
+*Last updated: 2026-05-21 — Circles Explorer `/events` as default on-chain feed; no custom indexer.*

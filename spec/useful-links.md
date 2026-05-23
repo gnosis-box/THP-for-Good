@@ -155,6 +155,8 @@ Hub: https://aboutcircles.github.io/CirclesTools/
 | Circles playground | https://circles.gnosis.io/playground |
 | Circles RPC (Gnosis Chain) | https://rpc.aboutcircles.com/ |
 | Circles data / explorer hub | https://explorer.aboutcircles.com/ |
+| **Explorer — avatar events** | `https://explorer.aboutcircles.com/avatar/{address}/events?startBlock=` — on-chain CRC activity (no custom indexer) |
+| **THP ops avatar events (example)** | https://explorer.aboutcircles.com/avatar/0xC19BC204eb1c1D5B3FE500E5E5dfaBaB625F286c/events?startBlock=46309369 |
 | Gnosis Chain | https://www.gnosis.io/ |
 | Miniapps marketplace PR | https://github.com/aboutcircles/CirclesMiniapps |
 | NPM `@aboutcircles/miniapp-sdk` | https://www.npmjs.com/package/@aboutcircles/miniapp-sdk |
