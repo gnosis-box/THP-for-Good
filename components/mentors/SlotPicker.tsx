@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
 import { Spinner } from '@/components/ui/spinner';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -16,11 +17,17 @@ type SlotPickerProps = {
 type DayGroup = { label: string; slots: string[] };
 
 function fmtTime(iso: string) {
-  return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+  return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(
+    new Date(iso),
+  );
 }
 
 function fmtDay(iso: string) {
-  return new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date(iso));
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(iso));
 }
 
 function groupByDay(slots: string[]): DayGroup[] {
@@ -64,7 +71,7 @@ export function SlotPicker({ mentorId, selected, onSelect }: SlotPickerProps) {
 
   if (slots === null) {
     return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
         <Spinner className="size-4" />
         Loading availability…
       </div>
@@ -85,33 +92,41 @@ export function SlotPicker({ mentorId, selected, onSelect }: SlotPickerProps) {
   const groups = groupByDay(slots);
 
   return (
-    <div className="flex flex-col gap-5">
-      <p className="text-sm font-medium">Select a slot</p>
-      {groups.map(({ label, slots: daySlots }) => (
-        <div key={label} className="flex flex-col gap-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
-          <ToggleGroup
-            value={selected && daySlots.includes(selected) ? [selected] : []}
-            onValueChange={(values) => {
-              const iso = values[values.length - 1];
-              if (!iso) onSelect(null);
-              else onSelect(iso === selected ? null : iso);
-            }}
-            className="flex flex-wrap gap-2"
-          >
-            {daySlots.map((iso) => (
-              <ToggleGroupItem
-                key={iso}
-                value={iso}
-                className="min-h-11 rounded-lg px-4 data-pressed:bg-primary data-pressed:text-primary-foreground"
-                aria-label={fmtTime(iso)}
+    <div className="flex w-full flex-col items-center gap-4">
+      <p className="text-sm font-medium text-center">Select a slot</p>
+      <div className="flex w-full max-w-md flex-col gap-3">
+        {groups.map(({ label, slots: daySlots }) => (
+          <Card key={label} size="sm" className="w-full gap-3 py-3">
+            <CardHeader className="items-center px-4 pb-0 text-center">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wide text-chart-2">
+                {label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pt-0">
+              <ToggleGroup
+                value={selected && daySlots.includes(selected) ? [selected] : []}
+                onValueChange={(values) => {
+                  const iso = values[values.length - 1];
+                  if (!iso) onSelect(null);
+                  else onSelect(iso === selected ? null : iso);
+                }}
+                className="flex flex-wrap justify-center gap-2"
               >
-                {fmtTime(iso)}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
-      ))}
+                {daySlots.map((iso) => (
+                  <ToggleGroupItem
+                    key={iso}
+                    value={iso}
+                    className="h-11 w-20 shrink-0 justify-center rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 data-pressed:bg-primary data-pressed:text-primary-foreground"
+                    aria-label={fmtTime(iso)}
+                  >
+                    {fmtTime(iso)}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

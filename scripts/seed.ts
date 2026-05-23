@@ -1,4 +1,4 @@
-import { insertMentor, addDbAdmin } from '../lib/db';
+import { insertMentor, addDbAdmin, syncMentorLanguages } from '../lib/db';
 
 /** Default admins — see spec/seed.md */
 const ADMINS = [
@@ -27,5 +27,12 @@ for (const address of ADMINS) {
 
 for (const mentor of MENTORS) {
   const id = insertMentor(mentor);
-  console.log(`Seeded mentor: ${mentor.name} (id=${id})`);
+  const synced = syncMentorLanguages(
+    mentor.circles_address,
+    [...mentor.spoken_languages],
+    [...mentor.call_languages],
+  );
+  console.log(
+    `Seeded mentor: ${mentor.name} (id=${id}${synced ? ', languages synced' : ''})`,
+  );
 }

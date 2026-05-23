@@ -32,34 +32,25 @@ export function MentorProfileHero({ mentor }: Props) {
   }, [mentor.circles_address]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start gap-4">
-        <Avatar className="size-16 shrink-0">
-          {imageUrl ? <AvatarImage src={imageUrl} alt={mentor.name} /> : null}
-          <AvatarFallback className="text-lg font-semibold">
-            {mentor.name.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <div className="flex items-start justify-between gap-2">
-            <h1 className="text-display text-xl font-semibold tracking-tight sm:text-2xl">
-              {mentor.name}
-            </h1>
-            <CrcAmount amount={mentor.price_crc} className="shrink-0 text-sm sm:text-base" />
-          </div>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {trustedBy !== null && (
-              <p className="text-xs text-muted-foreground">Trusted by {trustedBy}</p>
-            )}
-            <ExpertTrustControl
-              expertAddress={mentor.circles_address}
-              expertName={mentor.name}
-            />
-          </div>
-          <MentorLanguageTags languages={callLanguages} className="sm:text-sm" />
-          <MentorSkillTags skills={mentor.skills} className="sm:[&_span]:text-sm" />
-          <MentorSplitShare expertPercent={share} className="sm:text-sm" />
+    <div className="flex flex-col items-center gap-4 text-center">
+      <Avatar className="size-16 shrink-0">
+        {imageUrl ? <AvatarImage src={imageUrl} alt={mentor.name} /> : null}
+        <AvatarFallback className="text-lg font-semibold">
+          {mentor.name.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex w-full max-w-lg flex-col items-center gap-2">
+        <h1 className="text-display text-xl font-semibold tracking-tight sm:text-2xl">{mentor.name}</h1>
+        <CrcAmount amount={mentor.price_crc} className="text-sm sm:text-base" />
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
+          {trustedBy !== null && (
+            <p className="text-xs text-muted-foreground">Trusted by {trustedBy}</p>
+          )}
+          <ExpertTrustControl expertAddress={mentor.circles_address} expertName={mentor.name} />
         </div>
+        <MentorLanguageTags languages={callLanguages} className="sm:text-sm" prefix="Sessions" />
+        <MentorSkillTags skills={mentor.skills} className="justify-center sm:[&_span]:text-sm" />
+        <MentorSplitShare expertPercent={share} className="sm:text-sm" />
       </div>
     </div>
   );

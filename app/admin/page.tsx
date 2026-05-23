@@ -1,9 +1,10 @@
 import { AdminPanel } from '@/components/admin/AdminPanel';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 export default function AdminPage() {
   return (
     <main className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Admin</h1>
+      <PageHeader title="Admin" />
       <AdminPanel />
     </main>
   );

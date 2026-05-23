@@ -6,6 +6,17 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Miniapps Boilerplate — Agent Guide
 
+## Language policy (mandatory)
+
+| Context | Language |
+| --- | --- |
+| **Chat with Florian** | **French** |
+| **Everything else in this repo** | **English** — code, comments, commit messages, **GitHub issue titles & bodies**, PR descriptions, user-facing UI strings (MVP), agent-written docs in-repo |
+
+Spec files may stay bilingual or French where already established (`spec/PRD-MVP.md`, decisions). **Never open GitHub issues or write implementation comments in French** unless the user explicitly requests French for a named deliverable.
+
+---
+
 This is a starter template for building [Circles](https://aboutcircles.com) miniapps. A miniapp is a web app that loads inside the Circles host (https://circles.gnosis.io/playground) via an iframe; the host injects a wallet and your app drives interactions through the SDK. The boilerplate ships with the minimum plumbing — wallet provider, sign-in demo, profile lookup, layout — so a developer can clone it and start writing business logic immediately.
 
 ## Product spec & project workflow (mandatory)
@@ -14,6 +25,7 @@ This is a starter template for building [Circles](https://aboutcircles.com) mini
 | --- | --- |
 | **Centre de vérité (statut, priorité, exécution)** | [GitHub Project #1](https://github.com/orgs/gnosis-box/projects/1/views/1) |
 | **Index (liens, décisions verrouillées, anti-doublon)** | [`spec/PRD-MVP.md`](spec/PRD-MVP.md) · [`spec/useful-links.md`](spec/useful-links.md) |
+| **L4 backlog workflow (agents)** | This file § [L4 backlog workflow](#l4-backlog-workflow) · skill `thp-for-good-backlog` |
 
 Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**. Group by **Priority**.
 
@@ -43,6 +55,31 @@ Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**
 1. Board: **Triage** → **Ready** → **Running** → **Review** → close issue → **Done**.
 2. PRD backlog row: optional note “done” or remove only when issue closed (keep link for history).
 3. Respect **Locked decisions** below and layer order on the board.
+
+### L4 backlog workflow
+
+Use when adding post-MVP features, external link curation, or multi-phase specs (see skill **`thp-for-good-backlog`** for full commands).
+
+**Issue IDs:** `FEAT-L4-*` (epic/planning) · `IMPL-L4-*` (code) · `DIV-L4-*` (decision, no code). See [Language policy](#language-policy-mandatory) — issue bodies in **English**.
+
+**After creating an issue:**
+
+1. `gh project item-add 1 --owner gnosis-box --url https://github.com/gnosis-box/THP-for-Good/issues/NN`
+2. Add one row to [`spec/PRD-MVP.md`](spec/PRD-MVP.md) § L4 and [`spec/useful-links.md`](spec/useful-links.md)
+3. Non-trivial topics → dedicated spec (e.g. [`spec/analytics-strategy.md`](spec/analytics-strategy.md))
+
+**Branches (do not mix docs + impl in one PR):**
+
+| Branch | Contents | PR target |
+|--------|----------|-----------|
+| `feat/*-backlog`, `docs/*` | `.github/`, `spec/*.md`, PRD index | `dev` first |
+| `impl/l4-*` | App code, API, UI | `dev` after doc PR merged; `git rebase origin/dev` before impl PR |
+
+**On-chain facts (Circles):**
+
+- **Group** `0x2b5E…` — membership / admin Promote (`GROUP_ADDRESS`)
+- **Treasury org** `0xc02D…` — PAY split leg ([`lib/crc-pay.ts`](lib/crc-pay.ts) `FOUNDATION_ADDRESS`)
+- CRC / transfer analytics → [Circles Explorer `/events`](https://explorer.aboutcircles.com/) per avatar (`?startBlock=`), not a custom indexer; SQLite enriches via `bookings.tx_hash` only
 
 ### Locked decisions (do not contradict in code or docs)
 
@@ -212,6 +249,11 @@ The dashboard (`/`) intentionally has no `<PageNav />` because [`NavCards`](comp
 - **shadcn primitives** in `components/ui/`. **Do not hand-edit** them — they are CLI-generated. To update a component, regenerate it with `pnpm dlx shadcn@latest add <name> --overwrite`.
 - **shadcn uses Base UI** (`@base-ui/react`), not Radix. Trigger components accept a `render={<Button … />}` prop, not `asChild`. See `MobileNav.tsx` for an example.
 - **Dark-only theme.** Set `class="dark"` on `<html>` in `app/layout.tsx`. Tokens live in `app/globals.css` (`:root` mirrored to `.dark`). See `spec/design-tokens.md`.
+- **Surface contours** use `border border-border` (token `--border`; `--input` aliases it). Do not use `ring-foreground/*` for card outlines.
+- **Layout patterns** (reuse — do not reinvent):
+  - **Page hero** — `PageHeader` (`components/layout/PageHeader.tsx`): centered title + subtitle on every main route.
+  - **KPI / treasury / analytics card** — `MetricsPanel`, `StatCell`, `StatGrid`, `MetricsHero`, `MetricsActions`, `MetricsExternalLink` (`components/ui-patterns/metrics-panel.tsx`): centered title, label-above-value stats, centered CTAs.
+  - **Lists / tables / prose** — `ContentSection`, `ContentPanel` (`components/ui-patterns/content-section.tsx`): left-aligned title; use for experts lists, how-to blocks, tables, forms.
 
 ## Common workflows
 

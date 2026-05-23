@@ -1,8 +1,8 @@
 # SPIKE-L4-01 — cal.diy / calendar integration
 
-**Verdict: DEFER custom cal.diy self-host for hackathon; KEEP current Cal.com slots API path on `Dev`.**
+**Verdict: DEFER custom cal.diy self-host for hackathon; KEEP current Cal.com slots API path on `dev`.**
 
-## Current state (post-merge `Dev`)
+## Current state (post-merge `dev`)
 
 - [`SlotPicker`](../components/mentors/SlotPicker.tsx) loads slots via `/api/mentors/[id]/availability` (Cal.com)
 - PAY requires slot + email; booking creates Cal.com reservation via [`lib/calcom.ts`](../lib/calcom.ts)

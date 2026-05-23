@@ -31,7 +31,12 @@ export function MentorSplitShare({ expertPercent, className }: SplitShareProps) 
   const treasuryPercent = 100 - expertPercent;
 
   return (
-    <div className={cn('flex flex-wrap gap-x-1.5 gap-y-0.5 text-xs leading-snug text-accent', className)}>
+    <div
+      className={cn(
+        'flex flex-wrap justify-center gap-x-1.5 gap-y-0.5 text-xs leading-snug text-accent',
+        className,
+      )}
+    >
       <span className="whitespace-nowrap">{expertPercent}% to expert</span>
       <span className="whitespace-nowrap">{treasuryPercent}% to THP for Good</span>
     </div>

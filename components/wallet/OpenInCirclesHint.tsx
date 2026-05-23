@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { ExternalLink } from 'lucide-react';
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { buttonVariants } from '@/components/ui/button';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { UI_COPY } from '@/lib/ui-copy';
@@ -12,6 +11,7 @@ import { cn } from '@/lib/utils';
 export function OpenInCirclesHint() {
   const { isMiniappHost } = useWallet();
   const [href, setHref] = useState('https://circles.gnosis.io/playground');
+  const copy = UI_COPY.circlesHint;
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -21,20 +21,19 @@ export function OpenInCirclesHint() {
   if (isMiniappHost) return null;
 
   return (
-    <Alert className="border-warning/40 bg-warning/10" role="status">
-      <ExternalLink aria-hidden />
-      <AlertTitle>{UI_COPY.circlesHint.title}</AlertTitle>
-      <AlertDescription className="flex flex-col gap-2">
-        <p>{UI_COPY.circlesHint.body}</p>
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'inline-flex min-h-11 w-fit items-center')}
-        >
-          {UI_COPY.circlesHint.cta}
-        </a>
-      </AlertDescription>
-    </Alert>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      role="status"
+      aria-label={`${copy.title}. ${copy.body}`}
+      className={cn(
+        buttonVariants({ size: 'lg' }),
+        'flex min-h-14 w-full items-center justify-center gap-2.5 px-4 text-base font-semibold',
+      )}
+    >
+      <ExternalLink className="size-5 shrink-0" aria-hidden />
+      {copy.cta}
+    </a>
   );
 }

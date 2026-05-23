@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -13,9 +13,11 @@ import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { SlotPicker } from '@/components/mentors/SlotPicker';
 import { PayButton } from '@/components/mentors/PayButton';
 import { MentorEditForm } from '@/components/mentors/MentorEditForm';
+import { MentorLanguageTags } from '@/components/ui-patterns/MentorMeta';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { UI_COPY } from '@/lib/ui-copy';
+import { trackUmamiEvent } from '@/lib/analytics-umami';
 import { cn } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
@@ -28,6 +30,20 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const expertViewTracked = useRef(false);
+
+  useEffect(() => {
+    if (expertViewTracked.current) return;
+    expertViewTracked.current = true;
+    trackUmamiEvent('expert_view', { mentor_id: mentor.id });
+  }, [mentor.id]);
+
+  function handleDrawerOpenChange(open: boolean) {
+    setDrawerOpen(open);
+    if (open) {
+      trackUmamiEvent('pay_drawer_open', { mentor_id: mentor.id });
+    }
+  }
 
   const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
   const hasSlot = !!selectedSlot;
@@ -78,20 +94,32 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
             <MentorProfileHero mentor={mentor} />
 
             {mentor.bio && (
-              <section className="flex flex-col gap-2">
-                <h2 className="text-title text-sm font-semibold">{UI_COPY.booking.about}</h2>
-                <p className="text-sm leading-relaxed text-muted-foreground">{mentor.bio}</p>
+              <section className="flex flex-col items-center gap-2 text-center">
+                <h2 className="text-center text-sm font-semibold">{UI_COPY.booking.about}</h2>
+                <p className="max-w-lg whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                  {mentor.bio}
+                </p>
+                {(mentor.call_languages.length > 0 || mentor.spoken_languages.length > 0) && (
+                  <MentorLanguageTags
+                    languages={
+                      mentor.call_languages.length > 0
+                        ? mentor.call_languages
+                        : mentor.spoken_languages
+                    }
+                    prefix="Sessions"
+                  />
+                )}
               </section>
             )}
 
             <Separator />
 
-            <section className="flex flex-col gap-3">
-              <h2 className="text-title text-sm font-semibold">{UI_COPY.booking.availability}</h2>
+            <section className="flex flex-col items-center gap-3">
+              <h2 className="text-center text-sm font-semibold">{UI_COPY.booking.availability}</h2>
               {mentor.cal_event_type_id ? (
                 <SlotPicker mentorId={mentor.id} selected={selectedSlot} onSelect={setSelectedSlot} />
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-center text-sm text-muted-foreground">
                   {isSelf ? UI_COPY.booking.noCalSelf : UI_COPY.booking.noCalVisitor}
                 </p>
               )}
@@ -130,10 +158,10 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
           <StickyPayBar
             priceCrc={mentor.price_crc}
             hasSlot={hasSlot}
-            onReview={() => setDrawerOpen(true)}
+            onReview={() => handleDrawerOpenChange(true)}
           />
           <div className="md:hidden">
-            <PayDrawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <PayDrawer open={drawerOpen} onOpenChange={handleDrawerOpenChange}>
             <PayButton
               mentor={mentor}
               selectedSlot={selectedSlot}

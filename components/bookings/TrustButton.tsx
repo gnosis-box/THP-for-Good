@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { resolveTrustRelation } from '@/lib/trust-relation';
 import { addTrust, removeTrust } from '@/lib/trust-actions';
+import { trackUmamiEvent } from '@/lib/analytics-umami';
 
 type TrustState =
   | { kind: 'loading' }
@@ -18,10 +19,11 @@ type Props = {
   mentorAddress: string;
   mentorName: string;
   mentorSkills: string[];
+  mentorId: number;
   bookingId: number;
 };
 
-export function TrustButton({ mentorAddress, mentorName, bookingId }: Props) {
+export function TrustButton({ mentorAddress, mentorName, bookingId, mentorId }: Props) {
   const { address } = useWallet();
   const [trustState, setTrustState] = useState<TrustState>({ kind: 'loading' });
   const [refetchTick, setRefetchTick] = useState(0);
@@ -66,15 +68,19 @@ export function TrustButton({ mentorAddress, mentorName, bookingId }: Props) {
 
   async function handleTrust() {
     if (!address) return;
+    trackUmamiEvent('trust_click', { mentor_id: mentorId });
     setActionLoading(true);
     setActionError(null);
     try {
-      await addTrust(address, mentorAddress);
+      const trustTxHash = await addTrust(address, mentorAddress);
 
       fetch('/api/trust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ booking_id: bookingId }),
+        body: JSON.stringify({
+          booking_id: bookingId,
+          trust_tx_hash: trustTxHash ?? undefined,
+        }),
       }).catch(() => undefined);
 
       setRefetchTick((t) => t + 1);

@@ -19,7 +19,7 @@ export function Header() {
               alt=""
               width={28}
               height={28}
-              className="size-7 shrink-0 rounded-sm ring-1 ring-border"
+              className="size-7 shrink-0 rounded-sm border border-border"
               style={{ height: 'auto', width: 'auto', maxHeight: 28, maxWidth: 28 }}
             />
             <span className="hidden truncate sm:inline sm:text-sm lg:text-base">

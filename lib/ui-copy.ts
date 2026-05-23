@@ -3,7 +3,7 @@
 export const UI_COPY = {
   home: {
     title: 'Find a mentor',
-    subtitle: 'Book a 1:1 session. Pay in CRC. Fund the next cohort.',
+    subtitle: 'Book a 1:1 session. Pay in CRC. Fund the next student.',
     filterLabel: 'Which domain do you want help with?',
     emptySearch: 'No mentors found for this search.',
     searchPlaceholder: 'Search by name, skill or bio…',
@@ -28,6 +28,13 @@ export const UI_COPY = {
     selectSlotFirst: 'Select a slot above first.',
     successTrustReminder: (expertName: string) =>
       `After your call, trust ${expertName} on My Calls to strengthen the Circles network.`,
+    successDialogTitle: 'Booking confirmed!',
+    successDialogSubtitle: (expertName: string) =>
+      `Your session with ${expertName} is booked and paid in CRC.`,
+    successDialogCalEmail: 'A calendar invite has been sent to your email.',
+    successDialogCalManual: 'Use the calendar link below or from My Calls when ready.',
+    successDialogViewCalls: 'View in My Calls (Emitted)',
+    successDialogStay: 'Stay on this page',
     viewMyCalls: 'View my calls',
     openCalBooking: 'Open Cal.com booking',
     openExpertCalendar: 'Open expert calendar',
@@ -74,6 +81,51 @@ export const UI_COPY = {
     stopExpertLoading: 'Updating…',
     stopExpertConfirm:
       'Remove your expert profile from the directory? You can register again later.',
+  },
+  stats: {
+    title: 'Stats',
+    subtitle: 'On-chain treasury and Circles activity, plus off-chain session metrics.',
+    howToReadTitle: 'How to read this dashboard',
+    howToReadBullets: [
+      'CRC transfers and volume — use the Circles Explorer links below; the authoritative source is on-chain, not summed in this app.',
+      'Treasury balance — live read from the Circles network (refreshed every few minutes).',
+      'Session counts and skills — from THP app records only; they are labelled separately and are not on-chain totals.',
+      'Booker wallet addresses are never shown here — only public explorer links and aggregates.',
+    ] as const,
+    treasuryTitle: 'THP for Good treasury',
+    treasuryBalance: 'CRC balance (on-chain)',
+    treasuryBalanceUnavailable: 'Balance unavailable',
+    viewOnChainActivity: 'View on-chain activity',
+    trustGraph: 'Trust graph',
+    analyticsFromBlock: (block: number) =>
+      `Circles Explorer links below filter activity from block ${block.toLocaleString()}.`,
+    expertBalancesTruncated: 'CRC balances shown for the first active experts only.',
+    expertPaidSessions: (count: number) =>
+      count === 1 ? '1 paid session' : `${count} paid sessions`,
+    expertsTitle: 'Active experts',
+    expertsEmpty: 'No active experts listed yet.',
+    snapshotTitle: 'Activity snapshot',
+    snapshotOffChainNote: 'Counts below are from app records — not on-chain totals.',
+    activeExperts: 'Active experts',
+    paidBookings: 'Paid sessions (tx recorded)',
+    bookingIntent: 'Booking intents (no tx yet)',
+    trustAttestations: 'Trust actions logged',
+    topSkills: 'Top skills',
+    recentPaidTitle: 'Recent paid sessions',
+    recentPaidEmpty: 'No paid sessions with on-chain tx yet.',
+    viewTx: 'View tx',
+    reconcileTitle: (count: number) =>
+      `${count} booking${count === 1 ? '' : 's'} awaiting on-chain confirmation (over 24h)`,
+    loading: 'Loading stats…',
+    loadError: 'Could not load stats. Try again later.',
+    umamiTitle: 'Web analytics',
+    viewPublicAnalyticsDashboard: 'View more on public analytics dashboard',
+    webAnalyticsVisitors: 'Visitors',
+    webAnalyticsVisits: 'Visits',
+    webAnalyticsViews: 'Page views',
+    webAnalyticsBounce: 'Bounce rate',
+    webAnalyticsDuration: 'Avg. visit',
+    webAnalyticsUnavailable: 'Web analytics summary is temporarily unavailable.',
   },
 } as const;
 
