@@ -9,6 +9,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { MentorCard } from './MentorCard';
 import { MentorSearch } from './MentorSearch';
 import { SkillFilter } from './SkillFilter';
@@ -41,10 +42,7 @@ export function MentorBrowser({ mentors, tags }: Props) {
 
   return (
     <div className="flex w-full flex-col gap-8">
-      <section className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{UI_COPY.home.title}</h1>
-        <p className="text-sm text-muted-foreground">{UI_COPY.home.subtitle}</p>
-      </section>
+      <PageHeader title={UI_COPY.home.title} subtitle={UI_COPY.home.subtitle} />
 
       <section className="flex flex-col gap-4">
         <p className="text-sm font-medium">{UI_COPY.home.filterLabel}</p>
@@ -61,11 +59,11 @@ export function MentorBrowser({ mentors, tags }: Props) {
           </EmptyHeader>
         </Empty>
       ) : (
-        <ul className="flex w-full flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 lg:grid lg:grid-cols-2 lg:gap-4 lg:overflow-visible lg:rounded-none lg:bg-transparent lg:ring-0">
+        <ul className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2">
           {filtered.map((mentor) => (
             <li
               key={mentor.id}
-              className="w-full min-w-0 border-b border-border/60 last:border-b-0 lg:overflow-hidden lg:rounded-xl lg:border-b-0 lg:bg-card lg:ring-1 lg:ring-foreground/10"
+              className="w-full min-w-0 overflow-hidden rounded-xl border border-border bg-card"
             >
               <MentorCard mentor={mentor} />
             </li>

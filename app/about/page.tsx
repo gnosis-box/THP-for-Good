@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { DonationSection } from '@/components/about/DonationSection';
 import { cn } from '@/lib/utils';
 
@@ -9,7 +10,7 @@ export default function AboutPage() {
 
       {/* Hero */}
       <section className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">What is THP for Good?</h1>
+        <PageHeader title="What is THP for Good?" />
         <p className="text-muted-foreground leading-relaxed">
           THP for Good is a solidarity-based initiative by{' '}
           <a href="https://www.thehackingproject.org" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2">

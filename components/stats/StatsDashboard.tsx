@@ -113,9 +113,11 @@ export function StatsDashboard() {
 
       {/* Treasury */}
       <section className="flex flex-col gap-4 rounded-xl border border-border p-4 sm:p-5">
-        <h2 className="text-base font-semibold">{copy.treasuryTitle}</h2>
-        <p className="text-xs font-mono text-muted-foreground break-all">{data.treasury.address}</p>
-        <div>
+        <h2 className="text-center text-base font-semibold">{copy.treasuryTitle}</h2>
+        <p className="text-center text-xs font-mono text-muted-foreground break-all">
+          {data.treasury.address}
+        </p>
+        <div className="flex flex-col items-center gap-1 text-center">
           <p className="text-xs text-muted-foreground">{copy.treasuryBalance}</p>
           <p className="text-2xl font-semibold tabular-nums">
             {data.treasury.balanceCrc != null
@@ -123,7 +125,7 @@ export function StatsDashboard() {
               : copy.treasuryBalanceUnavailable}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           <ExplorerLink href={data.treasury.eventsUrl}>{copy.viewOnChainActivity}</ExplorerLink>
           <ExplorerLink href={data.treasury.graphUrl}>{copy.trustGraph}</ExplorerLink>
         </div>
