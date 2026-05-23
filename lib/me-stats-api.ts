@@ -1,6 +1,6 @@
 export type MeStatsResponse = {
-  mentorId: number;
-  mentorName: string;
+  expertId: number;
+  expertName: string;
   address: string;
   balanceCrc: number | null;
   eventsUrl: string;

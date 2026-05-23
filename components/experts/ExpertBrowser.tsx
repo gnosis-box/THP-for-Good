@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { MentorRow, TagRow } from '@/lib/db';
+import type { ExpertRow, TagRow } from '@/lib/db';
 import { UI_COPY } from '@/lib/ui-copy';
 import {
   Empty,
@@ -10,22 +10,22 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { MentorCard } from './MentorCard';
-import { MentorSearch } from './MentorSearch';
+import { ExpertCard } from './ExpertCard';
+import { ExpertSearch } from './ExpertSearch';
 import { SkillFilter } from './SkillFilter';
 import { LanguageFilter } from './LanguageFilter';
 
 type Props = {
-  mentors: MentorRow[];
+  experts: ExpertRow[];
   tags: TagRow[];
 };
 
-export function MentorBrowser({ mentors, tags }: Props) {
+export function ExpertBrowser({ experts, tags }: Props) {
   const [selectedSkill, setSelectedSkill] = useState('');
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filtered = mentors.filter((m) => {
+  const filtered = experts.filter((m) => {
     const matchSkill = !selectedSkill || m.skills.includes(selectedSkill);
     const callLanguages = m.call_languages.length > 0 ? m.call_languages : m.spoken_languages;
     const matchLanguage =
@@ -46,7 +46,7 @@ export function MentorBrowser({ mentors, tags }: Props) {
 
       <section className="flex flex-col gap-4">
         <p className="text-sm font-medium">{UI_COPY.home.filterLabel}</p>
-        <MentorSearch value={searchQuery} onChange={setSearchQuery} />
+        <ExpertSearch value={searchQuery} onChange={setSearchQuery} />
         <SkillFilter tags={tags} selected={selectedSkill} onSelect={setSelectedSkill} />
         <LanguageFilter selected={selectedLanguages} onChange={setSelectedLanguages} />
       </section>
@@ -54,18 +54,18 @@ export function MentorBrowser({ mentors, tags }: Props) {
       {filtered.length === 0 ? (
         <Empty>
           <EmptyHeader>
-            <EmptyTitle>No mentors</EmptyTitle>
+            <EmptyTitle>No experts</EmptyTitle>
             <EmptyDescription>{UI_COPY.home.emptySearch}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (
         <ul className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2">
-          {filtered.map((mentor) => (
+          {filtered.map((expert) => (
             <li
-              key={mentor.id}
+              key={expert.id}
               className="w-full min-w-0 overflow-hidden rounded-xl border border-border bg-card"
             >
-              <MentorCard mentor={mentor} />
+              <ExpertCard expert={expert} />
             </li>
           ))}
         </ul>

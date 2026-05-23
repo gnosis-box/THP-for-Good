@@ -14,15 +14,15 @@ import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { useTrustEligibleBalance } from '@/hooks/use-trust-eligible-balance';
 import {
   buildSplitPayTransactions,
-  clampMentorShare,
+  clampExpertShare,
   splitLegCrc,
-  type MentorSharePercent,
+  type ExpertSharePercent,
 } from '@/lib/crc-pay';
 import { mapPayError } from '@/lib/pay-copy';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
 import { UI_COPY } from '@/lib/ui-copy';
 import { cn } from '@/lib/utils';
-import type { MentorRow } from '@/lib/db';
+import type { ExpertRow } from '@/lib/db';
 
 type PayState =
   | { kind: 'idle' }
@@ -46,7 +46,7 @@ function fmtSlot(iso: string) {
 }
 
 type Props = {
-  mentor: MentorRow;
+  expert: ExpertRow;
   selectedSlot: string | null;
   email: string;
   onEmailChange: (v: string) => void;
@@ -56,7 +56,7 @@ type Props = {
 };
 
 export function PayButton({
-  mentor,
+  expert,
   selectedSlot,
   email,
   onEmailChange,
@@ -67,12 +67,12 @@ export function PayButton({
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
   const balance = useCrcBalance(address);
-  const sharePercent = clampMentorShare(mentor.mentor_share_percent ?? 20) as MentorSharePercent;
-  const { expertLegCrc, treasuryLegCrc } = splitLegCrc(mentor.price_crc, sharePercent);
+  const sharePercent = clampExpertShare(expert.expert_share_percent ?? 20) as ExpertSharePercent;
+  const { expertLegCrc, treasuryLegCrc } = splitLegCrc(expert.price_crc, sharePercent);
   const trustEligible = useTrustEligibleBalance(
     address,
-    mentor.circles_address,
-    mentor.price_crc,
+    expert.circles_address,
+    expert.price_crc,
     sharePercent,
   );
   const [bookerName, setBookerName] = useState<string | null>(null);
@@ -96,9 +96,9 @@ export function PayButton({
     })();
   }, [address]);
 
-  const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
+  const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
   const insufficientBalance =
-    balance.status === 'ready' && balance.balance < mentor.price_crc;
+    balance.status === 'ready' && balance.balance < expert.price_crc;
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const canPay =
     isConnected &&
@@ -114,7 +114,7 @@ export function PayButton({
     setState({ kind: 'loading' });
 
     try {
-      const slotRes = await fetch(`/api/mentors/${mentor.id}/availability`);
+      const slotRes = await fetch(`/api/experts/${expert.id}/availability`);
       if (slotRes.ok) {
         const openSlots = (await slotRes.json()) as string[];
         if (Array.isArray(openSlots) && !openSlots.includes(selectedSlot)) {
@@ -125,8 +125,8 @@ export function PayButton({
       const { sendTransactions } = await import('@aboutcircles/miniapp-sdk');
       const txs = await buildSplitPayTransactions(
         address as `0x${string}`,
-        mentor.circles_address as `0x${string}`,
-        mentor.price_crc,
+        expert.circles_address as `0x${string}`,
+        expert.price_crc,
         sharePercent,
       );
       const hashes = await sendTransactions(txs);
@@ -136,7 +136,7 @@ export function PayButton({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mentor_id: mentor.id,
+          expert_id: expert.id,
           booker_address: address,
           tx_hash: txHash,
           slot_time: selectedSlot,
@@ -165,7 +165,7 @@ export function PayButton({
         calendarEventUrl: booking.calendar_event_url ?? null,
       });
       setSuccessDialogOpen(true);
-      trackUmamiEvent('pay_success', { mentor_id: mentor.id });
+      trackUmamiEvent('pay_success', { expert_id: expert.id });
       onSuccess?.();
     } catch (err) {
       const message = mapPayError(err);
@@ -175,7 +175,7 @@ export function PayButton({
   }
 
   const success = state.kind === 'success' ? state : null;
-  const calUrl = success?.calendarEventUrl ?? mentor.calendar_link ?? null;
+  const calUrl = success?.calendarEventUrl ?? expert.calendar_link ?? null;
 
   return (
     <>
@@ -183,12 +183,12 @@ export function PayButton({
         <BookingSuccessDialog
           open={successDialogOpen}
           onOpenChange={setSuccessDialogOpen}
-          mentorName={mentor.name}
+          expertName={expert.name}
           slotLabel={fmtSlot(success.slotTime)}
           txHash={success.hash}
           calendarEventUrl={success.calendarEventUrl}
-          calendarLink={mentor.calendar_link}
-          calInviteSent={!!mentor.cal_event_type_id}
+          calendarLink={expert.calendar_link}
+          calInviteSent={!!expert.cal_event_type_id}
         />
       ) : null}
 
@@ -200,7 +200,7 @@ export function PayButton({
             <div className="flex flex-col gap-3">
               <p>{fmtSlot(success.slotTime)}</p>
               <p>
-                {mentor.cal_event_type_id
+                {expert.cal_event_type_id
                   ? 'A calendar invite has been sent to your email.'
                   : 'Complete scheduling using the expert calendar link below.'}
               </p>
@@ -228,12 +228,12 @@ export function PayButton({
                     {UI_COPY.booking.openCalBooking}
                   </Button>
                 ) : null}
-                {mentor.calendar_link ? (
+                {expert.calendar_link ? (
                   <Button
                     variant="outline"
                     size="sm"
                     className="min-h-11"
-                    onClick={() => window.open(mentor.calendar_link, '_blank', 'noopener,noreferrer')}
+                    onClick={() => window.open(expert.calendar_link, '_blank', 'noopener,noreferrer')}
                   >
                     {UI_COPY.booking.openExpertCalendar}
                   </Button>
@@ -251,7 +251,7 @@ export function PayButton({
                 </p>
               )}
               <p className="text-sm text-muted-foreground">
-                {UI_COPY.booking.successTrustReminder(mentor.name)}
+                {UI_COPY.booking.successTrustReminder(expert.name)}
               </p>
             </div>
           }
@@ -263,8 +263,8 @@ export function PayButton({
               trustEligible={trustEligible}
               expertLegCrc={expertLegCrc}
               treasuryLegCrc={treasuryLegCrc}
-              mentorName={mentor.name}
-              priceCrc={mentor.price_crc}
+              expertName={expert.name}
+              priceCrc={expert.price_crc}
             />
           )}
           <PaymentSummary
@@ -283,7 +283,7 @@ export function PayButton({
           )}
           {insufficientBalance && (
             <p className="text-sm text-destructive">
-              You need at least {mentor.price_crc} CRC to book this call.
+              You need at least {expert.price_crc} CRC to book this call.
             </p>
           )}
           <Button disabled={!canPay} onClick={handlePay} size="lg" className="min-h-11 w-full">
@@ -293,7 +293,7 @@ export function PayButton({
                 Processing…
               </>
             ) : (
-              `Pay ${mentor.price_crc} CRC to book`
+              `Pay ${expert.price_crc} CRC to book`
             )}
           </Button>
           {!selectedSlot && (

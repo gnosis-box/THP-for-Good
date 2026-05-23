@@ -51,7 +51,7 @@ function fmtWhen(iso: string) {
 }
 
 export function PlatformHealthSection({ stats }: Props) {
-  const { bookings, mentors, tags, recentBookings } = stats;
+  const { bookings, experts, tags, recentBookings } = stats;
 
   return (
     <section className="flex flex-col gap-4">
@@ -83,14 +83,14 @@ export function PlatformHealthSection({ stats }: Props) {
           variant={bookings.withoutTrust > 0 ? 'warning' : 'default'}
           hint="Paid bookings without attestation"
         />
-        <StatCard label="Active experts" value={mentors.active} />
+        <StatCard label="Active experts" value={experts.active} />
         <StatCard
           label="No Cal.com"
-          value={mentors.activeWithoutCal}
-          variant={mentors.activeWithoutCal > 0 ? 'warning' : 'default'}
+          value={experts.activeWithoutCal}
+          variant={experts.activeWithoutCal > 0 ? 'warning' : 'default'}
           hint="Active but not bookable in-app"
         />
-        <StatCard label="Inactive experts" value={mentors.inactive} />
+        <StatCard label="Inactive experts" value={experts.inactive} />
         <StatCard
           label="Pending tags"
           value={tags.pending}
@@ -114,7 +114,7 @@ export function PlatformHealthSection({ stats }: Props) {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium">
-                      {booking.mentor_name}{' '}
+                      {booking.expert_name}{' '}
                       <span className="font-normal text-muted-foreground">
                         ← {shortenAddress(booking.booker_address, 4)}
                       </span>

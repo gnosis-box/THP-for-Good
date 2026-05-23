@@ -15,6 +15,12 @@ const FRAME_ANCESTORS = [
 const nextConfig: NextConfig = {
   output: "standalone",
   serverExternalPackages: ['better-sqlite3'],
+  async redirects() {
+    return [
+      { source: '/mentor/:path*', destination: '/expert/:path*', permanent: true },
+      { source: '/api/mentors/:path*', destination: '/api/experts/:path*', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

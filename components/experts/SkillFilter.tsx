@@ -20,7 +20,7 @@ export function SkillFilter({ tags, selected, onSelect }: Props) {
           const v = values[values.length - 1] ?? '';
           onSelect(v === '' ? '' : v);
         }}
-        aria-label="Filter mentors by skill"
+        aria-label="Filter experts by skill"
         className="inline-flex w-max min-h-11 gap-2 pb-1"
       >
         <ToggleGroupItem value="" className="min-h-11 shrink-0 rounded-full px-4">

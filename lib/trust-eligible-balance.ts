@@ -1,4 +1,4 @@
-import { FOUNDATION_ADDRESS as PAY_FOUNDATION, type MentorSharePercent } from '@/lib/crc-pay';
+import { FOUNDATION_ADDRESS as PAY_FOUNDATION, type ExpertSharePercent } from '@/lib/crc-pay';
 
 const ATTO_PER_CRC = 10n ** 18n;
 
@@ -36,13 +36,13 @@ async function maxFlowCrc(
  */
 export function simulateBookableSessionCrc(
   priceCrc: number,
-  mentorSharePercent: MentorSharePercent,
+  expertSharePercent: ExpertSharePercent,
   toExpertCrc: number,
   toFoundationCrc: number,
 ): number {
   if (priceCrc <= 0) return 0;
 
-  const expertLeg = (priceCrc * mentorSharePercent) / 100;
+  const expertLeg = (priceCrc * expertSharePercent) / 100;
   const foundationLeg = priceCrc - expertLeg;
   const caps: number[] = [];
 
@@ -61,7 +61,7 @@ export async function queryTrustPathLimits(
   from: `0x${string}`,
   expert: `0x${string}`,
   priceCrc: number,
-  mentorSharePercent: MentorSharePercent,
+  expertSharePercent: ExpertSharePercent,
 ): Promise<TrustPathLimits> {
   const foundationSink = PAY_FOUNDATION as `0x${string}`;
 
@@ -75,7 +75,7 @@ export async function queryTrustPathLimits(
     toFoundationCrc,
     bookableCrc: simulateBookableSessionCrc(
       priceCrc,
-      mentorSharePercent,
+      expertSharePercent,
       toExpertCrc,
       toFoundationCrc,
     ),

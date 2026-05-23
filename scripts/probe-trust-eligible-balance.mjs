@@ -1,6 +1,6 @@
 /**
  * SPIKE #53 — probe trust-path max flow toward expert + foundation.
- * Run: node scripts/probe-trust-eligible-balance.mjs <from> <expert> [priceCrc] [mentorSharePercent]
+ * Run: node scripts/probe-trust-eligible-balance.mjs <from> <expert> [priceCrc] [expertSharePercent]
  */
 import { Sdk } from '@aboutcircles/sdk';
 
@@ -37,7 +37,7 @@ const share = Number(process.argv[5] ?? '20');
 
 if (!from?.startsWith('0x') || !expert?.startsWith('0x')) {
   console.error(
-    'Usage: node scripts/probe-trust-eligible-balance.mjs <from> <expert> [priceCrc] [mentorSharePercent]',
+    'Usage: node scripts/probe-trust-eligible-balance.mjs <from> <expert> [priceCrc] [expertSharePercent]',
   );
   process.exit(1);
 }
@@ -54,7 +54,7 @@ console.log(
       expert,
       foundation: PAY_FOUNDATION,
       priceCrc: price,
-      mentorSharePercent: share,
+      expertSharePercent: share,
       toExpertCrc: toExpert,
       toFoundationCrc: toFoundation,
       bookableCrc: bookable(price, share, toExpert, toFoundation),

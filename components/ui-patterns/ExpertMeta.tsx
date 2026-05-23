@@ -5,7 +5,7 @@ type SkillTagsProps = {
   className?: string;
 };
 
-export function MentorSkillTags({ skills, className }: SkillTagsProps) {
+export function ExpertSkillTags({ skills, className }: SkillTagsProps) {
   if (skills.length === 0) return null;
 
   return (
@@ -27,7 +27,7 @@ type SplitShareProps = {
   className?: string;
 };
 
-export function MentorSplitShare({ expertPercent, className }: SplitShareProps) {
+export function ExpertSplitShare({ expertPercent, className }: SplitShareProps) {
   const treasuryPercent = 100 - expertPercent;
 
   return (
@@ -49,7 +49,7 @@ type LanguageTagsProps = {
   prefix?: string;
 };
 
-export function MentorLanguageTags({ languages, className, prefix = 'Calls' }: LanguageTagsProps) {
+export function ExpertLanguageTags({ languages, className, prefix = 'Calls' }: LanguageTagsProps) {
   if (languages.length === 0) return null;
 
   return (

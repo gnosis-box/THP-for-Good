@@ -87,7 +87,7 @@ export function ExpertStatsPanel() {
         <MetricsExternalLink href={data.eventsUrl}>On-chain activity</MetricsExternalLink>
         <MetricsExternalLink href={data.graphUrl}>Trust graph</MetricsExternalLink>
         <Link
-          href={`/mentor/${data.mentorId}`}
+          href={`/expert/${data.expertId}`}
           className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'min-h-9')}
         >
           Public profile

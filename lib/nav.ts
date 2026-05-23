@@ -12,7 +12,7 @@ export const NAV: NavItem[] = [
   { href: "/stats", label: "Stats" },
   { href: "/about", label: "About" },
   {
-    href: "/mentor/register",
+    href: "/expert/register",
     label: "Offer your expertise",
     shortLabel: "Register",
   },

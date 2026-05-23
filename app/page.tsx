@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-import { getAllMentors, getAllTags } from '@/lib/db';
-import { MentorBrowser } from '@/components/mentors/MentorBrowser';
+import { getAllExperts, getAllTags } from '@/lib/db';
+import { ExpertBrowser } from '@/components/experts/ExpertBrowser';
 
 export default function HomePage() {
-  const mentors = getAllMentors();
+  const experts = getAllExperts();
   const tags = getAllTags();
 
-  return <MentorBrowser mentors={mentors} tags={tags} />;
+  return <ExpertBrowser experts={experts} tags={tags} />;
 }

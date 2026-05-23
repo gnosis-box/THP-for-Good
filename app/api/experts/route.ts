@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllMentors, getMentorByCirclesAddress, insertMentor } from '@/lib/db';
+import { getAllExperts, getExpertByCirclesAddress, insertExpert } from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
-import { clampMentorShare } from '@/lib/crc-pay';
-import { normalizeMentorLanguages } from '@/lib/languages';
+import { clampExpertShare } from '@/lib/crc-pay';
+import { normalizeExpertLanguages } from '@/lib/languages';
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const circlesAddress = searchParams.get('circles_address');
   if (circlesAddress) {
-    const mentor = getMentorByCirclesAddress(circlesAddress);
-    if (!mentor) {
+    const expert = getExpertByCirclesAddress(circlesAddress);
+    if (!expert) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
-    return NextResponse.json(mentor);
+    return NextResponse.json(expert);
   }
 
   const skill = searchParams.get('skill') ?? undefined;
@@ -20,10 +20,10 @@ export function GET(request: NextRequest) {
   const q = searchParams.get('q')?.toLowerCase();
   const all = searchParams.get('all') === '1' && isAdminRequest(request);
 
-  let mentors = getAllMentors(skill, all, callLanguage ?? undefined);
+  let experts = getAllExperts(skill, all, callLanguage ?? undefined);
 
   if (q) {
-    mentors = mentors.filter(
+    experts = experts.filter(
       (m) =>
         m.name.toLowerCase().includes(q) ||
         (m.bio ?? '').toLowerCase().includes(q) ||
@@ -31,7 +31,7 @@ export function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.json(mentors);
+  return NextResponse.json(experts);
 }
 
 export async function POST(request: NextRequest) {
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     google_calendar_id?: string;
     cal_event_type_id?: number;
     price_crc?: number;
-    mentor_share_percent?: number;
+    expert_share_percent?: number;
     skills: string[];
     spoken_languages?: string[];
     call_languages?: string[];
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'skills must be an array of strings' }, { status: 400 });
   }
 
-  const languages = normalizeMentorLanguages(
+  const languages = normalizeExpertLanguages(
     data.spoken_languages ?? [],
     data.call_languages,
   );
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const id = insertMentor({
+    const id = insertExpert({
       circles_address: data.circles_address.trim().toLowerCase(),
       name: data.name.trim(),
       bio: data.bio?.trim(),
@@ -93,14 +93,14 @@ export async function POST(request: NextRequest) {
       google_calendar_id: data.google_calendar_id?.trim() || undefined,
       cal_event_type_id: data.cal_event_type_id,
       price_crc: data.price_crc,
-      mentor_share_percent: clampMentorShare(data.mentor_share_percent ?? 20),
+      expert_share_percent: clampExpertShare(data.expert_share_percent ?? 20),
       skills: data.skills,
       spoken_languages: languages.spoken_languages,
       call_languages: languages.call_languages,
     });
     return NextResponse.json({ id }, { status: 201 });
   } catch (err) {
-    console.error('[api/mentors POST]', err);
-    return NextResponse.json({ error: 'Failed to register mentor' }, { status: 500 });
+    console.error('[api/experts POST]', err);
+    return NextResponse.json({ error: 'Failed to register expert' }, { status: 500 });
   }
 }

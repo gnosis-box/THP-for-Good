@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import type { MentorSharePercent } from '@/lib/crc-pay';
+import type { ExpertSharePercent } from '@/lib/crc-pay';
 import {
   formatCrc,
   queryTrustPathLimits,
@@ -18,7 +18,7 @@ export function useTrustEligibleBalance(
   from: string | null,
   expert: string | null,
   priceCrc: number,
-  mentorSharePercent: MentorSharePercent,
+  expertSharePercent: ExpertSharePercent,
 ) {
   const [snapshot, setSnapshot] = useState<{
     key: string;
@@ -31,7 +31,7 @@ export function useTrustEligibleBalance(
       return;
     }
 
-    const key = `${from}:${expert}:${priceCrc}:${mentorSharePercent}`;
+    const key = `${from}:${expert}:${priceCrc}:${expertSharePercent}`;
     let cancelled = false;
     setSnapshot({ key, state: { status: 'loading' } });
 
@@ -39,7 +39,7 @@ export function useTrustEligibleBalance(
       from as `0x${string}`,
       expert as `0x${string}`,
       priceCrc,
-      mentorSharePercent,
+      expertSharePercent,
     )
       .then((limits) => {
         if (cancelled) return;
@@ -70,10 +70,10 @@ export function useTrustEligibleBalance(
     return () => {
       cancelled = true;
     };
-  }, [from, expert, priceCrc, mentorSharePercent]);
+  }, [from, expert, priceCrc, expertSharePercent]);
 
   if (!from || !expert || priceCrc <= 0) return { status: 'idle' } as const;
-  const key = `${from}:${expert}:${priceCrc}:${mentorSharePercent}`;
+  const key = `${from}:${expert}:${priceCrc}:${expertSharePercent}`;
   if (snapshot.key !== key) return { status: 'loading' } as const;
   return snapshot.state;
 }

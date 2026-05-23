@@ -9,7 +9,7 @@ export type TagRow = {
   status: 'approved' | 'pending';
 };
 
-export type MentorRow = {
+export type ExpertRow = {
   id: number;
   circles_address: string;
   name: string;
@@ -18,7 +18,7 @@ export type MentorRow = {
   google_calendar_id: string | null;
   cal_event_type_id: number | null;
   price_crc: number;
-  mentor_share_percent: number;
+  expert_share_percent: number;
   active: number;
   created_at: string;
   skills: string[];
@@ -28,7 +28,7 @@ export type MentorRow = {
 
 export type BookingRow = {
   id: number;
-  mentor_id: number;
+  expert_id: number;
   booker_address: string;
   tx_hash: string | null;
   slot_time: string | null;
@@ -37,7 +37,7 @@ export type BookingRow = {
   created_at: string;
 };
 
-export type InsertMentorData = {
+export type InsertExpertData = {
   circles_address: string;
   name: string;
   bio?: string;
@@ -45,14 +45,14 @@ export type InsertMentorData = {
   google_calendar_id?: string;
   cal_event_type_id?: number;
   price_crc?: number;
-  mentor_share_percent?: number;
+  expert_share_percent?: number;
   skills: string[];
   spoken_languages?: string[];
   call_languages?: string[];
 };
 
 export type InsertBookingData = {
-  mentor_id: number;
+  expert_id: number;
   booker_address: string;
   tx_hash?: string;
   slot_time?: string;
@@ -60,13 +60,13 @@ export type InsertBookingData = {
   cal_booking_uid?: string;
 };
 
-type MentorRowRaw = Omit<MentorRow, 'skills' | 'spoken_languages' | 'call_languages'> & {
+type ExpertRowRaw = Omit<ExpertRow, 'skills' | 'spoken_languages' | 'call_languages'> & {
   skills: string;
   spoken_languages: string | null;
   call_languages: string | null;
 };
 
-function mapMentorRow(row: MentorRowRaw): MentorRow {
+function mapExpertRow(row: ExpertRowRaw): ExpertRow {
   return {
     ...row,
     skills: row.skills ? row.skills.split(',') : [],
@@ -94,46 +94,84 @@ if (dbPath !== ':memory:') {
 }
 db.pragma('busy_timeout = 5000');
 
+function tableExists(name: string): boolean {
+  const row = db
+    .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?")
+    .get(name) as { name: string } | undefined;
+  return !!row;
+}
+
+function tryExec(sql: string): void {
+  try {
+    db.exec(sql);
+  } catch {
+    /* already applied */
+  }
+}
+
 const schema = fs.readFileSync(path.join(process.cwd(), 'lib', 'schema.sql'), 'utf-8');
 db.exec(schema);
 
-// Idempotent column migrations for existing databases
+/** Legacy column adds before renaming mentors → experts. */
+if (tableExists('mentors')) {
+  for (const sql of [
+    'ALTER TABLE mentors ADD COLUMN google_calendar_id TEXT',
+    'ALTER TABLE mentors ADD COLUMN cal_event_type_id INTEGER',
+    'ALTER TABLE mentors ADD COLUMN mentor_share_percent INTEGER DEFAULT 20',
+    'ALTER TABLE mentors ADD COLUMN spoken_languages TEXT',
+    'ALTER TABLE mentors ADD COLUMN call_languages TEXT',
+  ]) {
+    tryExec(sql);
+  }
+}
+
+/** One-time rename for databases created before expert naming. */
+if (tableExists('mentors')) {
+  tryExec('ALTER TABLE mentors RENAME TO experts');
+}
+if (tableExists('mentor_skills')) {
+  tryExec('ALTER TABLE mentor_skills RENAME TO expert_skills');
+}
+tryExec('ALTER TABLE expert_skills RENAME COLUMN mentor_id TO expert_id');
+tryExec('ALTER TABLE bookings RENAME COLUMN mentor_id TO expert_id');
+tryExec('ALTER TABLE experts RENAME COLUMN mentor_share_percent TO expert_share_percent');
+
 for (const sql of [
-  'ALTER TABLE mentors ADD COLUMN google_calendar_id TEXT',
-  'ALTER TABLE mentors ADD COLUMN cal_event_type_id INTEGER',
+  'ALTER TABLE experts ADD COLUMN google_calendar_id TEXT',
+  'ALTER TABLE experts ADD COLUMN cal_event_type_id INTEGER',
   'ALTER TABLE bookings ADD COLUMN slot_time TEXT',
   'ALTER TABLE bookings ADD COLUMN calendar_event_url TEXT',
   'ALTER TABLE bookings ADD COLUMN cal_booking_uid TEXT',
   "ALTER TABLE skill_tags ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'",
-  'ALTER TABLE mentors ADD COLUMN mentor_share_percent INTEGER DEFAULT 20',
-  'ALTER TABLE mentors ADD COLUMN spoken_languages TEXT',
-  'ALTER TABLE mentors ADD COLUMN call_languages TEXT',
+  'ALTER TABLE experts ADD COLUMN expert_share_percent INTEGER DEFAULT 20',
+  'ALTER TABLE experts ADD COLUMN spoken_languages TEXT',
+  'ALTER TABLE experts ADD COLUMN call_languages TEXT',
 ]) {
-  try { db.exec(sql); } catch { /* column already exists */ }
+  tryExec(sql);
 }
 
-export function getAllMentors(
+export function getAllExperts(
   skillFilter?: string,
   includeInactive = false,
   callLanguageFilter?: string,
-): MentorRow[] {
+): ExpertRow[] {
   let sql = `
     SELECT
-      m.*,
+      e.*,
       GROUP_CONCAT(st.label) AS skills
-    FROM mentors m
-    LEFT JOIN mentor_skills ms ON ms.mentor_id = m.id
-    LEFT JOIN skill_tags st ON st.id = ms.tag_id
-    WHERE ${includeInactive ? '1=1' : 'm.active = 1'}
+    FROM experts e
+    LEFT JOIN expert_skills es ON es.expert_id = e.id
+    LEFT JOIN skill_tags st ON st.id = es.tag_id
+    WHERE ${includeInactive ? '1=1' : 'e.active = 1'}
   `;
   const params: string[] = [];
 
   if (skillFilter) {
     sql += `
-      AND m.id IN (
-        SELECT ms2.mentor_id
-        FROM mentor_skills ms2
-        JOIN skill_tags st2 ON st2.id = ms2.tag_id
+      AND e.id IN (
+        SELECT es2.expert_id
+        FROM expert_skills es2
+        JOIN skill_tags st2 ON st2.id = es2.tag_id
         WHERE st2.label = ?
       )
     `;
@@ -143,68 +181,68 @@ export function getAllMentors(
   if (callLanguageFilter) {
     sql += `
       AND (
-        m.call_languages LIKE ?
-        OR m.call_languages LIKE ?
-        OR m.call_languages LIKE ?
-        OR m.call_languages = ?
+        e.call_languages LIKE ?
+        OR e.call_languages LIKE ?
+        OR e.call_languages LIKE ?
+        OR e.call_languages = ?
       )
     `;
     const code = callLanguageFilter.toLowerCase();
     params.push(`${code},%`, `%,${code}`, `%,${code},%`, code);
   }
 
-  sql += ' GROUP BY m.id';
+  sql += ' GROUP BY e.id';
 
-  const rows = db.prepare(sql).all(...params) as MentorRowRaw[];
-  return rows.map(mapMentorRow);
+  const rows = db.prepare(sql).all(...params) as ExpertRowRaw[];
+  return rows.map(mapExpertRow);
 }
 
-export function getMentorById(id: number): MentorRow | undefined {
+export function getExpertById(id: number): ExpertRow | undefined {
   const sql = `
     SELECT
-      m.*,
+      e.*,
       GROUP_CONCAT(st.label) AS skills
-    FROM mentors m
-    LEFT JOIN mentor_skills ms ON ms.mentor_id = m.id
-    LEFT JOIN skill_tags st ON st.id = ms.tag_id
-    WHERE m.id = ?
-    GROUP BY m.id
+    FROM experts e
+    LEFT JOIN expert_skills es ON es.expert_id = e.id
+    LEFT JOIN skill_tags st ON st.id = es.tag_id
+    WHERE e.id = ?
+    GROUP BY e.id
   `;
-  const row = db.prepare(sql).get(id) as MentorRowRaw | undefined;
+  const row = db.prepare(sql).get(id) as ExpertRowRaw | undefined;
   if (!row) return undefined;
-  return mapMentorRow(row);
+  return mapExpertRow(row);
 }
 
-export function getMentorByCirclesAddress(address: string): MentorRow | undefined {
+export function getExpertByCirclesAddress(address: string): ExpertRow | undefined {
   const sql = `
     SELECT
-      m.*,
+      e.*,
       GROUP_CONCAT(st.label) AS skills
-    FROM mentors m
-    LEFT JOIN mentor_skills ms ON ms.mentor_id = m.id
-    LEFT JOIN skill_tags st ON st.id = ms.tag_id
-    WHERE LOWER(m.circles_address) = LOWER(?)
-    GROUP BY m.id
+    FROM experts e
+    LEFT JOIN expert_skills es ON es.expert_id = e.id
+    LEFT JOIN skill_tags st ON st.id = es.tag_id
+    WHERE LOWER(e.circles_address) = LOWER(?)
+    GROUP BY e.id
   `;
-  const row = db.prepare(sql).get(address) as MentorRowRaw | undefined;
+  const row = db.prepare(sql).get(address) as ExpertRowRaw | undefined;
   if (!row) return undefined;
-  return mapMentorRow(row);
+  return mapExpertRow(row);
 }
 
-export function insertMentor(data: InsertMentorData): number {
-  const insertMentorStmt = db.prepare(`
-    INSERT OR IGNORE INTO mentors (
+export function insertExpert(data: InsertExpertData): number {
+  const insertExpertStmt = db.prepare(`
+    INSERT OR IGNORE INTO experts (
       circles_address, name, bio, calendar_link, google_calendar_id, cal_event_type_id,
-      price_crc, mentor_share_percent, spoken_languages, call_languages
+      price_crc, expert_share_percent, spoken_languages, call_languages
     )
     VALUES (
       @circles_address, @name, @bio, @calendar_link, @google_calendar_id, @cal_event_type_id,
-      @price_crc, @mentor_share_percent, @spoken_languages, @call_languages
+      @price_crc, @expert_share_percent, @spoken_languages, @call_languages
     )
   `);
 
   const updateLanguagesStmt = db.prepare(`
-    UPDATE mentors
+    UPDATE experts
     SET spoken_languages = @spoken_languages, call_languages = @call_languages
     WHERE id = @id
   `);
@@ -214,12 +252,12 @@ export function insertMentor(data: InsertMentorData): number {
   `);
 
   const insertSkillStmt = db.prepare(`
-    INSERT OR IGNORE INTO mentor_skills (mentor_id, tag_id)
+    INSERT OR IGNORE INTO expert_skills (expert_id, tag_id)
     SELECT ?, id FROM skill_tags WHERE label = ?
   `);
 
-  const getMentorIdStmt = db.prepare(
-    'SELECT id FROM mentors WHERE circles_address = ?'
+  const getExpertIdStmt = db.prepare(
+    'SELECT id FROM experts WHERE circles_address = ?',
   );
 
   const run = db.transaction(() => {
@@ -232,7 +270,7 @@ export function insertMentor(data: InsertMentorData): number {
         ? serializeCallLanguageCodes(data.call_languages)
         : serializeCallLanguageCodes(data.spoken_languages ?? []);
 
-    insertMentorStmt.run({
+    insertExpertStmt.run({
       circles_address: data.circles_address,
       name: data.name,
       bio: data.bio ?? null,
@@ -240,35 +278,35 @@ export function insertMentor(data: InsertMentorData): number {
       google_calendar_id: data.google_calendar_id ?? null,
       cal_event_type_id: data.cal_event_type_id ?? null,
       price_crc: data.price_crc ?? 100,
-      mentor_share_percent: data.mentor_share_percent ?? 20,
+      expert_share_percent: data.expert_share_percent ?? 20,
       spoken_languages: spokenSerialized,
       call_languages: callSerialized,
     });
 
-    const row = getMentorIdStmt.get(data.circles_address) as { id: number };
-    const mentorId = row.id;
+    const row = getExpertIdStmt.get(data.circles_address) as { id: number };
+    const expertId = row.id;
 
     if (spokenSerialized !== null) {
       updateLanguagesStmt.run({
         spoken_languages: spokenSerialized,
         call_languages: callSerialized,
-        id: mentorId,
+        id: expertId,
       });
     }
 
     for (const skill of data.skills) {
       upsertTagStmt.run(skill);
-      insertSkillStmt.run(mentorId, skill);
+      insertSkillStmt.run(expertId, skill);
     }
 
-    return mentorId;
+    return expertId;
   });
 
   return run() as number;
 }
 
-/** Re-apply seed language fields for an existing mentor (idempotent). */
-export function syncMentorLanguages(
+/** Re-apply seed language fields for an existing expert (idempotent). */
+export function syncExpertLanguages(
   circlesAddress: string,
   spoken: string[],
   call: string[],
@@ -277,7 +315,7 @@ export function syncMentorLanguages(
   const callSerialized = serializeCallLanguageCodes(call.length > 0 ? call : spoken);
   const result = db
     .prepare(
-      `UPDATE mentors SET spoken_languages = ?, call_languages = ?
+      `UPDATE experts SET spoken_languages = ?, call_languages = ?
        WHERE LOWER(circles_address) = LOWER(?)`,
     )
     .run(spokenSerialized, callSerialized, circlesAddress);
@@ -317,11 +355,11 @@ export function approveSkillTag(id: number): void {
 
 export function insertBooking(data: InsertBookingData): number {
   const stmt = db.prepare(`
-    INSERT INTO bookings (mentor_id, booker_address, tx_hash, slot_time, calendar_event_url, cal_booking_uid)
-    VALUES (@mentor_id, @booker_address, @tx_hash, @slot_time, @calendar_event_url, @cal_booking_uid)
+    INSERT INTO bookings (expert_id, booker_address, tx_hash, slot_time, calendar_event_url, cal_booking_uid)
+    VALUES (@expert_id, @booker_address, @tx_hash, @slot_time, @calendar_event_url, @cal_booking_uid)
   `);
   const result = stmt.run({
-    mentor_id: data.mentor_id,
+    expert_id: data.expert_id,
     booker_address: data.booker_address,
     tx_hash: data.tx_hash ?? null,
     slot_time: data.slot_time ?? null,
@@ -359,18 +397,18 @@ export function getBookingsByAddress(address: string): BookingRow[] {
     .all(address) as BookingRow[];
 }
 
-export type BookingWithMentorName = BookingRow & { mentor_name: string };
+export type BookingWithExpertName = BookingRow & { expert_name: string };
 
-export function getBookingsByProviderAddress(providerAddress: string): BookingWithMentorName[] {
+export function getBookingsByProviderAddress(providerAddress: string): BookingWithExpertName[] {
   return db
     .prepare(
-      `SELECT b.*, m.name AS mentor_name
+      `SELECT b.*, e.name AS expert_name
        FROM bookings b
-       JOIN mentors m ON m.id = b.mentor_id
-       WHERE LOWER(m.circles_address) = LOWER(?)
+       JOIN experts e ON e.id = b.expert_id
+       WHERE LOWER(e.circles_address) = LOWER(?)
        ORDER BY b.created_at DESC`,
     )
-    .all(providerAddress) as BookingWithMentorName[];
+    .all(providerAddress) as BookingWithExpertName[];
 }
 
 export type AdminHealthStats = {
@@ -382,7 +420,7 @@ export type AdminHealthStats = {
     withoutTx: number;
     withoutTrust: number;
   };
-  mentors: {
+  experts: {
     total: number;
     active: number;
     inactive: number;
@@ -395,7 +433,7 @@ export type AdminHealthStats = {
   };
   recentBookings: Array<{
     id: number;
-    mentor_name: string;
+    expert_name: string;
     booker_address: string;
     tx_hash: string | null;
     slot_time: string | null;
@@ -427,7 +465,7 @@ export function getAdminHealthStats(): AdminHealthStats {
       without_trust: number;
     };
 
-  const mentorCounts = db
+  const expertCounts = db
     .prepare(
       `SELECT
          COUNT(*) AS total,
@@ -435,7 +473,7 @@ export function getAdminHealthStats(): AdminHealthStats {
          SUM(CASE WHEN active != 1 THEN 1 ELSE 0 END) AS inactive,
          SUM(CASE WHEN active = 1 AND cal_event_type_id IS NULL THEN 1 ELSE 0 END) AS active_without_cal,
          SUM(CASE WHEN active = 1 AND (call_languages IS NULL OR call_languages = '') THEN 1 ELSE 0 END) AS active_without_languages
-       FROM mentors`,
+       FROM experts`,
     )
     .get() as {
       total: number;
@@ -458,20 +496,20 @@ export function getAdminHealthStats(): AdminHealthStats {
     .prepare(
       `SELECT
          b.id,
-         m.name AS mentor_name,
+         e.name AS expert_name,
          b.booker_address,
          b.tx_hash,
          b.slot_time,
          b.created_at,
          EXISTS(SELECT 1 FROM trust_attestations t WHERE t.booking_id = b.id) AS has_trust
        FROM bookings b
-       JOIN mentors m ON m.id = b.mentor_id
+       JOIN experts e ON e.id = b.expert_id
        ORDER BY b.created_at DESC
        LIMIT 10`,
     )
     .all() as Array<{
       id: number;
-      mentor_name: string;
+      expert_name: string;
       booker_address: string;
       tx_hash: string | null;
       slot_time: string | null;
@@ -488,12 +526,12 @@ export function getAdminHealthStats(): AdminHealthStats {
       withoutTx: bookingCounts.without_tx ?? 0,
       withoutTrust: bookingCounts.without_trust ?? 0,
     },
-    mentors: {
-      total: mentorCounts.total ?? 0,
-      active: mentorCounts.active ?? 0,
-      inactive: mentorCounts.inactive ?? 0,
-      activeWithoutCal: mentorCounts.active_without_cal ?? 0,
-      activeWithoutLanguages: mentorCounts.active_without_languages ?? 0,
+    experts: {
+      total: expertCounts.total ?? 0,
+      active: expertCounts.active ?? 0,
+      inactive: expertCounts.inactive ?? 0,
+      activeWithoutCal: expertCounts.active_without_cal ?? 0,
+      activeWithoutLanguages: expertCounts.active_without_languages ?? 0,
     },
     tags: {
       pending: tagCounts.pending ?? 0,
@@ -501,7 +539,7 @@ export function getAdminHealthStats(): AdminHealthStats {
     },
     recentBookings: recentBookings.map((row) => ({
       id: row.id,
-      mentor_name: row.mentor_name,
+      expert_name: row.expert_name,
       booker_address: row.booker_address,
       tx_hash: row.tx_hash,
       slot_time: row.slot_time,
@@ -515,7 +553,7 @@ export type StatsTagCount = { label: string; count: number };
 
 export type StatsRecentPaidBooking = {
   id: number;
-  mentorName: string;
+  expertName: string;
   txHash: string;
   createdAt: string;
 };
@@ -539,26 +577,26 @@ export type StatsReconcile = {
 export function getExpertPaidSessionCounts(): Map<number, number> {
   const rows = db
     .prepare(
-      `SELECT mentor_id, COUNT(*) AS n FROM bookings
+      `SELECT expert_id, COUNT(*) AS n FROM bookings
        WHERE tx_hash IS NOT NULL AND TRIM(tx_hash) != ''
-       GROUP BY mentor_id`,
+       GROUP BY expert_id`,
     )
-    .all() as { mentor_id: number; n: number }[];
-  return new Map(rows.map((r) => [r.mentor_id, r.n]));
+    .all() as { expert_id: number; n: number }[];
+  return new Map(rows.map((r) => [r.expert_id, r.n]));
 }
 
 export function getStatsEnrichment(): StatsEnrichment {
   const activeExperts = (
-    db.prepare('SELECT COUNT(*) AS n FROM mentors WHERE active = 1').get() as { n: number }
+    db.prepare('SELECT COUNT(*) AS n FROM experts WHERE active = 1').get() as { n: number }
   ).n;
   const totalExperts = (
-    db.prepare('SELECT COUNT(*) AS n FROM mentors').get() as { n: number }
+    db.prepare('SELECT COUNT(*) AS n FROM experts').get() as { n: number }
   ).n;
   const tagCounts = db
     .prepare(
       `SELECT st.label AS label, COUNT(*) AS count
-       FROM mentor_skills ms
-       JOIN skill_tags st ON st.id = ms.tag_id
+       FROM expert_skills es
+       JOIN skill_tags st ON st.id = es.tag_id
        GROUP BY st.label
        ORDER BY count DESC, st.label ASC`,
     )
@@ -592,9 +630,9 @@ export function getStatsEnrichment(): StatsEnrichment {
   ).n;
   const recentPaidBookings = db
     .prepare(
-      `SELECT b.id AS id, m.name AS mentorName, b.tx_hash AS txHash, b.created_at AS createdAt
+      `SELECT b.id AS id, e.name AS expertName, b.tx_hash AS txHash, b.created_at AS createdAt
        FROM bookings b
-       JOIN mentors m ON m.id = b.mentor_id
+       JOIN experts e ON e.id = b.expert_id
        WHERE b.tx_hash IS NOT NULL AND TRIM(b.tx_hash) != ''
        ORDER BY b.created_at DESC
        LIMIT 10`,
@@ -648,37 +686,37 @@ export function insertTrustAttestation(bookingId: number, trustTxHash?: string |
   ).run(bookingId, trustTxHash?.trim() || null);
 }
 
-export function getMentorPaidBookingCount(mentorId: number): number {
+export function getExpertPaidBookingCount(expertId: number): number {
   return (
     db
       .prepare(
         `SELECT COUNT(*) AS n FROM bookings
-         WHERE mentor_id = ? AND tx_hash IS NOT NULL AND TRIM(tx_hash) != ''`,
+         WHERE expert_id = ? AND tx_hash IS NOT NULL AND TRIM(tx_hash) != ''`,
       )
-      .get(mentorId) as { n: number }
+      .get(expertId) as { n: number }
   ).n;
 }
 
-export function getMentorTrustAttestationCount(mentorId: number): number {
+export function getExpertTrustAttestationCount(expertId: number): number {
   return (
     db
       .prepare(
         `SELECT COUNT(*) AS n FROM trust_attestations t
          JOIN bookings b ON b.id = t.booking_id
-         WHERE b.mentor_id = ?`,
+         WHERE b.expert_id = ?`,
       )
-      .get(mentorId) as { n: number }
+      .get(expertId) as { n: number }
   ).n;
 }
 
-export function getMentorBookingIntentCount(mentorId: number): number {
+export function getExpertBookingIntentCount(expertId: number): number {
   return (
     db
       .prepare(
         `SELECT COUNT(*) AS n FROM bookings
-         WHERE mentor_id = ? AND (tx_hash IS NULL OR TRIM(tx_hash) = '')`,
+         WHERE expert_id = ? AND (tx_hash IS NULL OR TRIM(tx_hash) = '')`,
       )
-      .get(mentorId) as { n: number }
+      .get(expertId) as { n: number }
   ).n;
 }
 

@@ -3,36 +3,36 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { CalConnect } from '@/components/mentors/CalConnect';
-import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
-import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPicker';
+import { CalConnect } from '@/components/experts/CalConnect';
+import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
+import { SkillTagPicker, mergeSkillTag } from '@/components/experts/SkillTagPicker';
 import { defaultCallLanguagesFromSpoken, filterCallLanguageCodes } from '@/lib/languages';
-import { LanguagePicker } from '@/components/mentors/LanguagePicker';
-import { StopExpertButton } from '@/components/mentors/StopExpertButton';
-import type { MentorRow, TagRow } from '@/lib/db';
+import { LanguagePicker } from '@/components/experts/LanguagePicker';
+import { StopExpertButton } from '@/components/experts/StopExpertButton';
+import type { ExpertRow, TagRow } from '@/lib/db';
 
 type Props = {
-  mentor: MentorRow;
+  expert: ExpertRow;
   walletAddress: string;
   onSaved: () => void;
   onCancel: () => void;
   onDeactivated?: () => void;
 };
 
-export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDeactivated }: Props) {
+export function ExpertEditForm({ expert, walletAddress, onSaved, onCancel, onDeactivated }: Props) {
   const [tags, setTags] = useState<TagRow[]>([]);
-  const [name, setName] = useState(mentor.name);
-  const [bio, setBio] = useState(mentor.bio ?? '');
-  const [selectedSkills, setSelectedSkills] = useState<string[]>(mentor.skills);
-  const [spokenLanguages, setSpokenLanguages] = useState<string[]>(mentor.spoken_languages);
+  const [name, setName] = useState(expert.name);
+  const [bio, setBio] = useState(expert.bio ?? '');
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(expert.skills);
+  const [spokenLanguages, setSpokenLanguages] = useState<string[]>(expert.spoken_languages);
   const [callLanguages, setCallLanguages] = useState<string[]>(
-    mentor.call_languages.length > 0
-      ? filterCallLanguageCodes(mentor.call_languages)
-      : defaultCallLanguagesFromSpoken(mentor.spoken_languages),
+    expert.call_languages.length > 0
+      ? filterCallLanguageCodes(expert.call_languages)
+      : defaultCallLanguagesFromSpoken(expert.spoken_languages),
   );
-  const [calEventTypeId, setCalEventTypeId] = useState<number | null>(mentor.cal_event_type_id);
-  const [priceCrc, setPriceCrc] = useState(mentor.price_crc);
-  const [mentorShare, setMentorShare] = useState(clampMentorShare(mentor.mentor_share_percent ?? 20));
+  const [calEventTypeId, setCalEventTypeId] = useState<number | null>(expert.cal_event_type_id);
+  const [priceCrc, setPriceCrc] = useState(expert.price_crc);
+  const [expertShare, setExpertShare] = useState(clampExpertShare(expert.expert_share_percent ?? 20));
   const [newSkill, setNewSkill] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +61,7 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDea
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/mentors/${mentor.id}`, {
+      const res = await fetch(`/api/experts/${expert.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-wallet-address': walletAddress },
         body: JSON.stringify({
@@ -69,7 +69,7 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDea
           bio: bio.trim() || null,
           cal_event_type_id: calEventTypeId,
           price_crc: priceCrc,
-          mentor_share_percent: mentorShare,
+          expert_share_percent: expertShare,
           skills: selectedSkills,
           spoken_languages: spokenLanguages,
           call_languages:
@@ -143,14 +143,14 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDea
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium">Payment split</span>
         <div className="flex flex-wrap gap-2">
-          {MENTOR_SHARE_OPTIONS.map((opt) => (
+          {EXPERT_SHARE_OPTIONS.map((opt) => (
             <button
               key={opt}
               type="button"
-              onClick={() => setMentorShare(clampMentorShare(opt))}
+              onClick={() => setExpertShare(clampExpertShare(opt))}
               className={cn(
                 'rounded-full px-3 py-1 text-xs font-medium transition-colors border',
-                mentorShare === opt
+                expertShare === opt
                   ? 'bg-primary text-primary-foreground border-primary'
                   : 'border-border bg-background hover:bg-muted',
               )}
@@ -188,9 +188,9 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDea
         </Button>
       </div>
 
-      {mentor.active === 1 ? (
+      {expert.active === 1 ? (
         <StopExpertButton
-          mentorId={mentor.id}
+          expertId={expert.id}
           walletAddress={walletAddress}
           onDeactivated={onDeactivated}
         />
