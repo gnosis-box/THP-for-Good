@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { queryTrustEdge } from '@/lib/trust-relation';
+import { resolveTrustRelation } from '@/lib/trust-relation';
+import { addTrust, removeTrust } from '@/lib/trust-actions';
 
 type TrustState =
   | { kind: 'loading' }
   | { kind: 'none' }
-  | { kind: 'outgoing' }   // I trust them, they don't trust me
-  | { kind: 'mutual' };    // both directions
+  | { kind: 'incoming' }
+  | { kind: 'outgoing' }
+  | { kind: 'mutual' };
 
 type Props = {
   mentorAddress: string;
@@ -18,17 +20,6 @@ type Props = {
   mentorSkills: string[];
   bookingId: number;
 };
-
-async function buildContractRunner(address: string) {
-  const { sendTransactions } = await import('@aboutcircles/miniapp-sdk');
-  return {
-    address: address as `0x${string}`,
-    publicClient: null as unknown,
-    init: async () => {},
-    sendTransaction: (txs: { to: string; data: string; value?: bigint }[]) =>
-      sendTransactions(txs.map((tx) => ({ to: tx.to, data: tx.data, value: String(tx.value ?? '0') }))),
-  };
-}
 
 export function TrustButton({ mentorAddress, mentorName, bookingId }: Props) {
   const { address } = useWallet();
@@ -44,17 +35,14 @@ export function TrustButton({ mentorAddress, mentorName, bookingId }: Props) {
     let cancelled = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTrustState({ kind: 'loading' });
-    Promise.all([
-      queryTrustEdge(address, mentorAddress),
-      queryTrustEdge(mentorAddress, address),
-    ]).then(([iOutgoing, iIncoming]) => {
-      if (cancelled) return;
-      if (iOutgoing && iIncoming) setTrustState({ kind: 'mutual' });
-      else if (iOutgoing) setTrustState({ kind: 'outgoing' });
-      else setTrustState({ kind: 'none' });
-    }).catch(() => {
-      if (!cancelled) setTrustState({ kind: 'none' });
-    });
+    resolveTrustRelation(address, mentorAddress)
+      .then((kind) => {
+        if (cancelled) return;
+        setTrustState({ kind });
+      })
+      .catch(() => {
+        if (!cancelled) setTrustState({ kind: 'none' });
+      });
     return () => { cancelled = true; };
   }, [address, mentorAddress, refetchTick]);
 
@@ -81,14 +69,7 @@ export function TrustButton({ mentorAddress, mentorName, bookingId }: Props) {
     setActionLoading(true);
     setActionError(null);
     try {
-      const [{ Sdk }, { circlesConfig }] = await Promise.all([
-        import('@aboutcircles/sdk'),
-        import('@aboutcircles/sdk-utils'),
-      ]);
-      const runner = await buildContractRunner(address);
-      const sdk = new Sdk(circlesConfig[100], runner);
-      const avatar = await sdk.getAvatar(address as `0x${string}`);
-      await avatar.trust.add(mentorAddress as `0x${string}`);
+      await addTrust(address, mentorAddress);
 
       fetch('/api/trust', {
         method: 'POST',
@@ -109,14 +90,7 @@ export function TrustButton({ mentorAddress, mentorName, bookingId }: Props) {
     setActionLoading(true);
     setActionError(null);
     try {
-      const [{ Sdk }, { circlesConfig }] = await Promise.all([
-        import('@aboutcircles/sdk'),
-        import('@aboutcircles/sdk-utils'),
-      ]);
-      const runner = await buildContractRunner(address);
-      const sdk = new Sdk(circlesConfig[100], runner);
-      const avatar = await sdk.getAvatar(address as `0x${string}`);
-      await avatar.trust.add(mentorAddress as `0x${string}`, 0n);
+      await removeTrust(address, mentorAddress);
 
       setShowModal(false);
       setRefetchTick((t) => t + 1);
@@ -135,7 +109,7 @@ export function TrustButton({ mentorAddress, mentorName, bookingId }: Props) {
     );
   }
 
-  if (trustState.kind === 'none') {
+  if (trustState.kind === 'none' || trustState.kind === 'incoming') {
     return (
       <div className="flex flex-col gap-1">
         <Button

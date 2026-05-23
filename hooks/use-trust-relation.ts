@@ -10,7 +10,10 @@ export type TrustRelationState =
   | { status: 'loading' }
   | { status: TrustRelationKind };
 
-export function useTrustRelation(otherAddress: string | null | undefined): TrustRelationState {
+export function useTrustRelation(
+  otherAddress: string | null | undefined,
+  refetchKey = 0,
+): TrustRelationState {
   const { address, isConnected } = useWallet();
   const [state, setState] = useState<TrustRelationState>({ status: 'loading' });
 
@@ -44,7 +47,7 @@ export function useTrustRelation(otherAddress: string | null | undefined): Trust
     return () => {
       cancelled = true;
     };
-  }, [address, isConnected, otherAddress]);
+  }, [address, isConnected, otherAddress, refetchKey]);
 
   return state;
 }
