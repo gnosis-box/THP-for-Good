@@ -23,7 +23,7 @@ const navLinkClass = (active: boolean, compact = false) =>
     'inline-flex min-h-11 items-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     compact ? 'px-2.5 text-xs' : 'px-3 text-sm',
     active
-      ? 'bg-primary/15 text-primary'
+      ? 'bg-accent/10 font-semibold text-accent'
       : 'text-foreground hover:bg-muted',
   );
 
@@ -98,7 +98,7 @@ export function MobileNav() {
       <SheetContent
         id={sheetId}
         side="left"
-        className="w-[min(100vw,20rem)] max-w-[85vw] gap-0 p-0 pb-[env(safe-area-inset-bottom)] [&_[data-slot=sheet-close]]:size-11 [&_[data-slot=sheet-close]]:min-h-11 [&_[data-slot=sheet-close]]:min-w-11"
+        className="w-[min(calc(100vw-2rem),16rem)] gap-0 p-0 pb-[env(safe-area-inset-bottom)] [&_[data-slot=sheet-close]]:size-11 [&_[data-slot=sheet-close]]:min-h-11 [&_[data-slot=sheet-close]]:min-w-11"
       >
         <SheetHeader className="border-b border-border px-4 py-4 pr-14">
           <SheetTitle>Menu</SheetTitle>

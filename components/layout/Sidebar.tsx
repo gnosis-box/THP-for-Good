@@ -25,7 +25,7 @@ export function Sidebar() {
               className={cn(
                 'min-h-11 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground transition-colors',
                 active
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                  ? 'bg-accent/10 font-semibold text-accent'
                   : 'hover:bg-sidebar-accent/60',
               )}
             >
