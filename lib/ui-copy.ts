@@ -90,8 +90,6 @@ export const UI_COPY = {
     treasuryBalanceUnavailable: 'Balance unavailable',
     viewOnChainActivity: 'View on-chain activity',
     trustGraph: 'Trust graph',
-    groupTitle: 'THP Circles group',
-    groupBalance: 'CRC balance (on-chain)',
     analyticsFromBlock: (block: number) =>
       `Circles Explorer links below filter activity from block ${block.toLocaleString()}.`,
     expertBalancesTruncated: 'CRC balances shown for the first active experts only.',
@@ -113,7 +111,14 @@ export const UI_COPY = {
     loadError: 'Could not load stats. Try again later.',
     umamiTitle: 'Web analytics',
     umamiNote: 'Page views and funnel — not financial data.',
-    openUmamiDashboard: 'Open Umami dashboard',
+    viewPublicAnalyticsDashboard: 'View more on public analytics dashboard',
+    webAnalyticsPeriod: (days: number) => `Last ${days} days · UX metrics only`,
+    webAnalyticsVisitors: 'Visitors',
+    webAnalyticsVisits: 'Visits',
+    webAnalyticsViews: 'Page views',
+    webAnalyticsBounce: 'Bounce rate',
+    webAnalyticsDuration: 'Avg. visit',
+    webAnalyticsUnavailable: 'Web analytics summary is temporarily unavailable.',
   },
 } as const;
 

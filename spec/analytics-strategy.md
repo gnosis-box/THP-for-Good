@@ -173,9 +173,11 @@ External reference only (not wired in app): [Gnosis app overview on Dune](https:
 | `pay_success` | UX conversion | [`PayButton.tsx`](../components/mentors/PayButton.tsx) |
 | `trust_click` | UX | [`TrustButton.tsx`](../components/bookings/TrustButton.tsx) |
 
-**App code:** [`lib/analytics-umami.ts`](../lib/analytics-umami.ts), [`components/analytics/UmamiScript.tsx`](../components/analytics/UmamiScript.tsx), CSP via [`lib/csp-umami.ts`](../lib/csp-umami.ts).
+**App code:** [`lib/analytics-umami.ts`](../lib/analytics-umami.ts), [`lib/umami-share-client.ts`](../lib/umami-share-client.ts), [`components/analytics/UmamiScript.tsx`](../components/analytics/UmamiScript.tsx), [`components/stats/WebAnalyticsPanel.tsx`](../components/stats/WebAnalyticsPanel.tsx), CSP via [`lib/csp-umami.ts`](../lib/csp-umami.ts).
 
-**Deploy:** Umami Docker on Coolify + dedicated Postgres; gate script on `NEXT_PUBLIC_UMAMI_WEBSITE_ID`. Inside Circles iframe, CSP allows the analytics host when env is set at build time. No wallet addresses in event payloads.
+**Display on `/stats`:** server-side **share API proxy** (no iframe). Circles miniapp runs inside a Gnosis iframe — nested Umami embed is blocked (`frame-ancestors 'self'` on Umami + iframe-in-iframe). Flow: `GET /api/share/{shareId}` → short-lived token → `GET /api/websites/{id}/stats|metrics|events` with `x-umami-share-token` → `webAnalytics` block in `GET /api/stats`. No admin API key on the public route.
+
+**Deploy:** Umami Docker on Coolify + dedicated Postgres; gate script on `NEXT_PUBLIC_UMAMI_WEBSITE_ID`. Inside Circles iframe, `script.js` + `connect-src` Umami for client tracking. No wallet addresses in event payloads.
 
 ---
 
@@ -192,7 +194,7 @@ External reference only (not wired in app): [Gnosis app overview on Dune](https:
 | **Recent PAY txs** | SQLite `bookings` with `tx_hash` → explorer `/tx/{hash}` (no booker address) | ✅ |
 | **Reconciliation alert** | Count only: bookings without `tx_hash` > 24h | ✅ |
 | **Tags / active experts** | SQLite aggregates (labeled off-chain) | ✅ |
-| **Umami** | Share iframe + link on `/stats` | ✅ |
+| **Umami** | Native widgets via `GET /api/stats` `webAnalytics` (share API proxy) + external dashboard link | ✅ |
 | **Group CRC balance** | RPC `getProfileView(GROUP_ADDRESS)` | ✅ |
 | **Expert CRC balances** | RPC per active expert (`THP_STATS_MAX_EXPERT_BALANCES`) | ✅ |
 
@@ -200,7 +202,7 @@ External reference only (not wired in app): [Gnosis app overview on Dune](https:
 
 | Route | Auth | Source |
 |-------|------|--------|
-| `GET /api/stats` | Public | Treasury + group RPC, expert balances, explorer URLs, enrichment, reconcile |
+| `GET /api/stats` | Public | Treasury + group RPC, expert balances, explorer URLs, enrichment, reconcile, **`webAnalytics`** (Umami share API) |
 | `GET /api/me/stats` | Wallet header (`x-wallet-address`) | Expert self-service stats (active mentors only) |
 | `POST /api/trust` | Public | Persists `trust_attestations` (+ optional `trust_tx_hash`) |
 
@@ -218,10 +220,10 @@ Priority order (stay **on-chain first** ; no financial KPIs from SQLite/Umami AP
 | **P1** | **Group avatar CRC balance** (RPC `getProfileView`) | Same pattern as treasury | S |
 | **P2** | **Per-expert CRC balance** (RPC, active experts only) | Circles RPC — public on-chain | M |
 | **P2** | **Booking intent** count (bookings sans `tx_hash`, all ages) | SQLite — label « off-chain intent » | S |
-| **P3** | Umami **share dashboard** iframe | Umami share URL + CSP `frame-src` | S |
+| **P3** | Umami **share API proxy** on `/stats` | [`lib/umami-share-client.ts`](../lib/umami-share-client.ts) + `WebAnalyticsPanel` | S |
 | **—** | Do **not** expose `booker_address`, Umami API keys, or `SUM(price_crc)` on public `/stats` | Privacy / doctrine | — |
 
-**Already public and sufficient for hackathon transparency:** treasury balance, explorer deep links (org / group / experts / txs), off-chain snapshot (counts, tags), reconcile warning (count only), Umami public share link.
+**Already public and sufficient for hackathon transparency:** treasury balance, explorer deep links (org / group / experts / txs), off-chain snapshot (counts, tags), reconcile warning (count only), Umami UX summary widgets + external dashboard link.
 
 ### 7.2 Next sprint — branch `impl/l4-03-analytics`
 
@@ -235,7 +237,7 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | **1 — P1 UX** | Show `meta.startBlock` in UI | « Analytics depuis le block … » | ✅ |
 | **2 — P2 off-chain** | Booking intent count | `bookingIntentCount` in enrichment, labelled off-chain | ✅ |
 | **2 — P2 on-chain** | Expert CRC balances (active only) | RPC per expert ; cap via `THP_STATS_MAX_EXPERT_BALANCES` | ✅ |
-| **3 — P3** | Umami iframe on `/stats` | Share URL iframe + CSP | ✅ |
+| **3 — P3** | Umami widgets on `/stats` | Share API proxy → `webAnalytics` + native UI | ✅ |
 | **C — Phase 2** | `trust_tx_hash` + `POST /api/trust` | [`TrustButton`](../components/bookings/TrustButton.tsx) | ✅ |
 | **D — Phase 2** | Expert stats `/profile` | `GET /api/me/stats` | ✅ |
 
@@ -264,7 +266,7 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | Treasury balance | ✅ | — | — |
 | Expert name / skills | join | ✅ | — |
 | Page funnel | — | — | ✅ |
-| Public verifiable activity | ✅ Explorer links on `/stats` | — | share iframe |
+| Public verifiable activity | ✅ Explorer links on `/stats` | — | share API widgets |
 
 ---
 
@@ -283,7 +285,7 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 | ✅ | Umami infra prod | Single instance `stats.thp.gnosis.box` ; shared `NEXT_PUBLIC_UMAMI_*` on all Coolify apps |
 | ✅ | Umami public share link (code) | `NEXT_PUBLIC_UMAMI_SHARE_URL` — see §6 |
 | ✅ | Merge **`impl/l4-03-analytics` → `dev`** | PR [#67](https://github.com/gnosis-box/THP-for-Good/pull/67) |
-| ⬜ | Phase 2 follow-up PR → `dev` | Expert balances, Umami iframe, trust_tx, me/stats |
+| ⬜ | Phase 2 follow-up PR → `dev` | Expert balances, Umami API widgets, trust_tx, me/stats |
 | ⬜ | Tracking live on **prod** | Merge `dev` → `master` + rebuild |
 
 ### Phase 2
@@ -292,7 +294,7 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 |:----:|------|--------|
 | ✅ | Store `trust_tx_hash` on attest | [`POST /api/trust`](../app/api/trust/route.ts) + [`TrustButton`](../components/bookings/TrustButton.tsx) |
 | ✅ | Expert self-service stats | [`GET /api/me/stats`](../app/api/me/stats/route.ts) + [`ExpertStatsPanel`](../components/profile/ExpertStatsPanel.tsx) |
-| ✅ | Umami iframe embed on `/stats` | Share URL iframe + CSP |
+| ✅ | Umami native widgets on `/stats` | Share API proxy + `WebAnalyticsPanel` |
 
 ---
 
@@ -339,4 +341,4 @@ Continue on this branch **before** rebase/merge to `dev` (blocked until team res
 
 ---
 
-*Last updated: 2026-05-23 — Dune removed ; stack = Explorer + RPC + Umami + `/stats`.*
+*Last updated: 2026-05-23 — Umami iframe replaced by share API proxy on `/stats`.*

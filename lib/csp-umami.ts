@@ -12,7 +12,6 @@ export function umamiOriginFromEnv(): string | null {
 export function buildContentSecurityPolicy(frameAncestors: string): string {
   const umamiOrigin = umamiOriginFromEnv();
   const frameSrc = ['https://calendar.google.com'];
-  if (umamiOrigin) frameSrc.push(umamiOrigin);
 
   const parts = [`frame-ancestors ${frameAncestors}`, `frame-src ${frameSrc.join(' ')}`];
 

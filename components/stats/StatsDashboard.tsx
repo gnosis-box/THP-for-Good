@@ -7,10 +7,10 @@ import { ExternalLink } from 'lucide-react';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { buttonVariants } from '@/components/ui/button';
 import { buildExplorerTxUrl } from '@/lib/analytics-explorer';
-import { getUmamiShareUrl } from '@/lib/analytics-umami';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { StatsApiResponse } from '@/lib/stats-api';
 import { cn, shortenAddress } from '@/lib/utils';
+import { WebAnalyticsPanel } from '@/components/stats/WebAnalyticsPanel';
 
 function fmt(n: number) {
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(n);
@@ -24,29 +24,6 @@ function fmtDate(iso: string) {
   });
 }
 
-function EmbedFrame({
-  title,
-  src,
-  fallbackHref,
-  fallbackLabel,
-}: {
-  title: string;
-  src: string;
-  fallbackHref: string;
-  fallbackLabel: string;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <iframe
-        title={title}
-        src={src}
-        className="w-full min-h-[400px] rounded-lg border border-border bg-background"
-        loading="lazy"
-      />
-      <ExplorerLink href={fallbackHref}>{fallbackLabel}</ExplorerLink>
-    </div>
-  );
-}
 function ExplorerLink({
   href,
   children,
@@ -106,8 +83,6 @@ export function StatsDashboard() {
     return <p className="text-sm text-muted-foreground animate-pulse">{copy.loading}</p>;
   }
 
-  const umamiShareUrl = getUmamiShareUrl();
-
   return (
     <div className="flex flex-col gap-10">
       <section
@@ -127,16 +102,7 @@ export function StatsDashboard() {
         </ul>
       </section>
 
-      <section className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:p-5">
-        <h2 className="text-base font-semibold">{copy.umamiTitle}</h2>
-        <p className="text-xs text-muted-foreground">{copy.umamiNote}</p>
-        <EmbedFrame
-          title={copy.umamiTitle}
-          src={umamiShareUrl}
-          fallbackHref={umamiShareUrl}
-          fallbackLabel={copy.openUmamiDashboard}
-        />
-      </section>
+      <WebAnalyticsPanel data={data.webAnalytics} />
 
       {data.reconcile.pendingTxCount > 0 && (
         <StatusAlert
@@ -160,24 +126,6 @@ export function StatsDashboard() {
         <div className="flex flex-wrap gap-2">
           <ExplorerLink href={data.treasury.eventsUrl}>{copy.viewOnChainActivity}</ExplorerLink>
           <ExplorerLink href={data.treasury.graphUrl}>{copy.trustGraph}</ExplorerLink>
-        </div>
-      </section>
-
-      {/* Group */}
-      <section className="flex flex-col gap-4 rounded-xl border border-border p-4 sm:p-5">
-        <h2 className="text-base font-semibold">{copy.groupTitle}</h2>
-        <p className="text-xs font-mono text-muted-foreground break-all">{data.group.address}</p>
-        <div>
-          <p className="text-xs text-muted-foreground">{copy.groupBalance}</p>
-          <p className="text-2xl font-semibold tabular-nums">
-            {data.group.balanceCrc != null
-              ? `${fmt(data.group.balanceCrc)} CRC`
-              : copy.treasuryBalanceUnavailable}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ExplorerLink href={data.group.eventsUrl}>{copy.viewOnChainActivity}</ExplorerLink>
-          <ExplorerLink href={data.group.graphUrl}>{copy.trustGraph}</ExplorerLink>
         </div>
       </section>
 

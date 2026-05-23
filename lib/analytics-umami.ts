@@ -39,6 +39,50 @@ export function getUmamiShareUrl(): string {
   return url || DEFAULT_UMAMI_SHARE_URL;
 }
 
+/** Share ID segment from public share URL (server + client). */
+export function getUmamiShareId(): string | null {
+  try {
+    const pathname = new URL(getUmamiShareUrl()).pathname;
+    const id = pathname.split('/').filter(Boolean).pop();
+    return id?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Umami instance origin for server-side share API calls. */
+export function getUmamiApiOrigin(): string | null {
+  const scriptUrl = process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL?.trim();
+  if (scriptUrl) {
+    try {
+      return new URL(scriptUrl).origin;
+    } catch {
+      // fall through
+    }
+  }
+  const dashboardUrl = process.env.NEXT_PUBLIC_UMAMI_DASHBOARD_URL?.trim();
+  if (dashboardUrl) {
+    try {
+      return new URL(dashboardUrl).origin;
+    } catch {
+      return null;
+    }
+  }
+  try {
+    return new URL(DEFAULT_UMAMI_SHARE_URL).origin;
+  } catch {
+    return null;
+  }
+}
+
+/** THP custom Umami events shown on public /stats funnel panel. */
+export const THP_UMAMI_FUNNEL_EVENTS = [
+  'expert_view',
+  'pay_drawer_open',
+  'pay_success',
+  'trust_click',
+] as const;
+
 export function trackUmamiEvent(name: string, data?: UmamiEventPayload): void {
   if (typeof window === 'undefined') return;
   const payload = sanitizePayload(data);
