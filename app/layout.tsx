@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { ToastProvider } from "@/components/ui/toast";
 import { WalletProvider } from "@/components/wallet/WalletProvider";
 
 const geistSans = Geist({
@@ -16,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'THP for Good',
-  description: 'Book THP mentors with CRC and fund bootcamp scholarships',
+  title: "THP for Good",
+  description: "Book a session with a THP mentor, pay in CRC",
 };
 
 export default function RootLayout({
@@ -32,7 +33,9 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <WalletProvider>
-          <AppShell>{children}</AppShell>
+          <ToastProvider>
+            <AppShell>{children}</AppShell>
+          </ToastProvider>
         </WalletProvider>
       </body>
     </html>

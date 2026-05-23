@@ -1,38 +1,36 @@
 'use client';
 
-import Link from 'next/link';
-
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CIRCLES_PLAYGROUND_URL } from '@/lib/config';
-import { useWallet } from '@/hooks/use-wallet';
+import { useState, useEffect } from 'react';
+import { useWallet } from '@/components/wallet/WalletProvider';
 
 export function OpenInCirclesHint() {
   const { isMiniappHost } = useWallet();
+  const [href, setHref] = useState('https://circles.gnosis.io/playground');
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHref(`https://circles.gnosis.io/playground?url=${encodeURIComponent(window.location.origin)}`);
+  }, []);
 
   if (isMiniappHost) return null;
 
   return (
-    <Card className="border-dashed">
-      <CardHeader>
-        <CardTitle className="text-base">Open in Circles</CardTitle>
-        <CardDescription>
-          Wallet connection and payments only work inside the Circles host iframe.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Button
-          render={
-            <Link
-              href={CIRCLES_PLAYGROUND_URL}
-              target="_blank"
-              rel="noreferrer"
-            />
-          }
-        >
-          Open Circles playground
-        </Button>
-      </CardContent>
-    </Card>
+    <div
+      className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-foreground"
+      role="status"
+    >
+      <p className="font-medium">Open in Circles</p>
+      <p className="mt-1 text-muted-foreground">
+        Connect your wallet and pay in CRC inside the Circles miniapp.
+      </p>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-2 inline-block text-sm font-medium text-primary underline underline-offset-2"
+      >
+        Launch in Circles playground
+      </a>
+    </div>
   );
 }

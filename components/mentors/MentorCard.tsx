@@ -1,59 +1,77 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useMentorCirclesOverlay } from '@/hooks/use-mentor-circles-overlay';
-import { BOOKING_PRICE_CRC } from '@/lib/config';
-import type { Mentor } from '@/lib/types';
+import { toHttpImageUrl } from '@/lib/utils';
+import type { MentorRow } from '@/lib/db';
 
-type MentorCardProps = {
-  mentor: Mentor;
-};
+type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 
-export function MentorCard({ mentor }: MentorCardProps) {
-  const { overlay, loading } = useMentorCirclesOverlay(mentor.walletAddress);
+export function MentorCard({ mentor }: { mentor: MentorRow }) {
+  const [circles, setCircles] = useState<CirclesData | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { Sdk } = await import('@aboutcircles/sdk');
+      const sdk = new Sdk();
+      const view = await sdk.rpc.profile.getProfileView(mentor.circles_address as `0x${string}`);
+      const stats = view.trustStats as { trustedByCount?: number } | undefined;
+      const raw = view.profile as (typeof view.profile & { trustsReceivedCount?: number; picture?: string });
+      const trustedBy =
+        stats?.trustedByCount ?? raw?.trustsReceivedCount ?? null;
+      setCircles({
+        imageUrl: toHttpImageUrl(raw?.picture ?? view.profile?.previewImageUrl ?? view.profile?.imageUrl),
+        trustedByCount: typeof trustedBy === 'number' ? trustedBy : null,
+      });
+    })();
+  }, [mentor.circles_address]);
 
   return (
-    <Link href={`/mentors/${mentor.id}`} className="block h-full">
-      <Card className="h-full transition-colors hover:border-primary/40">
-        <CardHeader className="flex flex-row items-start gap-3 space-y-0 pb-3">
-          {loading ? (
-            <Skeleton className="size-12 shrink-0 rounded-full" />
-          ) : overlay?.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={overlay.imageUrl}
-              alt=""
-              className="size-12 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold">
-              {mentor.name.slice(0, 1)}
+    <Link href={`/mentor/${mentor.id}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl">
+      <Card className="h-full transition-shadow hover:shadow-md">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            {circles?.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={circles.imageUrl}
+                alt={mentor.name}
+                className="size-12 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-base font-semibold text-muted-foreground select-none">
+                {mentor.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <CardTitle className="text-base font-semibold">{mentor.name}</CardTitle>
+              {circles !== null && circles.trustedByCount !== null && (
+                <span className="text-xs text-muted-foreground">
+                  Trusted by {circles.trustedByCount}
+                </span>
+              )}
             </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <CardTitle className="text-base">{mentor.name}</CardTitle>
-            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{mentor.bio}</p>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-wrap gap-1.5">
-            {mentor.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
+
+        {mentor.skills.length > 0 && (
+          <CardContent className="flex flex-wrap gap-1.5">
+            {mentor.skills.map((skill) => (
+              <Badge key={skill} variant="secondary">
+                {skill}
               </Badge>
             ))}
-          </div>
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{BOOKING_PRICE_CRC} CRC / call</span>
-            {overlay?.trustedByCount !== undefined ? (
-              <span>{overlay.trustedByCount} trusts</span>
-            ) : null}
-          </div>
-        </CardContent>
+          </CardContent>
+        )}
+
+        <CardFooter className="flex flex-col items-start gap-0.5">
+          <span className="text-sm text-muted-foreground">{mentor.price_crc} CRC / session</span>
+          <span className="text-xs text-muted-foreground">
+            {mentor.mentor_share_percent ?? 20}% to mentor · {100 - (mentor.mentor_share_percent ?? 20)}% to THP for Good
+          </span>
+        </CardFooter>
       </Card>
     </Link>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-type CrcBalanceState =
+export type CrcBalanceState =
   | { status: 'idle' | 'loading' }
   | { status: 'ready'; balance: number; formatted: string }
   | { status: 'not-registered' }
@@ -18,6 +18,7 @@ export function useCrcBalance(address: string | null) {
     if (!address) return;
 
     let cancelled = false;
+    setSnapshot({ address, state: { status: 'loading' } });
 
     (async () => {
       try {

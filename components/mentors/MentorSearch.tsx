@@ -2,23 +2,21 @@
 
 import { Search } from 'lucide-react';
 
-import { Input } from '@/components/ui/input';
-
-type MentorSearchProps = {
+type Props = {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (v: string) => void;
 };
 
-export function MentorSearch({ value, onChange }: MentorSearchProps) {
+export function MentorSearch({ value, onChange }: Props) {
   return (
-    <div className="relative">
-      <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-      <Input
+    <div className="relative flex items-center">
+      <Search className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
+      <input
+        type="search"
         value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder="Search mentors, tags, bio…"
-        className="pl-9"
-        aria-label="Search mentors"
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Search by name, skill or bio…"
+        className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
       />
     </div>
   );

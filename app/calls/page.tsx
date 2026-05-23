@@ -1,17 +1,15 @@
-import { CallList } from '@/components/calls/CallList';
-import { PageNav } from '@/components/layout/PageNav';
+import { CallsView } from '@/components/bookings/CallsView';
 
 export default function CallsPage() {
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">My calls</h1>
-        <p className="text-sm text-muted-foreground">
-          After your call, trust your mentor on Circles for the skill they helped with.
+        <h1 className="text-2xl font-semibold tracking-tight">Calls</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Sessions you booked (emitted) and sessions booked on your expert profile (received).
         </p>
       </div>
-      <CallList />
-      <PageNav />
+      <CallsView />
     </div>
   );
 }

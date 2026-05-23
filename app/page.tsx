@@ -1,8 +1,11 @@
-import { MentorGrid } from '@/components/mentors/MentorGrid';
-import { getAllMentors } from '@/lib/mentors';
+export const dynamic = 'force-dynamic';
+
+import { getAllMentors, getAllTags } from '@/lib/db';
+import { MentorBrowser } from '@/components/mentors/MentorBrowser';
 
 export default function HomePage() {
   const mentors = getAllMentors();
+  const tags = getAllTags();
 
-  return <MentorGrid mentors={mentors} />;
+  return <MentorBrowser mentors={mentors} tags={tags} />;
 }

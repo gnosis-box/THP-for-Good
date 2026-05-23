@@ -1,219 +1,89 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-
-import { BookingSuccess } from '@/components/mentors/BookingSuccess';
-import { SlotPicker } from '@/components/mentors/SlotPicker';
-import { OpenInCirclesHint } from '@/components/wallet/OpenInCirclesHint';
-import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useCrcBalance } from '@/hooks/use-crc-balance';
-import { useMentorCirclesOverlay } from '@/hooks/use-mentor-circles-overlay';
-import { useWallet } from '@/hooks/use-wallet';
-import { addBooking, getBookings, isSlotBooked } from '@/lib/bookings-storage';
-import { BOOKING_PRICE_CRC, FOUNDATION_ADDRESS } from '@/lib/config';
-import { buildCrcPaymentTransactions } from '@/lib/crc-transfer';
-import type { Booking, Mentor } from '@/lib/types';
+import { Separator } from '@/components/ui/separator';
+import { SlotPicker } from '@/components/mentors/SlotPicker';
+import { PayButton } from '@/components/mentors/PayButton';
+import { MentorEditForm } from '@/components/mentors/MentorEditForm';
+import { useWallet } from '@/components/wallet/WalletProvider';
+import type { MentorRow } from '@/lib/db';
 
-type MentorDetailProps = {
-  mentor: Mentor;
-};
+export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
+  const router = useRouter();
+  const { address } = useWallet();
+  const [mentor, setMentor] = useState(initialMentor);
+  const [editing, setEditing] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
-export function MentorDetail({ mentor }: MentorDetailProps) {
-  const { address, isConnected, isMiniappHost } = useWallet();
-  const balanceState = useCrcBalance(address);
-  const { overlay, loading } = useMentorCirclesOverlay(mentor.walletAddress);
-  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
-  const [paying, setPaying] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successBooking, setSuccessBooking] = useState<Booking | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
 
-  const bookedSlotIds = useMemo(() => {
-    void refreshKey;
-    return new Set(
-      getBookings()
-        .filter((booking) => booking.mentorId === mentor.id)
-        .map((booking) => booking.slotId),
-    );
-  }, [mentor.id, refreshKey]);
-
-  const selectedSlot = mentor.slots.find((slot) => slot.id === selectedSlotId);
-  const slotAlreadyBooked = selectedSlotId ? isSlotBooked(mentor.id, selectedSlotId) : false;
-
-  const insufficientBalance =
-    balanceState.status === 'ready' && balanceState.balance < BOOKING_PRICE_CRC;
-
-  const canPay =
-    isConnected &&
-    Boolean(selectedSlotId) &&
-    !slotAlreadyBooked &&
-    !paying &&
-    !successBooking &&
-    balanceState.status === 'ready' &&
-    !insufficientBalance;
-
-  async function handlePay() {
-    if (!address || !selectedSlotId || !selectedSlot) return;
-
-    setPaying(true);
-    setError(null);
-
-    try {
-      const txs = await buildCrcPaymentTransactions(
-        address as `0x${string}`,
-        FOUNDATION_ADDRESS,
-        BOOKING_PRICE_CRC,
-      );
-
-      const { sendTransactions } = await import('@aboutcircles/miniapp-sdk');
-      const hashes = await sendTransactions(txs);
-      const txHash = (hashes[0] ?? '') as `0x${string}`;
-
-      if (!txHash) {
-        throw new Error('Payment succeeded but no transaction hash was returned.');
-      }
-
-      const booking: Booking = {
-        id: crypto.randomUUID(),
-        mentorId: mentor.id,
-        slotId: selectedSlotId,
-        studentAddress: address as `0x${string}`,
-        amountCrc: String(BOOKING_PRICE_CRC),
-        txHash,
-        paidAt: new Date().toISOString(),
-        status: 'booked',
-      };
-
-      addBooking(booking);
-      setSuccessBooking(booking);
-      setRefreshKey((value) => value + 1);
-
-      void fetch('/api/notify-booking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mentorId: mentor.id,
-          mentorName: mentor.name,
-          slotLabel: selectedSlot.label,
-          studentAddress: address,
-          txHash,
-          notifyEmail: mentor.notifyEmail,
-          notifyWebhook: mentor.notifyWebhook,
-        }),
-      }).catch(() => {
-        if (mentor.notifyEmail) {
-          const subject = encodeURIComponent(`THP booking: ${selectedSlot.label}`);
-          const body = encodeURIComponent(
-            `New paid booking\nMentor: ${mentor.name}\nSlot: ${selectedSlot.label}\nStudent: ${address}\nTx: ${txHash}`,
-          );
-          window.open(`mailto:${mentor.notifyEmail}?subject=${subject}&body=${body}`);
-        }
-      });
-    } catch (payError) {
-      setError(payError instanceof Error ? payError.message : 'Payment failed');
-    } finally {
-      setPaying(false);
+  async function reloadMentor() {
+    const res = await fetch(`/api/mentors/${mentor.id}`);
+    if (res.ok) {
+      const updated = (await res.json()) as MentorRow;
+      setMentor(updated);
     }
+    setEditing(false);
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-      <Card>
-        <CardHeader className="flex flex-row items-start gap-4 space-y-0">
-          {loading ? (
-            <Skeleton className="size-16 shrink-0 rounded-full" />
-          ) : overlay?.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={overlay.imageUrl}
-              alt=""
-              className="size-16 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-semibold">
-              {mentor.name.slice(0, 1)}
-            </div>
-          )}
-          <div className="min-w-0 flex-1 space-y-2">
-            <CardTitle className="text-2xl">{mentor.name}</CardTitle>
-            <CardDescription>{mentor.bio}</CardDescription>
-            <div className="flex flex-wrap gap-1.5">
-              {mentor.tags.map((tag) => (
-                <Badge key={tag} variant="secondary">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-            {overlay?.trustedByCount !== undefined ? (
-              <p className="text-xs text-muted-foreground">
-                Trusted by {overlay.trustedByCount} · Trusting {overlay.trustsCount ?? 0}
-              </p>
-            ) : null}
-          </div>
-        </CardHeader>
-      </Card>
-
-      {!isMiniappHost ? <OpenInCirclesHint /> : null}
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Pick a slot</CardTitle>
-          <CardDescription>{BOOKING_PRICE_CRC} CRC per call — paid to THP for Good</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <SlotPicker
-            slots={mentor.slots}
-            bookedSlotIds={bookedSlotIds}
-            selectedSlotId={selectedSlotId}
-            onSelect={setSelectedSlotId}
-          />
-
-          {balanceState.status === 'ready' ? (
-            <p className="text-sm text-muted-foreground">
-              Your balance: <strong>{balanceState.formatted} CRC</strong>
-            </p>
-          ) : null}
-
-          {balanceState.status === 'not-registered' ? (
-            <p className="text-sm text-amber-700">
-              Your wallet is not a registered Circles avatar. You may still attempt payment if the
-              host allows it.
-            </p>
-          ) : null}
-
-          {insufficientBalance ? (
-            <p className="text-sm text-destructive">
-              You need at least {BOOKING_PRICE_CRC} CRC to book this call.
-            </p>
-          ) : null}
-
-          {!isConnected ? (
-            <p className="text-sm text-muted-foreground">Connect via Circles to pay.</p>
-          ) : null}
-
-          <Button
-            type="button"
-            className="w-full"
-            disabled={!canPay}
-            onClick={() => void handlePay()}
-          >
-            {paying ? 'Processing…' : `PAY ${BOOKING_PRICE_CRC} CRC`}
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={() => router.back()} className="-ml-2">
+          ← Back
+        </Button>
+        {isSelf && !editing && (
+          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+            Edit my profile
           </Button>
+        )}
+      </div>
 
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
-        </CardContent>
-      </Card>
-
-      {successBooking && selectedSlot ? (
-        <BookingSuccess
-          booking={successBooking}
-          mentorName={mentor.name}
-          slotLabel={selectedSlot.label}
+      {editing ? (
+        <MentorEditForm
+          mentor={mentor}
+          walletAddress={address!}
+          onSaved={reloadMentor}
+          onCancel={() => setEditing(false)}
         />
-      ) : null}
+      ) : (
+        <>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-semibold tracking-tight">{mentor.name}</h1>
+            {mentor.skills.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {mentor.skills.map((skill) => (
+                  <span key={skill} className="rounded-full bg-muted px-3 py-1 text-sm font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {mentor.bio && (
+            <p className="text-sm leading-relaxed text-muted-foreground">{mentor.bio}</p>
+          )}
+
+          <Separator />
+
+          {mentor.cal_event_type_id ? (
+            <SlotPicker mentorId={mentor.id} selected={selectedSlot} onSelect={setSelectedSlot} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {isSelf
+                ? 'No availability configured yet. Click "Edit my profile" to connect your Cal.com.'
+                : 'Availability not configured for this mentor yet.'}
+            </p>
+          )}
+
+          <Separator />
+
+          <PayButton mentor={mentor} selectedSlot={selectedSlot} />
+        </>
+      )}
     </div>
   );
 }

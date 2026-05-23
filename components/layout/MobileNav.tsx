@@ -13,12 +13,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { NAV } from '@/lib/nav';
+import { useIsAdmin } from '@/hooks/use-is-admin';
+import { ADMIN_NAV_ITEM, NAV } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 
 export function MobileNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { isAdmin } = useIsAdmin();
+  const items = isAdmin ? [...NAV, ADMIN_NAV_ITEM] : NAV;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -39,7 +42,7 @@ export function MobileNav() {
           <SheetTitle>Navigation</SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-3 pb-3">
-          {NAV.map((item) => {
+          {items.map((item) => {
             const isActive =
               item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
             return (

@@ -8,6 +8,67 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This is a starter template for building [Circles](https://aboutcircles.com) miniapps. A miniapp is a web app that loads inside the Circles host (https://circles.gnosis.io/playground) via an iframe; the host injects a wallet and your app drives interactions through the SDK. The boilerplate ships with the minimum plumbing — wallet provider, sign-in demo, profile lookup, layout — so a developer can clone it and start writing business logic immediately.
 
+## Product spec & project workflow (mandatory)
+
+| Rôle | Où |
+| --- | --- |
+| **Centre de vérité (statut, priorité, exécution)** | [GitHub Project #1](https://github.com/orgs/gnosis-box/projects/1/views/1) |
+| **Index (liens, décisions verrouillées, anti-doublon)** | [`spec/PRD-MVP.md`](spec/PRD-MVP.md) |
+
+Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**. Group by **Priority**.
+
+**Current phase (2026-05-21):** **DIV L0–L3 complete** — execution via `IMPL-*` and spikes; see [`PRD-MVP.md`](spec/PRD-MVP.md). Priority: [SPIKE-L2-01 #30](https://github.com/gnosis-box/THP-for-Good/issues/30), L0–L3 IMPL backlog.
+
+### Two issue types (never mix)
+
+| Type | ID pattern | Label | Purpose |
+| --- | --- | --- | --- |
+| **Decision** | `DIV-Lx-yy` | `decision` | Trancher A/B/C (spec [`PRD-MVP.md`](spec/PRD-MVP.md)). **No code.** |
+| **Implementation** | `IMPL-Lx-yy` (or `IMPL-Lx-yy-n`) | `implementation` | Code, routes, infra, UI — **only** place where the repo changes. |
+
+### When a `DIV-*` is resolved
+
+**Decision ≠ implementation.** Do **not** edit application code in the same step.
+
+1. **DIV issue** — Paste decision comment (see PRD or chat); **close** the issue.
+2. **Project board** — Move the card to **Done** (manual on [Project #1](https://github.com/orgs/gnosis-box/projects/1)).
+3. **`PRD-MVP.md`** — § *Décisions tranchées* + layer ✅ + § *Architecture cible* (target state, not “repo done”).
+4. **Fallout** — For each concrete change (new route, Dockerfile, schema column, PayButton fix, …):
+   - Search § *Backlog d’implémentation* in the PRD — **if a row exists for this `DIV-*`, do not open a duplicate.**
+   - Else create **`IMPL-*`** issue (label `implementation`) on the board in **Triage**; add one line to PRD § *Backlog d’implémentation* with the link.
+5. **Code** — Only when someone moves an **`IMPL-*`** card Triage → Ready → Running and implements it.
+
+### When working an `IMPL-*`
+
+1. Board: **Triage** → **Ready** → **Running** → **Review** → close issue → **Done**.
+2. PRD backlog row: optional note “done” or remove only when issue closed (keep link for history).
+3. Respect **Locked decisions** below and layer order on the board.
+
+### Locked decisions (do not contradict in code or docs)
+
+| ID | Choice | Notes |
+| --- | --- | --- |
+| **DIV-L0-01** | **A — SQLite + API** | `better-sqlite3`, `lib/db.ts`, `lib/schema.sql`, `app/api/*`. No `mentors.json` / no client `localStorage` for bookings or trust. |
+| **DIV-L0-02** | **A — Coolify + Docker + volume** | Deploy on Coolify (not Vercel MVP). Add/maintain `Dockerfile`, `output: 'standalone'` in `next.config.ts`, persistent volume for `data/` SQLite. Set `NEXT_PUBLIC_FRAME_ANCESTOR_ORIGIN` at build. |
+| **DIV-L0-03** | **A′ — PRD routes + `/calls`** | **Target:** `/`, `/mentor/[id]`, `/mentor/register`, **`/calls`**, `/admin` (not `/mentors/*`). **Repo may still use `/history` until an `implementation` task is done.** |
+| **DIV-L1-01** | **A — Per-mentor price** | `price_crc` per mentor in DB; shown on card and PAY button. |
+| **DIV-L1-02** | **D — Split payment** | Admin: **min 50%** to foundation (`0x2b5E…`). Mentor picks **10 / 20 / 30 / 50%** to self; remainder to foundation. Not 100% treasury-only. |
+| **DIV-L1-03** | **C — Tags workflow** | Admin canonical catalogue; mentor **proposes** tag from mentor page; admin **approves/edits** tags. |
+| **DIV-L1-04** | **A — TRUST expert (MVP)** | Post-call on `/calls` Emitted: one `trust.add(expert)` per booking. **Per-domain trust-back / reputation** → L4 feature (see PRD § FEAT Trust-back), not MVP. |
+| **DIV-L1-05** | **A — Slots UI only** | Static `SlotPicker`; after PAY open `calendar_link`. Optional `slot_label` in DB later. No Google Calendar API in MVP. |
+| **DIV-L1-06** | **A′ — Dual onboarding** | Self-register at `/mentor/register` → public if `active=1`. Admin can promote members and activate/deactivate listings. Not admin-only seed. |
+| **DIV-L1-07** | **A — Admin hidden from nav** | No Admin item in `NAV`; access `/admin` by URL only. |
+| **DIV-L1-08** | **D — Unified `/calls`** | One page: **Emitted** (booker) + **Received** (expert profile). No `/my-slots`. Prefer UI terms *participant / expert* over student/mentor. |
+| **DIV-L1-09** | **B — Balance error on click** | Do not pre-disable PAY for low CRC; on failed tx show **toast** (e.g. “Not enough CRC”). Not A (pre-disable) or C (both). |
+| **DIV-L2-01** | **C′ — CRC encoding via SDK** | `TransferBuilder` + `sendTransactions`; foundation `0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00`. **SPIKE-L2-01** must prove split PAY (DIV-L1-02) before **IMPL-L1-02**. Fallback: viem manual (B) if spike fails. |
+| **DIV-L2-02** | **C — TRUST execution** | Direct `trust.add(expert)` first; `sendTransactions` fallback if playground fails. |
+| **DIV-L2-03** | **B — Admin auth** | `ADMIN_ADDRESSES` ∪ DB `admins`; canonical `isAdminAddress()`. |
+| **DIV-L2-04** | **A — No in-app notify MVP** | External calendar link + `/calls` Received; webhook/email deferred. |
+| **DIV-L2-05** | **A — Minimal DB schema** | No `slot_label` / `skill_tag_id` on trust yet; trust-back per domain is L4. |
+| **DIV-L3-01** | **B — Mobile-first nav** | No persistent desktop sidebar; header + mobile menu (`MobileNav`). Not bottom tab bar (≠ C). |
+| **DIV-L3-02** | **A — Dedicated outside-host hint** | When `!isMiniappHost`, show dedicated `OpenInCirclesHint` with playground link; not generic scattered copy only. |
+| **DIV-L3-03** | **A — English UI (MVP)** | All user-facing strings in **EN** for hackathon. i18n (FR/EN) deferred to **v2**. Spec/docs may stay FR. |
+
 ## Stack
 
 | Layer | Choice | Notes |
@@ -195,11 +256,37 @@ pnpm lint         # ESLint (the script is just `eslint`; `next lint` is removed 
 
 There is no test suite yet. If you add one, the conventional script name is `pnpm test`.
 
+## Deployment — Coolify (self-hosted)
+
+This app is deployed on **Coolify** (self-hosted PaaS, not Vercel). Key implications:
+
+- **SQLite persists** — Coolify runs a long-lived container, so `data/thp.db` survives between deployments as long as you mount a volume. Configure a persistent volume in Coolify pointing to `/app/data` (or wherever `process.cwd()/data` resolves inside the container).
+- **`better-sqlite3` native build** — Coolify builds a Docker image on Linux; `pnpm install` triggers the native compilation there without macOS C++ header issues. The `.node` binding is compiled fresh in the container.
+- **Environment variables** — set `ADMIN_ADDRESSES` and `NEXT_PUBLIC_ADMIN_ADDRESSES` in the Coolify service environment panel (not in `.env` files).
+- **CSP frame-ancestors** — `next.config.ts` must include the Coolify domain in `frame-ancestors` so the Circles host can iframe the app. Update the `FRAME_ANCESTORS` list in `next.config.ts` when the production domain is known.
+- **Port** — Coolify expects the app to listen on `3000` (Next.js default). No `PORT` override needed.
+
+### Local dev on macOS — `better-sqlite3` native binding
+
+On macOS, `pnpm rebuild better-sqlite3` may fail with `'climits' file not found` if node-gyp picks up the wrong SDK. Fix:
+
+```bash
+# Run once to compile the native addon
+npm rebuild better-sqlite3
+```
+
+If that still fails, ensure Xcode Command Line Tools are up to date:
+```bash
+xcode-select --install
+```
+
+`serverExternalPackages: ['better-sqlite3']` is already set in `next.config.ts` so Turbopack doesn't try to bundle the native module — it's loaded directly from `node_modules` at runtime.
+
 ## Running inside the Circles playground
 
 The host iframes any HTTPS URL pasted into https://circles.gnosis.io/playground. To test:
 
-1. Deploy to Vercel (or any HTTPS host).
+1. Deploy to Coolify (or any HTTPS host).
 2. Open `https://circles.gnosis.io/playground?url=<your-deploy-url>`.
 3. The host injects a Safe address. `onWalletChange` fires, the badge flips, `signMessage` and `sendTransactions` start working.
 

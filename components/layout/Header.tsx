@@ -1,6 +1,6 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
-import { CirclesLogo } from '@/components/brand/CirclesLogo';
 import { CurrentPage } from '@/components/layout/CurrentPage';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { WalletStatus } from '@/components/wallet/WalletStatus';
@@ -11,7 +11,7 @@ export function Header() {
       <div className="flex items-center gap-2">
         <MobileNav />
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <CirclesLogo width={28} height={28} />
+          <Image src="/thp-logo.jpg" alt="THP" width={28} height={28} className="rounded-sm" />
           <span className="hidden sm:inline">THP for Good</span>
         </Link>
         <CurrentPage />
