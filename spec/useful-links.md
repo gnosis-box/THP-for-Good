@@ -67,6 +67,7 @@ Central index of project, product, and ecosystem URLs.
 | **FEAT-L4-03** | Analytics & statistics (planning epic) | [#61](https://github.com/gnosis-box/THP-for-Good/issues/61) |
 | **FEAT-L4-04** | In-app “Report issue” + GitHub templates | [#62](https://github.com/gnosis-box/THP-for-Good/issues/62) |
 | **IMPL-L4-06** | Expert card trust status & two-way trust | [#63](https://github.com/gnosis-box/THP-for-Good/issues/63) |
+| **FEAT-L4-07** | Expert session languages (spoken & call) | [#64](https://github.com/gnosis-box/THP-for-Good/issues/64) |
 
 ### Related L4 / spikes (existing)
 
@@ -157,4 +158,4 @@ pnpm tsx scripts/seed.ts
 
 ---
 
-*Last updated: 2026-05-21 — issues #61–#63, GitHub templates, useful-links index.*
+*Last updated: 2026-05-21 — issues #61–#64, GitHub templates, useful-links index.*
