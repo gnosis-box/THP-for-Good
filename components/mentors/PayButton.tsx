@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
+import { useTrustEligibleBalance } from '@/hooks/use-trust-eligible-balance';
 import {
   buildSplitPayTransactions,
   clampMentorShare,
@@ -45,6 +46,13 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
   const balance = useCrcBalance(address);
+  const sharePercent = clampMentorShare(mentor.mentor_share_percent ?? 20) as MentorSharePercent;
+  const trustEligible = useTrustEligibleBalance(
+    address,
+    mentor.circles_address,
+    mentor.price_crc,
+    sharePercent,
+  );
   const [email, setEmail] = useState('');
   const [bookerName, setBookerName] = useState<string | null>(null);
   const [state, setState] = useState<PayState>({ kind: 'idle' });
@@ -66,7 +74,6 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
     })();
   }, [address]);
 
-  const sharePercent = clampMentorShare(mentor.mentor_share_percent ?? 20) as MentorSharePercent;
   const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
   const insufficientBalance =
     balance.status === 'ready' && balance.balance < mentor.price_crc;
@@ -154,6 +161,35 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
       {balance.status === 'ready' && (
         <p className="text-sm text-muted-foreground">
           Your balance: <strong>{balance.formatted} CRC</strong>
+        </p>
+      )}
+      {trustEligible.status === 'ready' && (
+        <div className="rounded-lg border border-border/80 bg-muted/30 px-3 py-2 text-xs text-muted-foreground space-y-1">
+          <p className="font-medium text-foreground">Trust path estimate (simulation)</p>
+          <p>
+            ~<strong>{trustEligible.formatted.expert} CRC</strong> reachable toward {mentor.name}
+          </p>
+          <p>
+            ~<strong>{trustEligible.formatted.foundation} CRC</strong> reachable toward foundation
+          </p>
+          <p>
+            ~<strong>{trustEligible.formatted.bookable} CRC</strong> bookable at this session price
+            ({mentor.price_crc} CRC)
+          </p>
+          {trustEligible.limits.bookableCrc < mentor.price_crc && (
+            <p className="text-amber-700">
+              Trust paths may not cover the full payment — you can still try PAY; the host may reject
+              the transfer.
+            </p>
+          )}
+        </div>
+      )}
+      {trustEligible.status === 'loading' && (
+        <p className="text-xs text-muted-foreground">Computing trust-path estimate…</p>
+      )}
+      {trustEligible.status === 'error' && (
+        <p className="text-xs text-muted-foreground">
+          Trust-path estimate unavailable ({trustEligible.message}).
         </p>
       )}
       {balance.status === 'not-registered' && (
