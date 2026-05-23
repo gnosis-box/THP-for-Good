@@ -96,10 +96,11 @@ export function PayButton({
   const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
   const insufficientBalance =
     balance.status === 'ready' && balance.balance < mentor.price_crc;
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const canPay =
     isConnected &&
     !!selectedSlot &&
-    !!email.trim() &&
+    isValidEmail &&
     !isSelf &&
     state.kind !== 'loading' &&
     balance.status === 'ready' &&
