@@ -3,7 +3,7 @@
 export const UI_COPY = {
   home: {
     title: 'Find a mentor',
-    subtitle: 'Book a 1:1 session. Pay in CRC. Fund the next cohort.',
+    subtitle: 'Book a 1:1 session. Pay in CRC. Fund the next student.',
     filterLabel: 'Which domain do you want help with?',
     emptySearch: 'No mentors found for this search.',
     searchPlaceholder: 'Search by name, skill or bio…',
