@@ -66,23 +66,33 @@ export async function POST(request: NextRequest) {
     attendee_email?: string;
   };
 
+  const mentor = getMentorById(data.mentor_id);
+  if (!mentor) {
+    console.error('[api/bookings POST] unknown mentor_id', data.mentor_id);
+    return NextResponse.json({ error: 'Expert not found' }, { status: 404 });
+  }
+
   let calBookingUid: string | undefined;
   let calendarEventUrl: string | undefined;
 
   if (data.slot_time && data.attendee_email) {
-    const mentor = getMentorById(data.mentor_id);
-    if (mentor?.cal_event_type_id) {
+    if (mentor.cal_event_type_id) {
       try {
-        const { createCalBooking } = await import('@/lib/calcom');
-        const result = await createCalBooking({
-          eventTypeId: mentor.cal_event_type_id,
-          slotTime: data.slot_time,
-          attendeeName: data.attendee_name ?? data.booker_address,
-          attendeeEmail: data.attendee_email,
-          txHash: data.tx_hash,
-        });
-        calBookingUid = result?.uid;
-        calendarEventUrl = result?.meetingUrl;
+        const { createCalBooking, getAvailableSlots } = await import('@/lib/calcom');
+        const openSlots = await getAvailableSlots(mentor.cal_event_type_id);
+        if (!openSlots.includes(data.slot_time)) {
+          console.warn('[api/bookings] slot no longer available in Cal.com', data.slot_time);
+        } else {
+          const result = await createCalBooking({
+            eventTypeId: mentor.cal_event_type_id,
+            slotTime: data.slot_time,
+            attendeeName: data.attendee_name ?? data.booker_address,
+            attendeeEmail: data.attendee_email,
+            txHash: data.tx_hash,
+          });
+          calBookingUid = result?.uid;
+          calendarEventUrl = result?.meetingUrl;
+        }
       } catch (err) {
         console.error('[api/bookings] Cal.com booking failed:', err);
       }
@@ -107,7 +117,15 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (err) {
-    console.error('[api/bookings POST]', err);
+    const code =
+      err instanceof Error && 'code' in err ? String((err as { code: string }).code) : '';
+    console.error('[api/bookings POST]', { mentor_id: data.mentor_id, code, err });
+    if (code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
+      return NextResponse.json(
+        { error: 'Expert not found or database out of sync. Contact support with your tx hash.' },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
   }
 }

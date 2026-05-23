@@ -37,7 +37,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid trust_tx_hash' }, { status: 400 });
   }
 
-  insertTrustAttestation(booking_id, trust_tx_hash?.trim() || null);
-
-  return NextResponse.json({ ok: true });
+  try {
+    insertTrustAttestation(booking_id, trust_tx_hash?.trim() || null);
+    console.info(`[api/trust] booking ${booking_id} trusted`);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('[api/trust]', { booking_id, err });
+    return NextResponse.json({ error: 'Failed to record trust attestation' }, { status: 500 });
+  }
 }
