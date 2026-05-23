@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+import { PaymentSummary } from '@/components/booking/PaymentSummary';
+import { TrustPathPanel } from '@/components/booking/TrustPathPanel';
+import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { useToast } from '@/components/ui/toast';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
@@ -12,7 +16,8 @@ import {
   splitLegCrc,
   type MentorSharePercent,
 } from '@/lib/crc-pay';
-import { mapPayError, PAY_COPY } from '@/lib/pay-copy';
+import { mapPayError } from '@/lib/pay-copy';
+import { UI_COPY } from '@/lib/ui-copy';
 import type { MentorRow } from '@/lib/db';
 
 type PayState =
@@ -31,7 +36,25 @@ function fmtSlot(iso: string) {
   }).format(new Date(iso));
 }
 
-export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selectedSlot: string | null }) {
+type Props = {
+  mentor: MentorRow;
+  selectedSlot: string | null;
+  email: string;
+  onEmailChange: (v: string) => void;
+  onSuccess?: () => void;
+  showEmail?: boolean;
+  compact?: boolean;
+};
+
+export function PayButton({
+  mentor,
+  selectedSlot,
+  email,
+  onEmailChange,
+  onSuccess,
+  showEmail = true,
+  compact = false,
+}: Props) {
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
   const balance = useCrcBalance(address);
@@ -43,7 +66,6 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
     mentor.price_crc,
     sharePercent,
   );
-  const [email, setEmail] = useState('');
   const [bookerName, setBookerName] = useState<string | null>(null);
   const [state, setState] = useState<PayState>({ kind: 'idle' });
 
@@ -105,6 +127,7 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
       });
 
       setState({ kind: 'success', hash: txHash, slotTime: selectedSlot });
+      onSuccess?.();
     } catch (err) {
       const message = mapPayError(err);
       setState({ kind: 'error' });
@@ -114,108 +137,95 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
 
   if (state.kind === 'success') {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/50 p-4">
-        <p className="text-sm font-medium">Booking confirmed!</p>
-        <p className="text-sm text-muted-foreground">{fmtSlot(state.slotTime)}</p>
-        <p className="text-xs text-muted-foreground">
-          {mentor.cal_event_type_id
-            ? 'A calendar invite has been sent to your email.'
-            : 'Complete scheduling using the expert calendar link below.'}
-        </p>
-        <p className="text-xs text-muted-foreground break-all">
-          Tx:{' '}
-          <a
-            href={`https://explorer.aboutcircles.com/tx/${state.hash}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline underline-offset-2"
-          >
-            {state.hash.slice(0, 10)}…{state.hash.slice(-8)}
-          </a>
-        </p>
-        {mentor.calendar_link && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open(mentor.calendar_link, '_blank', 'noopener,noreferrer')}
-          >
-            Open calendar link
-          </Button>
-        )}
-      </div>
+      <StatusAlert
+        variant="success"
+        title="Booking confirmed!"
+        description={
+          <div className="flex flex-col gap-2">
+            <p>{fmtSlot(state.slotTime)}</p>
+            <p>
+              {mentor.cal_event_type_id
+                ? 'A calendar invite has been sent to your email.'
+                : 'Complete scheduling using the expert calendar link below.'}
+            </p>
+            <p className="break-all font-mono text-xs">
+              Tx:{' '}
+              <a
+                href={`https://explorer.aboutcircles.com/tx/${state.hash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-trust underline underline-offset-2"
+              >
+                {state.hash.slice(0, 10)}…{state.hash.slice(-8)}
+              </a>
+            </p>
+            {mentor.calendar_link && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(mentor.calendar_link, '_blank', 'noopener,noreferrer')}
+              >
+                Open calendar link
+              </Button>
+            )}
+          </div>
+        }
+      />
     );
   }
 
   return (
     <div className="flex flex-col gap-3">
-      {balance.status === 'ready' && (
-        <p className="text-sm text-muted-foreground">
-          Your balance: <strong>{balance.formatted} CRC</strong>
-        </p>
+      {!compact && (
+        <TrustPathPanel
+          trustEligible={trustEligible}
+          expertLegCrc={expertLegCrc}
+          treasuryLegCrc={treasuryLegCrc}
+          mentorName={mentor.name}
+          priceCrc={mentor.price_crc}
+        />
       )}
-      {trustEligible.status === 'ready' && (
-        <div className="rounded-lg border border-border/80 bg-muted/30 px-3 py-2 text-xs text-muted-foreground space-y-1">
-          <p className="font-medium text-foreground">{PAY_COPY.trustEstimateTitle}</p>
-          {expertLegCrc > 0 && (
-            <p>
-              {PAY_COPY.trustLegLine(trustEligible.formatted.expert, expertLegCrc, mentor.name)}
-            </p>
-          )}
-          {treasuryLegCrc > 0 && (
-            <p>
-              {PAY_COPY.trustLegLine(
-                trustEligible.formatted.foundation,
-                treasuryLegCrc,
-                PAY_COPY.thpForGood,
-              )}
-            </p>
-          )}
-          <p>{PAY_COPY.bookableLine(trustEligible.formatted.bookable, mentor.price_crc)}</p>
-          {trustEligible.limits.bookableCrc < mentor.price_crc && (
-            <p className="text-amber-700">{PAY_COPY.trustEstimateShortfall}</p>
-          )}
-        </div>
-      )}
-      {trustEligible.status === 'loading' && (
-        <p className="text-xs text-muted-foreground">{PAY_COPY.trustEstimateLoading}</p>
-      )}
-      {trustEligible.status === 'error' && (
-        <p className="text-xs text-muted-foreground">{PAY_COPY.trustEstimateUnavailable}</p>
-      )}
+      <PaymentSummary
+        balance={balance}
+        sharePercent={sharePercent}
+        email={email}
+        onEmailChange={onEmailChange}
+        showEmail={showEmail}
+      />
       {balance.status === 'not-registered' && (
-        <p className="text-sm text-amber-700">
-          Your wallet is not a registered Circles avatar. Open the app in the Circles playground to
-          pay with CRC.
-        </p>
+        <StatusAlert
+          variant="warning"
+          title="Wallet not registered"
+          description="Your wallet is not a registered Circles avatar. Open the app in the Circles playground to pay with CRC."
+        />
       )}
       {insufficientBalance && (
         <p className="text-sm text-destructive">
           You need at least {mentor.price_crc} CRC to book this call.
         </p>
       )}
-      <p className="text-xs text-muted-foreground">
-        {PAY_COPY.paymentSplit(sharePercent, 100 - sharePercent)}
-      </p>
-      {selectedSlot && (
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Your email (for calendar invite)"
-          className="h-9 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
-        />
-      )}
-      <Button disabled={!canPay} onClick={handlePay} size="lg" className="w-full">
-        {state.kind === 'loading' ? 'Processing…' : `Pay ${mentor.price_crc} CRC to book`}
+      <Button disabled={!canPay} onClick={handlePay} size="lg" className="min-h-11 w-full">
+        {state.kind === 'loading' ? (
+          <>
+            <Spinner className="mr-2" />
+            Processing…
+          </>
+        ) : (
+          `Pay ${mentor.price_crc} CRC to book`
+        )}
       </Button>
       {!selectedSlot && (
-        <p className="text-xs text-muted-foreground text-center">Select a slot above first.</p>
+        <p className="text-center text-xs text-muted-foreground">{UI_COPY.booking.selectSlotFirst}</p>
       )}
       {isSelf && (
-        <p className="text-xs text-muted-foreground text-center">You can&apos;t book your own session.</p>
+        <p className="text-center text-xs text-muted-foreground">
+          You can&apos;t book your own session.
+        </p>
       )}
       {!isConnected && (
-        <p className="text-xs text-muted-foreground text-center">Connect your wallet to book a session.</p>
+        <p className="text-center text-xs text-muted-foreground">
+          Connect your wallet to book a session.
+        </p>
       )}
     </div>
   );
