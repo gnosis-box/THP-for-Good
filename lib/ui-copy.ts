@@ -37,6 +37,22 @@ export const UI_COPY = {
   },
   register: {
     title: 'Offer your expertise',
+    editTitle: 'Edit your expert profile',
+    editSubtitle: 'Update your skills, availability, and session details.',
+    inactiveNotice:
+      'Your profile is hidden from the expert directory. Save your changes to publish it again.',
+    viewPublicProfile: 'View public profile',
+    saveChanges: 'Save changes',
+    publishProfile: 'Publish profile',
+    saving: 'Saving…',
+    registering: 'Registering…',
+    registerCta: 'Register as expert',
+    stopExpertHint:
+      'You will no longer appear in the expert directory. Existing bookings are kept.',
+    stopExpertCta: 'Stop offering sessions',
+    stopExpertLoading: 'Updating…',
+    stopExpertConfirm:
+      'Remove your expert profile from the directory? You can register again later.',
   },
 } as const;
 

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { BookingStepper } from '@/components/booking/BookingStepper';
 import { MentorProfileHero } from '@/components/booking/MentorProfileHero';
@@ -15,6 +16,7 @@ import { MentorEditForm } from '@/components/mentors/MentorEditForm';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { UI_COPY } from '@/lib/ui-copy';
+import { cn } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
 export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
@@ -48,9 +50,17 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
             {UI_COPY.booking.back}
           </Button>
           {isSelf && !editing && (
-            <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="min-h-11">
-              {UI_COPY.booking.editProfile}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="min-h-11">
+                {UI_COPY.booking.editProfile}
+              </Button>
+              <Link
+                href="/mentor/register"
+                className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'min-h-11')}
+              >
+                {UI_COPY.register.editTitle}
+              </Link>
+            </div>
           )}
         </div>
 
@@ -60,6 +70,7 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
             walletAddress={address!}
             onSaved={reloadMentor}
             onCancel={() => setEditing(false)}
+            onDeactivated={() => router.push('/')}
           />
         ) : (
           <>
