@@ -425,4 +425,4 @@ Token snapshot: [design-tokens.md](./design-tokens.md).
 
 ---
 
-*Status:* §12 locked — implementation on branch **`ux/ui-design`** via **`IMPL-L4-UI-*`** (no merge to `Dev` until explicit request).
+*Status:* §12 locked — implementation on branch **`ux/ui-design`** via **`IMPL-L4-UI-*`** (no merge to `dev` until explicit request).
