@@ -76,12 +76,23 @@ function mapMentorRow(row: MentorRowRaw): MentorRow {
 }
 
 const dataDir = path.join(process.cwd(), 'data');
-fs.mkdirSync(dataDir, { recursive: true });
 
-const dbPath = path.join(dataDir, 'thp.db');
+/** File-backed SQLite cannot be opened by parallel Next.js build workers. */
+function resolveDbPath(): string {
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return ':memory:';
+  }
+  fs.mkdirSync(dataDir, { recursive: true });
+  return path.join(dataDir, 'thp.db');
+}
+
+const dbPath = resolveDbPath();
 const db = new Database(dbPath);
 
-db.pragma('journal_mode = WAL');
+if (dbPath !== ':memory:') {
+  db.pragma('journal_mode = WAL');
+}
+db.pragma('busy_timeout = 5000');
 
 const schema = fs.readFileSync(path.join(process.cwd(), 'lib', 'schema.sql'), 'utf-8');
 db.exec(schema);
