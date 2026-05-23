@@ -256,6 +256,23 @@ export function insertMentor(data: InsertMentorData): number {
   return run() as number;
 }
 
+/** Re-apply seed language fields for an existing mentor (idempotent). */
+export function syncMentorLanguages(
+  circlesAddress: string,
+  spoken: string[],
+  call: string[],
+): boolean {
+  const spokenSerialized = spoken.length > 0 ? spoken.join(',') : null;
+  const callSerialized = serializeCallLanguageCodes(call.length > 0 ? call : spoken);
+  const result = db
+    .prepare(
+      `UPDATE mentors SET spoken_languages = ?, call_languages = ?
+       WHERE LOWER(circles_address) = LOWER(?)`,
+    )
+    .run(spokenSerialized, callSerialized, circlesAddress);
+  return result.changes > 0;
+}
+
 export function getAllTags(includePending = false): TagRow[] {
   if (includePending) {
     return db
@@ -507,6 +524,17 @@ export type StatsReconcile = {
   pendingTxCount: number;
   oldestPendingAgeHours: number | null;
 };
+
+export function getExpertPaidSessionCounts(): Map<number, number> {
+  const rows = db
+    .prepare(
+      `SELECT mentor_id, COUNT(*) AS n FROM bookings
+       WHERE tx_hash IS NOT NULL AND TRIM(tx_hash) != ''
+       GROUP BY mentor_id`,
+    )
+    .all() as { mentor_id: number; n: number }[];
+  return new Map(rows.map((r) => [r.mentor_id, r.n]));
+}
 
 export function getStatsEnrichment(): StatsEnrichment {
   const activeExperts = (

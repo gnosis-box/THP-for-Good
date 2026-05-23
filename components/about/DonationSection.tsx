@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useToast } from '@/components/ui/toast';
+import {
+  MetricsPanel,
+  MetricsPanelMono,
+  MetricsPanelTitle,
+} from '@/components/ui-patterns/metrics-panel';
 import { FOUNDATION_ADDRESS, FORMATION_GOAL_CRC, buildDonationTransactions } from '@/lib/crc-pay';
 
 const PRESET_AMOUNTS = [10, 25, 50, 100];
@@ -27,7 +32,9 @@ export function DonationSection() {
         const sdk = new Sdk();
         const view = await sdk.rpc.profile.getProfileView(FOUNDATION_ADDRESS);
         if (view?.v2Balance) setBalance(parseFloat(view.v2Balance as string));
-      } catch { /* silent */ }
+      } catch {
+        /* silent */
+      }
     })();
   }, []);
 
@@ -43,7 +50,6 @@ export function DonationSection() {
       const txs = await buildDonationTransactions(address as `0x${string}`, donationAmount);
       await sendTransactions(txs);
       showToast(`Thank you! ${donationAmount} CRC donated.`);
-      // optimistically update balance
       setBalance((b) => (b ?? 0) + donationAmount);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Donation failed', 'error');
@@ -53,32 +59,25 @@ export function DonationSection() {
   }
 
   return (
-    <section className="flex flex-col gap-6 rounded-xl border border-border bg-muted/30 px-5 py-6">
-      {/* Header */}
+    <MetricsPanel muted className="gap-6 px-5 py-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-base font-semibold">THP For Good DAO Treasury</h2>
-        <p className="text-xs text-muted-foreground font-mono">{FOUNDATION_ADDRESS.slice(0, 10)}…{FOUNDATION_ADDRESS.slice(-8)}</p>
+        <MetricsPanelTitle>THP For Good DAO Treasury</MetricsPanelTitle>
+        <MetricsPanelMono>
+          {FOUNDATION_ADDRESS.slice(0, 10)}…{FOUNDATION_ADDRESS.slice(-8)}
+        </MetricsPanelMono>
       </div>
 
-      {/* Big percentage */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-end justify-between">
-          <span className="text-5xl font-extrabold tracking-tight leading-none">
-            {balance === null ? '—' : `${pct}%`}
-          </span>
-          <span className="text-sm text-muted-foreground pb-1">
-            goal: {fmt(FORMATION_GOAL_CRC)} CRC
-          </span>
-        </div>
-
-        {/* Progress bar */}
-        <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <span className="text-5xl font-extrabold leading-none tracking-tight">
+          {balance === null ? '—' : `${pct}%`}
+        </span>
+        <span className="text-sm text-muted-foreground">goal: {fmt(FORMATION_GOAL_CRC)} CRC</span>
+        <div className="h-3 w-full max-w-md rounded-full bg-muted overflow-hidden">
           <div
             className="h-full rounded-full bg-primary transition-all duration-700"
             style={{ width: `${pct}%` }}
           />
         </div>
-
         <p className="text-sm text-muted-foreground">
           {balance === null
             ? 'Loading balance…'
@@ -86,19 +85,20 @@ export function DonationSection() {
         </p>
       </div>
 
-      {/* Donation */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col items-center gap-3">
         <p className="text-sm font-medium">Donate CRC to fund a learner</p>
-
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           {PRESET_AMOUNTS.map((amt) => (
             <button
               key={amt}
               type="button"
-              onClick={() => { setSelected(amt); setCustom(''); }}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium border transition-colors ${
+              onClick={() => {
+                setSelected(amt);
+                setCustom('');
+              }}
+              className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                 !custom && selected === amt
-                  ? 'bg-primary text-primary-foreground border-primary'
+                  ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border text-foreground hover:border-primary'
               }`}
             >
@@ -114,19 +114,17 @@ export function DonationSection() {
             className="w-24 rounded-full border border-border bg-background px-3 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
           />
         </div>
-
         <Button
           onClick={handleDonate}
           disabled={loading || !isConnected || !donationAmount || donationAmount <= 0}
-          className="w-full sm:w-auto"
+          className="w-full max-w-xs"
         >
           {loading ? 'Processing…' : `Donate ${donationAmount || '?'} CRC`}
         </Button>
-
         {!isConnected && (
           <p className="text-xs text-muted-foreground">Open in the Circles playground to donate.</p>
         )}
       </div>
-    </section>
+    </MetricsPanel>
   );
 }

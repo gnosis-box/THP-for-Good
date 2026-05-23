@@ -11,7 +11,7 @@ export type StatsExpertPayload = {
   id: number;
   name: string;
   address: string;
-  balanceCrc: number | null;
+  paidSessionCount: number;
   eventsUrl: string;
   graphUrl: string;
 };
@@ -36,6 +36,5 @@ export type StatsApiResponse = {
   meta: {
     startBlock: number | null;
     generatedAt: string;
-    expertBalancesTruncated: boolean;
   };
 };

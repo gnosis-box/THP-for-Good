@@ -5,12 +5,8 @@ import {
   getAnalyticsStartBlock,
   TREASURY_ORG_ADDRESS,
 } from '@/lib/analytics-explorer';
-import {
-  fetchAvatarBalanceCrc,
-  fetchAvatarBalancesCrc,
-  getStatsMaxExpertBalances,
-} from '@/lib/analytics-rpc';
-import { getAllMentors, getStatsEnrichment, getStatsReconcile } from '@/lib/db';
+import { fetchAvatarBalanceCrc } from '@/lib/analytics-rpc';
+import { getAllMentors, getExpertPaidSessionCounts, getStatsEnrichment, getStatsReconcile } from '@/lib/db';
 import type { StatsApiResponse } from '@/lib/stats-api';
 import { fetchWebAnalytics } from '@/lib/umami-share-client';
 
@@ -20,31 +16,24 @@ export async function GET() {
   const treasuryLinks = explorerLinksForAddress(TREASURY_ORG_ADDRESS);
 
   const mentorRows = getAllMentors(undefined, false);
-  const maxBalances = getStatsMaxExpertBalances();
-  const balanceCap = mentorRows.length > maxBalances;
-  const mentorsForBalance = balanceCap ? mentorRows.slice(0, maxBalances) : mentorRows;
+  const paidSessionCounts = getExpertPaidSessionCounts();
 
-  const expertLinks = mentorRows.map((m) => {
+  const experts = mentorRows.map((m) => {
     const links = explorerLinksForAddress(m.circles_address);
     return {
       id: m.id,
       name: m.name,
       address: links.address,
+      paidSessionCount: paidSessionCounts.get(m.id) ?? 0,
       eventsUrl: links.eventsUrl,
       graphUrl: links.graphUrl,
     };
   });
 
-  const [treasuryBalanceCrc, expertBalanceMap, webAnalytics] = await Promise.all([
+  const [treasuryBalanceCrc, webAnalytics] = await Promise.all([
     fetchAvatarBalanceCrc(TREASURY_ORG_ADDRESS),
-    fetchAvatarBalancesCrc(mentorsForBalance.map((m) => m.circles_address)),
     fetchWebAnalytics(),
   ]);
-
-  const experts = expertLinks.map((expert) => ({
-    ...expert,
-    balanceCrc: expertBalanceMap.get(expert.address) ?? null,
-  }));
 
   const body: StatsApiResponse = {
     treasury: {
@@ -60,7 +49,6 @@ export async function GET() {
     meta: {
       startBlock: getAnalyticsStartBlock(),
       generatedAt: new Date().toISOString(),
-      expertBalancesTruncated: balanceCap,
     },
   };
 

@@ -249,6 +249,11 @@ The dashboard (`/`) intentionally has no `<PageNav />` because [`NavCards`](comp
 - **shadcn primitives** in `components/ui/`. **Do not hand-edit** them — they are CLI-generated. To update a component, regenerate it with `pnpm dlx shadcn@latest add <name> --overwrite`.
 - **shadcn uses Base UI** (`@base-ui/react`), not Radix. Trigger components accept a `render={<Button … />}` prop, not `asChild`. See `MobileNav.tsx` for an example.
 - **Dark-only theme.** Set `class="dark"` on `<html>` in `app/layout.tsx`. Tokens live in `app/globals.css` (`:root` mirrored to `.dark`). See `spec/design-tokens.md`.
+- **Surface contours** use `border border-border` (token `--border`; `--input` aliases it). Do not use `ring-foreground/*` for card outlines.
+- **Layout patterns** (reuse — do not reinvent):
+  - **Page hero** — `PageHeader` (`components/layout/PageHeader.tsx`): centered title + subtitle on every main route.
+  - **KPI / treasury / analytics card** — `MetricsPanel`, `StatCell`, `StatGrid`, `MetricsHero`, `MetricsActions`, `MetricsExternalLink` (`components/ui-patterns/metrics-panel.tsx`): centered title, label-above-value stats, centered CTAs.
+  - **Lists / tables / prose** — `ContentSection`, `ContentPanel` (`components/ui-patterns/content-section.tsx`): left-aligned title; use for experts lists, how-to blocks, tables, forms.
 
 ## Common workflows
 

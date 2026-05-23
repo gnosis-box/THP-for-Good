@@ -93,6 +93,8 @@ export const UI_COPY = {
     analyticsFromBlock: (block: number) =>
       `Circles Explorer links below filter activity from block ${block.toLocaleString()}.`,
     expertBalancesTruncated: 'CRC balances shown for the first active experts only.',
+    expertPaidSessions: (count: number) =>
+      count === 1 ? '1 paid session' : `${count} paid sessions`,
     expertsTitle: 'Active experts',
     expertsEmpty: 'No active experts listed yet.',
     snapshotTitle: 'Activity snapshot',

@@ -2,12 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ExternalLink } from 'lucide-react';
 
-import { buttonVariants } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  MetricsActions,
+  MetricsExternalLink,
+  MetricsHero,
+  MetricsPanel,
+  MetricsPanelDescription,
+  MetricsPanelTitle,
+  StatCell,
+  StatGrid,
+} from '@/components/ui-patterns/metrics-panel';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import type { MeStatsResponse } from '@/lib/me-stats-api';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 function fmt(n: number) {
@@ -61,67 +69,30 @@ export function ExpertStatsPanel() {
   if (!data) return null;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Expert stats</CardTitle>
-        <CardDescription>
-          On-chain balance and app session metrics for your expert profile.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div>
-          <p className="text-xs text-muted-foreground">CRC balance (on-chain)</p>
-          <p className="text-2xl font-semibold tabular-nums">
-            {data.balanceCrc != null ? `${fmt(data.balanceCrc)} CRC` : 'Unavailable'}
-          </p>
-        </div>
-        <dl className="grid grid-cols-3 gap-3 text-sm">
-          <div>
-            <dt className="text-xs text-muted-foreground">Paid sessions</dt>
-            <dd className="font-semibold tabular-nums">{data.paidBookingCount}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">Booking intents</dt>
-            <dd className="font-semibold tabular-nums">{data.bookingIntentCount}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">Trust logged</dt>
-            <dd className="font-semibold tabular-nums">{data.trustAttestationCount}</dd>
-          </div>
-        </dl>
-        <div className="flex flex-wrap gap-2">
-          <a
-            href={data.eventsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              buttonVariants({ variant: 'outline', size: 'sm' }),
-              'inline-flex min-h-9 items-center gap-1.5',
-            )}
-          >
-            On-chain activity
-            <ExternalLink className="size-3.5 opacity-70" aria-hidden />
-          </a>
-          <a
-            href={data.graphUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              buttonVariants({ variant: 'outline', size: 'sm' }),
-              'inline-flex min-h-9 items-center gap-1.5',
-            )}
-          >
-            Trust graph
-            <ExternalLink className="size-3.5 opacity-70" aria-hidden />
-          </a>
-          <Link
-            href={`/mentor/${data.mentorId}`}
-            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
-          >
-            Public profile
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+    <MetricsPanel>
+      <MetricsPanelTitle>Expert stats</MetricsPanelTitle>
+      <MetricsPanelDescription>
+        On-chain balance and app session metrics for your expert profile.
+      </MetricsPanelDescription>
+      <MetricsHero
+        label="CRC balance (on-chain)"
+        value={data.balanceCrc != null ? `${fmt(data.balanceCrc)} CRC` : 'Unavailable'}
+      />
+      <StatGrid columns={3}>
+        <StatCell label="Paid sessions" value={data.paidBookingCount} />
+        <StatCell label="Booking intents" value={data.bookingIntentCount} />
+        <StatCell label="Trust logged" value={data.trustAttestationCount} />
+      </StatGrid>
+      <MetricsActions>
+        <MetricsExternalLink href={data.eventsUrl}>On-chain activity</MetricsExternalLink>
+        <MetricsExternalLink href={data.graphUrl}>Trust graph</MetricsExternalLink>
+        <Link
+          href={`/mentor/${data.mentorId}`}
+          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'min-h-9')}
+        >
+          Public profile
+        </Link>
+      </MetricsActions>
+    </MetricsPanel>
   );
 }
