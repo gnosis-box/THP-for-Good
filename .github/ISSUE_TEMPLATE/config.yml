@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: THP for Good — About
+    url: https://dev.thp.gnosis.box/about
+    about: Learn how the app works before opening an issue.
+  - name: Circles playground
+    url: https://circles.gnosis.io/playground?url=https://dev.thp.gnosis.box
+    about: Reproduce wallet / trust / PAY flows inside the Circles host.

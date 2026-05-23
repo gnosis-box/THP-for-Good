@@ -1,0 +1,51 @@
+name: User feedback (from app)
+description: Quick feedback template — used by the in-app “Report issue” link.
+title: "[Feedback]: "
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submitted via the THP for Good app. Extra context helps us triage faster.
+
+  - type: input
+    id: page
+    attributes:
+      label: Page / route
+      placeholder: /mentor/3, /calls, /mentor/register, …
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Bug
+        - UX / copy
+        - PAY / CRC
+        - TRUST / Circles
+        - Expert profile
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+
+  - type: input
+    id: wallet
+    attributes:
+      label: Wallet address (optional)
+      placeholder: "0x…"
+
+  - type: checkboxes
+    id: host
+    attributes:
+      label: Context
+      options:
+        - label: I was inside the Circles playground / miniapp host
+        - label: I was browsing the site standalone (outside Circles)
