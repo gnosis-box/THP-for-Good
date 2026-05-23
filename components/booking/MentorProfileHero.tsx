@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { splitLine } from '@/lib/ui-copy';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
@@ -15,6 +14,7 @@ export function MentorProfileHero({ mentor }: Props) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [trustedBy, setTrustedBy] = useState<number | null>(null);
   const share = mentor.mentor_share_percent ?? 20;
+  const skillsLabel = mentor.skills.join(' · ');
 
   useEffect(() => {
     (async () => {
@@ -43,19 +43,15 @@ export function MentorProfileHero({ mentor }: Props) {
             <h1 className="text-display text-xl font-semibold tracking-tight sm:text-2xl">
               {mentor.name}
             </h1>
-            <CrcAmount amount={mentor.price_crc} variant="badge" />
+            <CrcAmount amount={mentor.price_crc} className="shrink-0 text-sm sm:text-base" />
           </div>
           {trustedBy !== null && (
             <p className="text-xs text-muted-foreground">Trusted by {trustedBy}</p>
           )}
           {mentor.skills.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {mentor.skills.map((skill) => (
-                <Badge key={skill} variant="secondary">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
+            <p className="text-xs text-muted-foreground sm:text-sm" title={skillsLabel}>
+              {skillsLabel}
+            </p>
           )}
           <p className="text-xs text-accent">{splitLine(share, 100 - share)}</p>
         </div>

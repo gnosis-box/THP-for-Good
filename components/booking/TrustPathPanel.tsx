@@ -3,7 +3,6 @@
 import { AlertTriangle, Check } from 'lucide-react';
 
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
 import { PAY_COPY } from '@/lib/pay-copy';
@@ -79,36 +78,34 @@ export function TrustPathPanel({
   const shortfall = trustEligible.limits.bookableCrc < priceCrc;
 
   return (
-    <Card className="border-border/80 bg-card/80">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">{PAY_COPY.trustEstimateTitle}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        {expertLegCrc > 0 && (
-          <LegRow
-            label={mentorName}
-            maxFormatted={trustEligible.formatted.expert}
-            legCrc={expertLegCrc}
-          />
-        )}
-        {treasuryLegCrc > 0 && (
-          <LegRow
-            label={PAY_COPY.thpForGood}
-            maxFormatted={trustEligible.formatted.foundation}
-            legCrc={treasuryLegCrc}
-          />
-        )}
-        <p className="text-xs text-muted-foreground">
-          {PAY_COPY.bookableLine(trustEligible.formatted.bookable, priceCrc)}
-        </p>
-        {shortfall && (
-          <StatusAlert
-            variant="warning"
-            title="Trust path shortfall"
-            description={PAY_COPY.trustEstimateShortfall}
-          />
-        )}
-      </CardContent>
-    </Card>
+    <section className="flex flex-col gap-3" aria-labelledby="trust-estimate-title">
+      <h3 id="trust-estimate-title" className="text-sm font-medium">
+        {PAY_COPY.trustEstimateTitle}
+      </h3>
+      {expertLegCrc > 0 && (
+        <LegRow
+          label={mentorName}
+          maxFormatted={trustEligible.formatted.expert}
+          legCrc={expertLegCrc}
+        />
+      )}
+      {treasuryLegCrc > 0 && (
+        <LegRow
+          label={PAY_COPY.thpForGood}
+          maxFormatted={trustEligible.formatted.foundation}
+          legCrc={treasuryLegCrc}
+        />
+      )}
+      <p className="text-xs text-muted-foreground">
+        {PAY_COPY.bookableLine(trustEligible.formatted.bookable, priceCrc)}
+      </p>
+      {shortfall && (
+        <StatusAlert
+          variant="warning"
+          title="Trust path shortfall"
+          description={PAY_COPY.trustEstimateShortfall}
+        />
+      )}
+    </section>
   );
 }

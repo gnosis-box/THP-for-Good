@@ -54,9 +54,12 @@ export function MentorBrowser({ mentors, tags }: Props) {
           </EmptyHeader>
         </Empty>
       ) : (
-        <ul className="flex w-full flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-4">
+        <ul className="flex w-full flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 lg:grid lg:grid-cols-2 lg:gap-4 lg:overflow-visible lg:rounded-none lg:bg-transparent lg:ring-0">
           {filtered.map((mentor) => (
-            <li key={mentor.id} className="w-full min-w-0">
+            <li
+              key={mentor.id}
+              className="w-full min-w-0 border-b border-border/60 last:border-b-0 lg:overflow-hidden lg:rounded-xl lg:border-b-0 lg:bg-card lg:ring-1 lg:ring-foreground/10"
+            >
               <MentorCard mentor={mentor} />
             </li>
           ))}
