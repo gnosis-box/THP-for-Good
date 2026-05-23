@@ -44,6 +44,13 @@ Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**
 2. PRD backlog row: optional note “done” or remove only when issue closed (keep link for history).
 3. Respect **Locked decisions** below and layer order on the board.
 
+**Branches (do not mix docs + impl in one PR):**
+
+| Branch | Contents | PR target |
+|--------|----------|-----------|
+| `feat/*-backlog`, `docs/*` | `.github/`, `spec/*.md`, PRD index | `dev` first |
+| `impl/l4-*` | App code, API, UI | `dev` after doc PR merged; `git rebase origin/dev` before impl PR |
+
 ### Locked decisions (do not contradict in code or docs)
 
 | ID | Choice | Notes |

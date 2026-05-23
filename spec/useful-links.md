@@ -29,7 +29,7 @@ Central index of project, product, and ecosystem URLs.
 
 | Environment | URL | Notes |
 |-------------|-----|-------|
-| **Dev** | https://dev.thp.gnosis.box | Coolify; SQLite volume on `/app/data` |
+| **dev** | https://dev.thp.gnosis.box | Coolify branch `dev`; SQLite volume on `/app/data` |
 | **Circles playground + dev** | https://circles.gnosis.io/playground?url=https://dev.thp.gnosis.box | Wallet, PAY, TRUST |
 | **Local dev** | http://localhost:3000 | `pnpm dev`; “Not connected” outside host is expected |
 
@@ -175,7 +175,7 @@ Hub: https://aboutcircles.github.io/CirclesTools/
 
 ## GitHub issue templates (repo)
 
-After merge to default branch:
+After merge to integration branch `dev`:
 
 | Template | File |
 |----------|------|

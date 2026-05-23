@@ -588,7 +588,7 @@ Schéma SQL de référence : [`lib/schema.sql`](../lib/schema.sql) — ajuster s
 
 ---
 
-## Audit du code (`Dev`) — écarts résolus (sprint MVP 2026-05-22)
+## Audit du code (`dev`) — écarts résolus (sprint MVP 2026-05-22)
 
 | Issue | Écart | Statut |
 |-------|-------|--------|
