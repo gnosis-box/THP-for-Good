@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { MentorEditForm } from '@/components/mentors/MentorEditForm';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { UI_COPY } from '@/lib/ui-copy';
+import { trackUmamiEvent } from '@/lib/analytics-umami';
 import { cn } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
@@ -28,6 +29,20 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const expertViewTracked = useRef(false);
+
+  useEffect(() => {
+    if (expertViewTracked.current) return;
+    expertViewTracked.current = true;
+    trackUmamiEvent('expert_view', { mentor_id: mentor.id });
+  }, [mentor.id]);
+
+  function handleDrawerOpenChange(open: boolean) {
+    setDrawerOpen(open);
+    if (open) {
+      trackUmamiEvent('pay_drawer_open', { mentor_id: mentor.id });
+    }
+  }
 
   const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
   const hasSlot = !!selectedSlot;
@@ -130,10 +145,10 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
           <StickyPayBar
             priceCrc={mentor.price_crc}
             hasSlot={hasSlot}
-            onReview={() => setDrawerOpen(true)}
+            onReview={() => handleDrawerOpenChange(true)}
           />
           <div className="md:hidden">
-            <PayDrawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <PayDrawer open={drawerOpen} onOpenChange={handleDrawerOpenChange}>
             <PayButton
               mentor={mentor}
               selectedSlot={selectedSlot}

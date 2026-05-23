@@ -106,6 +106,9 @@ export const UI_COPY = {
       `${count} booking${count === 1 ? '' : 's'} awaiting on-chain confirmation (over 24h)`,
     loading: 'Loading stats…',
     loadError: 'Could not load stats. Try again later.',
+    umamiTitle: 'Web analytics (UX)',
+    umamiNote: 'Page views and funnel — not financial data.',
+    openUmamiDashboard: 'Open Umami dashboard',
   },
 } as const;
 

@@ -7,6 +7,7 @@ import { ExternalLink } from 'lucide-react';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { buttonVariants } from '@/components/ui/button';
 import { buildExplorerTxUrl } from '@/lib/analytics-explorer';
+import { getUmamiDashboardUrl, isUmamiEnabled } from '@/lib/analytics-umami';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { StatsApiResponse } from '@/lib/stats-api';
 import { cn, shortenAddress } from '@/lib/utils';
@@ -82,6 +83,9 @@ export function StatsDashboard() {
     return <p className="text-sm text-muted-foreground animate-pulse">{copy.loading}</p>;
   }
 
+  const umamiDashboardUrl = getUmamiDashboardUrl();
+  const showUmami = isUmamiEnabled() && umamiDashboardUrl;
+
   return (
     <div className="flex flex-col gap-10">
       <section
@@ -97,6 +101,14 @@ export function StatsDashboard() {
           ))}
         </ul>
       </section>
+
+      {showUmami && (
+        <section className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:p-5">
+          <h2 className="text-base font-semibold">{copy.umamiTitle}</h2>
+          <p className="text-xs text-muted-foreground">{copy.umamiNote}</p>
+          <ExplorerLink href={umamiDashboardUrl}>{copy.openUmamiDashboard}</ExplorerLink>
+        </section>
+      )}
 
       {data.reconcile.pendingTxCount > 0 && (
         <StatusAlert

@@ -18,6 +18,7 @@ import {
   type MentorSharePercent,
 } from '@/lib/crc-pay';
 import { mapPayError } from '@/lib/pay-copy';
+import { trackUmamiEvent } from '@/lib/analytics-umami';
 import { UI_COPY } from '@/lib/ui-copy';
 import { cn } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
@@ -149,6 +150,7 @@ export function PayButton({
         slotTime: selectedSlot,
         calendarEventUrl: booking.calendar_event_url ?? null,
       });
+      trackUmamiEvent('pay_success', { mentor_id: mentor.id });
       onSuccess?.();
     } catch (err) {
       const message = mapPayError(err);

@@ -183,18 +183,20 @@ Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnos
 
 [Umami](https://umami.is/) tracks **behaviour**, not money:
 
-- Self-host on Coolify ([Umami docs](https://umami.is/docs)), Postgres backend.
-- Env: `NEXT_PUBLIC_UMAMI_WEBSITE_ID`, `NEXT_PUBLIC_UMAMI_SCRIPT_URL`.
+- Self-host on Coolify — env **mestryx**: `https://mestryx.stats.gnosis.box` ; env **Dev**: `https://dev.stats.gnosis.box`
+- Env (app): `NEXT_PUBLIC_UMAMI_WEBSITE_ID`, `NEXT_PUBLIC_UMAMI_SCRIPT_URL`, `NEXT_PUBLIC_UMAMI_DASHBOARD_URL`
 - **Do not** send CRC amounts as authoritative metrics in Umami — use `pay_success` as **event count** only; financial truth stays on-chain.
 
-| Event | Purpose |
-|-------|---------|
-| `expert_view` | Funnel top |
-| `pay_drawer_open` | Intent |
-| `pay_success` | UX conversion (correlate count with on-chain tx count) |
-| `trust_click` | UX (compare to new TrustRelations) |
+| Event | Purpose | Implementation |
+|-------|---------|----------------|
+| `expert_view` | Funnel top | [`MentorDetail.tsx`](../components/mentors/MentorDetail.tsx) |
+| `pay_drawer_open` | Intent | [`MentorDetail.tsx`](../components/mentors/MentorDetail.tsx) drawer |
+| `pay_success` | UX conversion | [`PayButton.tsx`](../components/mentors/PayButton.tsx) |
+| `trust_click` | UX | [`TrustButton.tsx`](../components/bookings/TrustButton.tsx) |
 
-**Deploy:** Umami Docker on Coolify + dedicated Postgres; gate script on `NEXT_PUBLIC_UMAMI_WEBSITE_ID`. Inside Circles iframe, verify CSP allows the analytics host (or reverse-proxy on the app domain). No wallet addresses in event payloads.
+**App code:** [`lib/analytics-umami.ts`](../lib/analytics-umami.ts), [`components/analytics/UmamiScript.tsx`](../components/analytics/UmamiScript.tsx), CSP via [`lib/csp-umami.ts`](../lib/csp-umami.ts).
+
+**Deploy:** Umami Docker on Coolify + dedicated Postgres; gate script on `NEXT_PUBLIC_UMAMI_WEBSITE_ID`. Inside Circles iframe, CSP allows the analytics host when env is set at build time. No wallet addresses in event payloads.
 
 ---
 
@@ -211,7 +213,7 @@ Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnos
 | **Recent PAY txs** | SQLite `bookings` with `tx_hash` → explorer `/tx/{hash}` (no booker address) |
 | **Reconciliation alert** | Count only: bookings without `tx_hash` > 24h |
 | **Tags / active experts** | SQLite aggregates (labeled off-chain) |
-| **Umami** | Phase 1b — link out when deployed |
+| **Umami** | Link on `/stats` when `NEXT_PUBLIC_UMAMI_*` configured | Phase 1b |
 | **Dune (optional)** | Embed iframe if aggregate public dashboard exists |
 
 ### API
@@ -249,7 +251,7 @@ No custom on-chain indexer. **No `SUM(price_crc)` as KPI.** Reconcile detail wit
 | Explorer deep links in **`/stats`** | Org, group, each expert `/events?startBlock=` |
 | Document `THP_ANALYTICS_START_BLOCK` env | Shared `startBlock` for all explorer URLs |
 | **`/stats`** enrichment + reconcile | SQLite tags + missing `tx_hash` count (public) |
-| Umami deploy + events | UX funnel |
+| Umami deploy + events | UX funnel — **app code done**; Coolify `{env}.stats.gnosis.box` + website UUID per env |
 | Dune dashboard (optional) | Public aggregate chart if needed |
 
 ### Phase 2

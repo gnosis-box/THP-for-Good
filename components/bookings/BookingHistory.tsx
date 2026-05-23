@@ -129,6 +129,7 @@ export function BookingHistory() {
                 mentorAddress={mentor.circles_address}
                 mentorName={mentor.name}
                 mentorSkills={mentor.skills}
+                mentorId={mentor.id}
                 bookingId={booking.id}
               />
             </CardFooter>
