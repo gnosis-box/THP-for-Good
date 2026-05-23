@@ -116,7 +116,7 @@ export function SlotPicker({ mentorId, selected, onSelect }: SlotPickerProps) {
                   <ToggleGroupItem
                     key={iso}
                     value={iso}
-                    className="min-h-11 rounded-lg border border-border bg-card px-4 hover:bg-muted data-pressed:border-primary data-pressed:bg-primary data-pressed:text-primary-foreground"
+                    className="h-11 w-20 shrink-0 justify-center rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 data-pressed:bg-primary data-pressed:text-primary-foreground"
                     aria-label={fmtTime(iso)}
                   >
                     {fmtTime(iso)}
