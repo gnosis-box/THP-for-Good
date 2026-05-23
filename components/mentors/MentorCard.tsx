@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { MentorSkillTags, MentorLanguageTags, MentorSplitShare } from '@/components/ui-patterns/MentorMeta';
-import { TrustRelationBadge } from '@/components/ui-patterns/TrustRelationBadge';
-import { useTrustRelation } from '@/hooks/use-trust-relation';
+import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
@@ -14,7 +13,6 @@ type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 
 export function MentorCard({ mentor }: { mentor: MentorRow }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
-  const trustRelation = useTrustRelation(mentor.circles_address);
   const share = mentor.mentor_share_percent ?? 20;
   const callLanguages =
     mentor.call_languages.length > 0 ? mentor.call_languages : mentor.spoken_languages;
@@ -59,7 +57,11 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
             {circles !== null && circles.trustedByCount !== null && (
               <p className="text-xs text-muted-foreground">Trusted by {circles.trustedByCount}</p>
             )}
-            <TrustRelationBadge relation={trustRelation} />
+            <ExpertTrustControl
+              expertAddress={mentor.circles_address}
+              expertName={mentor.name}
+              compact
+            />
           </div>
           <MentorLanguageTags languages={callLanguages} />
           <MentorSkillTags skills={mentor.skills} />

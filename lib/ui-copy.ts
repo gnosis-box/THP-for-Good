@@ -42,6 +42,20 @@ export const UI_COPY = {
     emptyEmitted: 'No bookings yet. Book a session with an expert.',
     emptyReceived: 'No incoming bookings yet.',
   },
+  support: {
+    reportIssue: 'Report issue',
+    reportIssueAria: 'Report an issue or send feedback on GitHub',
+  },
+  trustCard: {
+    loading: 'Trust…',
+    trust: 'Trust',
+    trustBack: 'Trust back',
+    trusting: 'Trusting…',
+    trustsYou: 'Trusts you',
+    youTrust: 'You trust',
+    mutual: 'Mutual trust',
+    trustFailed: 'Trust failed. Please try again.',
+  },
   register: {
     title: 'Offer your expertise',
     editTitle: 'Edit your expert profile',

@@ -1,4 +1,4 @@
-export type TrustRelationKind = 'none' | 'outgoing' | 'mutual';
+export type TrustRelationKind = 'none' | 'incoming' | 'outgoing' | 'mutual';
 
 export async function queryTrustEdge(truster: string, trustee: string): Promise<boolean> {
   const res = await fetch('https://rpc.aboutcircles.com/', {
@@ -36,5 +36,6 @@ export async function resolveTrustRelation(
   ]);
   if (outgoing && incoming) return 'mutual';
   if (outgoing) return 'outgoing';
+  if (incoming) return 'incoming';
   return 'none';
 }

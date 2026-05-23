@@ -562,8 +562,8 @@ Quand une issue est créée, remplacer *à créer* par le lien `#NN` et ne plus 
 | Feature | Description | Liens |
 |---------|-------------|--------|
 | **Analytics & statistics** | **On-chain first** (Dune + Circles RPC) for CRC/split/TRUST ; Umami UX ; SQLite enrichment only | [#61](https://github.com/gnosis-box/THP-for-Good/issues/61), [`analytics-strategy.md`](analytics-strategy.md) |
-| **In-app Report issue** | Footer/header link → GitHub Issues ; structured templates | [#62 FEAT-L4-04](https://github.com/gnosis-box/THP-for-Good/issues/62) |
-| **Expert card trust status** | Gnosis-style one-way / two-way trust on `MentorCard` ; reuse `TrustButton` logic | [#63 IMPL-L4-06](https://github.com/gnosis-box/THP-for-Good/issues/63) |
+| **In-app Report issue** | Footer link → GitHub Issues (`user_feedback.yml`) ; templates in `.github/ISSUE_TEMPLATE/` | [#62 FEAT-L4-04](https://github.com/gnosis-box/THP-for-Good/issues/62) | Done |
+| **Expert card trust status** | `ExpertTrustControl` on `MentorCard` + profile hero ; shared `lib/trust-actions.ts` | [#63 IMPL-L4-06](https://github.com/gnosis-box/THP-for-Good/issues/63) | Done |
 | **Expert session languages** | Spoken languages + languages offered for calls ; filter on home | [#64 FEAT-L4-07](https://github.com/gnosis-box/THP-for-Good/issues/64) |
 | **Trust-back par domaine** | Attestation post-call liée aux `skill_tags` ; réputation / crédibilité expert par expertise | [§ FEAT Trust-back](#feat--trust-back-par-domaine-créibilité-expert) |
 | Intuition Trust/NoTrust | Trust on-chain par compétence (mainnet) | [`archive/PRD-Mestryx.md`](archive/PRD-Mestryx.md) |

@@ -40,5 +40,16 @@ export function TrustRelationBadge({ relation, className }: Props) {
     );
   }
 
+  if (relation.status === 'incoming') {
+    return (
+      <Badge
+        variant="secondary"
+        className={cn('border-trust/20 bg-muted text-muted-foreground text-[10px] font-medium', className)}
+      >
+        Trusts you
+      </Badge>
+    );
+  }
+
   return null;
 }
