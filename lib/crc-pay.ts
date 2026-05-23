@@ -5,6 +5,9 @@ export const FOUNDATION_ADDRESS =
 /** CRC goal to fund one free THP formation. */
 export const FORMATION_GOAL_CRC = 50_000;
 
+/** User-facing label for the treasury leg (not "foundation"). */
+export const THP_FOR_GOOD_LABEL = 'THP for Good';
+
 export const MENTOR_SHARE_OPTIONS = [0, 10, 20, 30, 50] as const;
 export type MentorSharePercent = (typeof MENTOR_SHARE_OPTIONS)[number];
 
@@ -12,6 +15,14 @@ export function clampMentorShare(percent: number): MentorSharePercent {
   const allowed = MENTOR_SHARE_OPTIONS as readonly number[];
   if (allowed.includes(percent)) return percent as MentorSharePercent;
   return 20;
+}
+
+export function splitLegCrc(
+  priceCrc: number,
+  mentorSharePercent: MentorSharePercent,
+): { expertLegCrc: number; treasuryLegCrc: number } {
+  const expertLegCrc = (priceCrc * mentorSharePercent) / 100;
+  return { expertLegCrc, treasuryLegCrc: priceCrc - expertLegCrc };
 }
 
 export function splitAmounts(totalWei: bigint, mentorPercent: MentorSharePercent): {
