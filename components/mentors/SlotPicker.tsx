@@ -98,7 +98,7 @@ export function SlotPicker({ mentorId, selected, onSelect }: SlotPickerProps) {
         {groups.map(({ label, slots: daySlots }) => (
           <Card key={label} size="sm" className="w-full gap-3 py-3">
             <CardHeader className="items-center px-4 pb-0 text-center">
-              <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wide text-chart-2">
                 {label}
               </CardTitle>
             </CardHeader>
