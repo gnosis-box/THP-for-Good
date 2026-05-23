@@ -46,7 +46,7 @@ export async function buildDonationTransactions(
   ]);
   const builder = new TransferBuilder(circlesConfig[100]);
   const amountWei = BigInt(amountCrc) * 10n ** 18n;
-  const txs = await builder.constructAdvancedTransfer(from, FOUNDATION_ADDRESS, amountWei);
+  const txs = await builder.constructAdvancedTransfer(from, FOUNDATION_ADDRESS, amountWei, { useWrappedBalances: true });
   return txs.map((tx) => ({ to: tx.to, data: tx.data, value: tx.value.toString() }));
 }
 
@@ -66,8 +66,8 @@ export async function buildSplitPayTransactions(
   const { mentorWei, foundationWei } = splitAmounts(totalWei, mentorPercent);
 
   const legPromises = [
-    builder.constructAdvancedTransfer(from, FOUNDATION_ADDRESS, foundationWei),
-    ...(mentorWei > 0n ? [builder.constructAdvancedTransfer(from, mentor, mentorWei)] : []),
+    builder.constructAdvancedTransfer(from, FOUNDATION_ADDRESS, foundationWei, { useWrappedBalances: true }),
+    ...(mentorWei > 0n ? [builder.constructAdvancedTransfer(from, mentor, mentorWei, { useWrappedBalances: true })] : []),
   ];
 
   const results = await Promise.all(legPromises);
