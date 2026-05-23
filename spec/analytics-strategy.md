@@ -63,8 +63,6 @@ Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Goo
 | **Live chain reads** | **Circles RPC** + **Explorer** | Balances, trust state, tx detail, path viewer | **1** |
 | **Web analytics** | **[Umami](https://umami.is/)** | Pages, referrers, UX events (not CRC totals) | **1** |
 | **Admin UI** | **`/admin/stats`** | Embeds / proxies on-chain KPIs + SQLite enrichment | **1** |
-| **Deep product** | PostHog (optional) | Only if Umami insufficient | **3** |
-| **Ops** | Grafana (homelab) | Uptime, 5xx — not CRC | parallel |
 
 SQLite **`SUM(price_crc)` is deprecated as a KPI** — use only for “listed price” or reconciliation warnings when chain ≠ DB.
 
@@ -167,7 +165,7 @@ Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnos
 | `pay_success` | UX conversion (correlate count with on-chain tx count) |
 | `trust_click` | UX (compare to new TrustRelations) |
 
-See § 5 in previous draft for deployment / iframe / privacy checklist — unchanged.
+**Deploy:** Umami Docker on Coolify + dedicated Postgres; gate script on `NEXT_PUBLIC_UMAMI_WEBSITE_ID`. Inside Circles iframe, verify CSP allows the analytics host (or reverse-proxy on the app domain). No wallet addresses in event payloads.
 
 ---
 
@@ -231,13 +229,6 @@ Admin-gated ([DIV-L1-07](https://github.com/gnosis-box/THP-for-Good/issues/15)).
 | Store `trust_tx_hash` on attest | Full TRUST audit trail |
 | Expert self-service stats | On-chain CRC to their avatar |
 | Automated Dune → admin cache | Faster admin load |
-
-### Phase 3
-
-| Task | Output |
-|------|--------|
-| PostHog (optional) | Deep session analytics |
-| Real-time indexer | If Dune latency too high for demos |
 
 ---
 
