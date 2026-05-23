@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
@@ -186,6 +187,11 @@ export function AdminPanel() {
     <div className="flex flex-col gap-10">
       {health ? <PlatformHealthSection stats={health} /> : null}
 
+      <p className="text-sm">
+        <Link href="/stats" className="text-primary underline underline-offset-2">
+          Public stats →
+        </Link>
+      </p>
       {/* Tags */}
       <section className="flex flex-col gap-4">
         <h2 className="text-base font-semibold">Skill Tags</h2>

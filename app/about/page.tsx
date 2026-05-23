@@ -83,6 +83,16 @@ export default function AboutPage() {
       {/* DAO treasury + donation */}
       <DonationSection />
 
+      {/* Transparency */}
+      <section className="flex flex-col gap-2">
+        <Link
+          href="/stats"
+          className="text-sm text-primary underline underline-offset-2 w-fit"
+        >
+          View transparency dashboard →
+        </Link>
+      </section>
+
       {/* Circles */}
       <section className="rounded-xl border border-border bg-muted/40 px-5 py-5 flex flex-col gap-3">
         <h2 className="text-base font-semibold">Powered by Circles</h2>
