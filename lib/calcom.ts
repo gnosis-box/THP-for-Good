@@ -46,11 +46,8 @@ export async function createCalBooking(params: {
   slotTime: string;
   attendeeName: string;
   attendeeEmail: string;
-  mentorName: string;
   txHash?: string;
 }): Promise<{ uid: string; meetingUrl?: string } | null> {
-  const title = `[THP For Good] ${params.attendeeName} => ${params.mentorName}`;
-
   const res = await fetch(`${CAL_API}/bookings`, {
     method: 'POST',
     headers: authHeaders(CAL_BOOKING_VERSION),
@@ -59,7 +56,6 @@ export async function createCalBooking(params: {
       start: params.slotTime,
       timeZone: 'Europe/Paris',
       language: 'en',
-      title,
       responses: {
         name: params.attendeeName,
         email: params.attendeeEmail,

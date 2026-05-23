@@ -79,7 +79,6 @@ export async function POST(request: NextRequest) {
           slotTime: data.slot_time,
           attendeeName: data.attendee_name ?? data.booker_address,
           attendeeEmail: data.attendee_email,
-          mentorName: mentor.name,
           txHash: data.tx_hash,
         });
         calBookingUid = result?.uid;
