@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { DonationSection } from '@/components/about/DonationSection';
 
 export default function AboutPage() {
   return (
@@ -74,6 +75,9 @@ export default function AboutPage() {
           </li>
         </ol>
       </section>
+
+      {/* DAO treasury + donation */}
+      <DonationSection />
 
       {/* Circles */}
       <section className="rounded-xl border border-border bg-muted/40 px-5 py-5 flex flex-col gap-3">

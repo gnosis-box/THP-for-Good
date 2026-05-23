@@ -2,15 +2,10 @@
   "name": "thp-for-good",
   "version": "0.1.0",
   "private": true,
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "esbuild"
-    ],
-    "ignoredBuiltDependencies": [
-      "sharp",
-      "unrs-resolver"
-    ]
+  "packageManager": "pnpm@11.2.2",
+  "engines": {
+    "node": ">=22.13.0",
+    "pnpm": ">=11.2.2"
   },
   "scripts": {
     "dev": "next dev",
@@ -39,7 +34,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
