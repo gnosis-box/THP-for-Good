@@ -2,6 +2,13 @@
 
 import { Search } from 'lucide-react';
 
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group';
+import { UI_COPY } from '@/lib/ui-copy';
+
 type Props = {
   value: string;
   onChange: (v: string) => void;
@@ -9,15 +16,17 @@ type Props = {
 
 export function MentorSearch({ value, onChange }: Props) {
   return (
-    <div className="relative flex items-center">
-      <Search className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
-      <input
+    <InputGroup className="min-h-11 h-auto">
+      <InputGroupAddon>
+        <Search className="size-4" aria-hidden />
+      </InputGroupAddon>
+      <InputGroupInput
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search by name, skill or bio…"
-        className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        placeholder={UI_COPY.home.searchPlaceholder}
+        aria-label="Search mentors"
       />
-    </div>
+    </InputGroup>
   );
 }

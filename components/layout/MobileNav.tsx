@@ -51,10 +51,10 @@ export function MobileNav() {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'min-h-11 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-foreground hover:bg-accent/60',
+                    ? 'bg-primary/15 text-primary'
+                    : 'text-foreground hover:bg-muted',
                 )}
               >
                 {item.label}

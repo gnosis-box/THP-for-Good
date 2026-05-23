@@ -5,16 +5,23 @@ import { useWallet } from '@/components/wallet/WalletProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TrustButton } from '@/components/bookings/TrustButton';
+import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { shortenAddress } from '@/lib/utils';
+import { UI_COPY } from '@/lib/ui-copy';
 import type { BookingRow, MentorRow } from '@/lib/db';
-import { cn } from '@/lib/utils';
 
 type EnrichedBooking = BookingRow & { mentor: MentorRow };
 type ReceivedBooking = BookingRow & { mentor_name: string };
 type EnrichedReceivedBooking = ReceivedBooking & { booker_name: string | null; booker_avatar: string | null };
-
-type Tab = 'emitted' | 'received';
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -26,7 +33,6 @@ function fmtDate(iso: string) {
 
 export function CallsView() {
   const { address, isConnected } = useWallet();
-  const [tab, setTab] = useState<Tab>('emitted');
   const [emitted, setEmitted] = useState<EnrichedBooking[]>([]);
   const [received, setReceived] = useState<EnrichedReceivedBooking[]>([]);
   const [loading, setLoading] = useState(false);
@@ -74,7 +80,9 @@ export function CallsView() {
                   booker_avatar: profile?.previewImageUrl ?? profile?.imageUrl ?? null,
                 };
               }
-            } catch { /* ignore */ }
+            } catch {
+              /* ignore */
+            }
             return { ...booking, booker_name: null, booker_avatar: null };
           }),
         );
@@ -99,48 +107,55 @@ export function CallsView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex gap-2 border-b border-border">
-        {(['emitted', 'received'] as const).map((key) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            className={cn(
-              'px-4 py-2 text-sm font-medium capitalize transition-colors border-b-2 -mb-px',
-              tab === key
-                ? 'border-primary text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {key === 'emitted' ? 'Emitted' : 'Received'}
-          </button>
-        ))}
-      </div>
+      <Tabs defaultValue="emitted">
+        <TabsList className="w-full">
+          <TabsTrigger value="emitted" className="min-h-11 flex-1">
+            {UI_COPY.calls.emitted}
+          </TabsTrigger>
+          <TabsTrigger value="received" className="min-h-11 flex-1">
+            {UI_COPY.calls.received}
+          </TabsTrigger>
+        </TabsList>
 
-      {loading && (
-        <div className="flex flex-col gap-4">
-          {[1, 2].map((n) => (
-            <Skeleton key={n} className="h-32 w-full rounded-xl" />
-          ))}
-        </div>
-      )}
+        {loading && (
+          <div className="mt-4 flex flex-col gap-4">
+            {[1, 2].map((n) => (
+              <Skeleton key={n} className="h-32 w-full rounded-xl" />
+            ))}
+          </div>
+        )}
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && (
+          <div className="mt-4">
+            <StatusAlert variant="error" title="Could not load calls" description={error} />
+          </div>
+        )}
 
-      {!loading && !error && tab === 'emitted' && (
-        <CallsEmittedList bookings={emitted} />
-      )}
-
-      {!loading && !error && tab === 'received' && (
-        <CallsReceivedList bookings={received} />
-      )}
+        {!loading && !error && (
+          <>
+            <TabsContent value="emitted" className="mt-4">
+              <CallsEmittedList bookings={emitted} />
+            </TabsContent>
+            <TabsContent value="received" className="mt-4">
+              <CallsReceivedList bookings={received} />
+            </TabsContent>
+          </>
+        )}
+      </Tabs>
     </div>
   );
 }
 
 function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
   if (bookings.length === 0) {
-    return <p className="text-sm text-muted-foreground">You have no emitted calls yet.</p>;
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>No calls yet</EmptyTitle>
+          <EmptyDescription>{UI_COPY.calls.emptyEmitted}</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
   }
 
   return (
@@ -177,7 +192,7 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
                   href={`https://explorer.aboutcircles.com/tx/${booking.tx_hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs text-primary underline-offset-4 hover:underline"
+                  className="font-mono text-xs text-trust underline-offset-4 hover:underline"
                 >
                   {shortenAddress(booking.tx_hash, 6)}
                 </a>
@@ -211,9 +226,12 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
 function CallsReceivedList({ bookings }: { bookings: EnrichedReceivedBooking[] }) {
   if (bookings.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        No one has booked your expert profile yet.
-      </p>
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>No incoming bookings</EmptyTitle>
+          <EmptyDescription>{UI_COPY.calls.emptyReceived}</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
@@ -223,16 +241,12 @@ function CallsReceivedList({ bookings }: { bookings: EnrichedReceivedBooking[] }
         <Card key={booking.id}>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="size-10 rounded-full bg-muted overflow-hidden shrink-0 flex items-center justify-center">
+              <Avatar className="size-10 shrink-0">
                 {booking.booker_avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={booking.booker_avatar} alt={booking.booker_name ?? ''} className="size-full object-cover" />
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="size-5 text-muted-foreground">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                  </svg>
-                )}
-              </div>
+                  <AvatarImage src={booking.booker_avatar} alt={booking.booker_name ?? ''} />
+                ) : null}
+                <AvatarFallback>{(booking.booker_name ?? '?').charAt(0)}</AvatarFallback>
+              </Avatar>
               <CardTitle className="text-base font-semibold">
                 {booking.booker_name ?? shortenAddress(booking.booker_address, 6)}
               </CardTitle>
@@ -254,7 +268,7 @@ function CallsReceivedList({ bookings }: { bookings: EnrichedReceivedBooking[] }
                 href={`https://explorer.aboutcircles.com/tx/${booking.tx_hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-xs text-primary underline-offset-4 hover:underline"
+                className="font-mono text-xs text-trust underline-offset-4 hover:underline"
               >
                 {shortenAddress(booking.tx_hash, 6)}
               </a>

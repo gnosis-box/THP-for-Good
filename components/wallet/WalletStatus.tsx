@@ -8,7 +8,11 @@ export function WalletStatus() {
   const { address, isConnected } = useWallet();
 
   return (
-    <Badge variant={isConnected ? 'default' : 'secondary'} className="font-mono">
+    <Badge
+      variant={isConnected ? 'default' : 'secondary'}
+      className="max-w-[9rem] truncate font-mono sm:max-w-none"
+      aria-label={isConnected ? `Wallet connected: ${address}` : 'Wallet not connected'}
+    >
       <span
         className={
           'mr-1.5 inline-block size-1.5 rounded-full ' +

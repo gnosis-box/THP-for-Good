@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { DonationSection } from '@/components/about/DonationSection';
+import { cn } from '@/lib/utils';
 
 export default function AboutPage() {
   return (
@@ -54,8 +55,11 @@ export default function AboutPage() {
           </li>
           <li className="flex gap-4">
             <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">3</span>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
               <p className="font-medium">Payment split — solidarity by design</p>
+              <blockquote className="border-l-2 border-accent pl-3 text-sm text-accent">
+                At least 50% of every session goes to THP for Good to fund future learners.
+              </blockquote>
               <p className="text-sm text-muted-foreground">
                 Every session payment is automatically split: at least <strong>50% goes to the THP for
                 Good foundation</strong> to fund future learners, the rest to the mentor. The exact
@@ -100,8 +104,15 @@ export default function AboutPage() {
 
       {/* CTA */}
       <section className="flex flex-col gap-3 sm:flex-row">
-        <Button render={<Link href="/" />}>Find an expert</Button>
-        <Button variant="outline" render={<Link href="/mentor/register" />}>Offer your expertise</Button>
+        <Link href="/" className={cn(buttonVariants(), 'inline-flex min-h-11 items-center justify-center')}>
+          Find an expert
+        </Link>
+        <Link
+          href="/mentor/register"
+          className={cn(buttonVariants({ variant: 'outline' }), 'inline-flex min-h-11 items-center justify-center')}
+        >
+          Offer your expertise
+        </Link>
       </section>
 
     </div>

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
+import { MentorSkillTags, MentorSplitShare } from '@/components/ui-patterns/MentorMeta';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
@@ -11,6 +12,7 @@ type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 
 export function MentorCard({ mentor }: { mentor: MentorRow }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
+  const share = mentor.mentor_share_percent ?? 20;
 
   useEffect(() => {
     (async () => {
@@ -29,50 +31,32 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
   }, [mentor.circles_address]);
 
   return (
-    <Link href={`/mentor/${mentor.id}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl">
-      <Card className="h-full transition-shadow hover:shadow-md">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            {circles?.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={circles.imageUrl}
-                alt={mentor.name}
-                className="size-12 shrink-0 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-base font-semibold text-muted-foreground select-none">
-                {mentor.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="flex flex-col gap-0.5 min-w-0">
-              <CardTitle className="text-base font-semibold">{mentor.name}</CardTitle>
-              {circles !== null && circles.trustedByCount !== null && (
-                <span className="text-xs text-muted-foreground">
-                  Trusted by {circles.trustedByCount}
-                </span>
-              )}
-            </div>
+    <Link
+      href={`/mentor/${mentor.id}`}
+      aria-label={`Book ${mentor.name}, ${mentor.price_crc} CRC per session`}
+      className="block w-full min-w-0 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    >
+      <div className="flex w-full items-start gap-3 px-3 py-3 sm:px-4 sm:py-4">
+        <Avatar className="size-11 shrink-0 sm:size-12">
+          {circles?.imageUrl ? (
+            <AvatarImage src={circles.imageUrl} alt="" />
+          ) : null}
+          <AvatarFallback className="text-sm font-semibold">
+            {mentor.name.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1 space-y-1">
+          <div className="flex items-start justify-between gap-2">
+            <p className="truncate font-semibold leading-tight sm:text-base">{mentor.name}</p>
+            <CrcAmount amount={mentor.price_crc} className="shrink-0 text-sm text-foreground" />
           </div>
-        </CardHeader>
-
-        {mentor.skills.length > 0 && (
-          <CardContent className="flex flex-wrap gap-1.5">
-            {mentor.skills.map((skill) => (
-              <Badge key={skill} variant="secondary">
-                {skill}
-              </Badge>
-            ))}
-          </CardContent>
-        )}
-
-        <CardFooter className="flex flex-col items-start gap-0.5">
-          <span className="text-sm text-muted-foreground">{mentor.price_crc} CRC / session</span>
-          <span className="text-xs text-muted-foreground">
-            {mentor.mentor_share_percent ?? 20}% to mentor · {100 - (mentor.mentor_share_percent ?? 20)}% to THP for Good
-          </span>
-        </CardFooter>
-      </Card>
+          {circles !== null && circles.trustedByCount !== null && (
+            <p className="text-xs text-muted-foreground">Trusted by {circles.trustedByCount}</p>
+          )}
+          <MentorSkillTags skills={mentor.skills} />
+          <MentorSplitShare expertPercent={share} />
+        </div>
+      </div>
     </Link>
   );
 }
