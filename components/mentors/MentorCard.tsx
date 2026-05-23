@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
-import { splitLine } from '@/lib/ui-copy';
+import { MentorSkillTags, MentorSplitShare } from '@/components/ui-patterns/MentorMeta';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
@@ -13,7 +13,6 @@ type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 export function MentorCard({ mentor }: { mentor: MentorRow }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
   const share = mentor.mentor_share_percent ?? 20;
-  const skillsLabel = mentor.skills.join(' · ');
 
   useEffect(() => {
     (async () => {
@@ -54,12 +53,8 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
           {circles !== null && circles.trustedByCount !== null && (
             <p className="text-xs text-muted-foreground">Trusted by {circles.trustedByCount}</p>
           )}
-          {mentor.skills.length > 0 && (
-            <p className="truncate text-xs text-muted-foreground" title={skillsLabel}>
-              {skillsLabel}
-            </p>
-          )}
-          <p className="truncate text-xs text-accent">{splitLine(share, 100 - share)}</p>
+          <MentorSkillTags skills={mentor.skills} />
+          <MentorSplitShare expertPercent={share} />
         </div>
       </div>
     </Link>

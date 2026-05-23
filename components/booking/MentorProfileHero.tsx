@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
+import { MentorSkillTags, MentorSplitShare } from '@/components/ui-patterns/MentorMeta';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { splitLine } from '@/lib/ui-copy';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
@@ -14,7 +14,6 @@ export function MentorProfileHero({ mentor }: Props) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [trustedBy, setTrustedBy] = useState<number | null>(null);
   const share = mentor.mentor_share_percent ?? 20;
-  const skillsLabel = mentor.skills.join(' · ');
 
   useEffect(() => {
     (async () => {
@@ -48,12 +47,8 @@ export function MentorProfileHero({ mentor }: Props) {
           {trustedBy !== null && (
             <p className="text-xs text-muted-foreground">Trusted by {trustedBy}</p>
           )}
-          {mentor.skills.length > 0 && (
-            <p className="text-xs text-muted-foreground sm:text-sm" title={skillsLabel}>
-              {skillsLabel}
-            </p>
-          )}
-          <p className="text-xs text-accent">{splitLine(share, 100 - share)}</p>
+          <MentorSkillTags skills={mentor.skills} className="sm:[&_span]:text-sm" />
+          <MentorSplitShare expertPercent={share} className="sm:text-sm" />
         </div>
       </div>
     </div>
