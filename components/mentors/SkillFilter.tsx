@@ -1,6 +1,8 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { UI_COPY } from '@/lib/ui-copy';
 import type { TagRow } from '@/lib/db';
 
 type Props = {
@@ -11,44 +13,29 @@ type Props = {
 
 export function SkillFilter({ tags, selected, onSelect }: Props) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-      <PillButton active={selected === ''} onClick={() => onSelect('')}>
-        All
-      </PillButton>
-      {tags.map((tag) => (
-        <PillButton
-          key={tag.id}
-          active={selected === tag.label}
-          onClick={() => onSelect(tag.label)}
-        >
-          {tag.label}
-        </PillButton>
-      ))}
-    </div>
-  );
-}
-
-function PillButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'shrink-0 rounded-full px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        active
-          ? 'bg-primary text-primary-foreground'
-          : 'border border-border bg-background text-foreground hover:bg-muted'
-      )}
-    >
-      {children}
-    </button>
+    <ScrollArea className="w-full whitespace-nowrap">
+      <ToggleGroup
+        value={selected ? [selected] : ['']}
+        onValueChange={(values) => {
+          const v = values[values.length - 1] ?? '';
+          onSelect(v === '' ? '' : v);
+        }}
+        className="inline-flex w-max min-h-11 gap-2 pb-1"
+      >
+        <ToggleGroupItem value="" className="min-h-11 shrink-0 rounded-full px-4">
+          {UI_COPY.home.filterAll}
+        </ToggleGroupItem>
+        {tags.map((tag) => (
+          <ToggleGroupItem
+            key={tag.id}
+            value={tag.label}
+            className="min-h-11 shrink-0 rounded-full px-4"
+          >
+            {tag.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 }

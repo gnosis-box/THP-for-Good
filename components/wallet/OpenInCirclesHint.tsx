@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ExternalLink } from 'lucide-react';
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { useWallet } from '@/components/wallet/WalletProvider';
+import { UI_COPY } from '@/lib/ui-copy';
 
 export function OpenInCirclesHint() {
   const { isMiniappHost } = useWallet();
@@ -15,22 +20,15 @@ export function OpenInCirclesHint() {
   if (isMiniappHost) return null;
 
   return (
-    <div
-      className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-foreground"
-      role="status"
-    >
-      <p className="font-medium">Open in Circles</p>
-      <p className="mt-1 text-muted-foreground">
-        Connect your wallet and pay in CRC inside the Circles miniapp.
-      </p>
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-2 inline-block text-sm font-medium text-primary underline underline-offset-2"
-      >
-        Launch in Circles playground
-      </a>
-    </div>
+    <Alert className="border-warning/40 bg-warning/10" role="status">
+      <ExternalLink aria-hidden />
+      <AlertTitle>{UI_COPY.circlesHint.title}</AlertTitle>
+      <AlertDescription className="flex flex-col gap-2">
+        <p>{UI_COPY.circlesHint.body}</p>
+        <Button variant="outline" size="sm" className="w-fit" render={<a href={href} target="_blank" rel="noopener noreferrer" />}>
+          {UI_COPY.circlesHint.cta}
+        </Button>
+      </AlertDescription>
+    </Alert>
   );
 }

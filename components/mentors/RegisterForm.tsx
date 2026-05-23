@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { cn, shortenAddress } from '@/lib/utils';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { useCirclesProfile } from '@/hooks/use-circles-profile';
@@ -74,12 +81,6 @@ export function RegisterForm() {
     setNameFromWallet(true);
     setBio((prev) => prev.trim() || profile.bio || '');
   }, [profile]);
-
-  function toggleSkill(label: string) {
-    setSelectedSkills((prev) =>
-      prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label],
-    );
-  }
 
   function addNewSkill() {
     const label = newSkill.trim();
@@ -199,40 +200,36 @@ export function RegisterForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-sm font-medium">
-          Name <span className="text-destructive">*</span>
-        </label>
-        <input
-          id="name"
-          type="text"
-          required
-          readOnly={nameFromWallet}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your Circles profile name"
-          className={cn(
-            'h-9 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
-            nameFromWallet && 'cursor-default bg-muted/60',
-          )}
-        />
+        <Field>
+          <FieldLabel htmlFor="name">
+            Name <span className="text-destructive">*</span>
+          </FieldLabel>
+          <Input
+            id="name"
+            type="text"
+            required
+            readOnly={nameFromWallet}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your Circles profile name"
+            className={cn(nameFromWallet && 'cursor-default bg-muted/60')}
+          />
+        </Field>
         {nameFromWallet && (
           <p className="text-xs text-muted-foreground">Taken from your connected Circles wallet.</p>
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="bio" className="text-sm font-medium">
-          Bio
-        </label>
-        <textarea
+      <Field>
+        <FieldLabel htmlFor="bio">Bio</FieldLabel>
+        <Textarea
           id="bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           placeholder="Tell mentees about yourself..."
           rows={4}
-          className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
         />
-      </div>
+      </Field>
 
       <div className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">
@@ -241,35 +238,30 @@ export function RegisterForm() {
         {tagsLoading ? (
           <p className="text-xs text-muted-foreground">Loading skills…</p>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => {
-              const active = selectedSkills.includes(tag.label);
-              return (
-                <button
-                  key={tag.id}
-                  type="button"
-                  onClick={() => toggleSkill(tag.label)}
-                  className={cn(
-                    'shrink-0 rounded-full px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    active
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-border bg-background text-foreground hover:bg-muted',
-                  )}
-                >
-                  {tag.label}
-                </button>
-              );
-            })}
-          </div>
+          <ToggleGroup
+            value={selectedSkills}
+            onValueChange={setSelectedSkills}
+            className="flex flex-wrap gap-2"
+          >
+            {tags.map((tag) => (
+              <ToggleGroupItem
+                key={tag.id}
+                value={tag.label}
+                className="min-h-11 shrink-0 rounded-full px-4 data-pressed:bg-primary data-pressed:text-primary-foreground"
+              >
+                {tag.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         )}
         <div className="flex gap-2">
-          <input
+          <Input
             type="text"
             value={newSkill}
             onChange={(e) => setNewSkill(e.target.value)}
             onKeyDown={handleNewSkillKey}
             placeholder="Add a skill…"
-            className="h-8 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="h-11 flex-1"
           />
           <button
             type="button"
@@ -292,43 +284,38 @@ export function RegisterForm() {
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="price" className="text-sm font-medium">
-          CRC price per session
-        </label>
-        <input
+      <Field>
+        <FieldLabel htmlFor="price">CRC price per session</FieldLabel>
+        <Input
           id="price"
           type="number"
           min={1}
           value={priceCrc}
           onChange={(e) => setPriceCrc(parseInt(e.target.value, 10) || 1)}
-          className="h-9 w-32 rounded-lg border border-border bg-background px-3 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="w-32"
         />
-      </div>
+      </Field>
 
       <div className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Payment split</span>
         <p className="text-xs text-muted-foreground">Your share — at least 50% always goes to THP for Good.</p>
-        <div className="flex flex-wrap gap-2">
+        <RadioGroup
+          value={String(mentorShare)}
+          onValueChange={(v) => setMentorShare(clampMentorShare(parseInt(v, 10)))}
+          className="flex flex-col gap-2"
+        >
           {MENTOR_SHARE_OPTIONS.map((opt) => (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => setMentorShare(clampMentorShare(opt))}
-              className={cn(
-                'rounded-full px-3 py-1 text-sm font-medium transition-colors border',
-                mentorShare === opt
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'border-border bg-background hover:bg-muted',
-              )}
-            >
-              {opt}% me · {100 - opt}% THP
-            </button>
+            <div key={opt} className="flex min-h-11 items-center gap-2">
+              <RadioGroupItem value={String(opt)} id={`share-${opt}`} />
+              <Label htmlFor={`share-${opt}`} className="cursor-pointer font-normal">
+                {opt}% me · {100 - opt}% THP for Good
+              </Label>
+            </div>
           ))}
-        </div>
+        </RadioGroup>
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <StatusAlert variant="error" title="Registration failed" description={error} />}
 
       <Button
         type="submit"

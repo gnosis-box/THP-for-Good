@@ -77,7 +77,7 @@ Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**
 | Language | **TypeScript 5** | Strict mode on; path alias `@/*` → project root |
 | Styling | **Tailwind v4** + **shadcn/ui** | shadcn uses Base UI under the hood (`@base-ui/react`), not Radix. There is no `tailwind.config.js` — theme tokens live in `app/globals.css` under `@theme inline { … }` |
 | Package manager | **pnpm** | Lock at `pnpm-lock.yaml`; never mix with npm/yarn |
-| Theme | Light only | The `.dark { … }` CSS block and `@custom-variant dark` directive were intentionally removed. Do not add `dark:` Tailwind variants unless the user explicitly asks for dark mode |
+| Theme | **Dark only** (Gnosis 2026 palette) | `class="dark"` on `<html>`; tokens in `app/globals.css` under `:root` / `.dark`. No light-mode toggle in MVP redesign. |
 | Circles SDKs | `@aboutcircles/miniapp-sdk` + `@aboutcircles/sdk` | See "Working with the Circles SDKs" below |
 
 ## Project structure
@@ -88,7 +88,7 @@ app/
   page.tsx                      Dashboard (ConnectionCard + SignInDemo + NavCards)
   profile/page.tsx              Profile lookup
   actions/page.tsx              sendTransactions code sample
-  globals.css                   Tailwind v4 + shadcn tokens (light only)
+  globals.css                   Tailwind v4 + shadcn tokens (dark-only, Gnosis palette)
   icon.svg                      Favicon (Circles brand glyph)
 components/
   brand/CirclesLogo.tsx         Inline-SVG brand mark
@@ -211,7 +211,7 @@ The dashboard (`/`) intentionally has no `<PageNav />` because [`NavCards`](comp
 - **Tailwind v4.** `app/globals.css` imports `tailwindcss` and `shadcn/tailwind.css` and defines tokens under `@theme inline { … }`. There is no `tailwind.config.js`.
 - **shadcn primitives** in `components/ui/`. **Do not hand-edit** them — they are CLI-generated. To update a component, regenerate it with `pnpm dlx shadcn@latest add <name> --overwrite`.
 - **shadcn uses Base UI** (`@base-ui/react`), not Radix. Trigger components accept a `render={<Button … />}` prop, not `asChild`. See `MobileNav.tsx` for an example.
-- **Light mode only.** The `.dark { … }` CSS block was deleted from `globals.css` and the `@custom-variant dark` directive was removed. Do not write `dark:` variants. To re-enable dark mode, restore both, add `next-themes`, and ship a theme toggle.
+- **Dark-only theme.** Set `class="dark"` on `<html>` in `app/layout.tsx`. Tokens live in `app/globals.css` (`:root` mirrored to `.dark`). See `spec/design-tokens.md`.
 
 ## Common workflows
 
@@ -301,7 +301,7 @@ For permanent marketplace placement, open a PR against [`aboutcircles/CirclesMin
 - **Do not use `sdk.getAvatar()` for read flows** — use `sdk.rpc.profile.getProfileView()`. The former silently masks errors as "Avatar not found".
 - **Do not divide `v2Balance` by `1e18`** — it is already a decimal string.
 - **Do not hand-edit `components/ui/*`** — regenerate via the shadcn CLI.
-- **Do not add `dark:` Tailwind variants** unless the user explicitly opts into dark mode.
+- **Do not remove dark mode** without an explicit product decision — the MVP redesign is dark-only.
 - **Do not edit `next-env.d.ts`** — it is regenerated on every build.
 - **Do not run `next lint`** — Next 16 removed that CLI; use the `pnpm lint` script which invokes `eslint` directly.
 - **Do not run `pnpm dev` in the background without need.** Stop it when done; orphaned dev servers eat ports and confuse the next run. Use `pkill -f "next dev"` to clean up.

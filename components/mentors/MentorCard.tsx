@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
+import { splitLine } from '@/lib/ui-copy';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
@@ -11,6 +14,7 @@ type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 
 export function MentorCard({ mentor }: { mentor: MentorRow }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
+  const share = mentor.mentor_share_percent ?? 20;
 
   useEffect(() => {
     (async () => {
@@ -29,30 +33,32 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
   }, [mentor.circles_address]);
 
   return (
-    <Link href={`/mentor/${mentor.id}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl">
-      <Card className="h-full transition-shadow hover:shadow-md">
+    <Link
+      href={`/mentor/${mentor.id}`}
+      className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <Card className="h-full border-border/80 transition-colors hover:border-primary/30 hover:shadow-md">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            {circles?.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={circles.imageUrl}
-                alt={mentor.name}
-                className="size-12 shrink-0 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-base font-semibold text-muted-foreground select-none">
-                {mentor.name.charAt(0).toUpperCase()}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-3">
+              <Avatar className="size-12 shrink-0">
+                {circles?.imageUrl ? (
+                  <AvatarImage src={circles.imageUrl} alt={mentor.name} />
+                ) : null}
+                <AvatarFallback className="font-semibold">
+                  {mentor.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <CardTitle className="truncate text-base font-semibold">{mentor.name}</CardTitle>
+                {circles !== null && circles.trustedByCount !== null && (
+                  <span className="text-xs text-muted-foreground">
+                    Trusted by {circles.trustedByCount}
+                  </span>
+                )}
               </div>
-            )}
-            <div className="flex flex-col gap-0.5 min-w-0">
-              <CardTitle className="text-base font-semibold">{mentor.name}</CardTitle>
-              {circles !== null && circles.trustedByCount !== null && (
-                <span className="text-xs text-muted-foreground">
-                  Trusted by {circles.trustedByCount}
-                </span>
-              )}
             </div>
+            <CrcAmount amount={mentor.price_crc} variant="badge" />
           </div>
         </CardHeader>
 
@@ -66,11 +72,8 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
           </CardContent>
         )}
 
-        <CardFooter className="flex flex-col items-start gap-0.5">
-          <span className="text-sm text-muted-foreground">{mentor.price_crc} CRC / session</span>
-          <span className="text-xs text-muted-foreground">
-            {mentor.mentor_share_percent ?? 20}% to mentor · {100 - (mentor.mentor_share_percent ?? 20)}% to THP for Good
-          </span>
+        <CardFooter>
+          <span className="text-xs text-accent">{splitLine(share, 100 - share)}</span>
         </CardFooter>
       </Card>
     </Link>

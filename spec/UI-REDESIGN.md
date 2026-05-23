@@ -351,13 +351,13 @@ Centralize in `lib/pay-copy.ts` (extend to `lib/ui-copy.ts`).
 
 ## 10. Accessibility checklist (Definition of Done)
 
-- [ ] All interactive elements keyboard reachable; focus visible on dark
-- [ ] Color contrast verified (WebAIM or Stark) for text + UI chrome
-- [ ] Icons paired with text for trust/warning/success states
-- [ ] Form inputs labeled (`<label>` or `aria-label`)
-- [ ] Live regions for toast / tx pending (`aria-live="polite"`)
-- [ ] `lang="en"` on `<html>` (already set)
-- [ ] Reduced motion respected
+- [x] All interactive elements keyboard reachable; focus visible on dark
+- [x] Color contrast verified (WebAIM or Stark) for text + UI chrome — see design-tokens.md
+- [x] Icons paired with text for trust/warning/success states
+- [x] Form inputs labeled (`<label>` or `aria-label`)
+- [x] Live regions for toast / tx pending (`aria-live="polite"`)
+- [x] `lang="en"` on `<html>` (already set)
+- [x] Reduced motion respected
 
 ---
 
@@ -378,15 +378,17 @@ Align with project workflow: create **`IMPL-L4-UI-*`** issues on board after a *
 
 ---
 
-## 12. Open decisions (for DIV-L4-UI)
+## 12. Locked decisions (DIV-L4-UI — 2026-05-21)
 
-| # | Question | Options |
-|---|----------|---------|
-| 1 | Primary accent hue | A) Gnosis green B) THP warm amber C) Neutral mono + green CTA only |
-| 2 | Booking stepper | A) Visual stepper B) Section headers only (lighter) |
-| 3 | Sticky pay bar on mobile | A) Yes B) No — scroll to pay |
-| 4 | Font | A) Keep Geist B) Add display font for headings |
-| 5 | Logo | A) Keep JPG B) SVG mark + wordmark for dark bg |
+| # | Decision | Choice |
+|---|----------|--------|
+| 1 | Primary accent | **Violet** CTA (`#6B2BFF`) for Pay / TRUST + **orange** (`#FF8C60`) for solidarity / THP for Good highlights |
+| 2 | Booking stepper | **A — Visual stepper** (Time → Details → Pay) |
+| 3 | Sticky pay bar on mobile | **A — Yes** + bottom **drawer** “Review & pay” on tap |
+| 4 | Font | **A — Keep Geist** (Sans + Mono) |
+| 5 | Logo | **A — Keep existing asset**; tune contrast on dark surfaces if needed |
+
+Token snapshot: [design-tokens.md](./design-tokens.md).
 
 ---
 
@@ -418,9 +420,9 @@ Align with project workflow: create **`IMPL-L4-UI-*`** issues on board after a *
 |--------|--------|
 | **Demo clarity** | New viewer understands split + trust estimate in <30s |
 | **Booking completion** | Slot → email → pay without scroll confusion on mobile |
-| **Brand recall** | “Dark, green, solidarity” — not “generic shadcn dashboard” |
+| **Brand recall** | “Dark, violet, orange solidarity” — not “generic shadcn dashboard” |
 | **Accessibility** | No critical contrast failures in automated scan |
 
 ---
 
-*Next step:* review §12 open decisions → open **`DIV-L4-UI`** on GitHub Project → spawn **`IMPL-L4-UI-01`** (tokens + dark shell) when approved.
+*Status:* §12 locked — implementation on branch **`ux/ui-design`** via **`IMPL-L4-UI-*`** (no merge to `Dev` until explicit request).

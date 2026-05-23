@@ -54,8 +54,11 @@ export default function AboutPage() {
           </li>
           <li className="flex gap-4">
             <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">3</span>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
               <p className="font-medium">Payment split — solidarity by design</p>
+              <blockquote className="border-l-2 border-accent pl-3 text-sm text-accent">
+                At least 50% of every session goes to THP for Good to fund future learners.
+              </blockquote>
               <p className="text-sm text-muted-foreground">
                 Every session payment is automatically split: at least <strong>50% goes to the THP for
                 Good foundation</strong> to fund future learners, the rest to the mentor. The exact
