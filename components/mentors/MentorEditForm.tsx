@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { CalConnect } from '@/components/mentors/CalConnect';
 import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
 import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPicker';
+import { LanguagePicker } from '@/components/mentors/LanguagePicker';
 import { StopExpertButton } from '@/components/mentors/StopExpertButton';
 import type { MentorRow, TagRow } from '@/lib/db';
 
@@ -22,6 +23,10 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDea
   const [name, setName] = useState(mentor.name);
   const [bio, setBio] = useState(mentor.bio ?? '');
   const [selectedSkills, setSelectedSkills] = useState<string[]>(mentor.skills);
+  const [spokenLanguages, setSpokenLanguages] = useState<string[]>(mentor.spoken_languages);
+  const [callLanguages, setCallLanguages] = useState<string[]>(
+    mentor.call_languages.length > 0 ? mentor.call_languages : mentor.spoken_languages,
+  );
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(mentor.cal_event_type_id);
   const [priceCrc, setPriceCrc] = useState(mentor.price_crc);
   const [mentorShare, setMentorShare] = useState(clampMentorShare(mentor.mentor_share_percent ?? 20));
@@ -63,6 +68,8 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDea
           price_crc: priceCrc,
           mentor_share_percent: mentorShare,
           skills: selectedSkills,
+          spoken_languages: spokenLanguages,
+          call_languages: callLanguages.length > 0 ? callLanguages : spokenLanguages,
           active: 1,
         }),
       });
@@ -109,6 +116,14 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDea
         newSkill={newSkill}
         onNewSkillChange={setNewSkill}
         onAddNewSkill={addNewSkill}
+      />
+
+      <LanguagePicker
+        spoken={spokenLanguages}
+        call={callLanguages}
+        onSpokenChange={setSpokenLanguages}
+        onCallChange={setCallLanguages}
+        size="sm"
       />
 
       <div className="flex flex-col gap-1.5">

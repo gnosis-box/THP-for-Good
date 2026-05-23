@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { queryTrustEdge } from '@/lib/trust-relation';
 
 type TrustState =
   | { kind: 'loading' }
@@ -17,32 +18,6 @@ type Props = {
   mentorSkills: string[];
   bookingId: number;
 };
-
-async function queryTrust(truster: string, trustee: string): Promise<boolean> {
-  const res = await fetch('https://rpc.aboutcircles.com/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'circles_query',
-      params: [
-        {
-          Namespace: 'V_Crc',
-          Table: 'TrustRelations',
-          Columns: ['truster', 'trustee', 'expiryTime'],
-          Filter: [
-            { Type: 'FilterPredicate', FilterType: 'Equals', Column: 'truster', Value: truster.toLowerCase() },
-            { Type: 'FilterPredicate', FilterType: 'Equals', Column: 'trustee', Value: trustee.toLowerCase() },
-          ],
-          Limit: 1,
-        },
-      ],
-    }),
-  });
-  const json = await res.json() as { result?: { rows?: unknown[][] } };
-  return (json.result?.rows?.length ?? 0) > 0;
-}
 
 async function buildContractRunner(address: string) {
   const { sendTransactions } = await import('@aboutcircles/miniapp-sdk');
@@ -70,8 +45,8 @@ export function TrustButton({ mentorAddress, mentorName, bookingId }: Props) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTrustState({ kind: 'loading' });
     Promise.all([
-      queryTrust(address, mentorAddress),
-      queryTrust(mentorAddress, address),
+      queryTrustEdge(address, mentorAddress),
+      queryTrustEdge(mentorAddress, address),
     ]).then(([iOutgoing, iIncoming]) => {
       if (cancelled) return;
       if (iOutgoing && iIncoming) setTrustState({ kind: 'mutual' });

@@ -18,6 +18,7 @@ import type { MentorRow, TagRow } from '@/lib/db';
 import { CalConnect } from '@/components/mentors/CalConnect';
 import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
 import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPicker';
+import { LanguagePicker } from '@/components/mentors/LanguagePicker';
 import { StopExpertButton } from '@/components/mentors/StopExpertButton';
 import { UI_COPY } from '@/lib/ui-copy';
 
@@ -39,6 +40,8 @@ export function RegisterForm() {
   const [priceCrc, setPriceCrc] = useState(100);
   const [mentorShare, setMentorShare] = useState(clampMentorShare(20));
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [spokenLanguages, setSpokenLanguages] = useState<string[]>([]);
+  const [callLanguages, setCallLanguages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,6 +83,10 @@ export function RegisterForm() {
         setPriceCrc(mentor.price_crc);
         setMentorShare(clampMentorShare(mentor.mentor_share_percent ?? 20));
         setSelectedSkills(mentor.skills);
+        setSpokenLanguages(mentor.spoken_languages);
+        setCallLanguages(
+          mentor.call_languages.length > 0 ? mentor.call_languages : mentor.spoken_languages,
+        );
       })
       .catch(() => {
         if (!cancelled) setExistingMentor(null);
@@ -135,6 +142,8 @@ export function RegisterForm() {
         price_crc: priceCrc,
         mentor_share_percent: mentorShare,
         skills: selectedSkills,
+        spoken_languages: spokenLanguages,
+        call_languages: callLanguages.length > 0 ? callLanguages : spokenLanguages,
       };
 
       if (isEditMode && existingMentor) {
@@ -304,6 +313,13 @@ export function RegisterForm() {
           newSkill={newSkill}
           onNewSkillChange={setNewSkill}
           onAddNewSkill={addNewSkill}
+        />
+
+        <LanguagePicker
+          spoken={spokenLanguages}
+          call={callLanguages}
+          onSpokenChange={setSpokenLanguages}
+          onCallChange={setCallLanguages}
         />
 
         <div className="flex flex-col gap-1.5">
