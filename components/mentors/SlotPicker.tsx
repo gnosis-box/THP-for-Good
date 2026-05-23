@@ -98,7 +98,7 @@ export function SlotPicker({ mentorId, selected, onSelect }: SlotPickerProps) {
         {groups.map(({ label, slots: daySlots }) => (
           <Card key={label} size="sm" className="w-full gap-3 py-3">
             <CardHeader className="items-center px-4 pb-0 text-center">
-              <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wide text-chart-2">
                 {label}
               </CardTitle>
             </CardHeader>
@@ -116,7 +116,7 @@ export function SlotPicker({ mentorId, selected, onSelect }: SlotPickerProps) {
                   <ToggleGroupItem
                     key={iso}
                     value={iso}
-                    className="min-h-11 rounded-lg px-4 data-pressed:bg-primary data-pressed:text-primary-foreground"
+                    className="min-h-11 rounded-lg border border-border bg-card px-4 hover:bg-muted data-pressed:border-primary data-pressed:bg-primary data-pressed:text-primary-foreground"
                     aria-label={fmtTime(iso)}
                   >
                     {fmtTime(iso)}
