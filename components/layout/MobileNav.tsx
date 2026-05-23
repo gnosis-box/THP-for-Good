@@ -12,7 +12,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from '@/components/ui/sheet';
 import { useIsAdmin } from '@/hooks/use-is-admin';
 import { getNavItems, isNavItemActive, type NavItem } from '@/lib/nav';
@@ -64,7 +63,7 @@ export function DesktopNav() {
 
   return (
     <nav
-      className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 md:flex lg:gap-1"
+      className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex lg:gap-1"
       aria-label="Main navigation"
     >
       <NavLinks items={items} pathname={pathname} compact />
@@ -80,41 +79,41 @@ export function MobileNav() {
   const sheetId = 'mobile-main-nav';
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-11 shrink-0 md:hidden"
-            aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={open}
-            aria-controls={sheetId}
-          >
-            <Menu className="size-5" aria-hidden />
-          </Button>
-        }
-      />
-      <SheetContent
-        id={sheetId}
-        side="left"
-        className="w-[min(calc(100vw-2rem),16rem)] gap-0 p-0 pb-[env(safe-area-inset-bottom)] [&_[data-slot=sheet-close]]:size-11 [&_[data-slot=sheet-close]]:min-h-11 [&_[data-slot=sheet-close]]:min-w-11"
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-11 shrink-0 lg:hidden"
+        aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
+        aria-expanded={open}
+        aria-controls={sheetId}
+        onClick={() => setOpen(true)}
       >
-        <SheetHeader className="border-b border-border px-4 py-4 pr-14">
-          <SheetTitle>Menu</SheetTitle>
-          <SheetDescription className="sr-only">
-            Main navigation links for THP for Good
-          </SheetDescription>
-        </SheetHeader>
-        <nav className="flex flex-col gap-1 p-3" aria-label="Main navigation">
-          <NavLinks
-            items={items}
-            pathname={pathname}
-            onNavigate={() => setOpen(false)}
-            className="w-full"
-          />
-        </nav>
-      </SheetContent>
-    </Sheet>
+        <Menu className="size-5" aria-hidden />
+      </Button>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          id={sheetId}
+          side="left"
+          className="w-[min(calc(100vw-2rem),16rem)] gap-0 p-0 pb-[env(safe-area-inset-bottom)] [&_[data-slot=sheet-close]]:size-11 [&_[data-slot=sheet-close]]:min-h-11 [&_[data-slot=sheet-close]]:min-w-11"
+        >
+          <SheetHeader className="border-b border-border px-4 py-4 pr-14">
+            <SheetTitle>Menu</SheetTitle>
+            <SheetDescription className="sr-only">
+              Main navigation links for THP for Good
+            </SheetDescription>
+          </SheetHeader>
+          <nav className="flex flex-col gap-1 p-3" aria-label="Main navigation">
+            <NavLinks
+              items={items}
+              pathname={pathname}
+              onNavigate={() => setOpen(false)}
+              className="w-full"
+            />
+          </nav>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

@@ -22,7 +22,7 @@ export function Header() {
               className="size-7 shrink-0 rounded-sm ring-1 ring-border"
               style={{ height: 'auto', width: 'auto', maxHeight: 28, maxWidth: 28 }}
             />
-            <span className="sr-only sm:not-sr-only sm:truncate sm:text-sm md:text-base">
+            <span className="hidden truncate sm:inline sm:text-sm lg:text-base">
               THP for Good
             </span>
           </Link>
