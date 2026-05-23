@@ -84,7 +84,19 @@ export function StatsDashboard() {
 
   return (
     <div className="flex flex-col gap-10">
-      <p className="text-sm text-muted-foreground">{copy.explorerDisclaimer}</p>
+      <section
+        className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 px-4 py-4 sm:px-5 sm:py-5"
+        aria-labelledby="stats-how-to-read"
+      >
+        <h2 id="stats-how-to-read" className="text-sm font-semibold">
+          {copy.howToReadTitle}
+        </h2>
+        <ul className="flex flex-col gap-2 pl-4 text-sm text-muted-foreground list-disc marker:text-muted-foreground/70">
+          {copy.howToReadBullets.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </section>
 
       {data.reconcile.pendingTxCount > 0 && (
         <StatusAlert

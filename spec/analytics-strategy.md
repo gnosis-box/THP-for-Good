@@ -62,7 +62,7 @@ Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Goo
 | **On-chain BI** | **[Dune Analytics](https://dune.com/)** | CRC volume, split legs, treasury, public hackathon dashboard | **1** |
 | **Live chain reads** | **Circles RPC** + **Explorer** | Balances, trust state, tx detail, path viewer | **1** |
 | **Web analytics** | **[Umami](https://umami.is/)** | Pages, referrers, UX events (not CRC totals) | **1** |
-| **Admin UI** | **`/stats`** (public) | On-chain links + SQLite enrichment; not in public NAV | **1** |
+| **Admin UI** | **`/stats`** (public) | On-chain links + SQLite enrichment; in [`lib/nav.ts`](../lib/nav.ts) NAV | **1** |
 
 SQLite **`SUM(price_crc)` is deprecated as a KPI** — use only for “listed price” or reconciliation warnings when chain ≠ DB.
 
@@ -200,7 +200,7 @@ Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnos
 
 ## 7. Public `/stats` dashboard
 
-**Public** transparency page (not admin-gated). Linked from `/about` and `/admin`; **not** in [`lib/nav.ts`](../lib/nav.ts) NAV.
+**Public** transparency page (not admin-gated). In [`lib/nav.ts`](../lib/nav.ts) NAV as **Stats**; also linked from `/about` and `/admin`.
 
 ### Layout (implemented)
 

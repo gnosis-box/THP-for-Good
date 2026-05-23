@@ -76,8 +76,15 @@ export const UI_COPY = {
       'Remove your expert profile from the directory? You can register again later.',
   },
   stats: {
-    title: 'Transparency dashboard',
-    subtitle: 'On-chain activity and session snapshot for THP for Good.',
+    title: 'Stats',
+    subtitle: 'On-chain treasury and Circles activity, plus off-chain session metrics.',
+    howToReadTitle: 'How to read this dashboard',
+    howToReadBullets: [
+      'CRC transfers and volume — use the Circles Explorer links below; the authoritative source is on-chain, not summed in this app.',
+      'Treasury balance — live read from the Circles network (refreshed every few minutes).',
+      'Session counts and skills — from THP app records only; they are labelled separately and are not on-chain totals.',
+      'Booker wallet addresses are never shown here — only public explorer links and aggregates.',
+    ] as const,
     treasuryTitle: 'THP for Good treasury',
     treasuryBalance: 'CRC balance (on-chain)',
     treasuryBalanceUnavailable: 'Balance unavailable',
@@ -99,7 +106,6 @@ export const UI_COPY = {
       `${count} booking${count === 1 ? '' : 's'} awaiting on-chain confirmation (over 24h)`,
     loading: 'Loading stats…',
     loadError: 'Could not load stats. Try again later.',
-    explorerDisclaimer: 'CRC volume and transfers are verified on Circles Explorer — not summed here.',
   },
 } as const;
 
