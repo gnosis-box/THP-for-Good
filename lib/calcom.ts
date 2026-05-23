@@ -50,12 +50,6 @@ export async function createCalBooking(params: {
   txHash?: string;
 }): Promise<{ uid: string; meetingUrl?: string } | null> {
   const title = `[THP For Good] ${params.attendeeName} => ${params.mentorName}`;
-  const notes = [
-    params.txHash
-      ? `CRC payment tx: https://explorer.aboutcircles.com/tx/${params.txHash}/social-graph`
-      : 'CRC payment tx: pending',
-    'Need to reschedule or cancel? ( No refunds )',
-  ].join('\n');
 
   const res = await fetch(`${CAL_API}/bookings`, {
     method: 'POST',
@@ -69,9 +63,14 @@ export async function createCalBooking(params: {
       responses: {
         name: params.attendeeName,
         email: params.attendeeEmail,
-        notes,
       },
-      metadata: {},
+      metadata: {
+        thpTxHash: params.txHash ?? 'pending',
+        thpTxUrl: params.txHash
+          ? `https://explorer.aboutcircles.com/tx/${params.txHash}/social-graph`
+          : '',
+        thpNote: 'No refunds — payment confirmed on-chain.',
+      },
     }),
   });
 
