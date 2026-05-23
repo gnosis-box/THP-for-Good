@@ -18,7 +18,7 @@ import { buildExplorerTxUrl } from '@/lib/analytics-explorer';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { StatsApiResponse } from '@/lib/stats-api';
 import { WebAnalyticsPanel } from '@/components/stats/WebAnalyticsPanel';
-import { StatsExpertCard } from '@/components/stats/StatsExpertCard';
+import { MentorCard } from '@/components/mentors/MentorCard';
 import { ExternalLink } from 'lucide-react';
 
 function fmt(n: number) {
@@ -111,8 +111,13 @@ export function StatsDashboard() {
           <p className="text-center text-sm text-muted-foreground">{copy.expertsEmpty}</p>
         ) : (
           <ul className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2">
-            {data.experts.map((expert) => (
-              <StatsExpertCard key={expert.id} expert={expert} />
+            {data.experts.map(({ mentor, paidSessionCount }) => (
+              <li
+                key={mentor.id}
+                className="w-full min-w-0 overflow-hidden rounded-xl border border-border bg-card"
+              >
+                <MentorCard mentor={mentor} paidSessionCount={paidSessionCount} />
+              </li>
             ))}
           </ul>
         )}

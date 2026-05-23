@@ -1,4 +1,4 @@
-import type { StatsEnrichment, StatsReconcile } from '@/lib/db';
+import type { MentorRow, StatsEnrichment, StatsReconcile } from '@/lib/db';
 
 export type StatsTreasuryPayload = {
   address: string;
@@ -8,12 +8,8 @@ export type StatsTreasuryPayload = {
 };
 
 export type StatsExpertPayload = {
-  id: number;
-  name: string;
-  address: string;
+  mentor: MentorRow;
   paidSessionCount: number;
-  eventsUrl: string;
-  graphUrl: string;
 };
 
 export type WebAnalyticsPayload = {

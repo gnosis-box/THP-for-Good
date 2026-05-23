@@ -18,17 +18,10 @@ export async function GET() {
   const mentorRows = getAllMentors(undefined, false);
   const paidSessionCounts = getExpertPaidSessionCounts();
 
-  const experts = mentorRows.map((m) => {
-    const links = explorerLinksForAddress(m.circles_address);
-    return {
-      id: m.id,
-      name: m.name,
-      address: links.address,
-      paidSessionCount: paidSessionCounts.get(m.id) ?? 0,
-      eventsUrl: links.eventsUrl,
-      graphUrl: links.graphUrl,
-    };
-  });
+  const experts = mentorRows.map((m) => ({
+    mentor: m,
+    paidSessionCount: paidSessionCounts.get(m.id) ?? 0,
+  }));
 
   const [treasuryBalanceCrc, webAnalytics] = await Promise.all([
     fetchAvatarBalanceCrc(TREASURY_ORG_ADDRESS),
