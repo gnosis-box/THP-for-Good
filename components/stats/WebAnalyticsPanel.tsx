@@ -5,7 +5,7 @@ import {
   MetricsPanel,
   MetricsPanelTitle,
   StatCell,
-  StatGrid,
+  StatFlexGrid,
 } from '@/components/ui-patterns/metrics-panel';
 
 function fmtDurationMinutes(seconds: number): string {
@@ -21,11 +21,11 @@ export function WebAnalyticsPanel({ data }: { data: WebAnalyticsPayload }) {
   const copy = UI_COPY.stats;
 
   return (
-    <MetricsPanel>
+    <MetricsPanel className="gap-3 p-3 sm:gap-4 sm:p-4">
       <MetricsPanelTitle>{copy.umamiTitle}</MetricsPanelTitle>
 
       {!data.available ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2.5">
           <p className="text-center text-sm text-muted-foreground">{copy.webAnalyticsUnavailable}</p>
           <MetricsExternalLink href={data.dashboardUrl} fullWidth>
             {copy.viewPublicAnalyticsDashboard}
@@ -33,21 +33,23 @@ export function WebAnalyticsPanel({ data }: { data: WebAnalyticsPayload }) {
         </div>
       ) : (
         <>
-          <StatGrid columns={5}>
-            <StatCell label={copy.webAnalyticsVisitors} value={data.visitors ?? 0} />
-            <StatCell label={copy.webAnalyticsVisits} value={data.visits ?? 0} />
-            <StatCell label={copy.webAnalyticsViews} value={data.pageviews ?? 0} />
+          <StatFlexGrid>
+            <StatCell compact label={copy.webAnalyticsVisitors} value={data.visitors ?? 0} />
+            <StatCell compact label={copy.webAnalyticsVisits} value={data.visits ?? 0} />
+            <StatCell compact label={copy.webAnalyticsViews} value={data.pageviews ?? 0} />
             <StatCell
+              compact
               label={copy.webAnalyticsBounce}
               value={data.bounceRate != null ? fmtPercent(data.bounceRate) : '—'}
             />
             <StatCell
+              compact
               label={copy.webAnalyticsDuration}
               value={
                 data.avgVisitSeconds != null ? fmtDurationMinutes(data.avgVisitSeconds) : '—'
               }
             />
-          </StatGrid>
+          </StatFlexGrid>
 
           <MetricsExternalLink href={data.dashboardUrl} fullWidth>
             {copy.viewPublicAnalyticsDashboard}

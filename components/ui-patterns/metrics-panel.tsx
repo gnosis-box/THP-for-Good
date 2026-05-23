@@ -87,15 +87,25 @@ export function StatCell({
   label,
   value,
   className,
+  compact,
 }: {
   label: string;
   value: ReactNode;
   className?: string;
+  compact?: boolean;
 }) {
   return (
-    <div className={cn('flex flex-col items-center gap-1 text-center', className)}>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-lg font-semibold tabular-nums">{value}</p>
+    <div
+      className={cn(
+        'flex flex-col items-center text-center',
+        compact ? 'min-w-[4.25rem] flex-[1_1_4.25rem] gap-0.5' : 'gap-1',
+        className,
+      )}
+    >
+      <p className={cn('text-muted-foreground', compact ? 'text-[11px] leading-tight' : 'text-xs')}>
+        {label}
+      </p>
+      <p className={cn('font-semibold tabular-nums', compact ? 'text-base' : 'text-lg')}>{value}</p>
     </div>
   );
 }
@@ -118,6 +128,20 @@ export function StatGrid({
 }) {
   return (
     <div className={cn('grid gap-4', STAT_GRID_COLUMNS[columns], className)}>{children}</div>
+  );
+}
+
+/** Flex-wrap KPI row — keeps more metrics on one line on narrow viewports. */
+export function StatFlexGrid({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <div
+      className={cn(
+        'flex flex-wrap justify-center gap-x-1.5 gap-y-2 sm:gap-x-2 sm:gap-y-2.5',
+        className,
+      )}
+    >
+      {children}
+    </div>
   );
 }
 
