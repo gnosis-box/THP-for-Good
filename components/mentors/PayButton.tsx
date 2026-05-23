@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { BookingSuccessDialog } from '@/components/booking/BookingSuccessDialog';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { TrustPathPanel } from '@/components/booking/TrustPathPanel';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
@@ -75,6 +76,7 @@ export function PayButton({
   );
   const [bookerName, setBookerName] = useState<string | null>(null);
   const [state, setState] = useState<PayState>({ kind: 'idle' });
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!address) return;
@@ -149,6 +151,7 @@ export function PayButton({
         slotTime: selectedSlot,
         calendarEventUrl: booking.calendar_event_url ?? null,
       });
+      setSuccessDialogOpen(true);
       onSuccess?.();
     } catch (err) {
       const message = mapPayError(err);
@@ -157,129 +160,145 @@ export function PayButton({
     }
   }
 
-  if (state.kind === 'success') {
-    const calUrl = state.calendarEventUrl ?? mentor.calendar_link ?? null;
-
-    return (
-      <StatusAlert
-        variant="success"
-        title="Booking confirmed!"
-        description={
-          <div className="flex flex-col gap-3">
-            <p>{fmtSlot(state.slotTime)}</p>
-            <p>
-              {mentor.cal_event_type_id
-                ? 'A calendar invite has been sent to your email.'
-                : 'Complete scheduling using the expert calendar link below.'}
-            </p>
-            <p className="break-all font-mono text-xs">
-              Tx:{' '}
-              <a
-                href={`https://explorer.aboutcircles.com/tx/${state.hash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-trust underline underline-offset-2"
-              >
-                {state.hash.slice(0, 10)}…{state.hash.slice(-8)}
-              </a>
-            </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              {state.calendarEventUrl ? (
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="min-h-11"
-                  onClick={() =>
-                    window.open(state.calendarEventUrl!, '_blank', 'noopener,noreferrer')
-                  }
-                >
-                  {UI_COPY.booking.openCalBooking}
-                </Button>
-              ) : null}
-              {mentor.calendar_link ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="min-h-11"
-                  onClick={() => window.open(mentor.calendar_link, '_blank', 'noopener,noreferrer')}
-                >
-                  {UI_COPY.booking.openExpertCalendar}
-                </Button>
-              ) : null}
-              <Link
-                href="/calls"
-                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'min-h-11')}
-              >
-                {UI_COPY.booking.viewMyCalls}
-              </Link>
-            </div>
-            {calUrl ? null : (
-              <p className="text-xs text-muted-foreground">
-                Open your expert&apos;s calendar from My Calls once the invite arrives.
-              </p>
-            )}
-            <p className="text-sm text-muted-foreground">
-              {UI_COPY.booking.successTrustReminder(mentor.name)}
-            </p>
-          </div>
-        }
-      />
-    );
-  }
+  const success = state.kind === 'success' ? state : null;
+  const calUrl = success?.calendarEventUrl ?? mentor.calendar_link ?? null;
 
   return (
-    <div className="flex flex-col gap-3">
-      {!compact && (
-        <TrustPathPanel
-          trustEligible={trustEligible}
-          expertLegCrc={expertLegCrc}
-          treasuryLegCrc={treasuryLegCrc}
+    <>
+      {success ? (
+        <BookingSuccessDialog
+          open={successDialogOpen}
+          onOpenChange={setSuccessDialogOpen}
           mentorName={mentor.name}
-          priceCrc={mentor.price_crc}
+          slotLabel={fmtSlot(success.slotTime)}
+          txHash={success.hash}
+          calendarEventUrl={success.calendarEventUrl}
+          calendarLink={mentor.calendar_link}
+          calInviteSent={!!mentor.cal_event_type_id}
         />
-      )}
-      <PaymentSummary
-        balance={balance}
-        sharePercent={sharePercent}
-        email={email}
-        onEmailChange={onEmailChange}
-        showEmail={showEmail}
-      />
-      {balance.status === 'not-registered' && (
+      ) : null}
+
+      {success && !successDialogOpen ? (
         <StatusAlert
-          variant="warning"
-          title="Wallet not registered"
-          description="Your wallet is not a registered Circles avatar. Open the app in the Circles playground to pay with CRC."
+          variant="success"
+          title="Booking confirmed!"
+          description={
+            <div className="flex flex-col gap-3">
+              <p>{fmtSlot(success.slotTime)}</p>
+              <p>
+                {mentor.cal_event_type_id
+                  ? 'A calendar invite has been sent to your email.'
+                  : 'Complete scheduling using the expert calendar link below.'}
+              </p>
+              <p className="break-all font-mono text-xs">
+                Tx:{' '}
+                <a
+                  href={`https://explorer.aboutcircles.com/tx/${success.hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-trust underline underline-offset-2"
+                >
+                  {success.hash.slice(0, 10)}…{success.hash.slice(-8)}
+                </a>
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                {success.calendarEventUrl ? (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="min-h-11"
+                    onClick={() =>
+                      window.open(success.calendarEventUrl!, '_blank', 'noopener,noreferrer')
+                    }
+                  >
+                    {UI_COPY.booking.openCalBooking}
+                  </Button>
+                ) : null}
+                {mentor.calendar_link ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="min-h-11"
+                    onClick={() => window.open(mentor.calendar_link, '_blank', 'noopener,noreferrer')}
+                  >
+                    {UI_COPY.booking.openExpertCalendar}
+                  </Button>
+                ) : null}
+                <Link
+                  href="/calls?tab=emitted"
+                  className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'min-h-11')}
+                >
+                  {UI_COPY.booking.viewMyCalls}
+                </Link>
+              </div>
+              {calUrl ? null : (
+                <p className="text-xs text-muted-foreground">
+                  Open your expert&apos;s calendar from My Calls once the invite arrives.
+                </p>
+              )}
+              <p className="text-sm text-muted-foreground">
+                {UI_COPY.booking.successTrustReminder(mentor.name)}
+              </p>
+            </div>
+          }
         />
+      ) : success ? null : (
+        <div className="flex flex-col gap-3">
+          {!compact && (
+            <TrustPathPanel
+              trustEligible={trustEligible}
+              expertLegCrc={expertLegCrc}
+              treasuryLegCrc={treasuryLegCrc}
+              mentorName={mentor.name}
+              priceCrc={mentor.price_crc}
+            />
+          )}
+          <PaymentSummary
+            balance={balance}
+            sharePercent={sharePercent}
+            email={email}
+            onEmailChange={onEmailChange}
+            showEmail={showEmail}
+          />
+          {balance.status === 'not-registered' && (
+            <StatusAlert
+              variant="warning"
+              title="Wallet not registered"
+              description="Your wallet is not a registered Circles avatar. Open the app in the Circles playground to pay with CRC."
+            />
+          )}
+          {insufficientBalance && (
+            <p className="text-sm text-destructive">
+              You need at least {mentor.price_crc} CRC to book this call.
+            </p>
+          )}
+          <Button disabled={!canPay} onClick={handlePay} size="lg" className="min-h-11 w-full">
+            {state.kind === 'loading' ? (
+              <>
+                <Spinner className="mr-2" />
+                Processing…
+              </>
+            ) : (
+              `Pay ${mentor.price_crc} CRC to book`
+            )}
+          </Button>
+          {!selectedSlot && (
+            <p className="text-center text-xs text-muted-foreground">
+              {UI_COPY.booking.selectSlotFirst}
+            </p>
+          )}
+          {isSelf && (
+            <p className="text-center text-xs text-muted-foreground">
+              You can&apos;t book your own session.
+            </p>
+          )}
+          {!isConnected && (
+            <p className="text-center text-xs text-muted-foreground">
+              Connect your wallet to book a session.
+            </p>
+          )}
+        </div>
       )}
-      {insufficientBalance && (
-        <p className="text-sm text-destructive">
-          You need at least {mentor.price_crc} CRC to book this call.
-        </p>
-      )}
-      <Button disabled={!canPay} onClick={handlePay} size="lg" className="min-h-11 w-full">
-        {state.kind === 'loading' ? (
-          <>
-            <Spinner className="mr-2" />
-            Processing…
-          </>
-        ) : (
-          `Pay ${mentor.price_crc} CRC to book`
-        )}
-      </Button>
-      {!selectedSlot && (
-        <p className="text-center text-xs text-muted-foreground">{UI_COPY.booking.selectSlotFirst}</p>
-      )}
-      {isSelf && (
-        <p className="text-center text-xs text-muted-foreground">
-          You can&apos;t book your own session.
-        </p>
-      )}
-      {!isConnected && (
-        <p className="text-center text-xs text-muted-foreground">
-          Connect your wallet to book a session.
-        </p>
-      )}
-    </div>
+    </>
   );
 }

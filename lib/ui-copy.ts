@@ -28,6 +28,13 @@ export const UI_COPY = {
     selectSlotFirst: 'Select a slot above first.',
     successTrustReminder: (expertName: string) =>
       `After your call, trust ${expertName} on My Calls to strengthen the Circles network.`,
+    successDialogTitle: 'Booking confirmed!',
+    successDialogSubtitle: (expertName: string) =>
+      `Your session with ${expertName} is booked and paid in CRC.`,
+    successDialogCalEmail: 'A calendar invite has been sent to your email.',
+    successDialogCalManual: 'Use the calendar link below or from My Calls when ready.',
+    successDialogViewCalls: 'View in My Calls (Emitted)',
+    successDialogStay: 'Stay on this page',
     viewMyCalls: 'View my calls',
     openCalBooking: 'Open Cal.com booking',
     openExpertCalendar: 'Open expert calendar',
