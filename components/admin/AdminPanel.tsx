@@ -5,9 +5,10 @@ import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
 import { toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
 import { PromoteSection } from './PromoteSection';
+import { PlatformHealthSection } from './PlatformHealthSection';
 import { MentorEditForm } from '@/components/mentors/MentorEditForm';
 import type { GroupMemberDto } from '@/lib/admin';
-import type { MentorRow, TagRow, AdminRow } from '@/lib/db';
+import type { AdminHealthStats, MentorRow, TagRow, AdminRow } from '@/lib/db';
 
 export function AdminPanel() {
   const { address, isConnected } = useWallet();
@@ -17,6 +18,7 @@ export function AdminPanel() {
   const [mentors, setMentors] = useState<MentorRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
   const [dbAdmins, setDbAdmins] = useState<AdminRow[]>([]);
+  const [health, setHealth] = useState<AdminHealthStats | null>(null);
   const [groupMembers, setGroupMembers] = useState<GroupMemberDto[]>([]);
   const [membersError, setMembersError] = useState<string | null>(null);
   type AdminProfile = { name: string; imageUrl?: string; trustsReceivedCount: number; score: number | null };
@@ -53,10 +55,11 @@ export function AdminPanel() {
 
       if (!admin) return;
 
-      const [mRes, tRes, aRes, memRes] = await Promise.all([
+      const [mRes, tRes, aRes, hRes, memRes] = await Promise.all([
         fetch('/api/mentors?all=1', { headers: hdrs }),
         fetch('/api/tags', { headers: hdrs }),
         fetch('/api/admin/admins', { headers: hdrs }),
+        fetch('/api/admin/health', { headers: hdrs }),
         ga
           ? fetch(`/api/admin/members?group=${encodeURIComponent(ga)}`, { headers: hdrs })
           : Promise.resolve(null),
@@ -66,6 +69,11 @@ export function AdminPanel() {
       setMentors(Array.isArray(mentorsJson) ? mentorsJson : []);
       setTags(await tRes.json());
       setDbAdmins(await aRes.json());
+      if (hRes.ok) {
+        setHealth((await hRes.json()) as AdminHealthStats);
+      } else {
+        setHealth(null);
+      }
 
       if (memRes) {
         const memJson = (await memRes.json()) as { members?: GroupMemberDto[]; error?: string };
@@ -176,6 +184,8 @@ export function AdminPanel() {
 
   return (
     <div className="flex flex-col gap-10">
+      {health ? <PlatformHealthSection stats={health} /> : null}
+
       {/* Tags */}
       <section className="flex flex-col gap-4">
         <h2 className="text-base font-semibold">Skill Tags</h2>

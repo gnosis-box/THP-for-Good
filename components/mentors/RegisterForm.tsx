@@ -18,6 +18,7 @@ import type { MentorRow, TagRow } from '@/lib/db';
 import { CalConnect } from '@/components/mentors/CalConnect';
 import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
 import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPicker';
+import { defaultCallLanguagesFromSpoken, filterCallLanguageCodes } from '@/lib/languages';
 import { LanguagePicker } from '@/components/mentors/LanguagePicker';
 import { StopExpertButton } from '@/components/mentors/StopExpertButton';
 import { UI_COPY } from '@/lib/ui-copy';
@@ -85,7 +86,9 @@ export function RegisterForm() {
         setSelectedSkills(mentor.skills);
         setSpokenLanguages(mentor.spoken_languages);
         setCallLanguages(
-          mentor.call_languages.length > 0 ? mentor.call_languages : mentor.spoken_languages,
+          mentor.call_languages.length > 0
+            ? filterCallLanguageCodes(mentor.call_languages)
+            : defaultCallLanguagesFromSpoken(mentor.spoken_languages),
         );
       })
       .catch(() => {
@@ -143,7 +146,10 @@ export function RegisterForm() {
         mentor_share_percent: mentorShare,
         skills: selectedSkills,
         spoken_languages: spokenLanguages,
-        call_languages: callLanguages.length > 0 ? callLanguages : spokenLanguages,
+        call_languages:
+          callLanguages.length > 0
+            ? filterCallLanguageCodes(callLanguages)
+            : defaultCallLanguagesFromSpoken(spokenLanguages),
       };
 
       if (isEditMode && existingMentor) {

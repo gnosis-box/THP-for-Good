@@ -1,4 +1,4 @@
-/** Curated ISO 639-1 session languages (FEAT-L4-07). */
+/** Spoken languages an expert may declare (FEAT-L4-07). */
 export const SESSION_LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'fr', label: 'French' },
@@ -9,9 +9,26 @@ export const SESSION_LANGUAGES = [
   { code: 'nl', label: 'Dutch' },
 ] as const;
 
+/** Languages offered for paid sessions — English and French only. */
+export const CALL_LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'French' },
+] as const;
+
 export type SessionLanguageCode = (typeof SESSION_LANGUAGES)[number]['code'];
+export type CallLanguageCode = (typeof CALL_LANGUAGES)[number]['code'];
 
 const VALID_CODES = new Set<string>(SESSION_LANGUAGES.map((l) => l.code));
+const VALID_CALL_CODES = new Set<string>(CALL_LANGUAGES.map((l) => l.code));
+
+export function filterCallLanguageCodes(codes: string[]): string[] {
+  return codes.map((c) => c.toLowerCase()).filter((c) => VALID_CALL_CODES.has(c));
+}
+
+/** Default call languages when none selected: spoken ∩ {en, fr}. */
+export function defaultCallLanguagesFromSpoken(spoken: string[]): string[] {
+  return filterCallLanguageCodes(spoken);
+}
 
 export function parseLanguageCodes(raw: string | null | undefined): string[] {
   if (!raw?.trim()) return [];
@@ -23,6 +40,15 @@ export function parseLanguageCodes(raw: string | null | undefined): string[] {
 
 export function serializeLanguageCodes(codes: string[]): string | null {
   const unique = [...new Set(codes.map((c) => c.toLowerCase()).filter((c) => VALID_CODES.has(c)))];
+  return unique.length > 0 ? unique.join(',') : null;
+}
+
+export function parseCallLanguageCodes(raw: string | null | undefined): string[] {
+  return filterCallLanguageCodes(parseLanguageCodes(raw));
+}
+
+export function serializeCallLanguageCodes(codes: string[]): string | null {
+  const unique = [...new Set(filterCallLanguageCodes(codes))];
   return unique.length > 0 ? unique.join(',') : null;
 }
 
@@ -43,16 +69,16 @@ export function normalizeMentorLanguages(
 
   let call: string[];
   if (callInput === undefined || (Array.isArray(callInput) && callInput.length === 0)) {
-    call = [...spoken];
+    call = defaultCallLanguagesFromSpoken(spoken);
   } else {
     if (!Array.isArray(callInput) || !callInput.every((c) => typeof c === 'string')) {
       return { error: 'call_languages must be an array of language codes' };
     }
-    call = callInput.map((c) => c.toLowerCase()).filter((c) => VALID_CODES.has(c));
+    call = filterCallLanguageCodes(callInput);
   }
 
   if (call.some((c) => !spoken.includes(c))) {
-    return { error: 'Every call language must also be a spoken language' };
+    return { error: 'Every call language must also be a spoken language (English or French only)' };
   }
 
   return {
