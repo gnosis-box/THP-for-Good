@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "tsx scripts/seed.ts && next start",
+    "start": "tsx scripts/seed.ts && node server.js",
+    "start:next-dev-server": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts"
   },

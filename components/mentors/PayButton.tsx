@@ -114,6 +114,14 @@ export function PayButton({
     setState({ kind: 'loading' });
 
     try {
+      const slotRes = await fetch(`/api/mentors/${mentor.id}/availability`);
+      if (slotRes.ok) {
+        const openSlots = (await slotRes.json()) as string[];
+        if (Array.isArray(openSlots) && !openSlots.includes(selectedSlot)) {
+          throw new Error('This time slot is no longer available. Please pick another one.');
+        }
+      }
+
       const { sendTransactions } = await import('@aboutcircles/miniapp-sdk');
       const txs = await buildSplitPayTransactions(
         address as `0x${string}`,
@@ -138,7 +146,11 @@ export function PayButton({
       });
 
       if (!bookingRes.ok) {
-        throw new Error('Payment succeeded but booking could not be saved. Check My Calls or contact support.');
+        const detail = (await bookingRes.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(
+          detail?.error ??
+            'Payment succeeded but booking could not be saved. Check My Calls or contact support.',
+        );
       }
 
       const booking = (await bookingRes.json()) as {
