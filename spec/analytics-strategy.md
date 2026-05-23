@@ -3,260 +3,286 @@
 Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Good/issues/61).  
 **Status:** draft — pending `DIV-L4-03` tool choices and `IMPL-L4-*` breakdown.
 
+**Core principle:** CRC volume, payment splits, treasury inflows, and TRUST edges are **on-chain facts**. SQLite and Umami add **context** (who booked whom, which skill, UX funnel) — they must not be the source of truth for money metrics.
+
 ---
 
 ## 1. Goals
 
 | Audience | Needs |
 |----------|--------|
-| **Foundation / admin** | Bookings, CRC volume, split expert vs THP treasury, active experts, tag usage, TRUST completion |
-| **Experts** (optional v2) | Sessions received, CRC earned (expert leg), trust received |
-| **Product** | Funnel browse → profile → PAY → calendar → TRUST; drop-offs; device / referrer |
-| **Hackathon / Gnosis** | Public proof of on-chain activity (treasury org `0xc02D…`) |
-
-No single tool covers all layers. This doc defines a **hybrid stack** with **[Umami](https://umami.is/)** as the default **web / product analytics** layer.
+| **Foundation / admin** | **On-chain** CRC volume, expert vs treasury legs, treasury org balance, trust graph growth |
+| **Experts** (optional v2) | **On-chain** CRC received, trusts received (`trustStats`) |
+| **Product** | Funnel browse → PAY → TRUST (Umami); off-chain booking intent vs confirmed txs |
+| **Hackathon / Gnosis** | Public, verifiable dashboards — Dune + Circles explorer |
 
 ---
 
-## 2. Metric families
+## 2. Source-of-truth model
 
 ```
-┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
-│  Business KPIs   │   │  Product / UX    │   │  On-chain        │
-│  (SQLite)        │   │  (Umami)         │   │  (Dune + RPC)    │
-├──────────────────┤   ├──────────────────┤   ├──────────────────┤
-│ bookings count   │   │ page views       │   │ CRC to treasury  │
-│ CRC totals       │   │ unique visitors  │   │ tx from bookings │
-│ split legs       │   │ custom events    │   │ trust txs        │
-│ mentors active   │   │ referrers        │   │                  │
-│ trust_attestations│  │ bounce / time    │   │                  │
-└────────┬─────────┘   └────────┬─────────┘   └────────┬─────────┘
-         │                      │                      │
-         ▼                      ▼                      ▼
-   /admin/stats            Umami dashboard         Dune dashboard
-   (in-app)                (self-hosted)           (public optional)
+                    ┌─────────────────────────────────────┐
+                    │     ON-CHAIN (primary)              │
+                    │  Dune · Circles RPC · Explorer      │
+                    ├─────────────────────────────────────┤
+                    │ CRC transferred (per tx / leg)      │
+                    │ Split: expert avatar + org 0xc02D…  │
+                    │ TrustRelations (trust.add)          │
+                    │ Treasury / org CRC balance            │
+                    │ Donations → FOUNDATION_ADDRESS      │
+                    └──────────────┬──────────────────────┘
+                                   │ enrich via tx_hash
+                    ┌──────────────▼──────────────────────┐
+                    │     OFF-CHAIN (secondary)           │
+                    │  SQLite · Umami                     │
+                    ├─────────────────────────────────────┤
+                    │ mentor_id, skills, slot_label       │
+                    │ booker_address (link only)            │
+                    │ page views, pay_drawer_open, etc.   │
+                    └─────────────────────────────────────┘
 ```
+
+| Metric type | Primary source | Secondary (enrichment) |
+|-------------|----------------|------------------------|
+| **CRC volume** | On-chain transfers | SQLite `bookings.tx_hash` → join |
+| **Expert vs THP split** | Decode split legs from tx batch | `mentor_share_percent` for expected vs actual |
+| **TRUST edges** | `TrustRelations` (Circles RPC / Dune) | `trust_attestations` audit row |
+| **Treasury balance** | Org avatar `getProfileView` / RPC | — |
+| **Booking count (paid)** | Count distinct `tx_hash` on-chain | SQLite rows with non-null `tx_hash` |
+| **Top experts by CRC** | Aggregate transfers **to** expert addresses | Map address → `mentors` table |
+| **Tags / skills** | — | SQLite only |
+| **Page funnel** | — | Umami only |
 
 ---
 
-## 3. Recommended stack (default proposal)
+## 3. Recommended stack
 
 | Layer | Tool | Role | Phase |
 |-------|------|------|-------|
-| **Web analytics** | **[Umami](https://umami.is/)** | Privacy-focused page views, referrers, custom events | **1** |
-| **Business BI** | **In-app `/admin/stats`** | SQL aggregations on `bookings`, `mentors`, `trust_attestations` | **1** |
-| **On-chain proof** | **Dune Analytics** | Gnosis Chain queries on treasury org + booking `tx_hash` | **2** |
-| **Deep product** | PostHog (optional) | Session funnels, flags — only if Umami + events insufficient | **3** |
-| **Ad-hoc BI** | Metabase (optional) | SQL exploration for non-dev admins | **3** |
-| **Ops** | Grafana (existing homelab) | HTTP errors, latency, uptime — not business KPIs | parallel |
+| **On-chain BI** | **[Dune Analytics](https://dune.com/)** | CRC volume, split legs, treasury, public hackathon dashboard | **1** |
+| **Live chain reads** | **Circles RPC** + **Explorer** | Balances, trust state, tx detail, path viewer | **1** |
+| **Web analytics** | **[Umami](https://umami.is/)** | Pages, referrers, UX events (not CRC totals) | **1** |
+| **Admin UI** | **`/admin/stats`** | Embeds / proxies on-chain KPIs + SQLite enrichment | **1** |
+| **Deep product** | PostHog (optional) | Only if Umami insufficient | **3** |
+| **Ops** | Grafana (homelab) | Uptime, 5xx — not CRC | parallel |
 
-### Why Umami for web analytics
-
-[Umami](https://umami.is/) is an **open-source, privacy-focused** analytics product:
-
-- **Self-hostable** on Coolify (Docker) — fits THP deploy model ([`spec/deploy.md`](deploy.md)).
-- **Lightweight** tracker (~2 KB); no heavy cookie banners for basic EU-friendly use.
-- **Custom events** — e.g. `pay_started`, `pay_success`, `trust_clicked` without a full product-analytics suite.
-- **Simple dashboards** — pages, referrers, devices, countries, event counts.
-- **Website data stays on your infrastructure** when self-hosted (Postgres backend).
-
-**Alternatives considered**
-
-| Tool | vs Umami |
-|------|----------|
-| [Plausible](https://plausible.io/) | Similar privacy model; often SaaS-first; Umami is fully OSS self-host |
-| Google Analytics | Free but privacy / iframe / GDPR friction; poor fit for Circles community |
-| PostHog | Richer funnels & replay; heavier self-host (Postgres + ClickHouse); defer to Phase 3 |
-| Vercel Analytics | Not applicable — app runs on Coolify, not Vercel |
+SQLite **`SUM(price_crc)` is deprecated as a KPI** — use only for “listed price” or reconciliation warnings when chain ≠ DB.
 
 ---
 
-## 4. Tool comparison matrix
+## 4. On-chain data sources
 
-| Capability | In-app stats | Umami | Dune | PostHog | Metabase |
-|------------|:------------:|:-----:|:----:|:-------:|:--------:|
-| Bookings / CRC from DB | ✅ | — | — | — | ✅ |
-| Split expert / treasury | ✅ | — | partial | — | ✅ |
-| Page / route traffic | — | ✅ | — | ✅ | — |
-| Custom UX events | partial | ✅ | — | ✅ | — |
-| On-chain CRC proof | — | — | ✅ | — | — |
-| Self-host on Coolify | ✅ | ✅ | — | ⚠️ heavy | ✅ |
-| Admin-only / no extra login | ✅ | separate | public opt | separate | separate |
-| Wallet addresses in metrics | ✅ controlled | ⚠️ avoid PII | public chain | hash only | ✅ |
+### 4.1 Addresses to index
 
----
+| Role | Address | Analytics use |
+|------|---------|---------------|
+| **Treasury org (PAY leg)** | `0xc02D5aaCA64dE428D571dA42538232C431E0CDeD` | Inbound CRC from split PAY + donations ([`FOUNDATION_ADDRESS`](../lib/crc-pay.ts)) |
+| **THP Circles group** | `0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00` | Membership, group policy ([`useful-links.md`](useful-links.md)) |
+| **Expert avatars** | `mentors.circles_address` | Per-expert inbound CRC from bookings |
 
-## 5. Umami — integration plan
+### 4.2 Tools & endpoints
 
-### 5.1 Deployment (Coolify)
+| Tool | URL | Use for |
+|------|-----|---------|
+| **Dune — Gnosis overview** | https://dune.com/gnosischain_team/gnosis-app-overview | Starting queries, ecosystem patterns |
+| **Circles explorer (tx)** | https://explorer.aboutcircles.com/tx/{hash} | Already linked from `/calls` (`tx_hash`) |
+| **Circles explorer (avatar)** | https://explorer.aboutcircles.com/avatar/{address}/graph | Trust graph, CRC flow per expert/org |
+| **Circles RPC** | https://rpc.aboutcircles.com/ | `circles_query` → `V_Crc.TrustRelations`, profile views |
+| **Trust path viewer** | https://data.aboutcircles.com/path-viewer | Path capacity / trust-bound transfers |
+| **Flow visualization** | https://flow-viz-bm3ge.ondigitalocean.app/flow-visualization/ | CRC flow diagrams (reference UX) |
+| **Group checker** | https://aboutcircles.github.io/CirclesTools/groupChecker.html | Verify group treasury / fee config |
+| **GnosisScan** | https://gnosisscan.io/ | Raw L2 txs if Circles indexer lags |
 
-1. Deploy Umami from official Docker image ([Umami docs](https://umami.is/docs)).
-2. Backend: **PostgreSQL** (dedicated service on Coolify — do not share SQLite with THP app).
-3. Hostname example: `https://analytics.thp.gnosis.box` (or internal LAN + Cloudflare tunnel).
-4. Create site **“THP for Good — dev”** and **“THP for Good — prod”** with separate website IDs.
+### 4.3 What each PAY stores today
 
-### 5.2 Next.js app wiring
+[`buildSplitPayTransactions`](../lib/crc-pay.ts) emits **one `sendTransactions` batch** with up to two legs:
 
-Environment variables (add to `.env.example` when implementing):
+1. `constructAdvancedTransfer(from → FOUNDATION_ADDRESS, foundationWei)`
+2. `constructAdvancedTransfer(from → mentor, mentorWei)` (if share > 0)
 
-```bash
-# Umami — omit in local dev to disable tracking
-NEXT_PUBLIC_UMAMI_WEBSITE_ID=<uuid-from-umami-dashboard>
-NEXT_PUBLIC_UMAMI_SCRIPT_URL=https://analytics.thp.gnosis.box/script.js
+[`PayButton`](../components/mentors/PayButton.tsx) persists **`bookings.tx_hash`** — the join key between app and chain.
+
+**Dune strategy:** index transfers where `from` = booker Safes and `to` ∈ {`0xc02D…`, expert addresses from a Dune dimension table synced from `mentors.circles_address`}.
+
+### 4.4 TRUST on-chain
+
+| Signal | Source |
+|--------|--------|
+| Trust edge booker → expert | `circles_query` / Dune on `TrustRelations` |
+| Trust tx hash (optional) | Extend `POST /api/trust` to store `trust_tx_hash` ([`schema.sql`](../lib/schema.sql) column exists) |
+| Mutual / two-way | Bidirectional query (same as [`TrustButton`](../components/bookings/TrustButton.tsx)) |
+
+### 4.5 Server-side chain reads (in-app)
+
+For `/admin/stats` without waiting on Dune refresh:
+
+```ts
+// Pattern: enrich booking rows from chain
+for (const b of bookingsWithTxHash) {
+  // Circles explorer API or RPC — decode transfer amounts per leg
+  // Compare to mentors.price_crc + mentor_share_percent
+}
 ```
 
-Integration options:
-
-| Approach | Notes |
-|----------|--------|
-| **`<Script>` in `app/layout.tsx`** | Minimal; load only when env vars set |
-| **`@umami/next` package** | Typed `track()` helper if we adopt the official Next helper |
-
-**Do not track in development** unless explicitly testing — gate on `NEXT_PUBLIC_UMAMI_WEBSITE_ID`.
-
-### 5.3 Custom events (product funnel)
-
-| Event name | Trigger | Properties (no raw wallet) |
-|------------|---------|----------------------------|
-| `expert_view` | `/mentor/[id]` mount | `mentor_id` |
-| `pay_drawer_open` | PayButton opens drawer | `mentor_id`, `price_crc` |
-| `pay_success` | Tx confirmed | `mentor_id`, `amount_crc` |
-| `pay_failed` | Toast insufficient CRC / tx error | `reason` enum |
-| `trust_click` | TrustButton on `/calls` | `booking_id` |
-| `register_submit` | Expert profile saved | `is_edit` boolean |
-
-Use **`mentor_id` / `booking_id`**, not `circles_address`, in Umami payloads.
-
-### 5.4 Circles iframe caveat
-
-When the app runs inside [Circles playground](https://circles.gnosis.io/playground), the parent frame is `circles.gnosis.io`. Umami still records page URL of the **embedded app origin** (`dev.thp.gnosis.box`) if the script runs inside the iframe — verify in staging:
-
-- Referrer may show `circles.gnosis.io` → useful signal (“miniapp vs standalone”).
-- If CSP blocks third-party scripts, host Umami on same site path (reverse proxy `/umami` → Umami) or allowlist in `next.config.ts`.
-
-### 5.5 Privacy checklist
-
-- [ ] Self-hosted Umami; no data sent to Umami Cloud unless explicitly chosen.
-- [ ] No wallet addresses in event properties.
-- [ ] Optional: anonymize IP in Umami settings.
-- [ ] Document in `/about` or privacy note: “We use privacy-friendly analytics (Umami) on our own server.”
+Cache results (5–15 min TTL) to avoid hammering RPC. Long-term: **materialized view** fed by Dune API or nightly indexer job.
 
 ---
 
-## 6. In-app `/admin/stats` (business layer)
+## 5. Dune — primary financial dashboard
 
-Admin-gated route extending existing [`/admin`](../app/admin/page.tsx) pattern ([DIV-L1-07](https://github.com/gnosis-box/THP-for-Good/issues/15)).
+**Phase 1 deliverable** (not Phase 2): public dashboard **“THP for Good — on-chain activity”**.
 
-### 6.1 API
+### Suggested queries / widgets
 
-`GET /api/admin/stats?from=&to=` — `isAdminRequest()` only.
+| Widget | On-chain logic |
+|--------|----------------|
+| **Total CRC to treasury org** | Sum transfers → `0xc02D…` over time |
+| **CRC to experts** | Sum transfers → known mentor addresses |
+| **Split ratio (actual)** | Expert leg / (expert + treasury) per tx or aggregate |
+| **Paid sessions (tx count)** | Distinct txs matching split-pay pattern from bookers |
+| **Donations** | Transfers → org excluding known booking batch pattern |
+| **Trust edges created** | New `TrustRelations` where trustee ∈ experts |
+| **Top experts by CRC received** | Group by `to` address, join names off-chain |
 
-Suggested SQL aggregates ([`lib/schema.sql`](../lib/schema.sql)):
+### Off-chain join (optional Dune spell)
 
-| Metric | Source |
-|--------|--------|
-| Total bookings | `COUNT(*)` on `bookings` |
-| CRC volume | `SUM(mentors.price_crc)` joined on `mentor_id` |
-| Expert leg / treasury leg | computed from `mentors.mentor_share_percent` + price |
-| Bookings over time | `GROUP BY date(created_at)` |
-| Top experts by bookings | `GROUP BY mentor_id` |
-| Active experts | `mentors.active = 1` |
-| TRUST recorded | `COUNT(*)` on `trust_attestations` |
-| Tag popularity | join `mentor_skills` + `skill_tags` |
+Export `mentors(circles_address, name)` as Dune **seed CSV** or API upload — maps addresses to human-readable expert names on dashboards.
 
-### 6.2 UI
-
-- Reuse shadcn **`chart`** ([`spec/UI-SHADCN-INVENTORY.md`](UI-SHADCN-INVENTORY.md) — deferred for MVP, enabled here).
-- Cards: totals + line chart (bookings/day) + bar chart (top tags / experts).
-- Export CSV button (optional Phase 1b).
-
-### 6.3 Expert self-service (Phase 2)
-
-Filtered stats where `mentors.circles_address = wallet` — separate route or tab, not mixed with foundation admin view.
+Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnosis-app-overview).
 
 ---
 
-## 7. On-chain analytics (Dune)
+## 6. Umami — UX layer only
 
-Complement app DB with chain truth:
+[Umami](https://umami.is/) tracks **behaviour**, not money:
 
-- Treasury org: `0xc02D5aaCA64dE428D571dA42538232C431E0CDeD` ([`lib/crc-pay.ts`](../lib/crc-pay.ts)).
-- Join off-chain: export `bookings.tx_hash` periodically or query known contract patterns.
+- Self-host on Coolify ([Umami docs](https://umami.is/docs)), Postgres backend.
+- Env: `NEXT_PUBLIC_UMAMI_WEBSITE_ID`, `NEXT_PUBLIC_UMAMI_SCRIPT_URL`.
+- **Do not** send CRC amounts as authoritative metrics in Umami — use `pay_success` as **event count** only; financial truth stays on-chain.
 
-Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnosis-app-overview) ([`useful-links.md`](useful-links.md)).
+| Event | Purpose |
+|-------|---------|
+| `expert_view` | Funnel top |
+| `pay_drawer_open` | Intent |
+| `pay_success` | UX conversion (correlate count with on-chain tx count) |
+| `trust_click` | UX (compare to new TrustRelations) |
 
-**Deliverable:** one public dashboard “THP for Good — treasury & activity” for hackathon demos.
+See § 5 in previous draft for deployment / iframe / privacy checklist — unchanged.
 
 ---
 
-## 8. Phased roadmap
+## 7. In-app `/admin/stats` — hybrid dashboard
 
-### Phase 1 — Hackathon-ready
+Admin-gated ([DIV-L1-07](https://github.com/gnosis-box/THP-for-Good/issues/15)).
 
-| Task | Issue type | Output |
-|------|------------|--------|
-| Umami on Coolify + script in layout | `IMPL-L4-03a` | Live traffic on dev/prod |
-| Umami custom events (PAY, TRUST) | `IMPL-L4-03b` | Funnel events in Umami |
-| `/admin/stats` + API | `IMPL-L4-03c` | Business KPIs in app |
+### Layout (proposed)
 
-### Phase 2 — Post-hackathon
+| Panel | Source |
+|-------|--------|
+| **CRC volume (chain)** | Dune embed iframe **or** `GET /api/admin/stats/onchain` (RPC/cache) |
+| **Treasury org balance** | `getProfileView(FOUNDATION_ADDRESS).v2Balance` |
+| **Recent PAY txs** | List `bookings` where `tx_hash` set → link to Circles explorer |
+| **Reconciliation alert** | SQLite booking without `tx_hash` > 24h, or chain amount ≠ listed price |
+| **Tags / active experts** | SQLite only |
+| **Umami snapshot** | Link out to Umami dashboard (or iframe if auth allows) |
+
+### API sketch
+
+| Route | Source |
+|-------|--------|
+| `GET /api/admin/stats/onchain?from=&to=` | RPC + optional Dune API |
+| `GET /api/admin/stats/enrichment` | SQLite tags, mentors, booking metadata |
+| `GET /api/admin/stats/reconcile` | Diff chain vs DB |
+
+**No `SUM(price_crc)` in API responses** unless labeled `"listed price (off-chain)"`.
+
+---
+
+## 8. Tool comparison (revised)
+
+| Capability | On-chain (Dune/RPC) | SQLite | Umami |
+|------------|:-------------------:|:------:|:-----:|
+| CRC volume (truth) | ✅ primary | ⚠️ reconcile only | — |
+| Split expert / treasury | ✅ | expected % only | — |
+| Trust edges | ✅ | audit | — |
+| Treasury balance | ✅ | — | — |
+| Expert name / skills | join | ✅ | — |
+| Page funnel | — | — | ✅ |
+| Public verifiable dashboard | ✅ Dune | — | — |
+
+---
+
+## 9. Phased roadmap
+
+### Phase 1 — Hackathon-ready (on-chain first)
 
 | Task | Output |
 |------|--------|
-| Dune dashboard | On-chain CRC proof |
-| Expert stats tab | Self-service for experts |
-| CSV export / weekly email | Foundation reporting |
+| **Dune dashboard** THP for Good | Public CRC / treasury / expert transfers |
+| Dune seed: expert addresses | Named widgets |
+| `/admin/stats` on-chain panel | RPC balance + tx list + Dune embed |
+| Reconciliation job | Flag DB vs chain mismatches |
+| Umami deploy + events | UX funnel only |
 
-### Phase 3 — If scale demands
+### Phase 2
 
 | Task | Output |
 |------|--------|
-| PostHog OR Metabase | Deeper funnels or ad-hoc BI |
-| Correlate Umami events + SQLite booking IDs | Single funnel truth |
+| Store `trust_tx_hash` on attest | Full TRUST audit trail |
+| Expert self-service stats | On-chain CRC to their avatar |
+| Automated Dune → admin cache | Faster admin load |
+
+### Phase 3
+
+| Task | Output |
+|------|--------|
+| PostHog (optional) | Deep session analytics |
+| Real-time indexer | If Dune latency too high for demos |
 
 ---
 
-## 9. KPI catalog
+## 10. KPI catalog (on-chain primary)
 
-| KPI | Primary source | Secondary |
-|-----|----------------|-----------|
-| Page views / uniques | Umami | — |
-| Expert profile views | Umami `expert_view` | — |
-| PAY attempts / success | Umami + SQLite `bookings` | Dune `tx_hash` |
-| CRC volume (total) | SQLite | Dune treasury |
-| CRC to expert vs THP | SQLite (split math) | Dune |
-| TRUST after session | SQLite `trust_attestations` | Circles RPC |
-| Conversion PAY → TRUST | SQLite join | Umami events |
-| Top skills | SQLite tags | — |
-| Traffic: playground vs direct | Umami referrer | — |
-
----
-
-## 10. Open decisions (`DIV-L4-03`)
-
-| # | Question | Options |
-|---|----------|---------|
-| 1 | Confirm **Umami** as web analytics tool? | A) Umami self-host ✅ proposed · B) Plausible · C) None |
-| 2 | Umami hostname | Dedicated subdomain vs path proxy on `dev.thp.gnosis.box` |
-| 3 | Phase 1 scope | A) Umami + admin stats · B) admin stats only · C) Umami only |
-| 4 | Expert-facing stats in Phase 1? | A) Admin only · B) Expert tab too |
-| 5 | Public dashboard | A) Dune public · B) Admin only · C) Both |
-
-**Proposed default:** 1-A, 2-dedicated subdomain, 3-A, 4-A, 5-C.
+| KPI | Primary | Enrichment |
+|-----|---------|------------|
+| CRC volume (total moved) | **Dune / RPC** | — |
+| CRC to THP org | **On-chain** → `0xc02D…` | — |
+| CRC to experts | **On-chain** → mentor addresses | `mentors.name` |
+| Actual split % | **Decode tx legs** | `mentor_share_percent` expected |
+| Paid session count | **Distinct PAY txs** | SQLite `bookings.tx_hash` |
+| TRUST edges | **TrustRelations** | `trust_attestations` |
+| Treasury balance | **getProfileView** | — |
+| Booking intent (unpaid) | — | SQLite rows without `tx_hash` |
+| Top skills | — | SQLite tags |
+| Page views / funnel | — | Umami |
+| Playground vs standalone | — | Umami referrer |
 
 ---
 
-## 11. References
+## 11. Open decisions (`DIV-L4-03`)
+
+| # | Question | Proposed |
+|---|----------|----------|
+| 1 | **On-chain first** for CRC KPIs? | **A) Yes** — Dune + RPC primary; SQLite reconcile only |
+| 2 | Dune dashboard visibility | **Public** for hackathon + embed in admin |
+| 3 | Umami scope | UX events only; no financial totals |
+| 4 | Phase 1 must-ship | **Dune + admin on-chain panel + Umami** |
+| 5 | Expert stats Phase 1? | No — admin only; expert tab uses on-chain in Phase 2 |
+
+---
+
+## 12. References
 
 | Resource | URL |
 |----------|-----|
 | Umami | https://umami.is/ |
-| Umami docs (self-host) | https://umami.is/docs |
+| Dune — Gnosis app overview | https://dune.com/gnosischain_team/gnosis-app-overview |
+| Circles data / explorer | https://explorer.aboutcircles.com/ |
+| Circles RPC | https://rpc.aboutcircles.com/ |
 | Epic GitHub | [#61 FEAT-L4-03](https://github.com/gnosis-box/THP-for-Good/issues/61) |
-| Useful links index | [`spec/useful-links.md`](useful-links.md) |
-| PRD L4 backlog | [`spec/PRD-MVP.md`](PRD-MVP.md) § L4 |
-| shadcn chart (UI) | [`spec/UI-SHADCN-INVENTORY.md`](UI-SHADCN-INVENTORY.md) |
+| Useful links | [`spec/useful-links.md`](useful-links.md) |
+| PRD L4 | [`spec/PRD-MVP.md`](PRD-MVP.md) § L4 |
 
 ---
 
-*Last updated: 2026-05-21 — initial strategy; Umami as default web analytics layer.*
+*Last updated: 2026-05-21 — on-chain first for CRC/financial metrics; Umami for UX only.*
