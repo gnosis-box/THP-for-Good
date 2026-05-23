@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { SESSION_LANGUAGES } from '@/lib/languages';
+import { CALL_LANGUAGES, SESSION_LANGUAGES, filterCallLanguageCodes } from '@/lib/languages';
 
 type Props = {
   spoken: string[];
@@ -29,14 +29,16 @@ export function LanguagePicker({
     if (spoken.includes(code)) {
       const nextSpoken = spoken.filter((c) => c !== code);
       onSpokenChange(nextSpoken);
-      onCallChange(call.filter((c) => nextSpoken.includes(c)));
+      onCallChange(filterCallLanguageCodes(call.filter((c) => nextSpoken.includes(c))));
       return;
     }
     onSpokenChange([...spoken, code]);
   }
 
+  const callOptions = filterCallLanguageCodes(spoken);
+
   function toggleCall(code: string) {
-    if (!spoken.includes(code)) return;
+    if (!callOptions.includes(code)) return;
     onCallChange(
       call.includes(code) ? call.filter((c) => c !== code) : [...call, code],
     );
@@ -81,31 +83,39 @@ export function LanguagePicker({
             Languages for calls
           </span>
           <p className="text-xs text-muted-foreground">
-            Which spoken languages you offer for paid sessions. Defaults to all spoken languages.
+            Paid sessions are offered in English and French only. Select which of those you speak
+            you accept for bookings.
           </p>
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Call languages">
-            {spoken.map((code) => {
-              const label = SESSION_LANGUAGES.find((l) => l.code === code)?.label ?? code.toUpperCase();
-              const active = call.includes(code);
-              return (
-                <button
-                  key={code}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => toggleCall(code)}
-                  className={cn(
-                    'shrink-0 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    pill,
-                    active
-                      ? 'bg-accent text-accent-foreground'
-                      : 'border border-border bg-background text-muted-foreground hover:bg-muted',
-                  )}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+          {callOptions.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Add English or French under spoken languages to configure call languages.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Call languages">
+              {callOptions.map((code) => {
+                const label =
+                  CALL_LANGUAGES.find((l) => l.code === code)?.label ?? code.toUpperCase();
+                const active = call.includes(code);
+                return (
+                  <button
+                    key={code}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => toggleCall(code)}
+                    className={cn(
+                      'shrink-0 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      pill,
+                      active
+                        ? 'bg-accent text-accent-foreground'
+                        : 'border border-border bg-background text-muted-foreground hover:bg-muted',
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>

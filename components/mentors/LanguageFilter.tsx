@@ -3,7 +3,7 @@
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { SESSION_LANGUAGES } from '@/lib/languages';
+import { CALL_LANGUAGES } from '@/lib/languages';
 import { UI_COPY } from '@/lib/ui-copy';
 
 type Props = {
@@ -37,7 +37,7 @@ export function LanguageFilter({ selected, onChange }: Props) {
             aria-label="Filter experts by call language"
             className="inline-flex gap-2"
           >
-            {SESSION_LANGUAGES.map(({ code, label }) => (
+            {CALL_LANGUAGES.map(({ code, label }) => (
               <ToggleGroupItem
                 key={code}
                 value={code}

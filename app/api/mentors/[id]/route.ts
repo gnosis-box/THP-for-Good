@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import db, { getMentorById } from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
 import { clampMentorShare } from '@/lib/crc-pay';
-import { normalizeMentorLanguages, serializeLanguageCodes } from '@/lib/languages';
+import {
+  normalizeMentorLanguages,
+  serializeCallLanguageCodes,
+  serializeLanguageCodes,
+} from '@/lib/languages';
 
 export async function GET(
   _request: NextRequest,
@@ -92,7 +96,7 @@ export async function PATCH(
     fields.push('spoken_languages = ?', 'call_languages = ?');
     values.push(
       serializeLanguageCodes(languages.spoken_languages),
-      serializeLanguageCodes(languages.call_languages),
+      serializeCallLanguageCodes(languages.call_languages),
     );
   }
 

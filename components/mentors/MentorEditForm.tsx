@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { CalConnect } from '@/components/mentors/CalConnect';
 import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
 import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPicker';
+import { defaultCallLanguagesFromSpoken, filterCallLanguageCodes } from '@/lib/languages';
 import { LanguagePicker } from '@/components/mentors/LanguagePicker';
 import { StopExpertButton } from '@/components/mentors/StopExpertButton';
 import type { MentorRow, TagRow } from '@/lib/db';
@@ -25,7 +26,9 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDea
   const [selectedSkills, setSelectedSkills] = useState<string[]>(mentor.skills);
   const [spokenLanguages, setSpokenLanguages] = useState<string[]>(mentor.spoken_languages);
   const [callLanguages, setCallLanguages] = useState<string[]>(
-    mentor.call_languages.length > 0 ? mentor.call_languages : mentor.spoken_languages,
+    mentor.call_languages.length > 0
+      ? filterCallLanguageCodes(mentor.call_languages)
+      : defaultCallLanguagesFromSpoken(mentor.spoken_languages),
   );
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(mentor.cal_event_type_id);
   const [priceCrc, setPriceCrc] = useState(mentor.price_crc);
@@ -69,7 +72,10 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDea
           mentor_share_percent: mentorShare,
           skills: selectedSkills,
           spoken_languages: spokenLanguages,
-          call_languages: callLanguages.length > 0 ? callLanguages : spokenLanguages,
+          call_languages:
+            callLanguages.length > 0
+              ? filterCallLanguageCodes(callLanguages)
+              : defaultCallLanguagesFromSpoken(spokenLanguages),
           active: 1,
         }),
       });
