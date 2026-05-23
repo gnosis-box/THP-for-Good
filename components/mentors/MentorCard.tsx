@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { splitLine } from '@/lib/ui-copy';
@@ -37,12 +36,11 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
     <Link
       href={`/mentor/${mentor.id}`}
       aria-label={`Book ${mentor.name}, ${mentor.price_crc} CRC per session`}
-      className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="block w-full min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <Card className="border-border/80 py-0 transition-colors hover:border-primary/30 hover:shadow-md sm:py-4">
-        {/* Mobile: compact list row */}
-        <div className="flex items-start gap-3 p-3 sm:hidden">
-          <Avatar className="size-11 shrink-0">
+      <Card className="w-full border-border/80 py-0 transition-colors hover:border-primary/30 hover:shadow-md">
+        <div className="flex w-full items-start gap-3 p-3 sm:p-4">
+          <Avatar className="size-11 shrink-0 sm:size-12">
             {circles?.imageUrl ? (
               <AvatarImage src={circles.imageUrl} alt="" />
             ) : null}
@@ -52,7 +50,7 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
           </Avatar>
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex items-start justify-between gap-2">
-              <p className="truncate font-semibold leading-tight">{mentor.name}</p>
+              <p className="truncate font-semibold leading-tight sm:text-base">{mentor.name}</p>
               <CrcAmount amount={mentor.price_crc} variant="badge" />
             </div>
             {circles !== null && circles.trustedByCount !== null && (
@@ -65,45 +63,6 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
             )}
             <p className="truncate text-xs text-accent">{splitLine(share, 100 - share)}</p>
           </div>
-        </div>
-
-        {/* sm+: card with horizontal skill badges */}
-        <div className="hidden flex-col gap-3 px-4 sm:flex">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-3">
-              <Avatar className="size-12 shrink-0">
-                {circles?.imageUrl ? (
-                  <AvatarImage src={circles.imageUrl} alt="" />
-                ) : null}
-                <AvatarFallback className="font-semibold">
-                  {mentor.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <p className="truncate text-base font-semibold">{mentor.name}</p>
-                {circles !== null && circles.trustedByCount !== null && (
-                  <span className="text-xs text-muted-foreground">
-                    Trusted by {circles.trustedByCount}
-                  </span>
-                )}
-              </div>
-            </div>
-            <CrcAmount amount={mentor.price_crc} variant="badge" />
-          </div>
-
-          {mentor.skills.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {mentor.skills.map((skill) => (
-                <Badge key={skill} variant="secondary">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          <p className="border-t border-border/80 pt-3 text-xs text-accent">
-            {splitLine(share, 100 - share)}
-          </p>
         </div>
       </Card>
     </Link>

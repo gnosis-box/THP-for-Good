@@ -34,7 +34,7 @@ export function MentorBrowser({ mentors, tags }: Props) {
   });
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex w-full flex-col gap-8">
       <section className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">{UI_COPY.home.title}</h1>
         <p className="text-sm text-muted-foreground">{UI_COPY.home.subtitle}</p>
@@ -54,11 +54,13 @@ export function MentorBrowser({ mentors, tags }: Props) {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <ul className="flex w-full flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-4">
           {filtered.map((mentor) => (
-            <MentorCard key={mentor.id} mentor={mentor} />
+            <li key={mentor.id} className="w-full min-w-0">
+              <MentorCard mentor={mentor} />
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
