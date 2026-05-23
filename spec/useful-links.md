@@ -40,6 +40,7 @@ Central index of project, product, and ecosystem URLs.
 | Document | Path / link |
 |----------|-------------|
 | **PRD MVP (source of truth index)** | [`spec/PRD-MVP.md`](PRD-MVP.md) |
+| **Analytics strategy (Umami + admin stats + Dune)** | [`spec/analytics-strategy.md`](analytics-strategy.md) |
 | UI redesign decisions | [`spec/UI-REDESIGN.md`](UI-REDESIGN.md) |
 | Design tokens | [`spec/design-tokens.md`](design-tokens.md) |
 | Seed data (admins + mentors) | [`spec/seed.md`](seed.md), [`scripts/seed.ts`](../scripts/seed.ts) |

@@ -561,7 +561,7 @@ Quand une issue est créée, remplacer *à créer* par le lien `#NN` et ne plus 
 
 | Feature | Description | Liens |
 |---------|-------------|--------|
-| **Analytics & statistics** | Admin/foundation + expert metrics ; SQL aggregations, optional charts | [#61 FEAT-L4-03](https://github.com/gnosis-box/THP-for-Good/issues/61) |
+| **Analytics & statistics** | Admin/foundation + expert metrics ; **Umami** web analytics ; in-app `/admin/stats` ; Dune on-chain | [#61 FEAT-L4-03](https://github.com/gnosis-box/THP-for-Good/issues/61), [`analytics-strategy.md`](analytics-strategy.md) |
 | **In-app Report issue** | Footer/header link → GitHub Issues ; structured templates | [#62 FEAT-L4-04](https://github.com/gnosis-box/THP-for-Good/issues/62) |
 | **Expert card trust status** | Gnosis-style one-way / two-way trust on `MentorCard` ; reuse `TrustButton` logic | [#63 IMPL-L4-06](https://github.com/gnosis-box/THP-for-Good/issues/63) |
 | **Expert session languages** | Spoken languages + languages offered for calls ; filter on home | [#64 FEAT-L4-07](https://github.com/gnosis-box/THP-for-Good/issues/64) |
