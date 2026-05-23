@@ -9,7 +9,6 @@ export const NAV: NavItem[] = [
   { href: "/calls", label: "Calls" },
   { href: "/about", label: "About" },
   { href: "/mentor/register", label: "Offer your expertise" },
-  { href: "/admin", label: "Admin" },
 ];
 
 export const ADMIN_NAV_ITEM: NavItem = { href: "/admin", label: "Admin" };
