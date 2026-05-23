@@ -79,24 +79,94 @@ Central index of project, product, and ecosystem URLs.
 
 ---
 
-## Circles / Gnosis ecosystem
+### On-chain / config (MVP)
+
+| Role | Address | Used in app |
+|------|---------|-------------|
+| **THP for Good Circles group** | `0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00` | `GROUP_ADDRESS` env → admin **Promote** member list ([`/api/admin/members`](../app/api/admin/members/route.ts)); community **join** link (Metri) |
+| **THP for Good organization (treasury leg)** | `0xc02D5aaCA64dE428D571dA42538232C431E0CDeD` | [`FOUNDATION_ADDRESS`](../lib/crc-pay.ts) — split **PAY**, donations ([`DonationSection`](../components/about/DonationSection.tsx)), trust-path simulation sink |
+| Chain ID | `100` (Gnosis) | All Circles SDK / RPC calls |
+
+> **Do not conflate group vs org.** The **group** is the Circles membership avatar (who belongs to THP for Good). The **organization** is the treasury sink encoded in booking payments. PRD text that says “foundation `0x2b5E…`” refers to the group name/history; **live PAY code sends the treasury leg to `0xc02D…`**.
+
+---
+
+## THP for Good — Circles identity & onboarding
+
+| Resource | URL | Relevance | Notes |
+|----------|-----|-----------|-------|
+| **Join THP group (Metri)** | https://app.metri.xyz/0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00 | **Core** | Onboarding link for users to join the THP Circles group before trusting / paying within the network |
+| **Group explorer (THP group)** | https://explorer.aboutcircles.com/avatar/0x2b5e4045936ef12250a8c01e4cbf71e9bee69e00 | **High** | Public profile, members, trust graph entry point for `0x2b5E…` |
+| **Group checker** | https://aboutcircles.github.io/CirclesTools/groupChecker.html | **High** | Verify group config: fee collector, treasury, mint rules — use when debugging split PAY or group policy |
+| **Org explorer (treasury org)** | https://explorer.aboutcircles.com/avatar/0xc02d5aac64de428d571da42538232c431e0cded | **High** | Inspect organization avatar that receives the treasury leg in [`crc-pay.ts`](../lib/crc-pay.ts) |
+
+---
+
+## Circles dashboards
+
+| Resource | URL | Relevance | Notes |
+|----------|-----|-----------|-------|
+| **Circles app dashboard** | https://app.aboutcircles.com/dashboard | **High** | Official wallet / trust / activity UI — reference UX for trust states ([#63](https://github.com/gnosis-box/THP-for-Good/issues/63)) |
+| **Lionfish dashboard** | https://lionfish-app-eypqs.ondigitalocean.app/ | **Low** | Third-party / hackathon dashboard on DigitalOcean — not maintained by THP repo; verify before relying on data |
+| **Dune — Gnosis app overview** | https://dune.com/gnosischain_team/gnosis-app-overview | **Medium** | Ecosystem-level metrics — input for analytics epic ([#61](https://github.com/gnosis-box/THP-for-Good/issues/61)), not THP-specific |
+
+---
+
+## Trust graph, paths & scores
+
+| Resource | URL | Relevance | Notes |
+|----------|-----|-----------|-------|
+| **Trust path viewer** | https://data.aboutcircles.com/path-viewer | **Core** | Visualize CRC/trust paths between avatars — same problem space as [`TrustPathPanel`](../components/booking/TrustPathPanel.tsx) / [#53 SPIKE-L4-02](https://github.com/gnosis-box/THP-for-Good/issues/53) |
+| **Sybil resistance explainer** | https://data.aboutcircles.com/sybilresistance | **Medium** | Educational — why trust limits matter; good copy reference for `/about` and booking disclaimers |
+| **Trust score explorer** | https://aboutcircles.github.io/CirclesTools/trustScoreExplorer.html | **High** | Debug trust scores / reputation between addresses — useful when implementing card trust badges ([#63](https://github.com/gnosis-box/THP-for-Good/issues/63)) |
+| **Flow visualization** | https://flow-viz-bm3ge.ondigitalocean.app/flow-visualization/ | **Medium** | CRC flow diagrams — inspiration for [#61](https://github.com/gnosis-box/THP-for-Good/issues/61) analytics, not wired to THP DB |
+| **Example trust graphs (team)** | [Max](https://explorer.aboutcircles.com/avatar/0xc9cabd666e282159c88753eda101d7485caada51/graph) · [Paul](https://explorer.aboutcircles.com/avatar/0x2f0476ddad86ccbc4de77e0ae161ddb3d5fd860c/graph) | **Low** | Sandbox avatars for manual trust-path testing — replace with your own wallet in path viewer |
+
+---
+
+## CirclesTools (community ops)
+
+Hub: https://aboutcircles.github.io/CirclesTools/
+
+| Tool | URL | Relevance | Notes |
+|------|-----|-----------|-------|
+| **Group checker** | https://aboutcircles.github.io/CirclesTools/groupChecker.html | **High** | See above |
+| **Trust score explorer** | https://aboutcircles.github.io/CirclesTools/trustScoreExplorer.html | **High** | See above |
+| **LBP starter** | https://aboutcircles.github.io/CirclesTools/lbpStarter.html | **Low** | Liquidity Bootstrapping Pool setup for Circles groups — **not** used by THP miniapp MVP; only if THP launches a group token LBP |
+
+---
+
+## Wallets, Safe & dev utilities
+
+| Resource | URL | Relevance | Notes |
+|----------|-----|-----------|-------|
+| **Gnosis Safe — owners API** | https://safe-transaction-gnosis-chain.safe.global/#/owners/owners_safes_retrieve | **Medium** | Circles miniapp wallets are Safes — lookup safes by owner when debugging `sendTransactions` / PAY failures |
+| **CRC auto-minter** | https://github.com/mjadach-iv/crc-auto-minter | **Low** | Community tool to mint CRC on test setups — dev/test only, not production user flow |
+| **CirclesUBI (legacy GitHub)** | https://github.com/CirclesUBI | **Low** | Original Circles v1 repo — historical; active SDK is [`aboutcircles`](https://github.com/aboutcircles) |
+
+---
+
+## Circles / Gnosis ecosystem (SDK & docs)
 
 | Resource | URL |
 |----------|-----|
 | Circles (about) | https://aboutcircles.com |
 | Circles playground | https://circles.gnosis.io/playground |
 | Circles RPC (Gnosis Chain) | https://rpc.aboutcircles.com/ |
+| Circles data / explorer hub | https://explorer.aboutcircles.com/ |
 | Gnosis Chain | https://www.gnosis.io/ |
 | Miniapps marketplace PR | https://github.com/aboutcircles/CirclesMiniapps |
 | NPM `@aboutcircles/miniapp-sdk` | https://www.npmjs.com/package/@aboutcircles/miniapp-sdk |
 | NPM `@aboutcircles/sdk` | https://www.npmjs.com/package/@aboutcircles/sdk |
 
-### On-chain / config (MVP)
+### Relevance legend
 
-| Item | Value |
-|------|-------|
-| Foundation treasury (split PAY) | `0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00` |
-| Chain ID | `100` (Gnosis) |
+| Tag | Meaning |
+|-----|---------|
+| **Core** | Directly supports THP app behaviour, onboarding, or PAY/trust implementation |
+| **High** | Admin, debugging, or UX parity with official Circles apps |
+| **Medium** | Education, analytics planning, or optional ops |
+| **Low** | Historical, third-party, or niche — bookmark only if needed |
 
 ---
 
@@ -158,4 +228,4 @@ pnpm tsx scripts/seed.ts
 
 ---
 
-*Last updated: 2026-05-21 — issues #61–#64, GitHub templates, useful-links index.*
+*Last updated: 2026-05-21 — Circles ecosystem links curated; group vs org addresses clarified.*
