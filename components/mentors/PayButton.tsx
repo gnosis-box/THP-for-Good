@@ -5,11 +5,14 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
+import { useTrustEligibleBalance } from '@/hooks/use-trust-eligible-balance';
 import {
   buildSplitPayTransactions,
   clampMentorShare,
+  splitLegCrc,
   type MentorSharePercent,
 } from '@/lib/crc-pay';
+import { mapPayError, PAY_COPY } from '@/lib/pay-copy';
 import type { MentorRow } from '@/lib/db';
 
 type PayState =
@@ -28,23 +31,18 @@ function fmtSlot(iso: string) {
   }).format(new Date(iso));
 }
 
-function mapPayError(err: unknown): string {
-  const msg = err instanceof Error ? err.message.toLowerCase() : '';
-  if (
-    msg.includes('insufficient') ||
-    msg.includes('balance') ||
-    msg.includes('funds') ||
-    msg.includes('not enough')
-  ) {
-    return 'Not enough CRC';
-  }
-  return err instanceof Error ? err.message : 'Payment failed';
-}
-
 export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selectedSlot: string | null }) {
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
   const balance = useCrcBalance(address);
+  const sharePercent = clampMentorShare(mentor.mentor_share_percent ?? 20) as MentorSharePercent;
+  const { expertLegCrc, treasuryLegCrc } = splitLegCrc(mentor.price_crc, sharePercent);
+  const trustEligible = useTrustEligibleBalance(
+    address,
+    mentor.circles_address,
+    mentor.price_crc,
+    sharePercent,
+  );
   const [email, setEmail] = useState('');
   const [bookerName, setBookerName] = useState<string | null>(null);
   const [state, setState] = useState<PayState>({ kind: 'idle' });
@@ -66,7 +64,6 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
     })();
   }, [address]);
 
-  const sharePercent = clampMentorShare(mentor.mentor_share_percent ?? 20) as MentorSharePercent;
   const isSelf = !!address && address.toLowerCase() === mentor.circles_address.toLowerCase();
   const insufficientBalance =
     balance.status === 'ready' && balance.balance < mentor.price_crc;
@@ -156,6 +153,35 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
           Your balance: <strong>{balance.formatted} CRC</strong>
         </p>
       )}
+      {trustEligible.status === 'ready' && (
+        <div className="rounded-lg border border-border/80 bg-muted/30 px-3 py-2 text-xs text-muted-foreground space-y-1">
+          <p className="font-medium text-foreground">{PAY_COPY.trustEstimateTitle}</p>
+          {expertLegCrc > 0 && (
+            <p>
+              {PAY_COPY.trustLegLine(trustEligible.formatted.expert, expertLegCrc, mentor.name)}
+            </p>
+          )}
+          {treasuryLegCrc > 0 && (
+            <p>
+              {PAY_COPY.trustLegLine(
+                trustEligible.formatted.foundation,
+                treasuryLegCrc,
+                PAY_COPY.thpForGood,
+              )}
+            </p>
+          )}
+          <p>{PAY_COPY.bookableLine(trustEligible.formatted.bookable, mentor.price_crc)}</p>
+          {trustEligible.limits.bookableCrc < mentor.price_crc && (
+            <p className="text-amber-700">{PAY_COPY.trustEstimateShortfall}</p>
+          )}
+        </div>
+      )}
+      {trustEligible.status === 'loading' && (
+        <p className="text-xs text-muted-foreground">{PAY_COPY.trustEstimateLoading}</p>
+      )}
+      {trustEligible.status === 'error' && (
+        <p className="text-xs text-muted-foreground">{PAY_COPY.trustEstimateUnavailable}</p>
+      )}
       {balance.status === 'not-registered' && (
         <p className="text-sm text-amber-700">
           Your wallet is not a registered Circles avatar. Open the app in the Circles playground to
@@ -168,7 +194,7 @@ export function PayButton({ mentor, selectedSlot }: { mentor: MentorRow; selecte
         </p>
       )}
       <p className="text-xs text-muted-foreground">
-        Payment split: {sharePercent}% to expert, {100 - sharePercent}% to foundation.
+        {PAY_COPY.paymentSplit(sharePercent, 100 - sharePercent)}
       </p>
       {selectedSlot && (
         <input
