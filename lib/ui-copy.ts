@@ -75,6 +75,32 @@ export const UI_COPY = {
     stopExpertConfirm:
       'Remove your expert profile from the directory? You can register again later.',
   },
+  stats: {
+    title: 'Transparency dashboard',
+    subtitle: 'On-chain activity and session snapshot for THP for Good.',
+    treasuryTitle: 'THP for Good treasury',
+    treasuryBalance: 'CRC balance (on-chain)',
+    treasuryBalanceUnavailable: 'Balance unavailable',
+    viewOnChainActivity: 'View on-chain activity',
+    trustGraph: 'Trust graph',
+    groupTitle: 'THP Circles group',
+    expertsTitle: 'Active experts',
+    expertsEmpty: 'No active experts listed yet.',
+    snapshotTitle: 'Activity snapshot',
+    snapshotOffChainNote: 'Counts below are from app records — not on-chain totals.',
+    activeExperts: 'Active experts',
+    paidBookings: 'Paid sessions (tx recorded)',
+    trustAttestations: 'Trust actions logged',
+    topSkills: 'Top skills',
+    recentPaidTitle: 'Recent paid sessions',
+    recentPaidEmpty: 'No paid sessions with on-chain tx yet.',
+    viewTx: 'View tx',
+    reconcileTitle: (count: number) =>
+      `${count} booking${count === 1 ? '' : 's'} awaiting on-chain confirmation (over 24h)`,
+    loading: 'Loading stats…',
+    loadError: 'Could not load stats. Try again later.',
+    explorerDisclaimer: 'CRC volume and transfers are verified on Circles Explorer — not summed here.',
+  },
 } as const;
 
 export function splitLine(expertPercent: number, treasuryPercent: number): string {

@@ -62,7 +62,7 @@ Planning document for [FEAT-L4-03 #61](https://github.com/gnosis-box/THP-for-Goo
 | **On-chain BI** | **[Dune Analytics](https://dune.com/)** | CRC volume, split legs, treasury, public hackathon dashboard | **1** |
 | **Live chain reads** | **Circles RPC** + **Explorer** | Balances, trust state, tx detail, path viewer | **1** |
 | **Web analytics** | **[Umami](https://umami.is/)** | Pages, referrers, UX events (not CRC totals) | **1** |
-| **Admin UI** | **`/admin/stats`** | Embeds / proxies on-chain KPIs + SQLite enrichment | **1** |
+| **Admin UI** | **`/stats`** (public) | On-chain links + SQLite enrichment; not in public NAV | **1** |
 
 SQLite **`SUM(price_crc)` is deprecated as a KPI** — use only for “listed price” or reconciliation warnings when chain ≠ DB.
 
@@ -198,33 +198,31 @@ Reference: [Dune — Gnosis app overview](https://dune.com/gnosischain_team/gnos
 
 ---
 
-## 7. In-app `/admin/stats` — hybrid dashboard
+## 7. Public `/stats` dashboard
 
-Admin-gated ([DIV-L1-07](https://github.com/gnosis-box/THP-for-Good/issues/15)).
+**Public** transparency page (not admin-gated). Linked from `/about` and `/admin`; **not** in [`lib/nav.ts`](../lib/nav.ts) NAV.
 
-### Layout (proposed)
+### Layout (implemented)
 
 | Panel | Source |
 |-------|--------|
-| **Treasury org balance** | RPC `getProfileView(FOUNDATION_ADDRESS).v2Balance` |
-| **CRC activity (org, group, experts)** | Deep links → [Circles Explorer `/events`](https://explorer.aboutcircles.com/) per address (`startBlock` from env) |
-| **Recent PAY txs** | SQLite `bookings` with `tx_hash` → link `/tx/{hash}` |
-| **Reconciliation alert** | Booking without `tx_hash` > 24h |
-| **Tags / active experts** | SQLite only |
-| **Umami** | Link out to Umami dashboard |
+| **Treasury org balance** | RPC `getProfileView(FOUNDATION_ADDRESS).v2Balance` via `GET /api/stats` |
+| **CRC activity (org, group, experts)** | Deep links → [Circles Explorer `/events`](https://explorer.aboutcircles.com/) per address (`THP_ANALYTICS_START_BLOCK`) |
+| **Recent PAY txs** | SQLite `bookings` with `tx_hash` → explorer `/tx/{hash}` (no booker address) |
+| **Reconciliation alert** | Count only: bookings without `tx_hash` > 24h |
+| **Tags / active experts** | SQLite aggregates (labeled off-chain) |
+| **Umami** | Phase 1b — link out when deployed |
 | **Dune (optional)** | Embed iframe if aggregate public dashboard exists |
 
-### API sketch
+### API
 
-| Route | Source |
-|-------|--------|
-| `GET /api/admin/stats/enrichment` | SQLite tags, mentors, booking metadata |
-| `GET /api/admin/stats/reconcile` | Bookings missing `tx_hash` |
-| `GET /api/admin/stats/explorer-links` | Built URLs: org, group, mentors → `/avatar/…/events?startBlock=` |
+| Route | Auth | Source |
+|-------|------|--------|
+| `GET /api/stats` | Public | Treasury RPC + explorer URLs + `getStatsEnrichment()` + `getStatsReconcile()` |
 
-No `GET /api/admin/stats/onchain` event ingestion — use explorer links instead.
+Implementation: [`app/api/stats/route.ts`](../app/api/stats/route.ts), [`lib/analytics-explorer.ts`](../lib/analytics-explorer.ts), [`components/stats/StatsDashboard.tsx`](../components/stats/StatsDashboard.tsx).
 
-**No `SUM(price_crc)` in API responses** unless labeled `"listed price (off-chain)"`.
+No custom on-chain indexer. **No `SUM(price_crc)` as KPI.** Reconcile detail with wallet addresses remains admin-only future work if needed.
 
 ---
 
@@ -248,9 +246,9 @@ No `GET /api/admin/stats/onchain` event ingestion — use explorer links instead
 
 | Task | Output |
 |------|--------|
-| Explorer deep links in `/admin/stats` | Org, group, each expert `/events?startBlock=` |
+| Explorer deep links in **`/stats`** | Org, group, each expert `/events?startBlock=` |
 | Document `THP_ANALYTICS_START_BLOCK` env | Shared `startBlock` for all explorer URLs |
-| `/admin/stats` enrichment + reconcile | SQLite tags + missing `tx_hash` alerts |
+| **`/stats`** enrichment + reconcile | SQLite tags + missing `tx_hash` count (public) |
 | Umami deploy + events | UX funnel |
 | Dune dashboard (optional) | Public aggregate chart if needed |
 
@@ -289,7 +287,7 @@ No `GET /api/admin/stats/onchain` event ingestion — use explorer links instead
 | 1 | **On-chain first** for CRC KPIs? | **A) Yes** — Dune + RPC primary; SQLite reconcile only |
 | 2 | Dune dashboard visibility | **Public** for hackathon + embed in admin |
 | 3 | Umami scope | UX events only; no financial totals |
-| 4 | Phase 1 must-ship | **Explorer links + admin panel + Umami** (Dune optional) |
+| 4 | Phase 1 must-ship | **`/stats` + `/api/stats` + Umami** (Dune optional) |
 | 5 | Expert stats Phase 1? | No — admin only; expert tab uses on-chain in Phase 2 |
 
 ---
