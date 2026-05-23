@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,9 @@ function fmtDate(iso: string) {
 
 export function CallsView() {
   const { address, isConnected } = useWallet();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get('tab') === 'received' ? 'received' : 'emitted';
   const [emitted, setEmitted] = useState<EnrichedBooking[]>([]);
   const [received, setReceived] = useState<EnrichedReceivedBooking[]>([]);
   const [loading, setLoading] = useState(false);
@@ -107,7 +111,14 @@ export function CallsView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Tabs defaultValue="emitted">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          router.replace(value === 'received' ? '/calls?tab=received' : '/calls?tab=emitted', {
+            scroll: false,
+          });
+        }}
+      >
         <TabsList className="w-full">
           <TabsTrigger value="emitted" className="min-h-11 flex-1">
             {UI_COPY.calls.emitted}
