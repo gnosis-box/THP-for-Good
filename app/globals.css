@@ -1,3 +1,6 @@
+/* Hallmark · macrostructure: Ecosystem Index · tone: playful dark professional · anchor hue: amber oklch(72% 0.16 45)
+ * genre: playful (dark custom) · theme: custom · display: Bricolage Grotesque · body: Geist
+ * pre-emit critique: P4 H4 E4 S4 R4 V5 */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -9,7 +12,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
+  --font-heading: var(--font-bricolage);
+  --font-display: var(--font-bricolage);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -86,7 +90,10 @@
   --chart-3: oklch(0.82 0.12 210);
   --chart-4: oklch(0.78 0.12 155);
   --chart-5: oklch(0.68 0.02 280);
-  --radius: 0.625rem;
+  --radius: 0.875rem;
+  --shadow-card: 0 2px 12px -2px oklch(52% 0.28 285 / 14%);
+  --shadow-card-hover: 0 8px 32px -4px oklch(52% 0.28 285 / 28%), 0 0 0 1px oklch(52% 0.28 285 / 18%);
+  --shadow-amber-glow: 0 0 24px -4px oklch(72% 0.16 45 / 30%);
   --sidebar: oklch(0.18 0.02 280);
   --sidebar-foreground: oklch(0.94 0.03 85);
   --sidebar-primary: oklch(0.52 0.28 285);

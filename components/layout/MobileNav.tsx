@@ -41,7 +41,7 @@ export function MobileNav() {
         <SheetHeader>
           <SheetTitle>Navigation</SheetTitle>
         </SheetHeader>
-        <nav className="flex flex-col gap-1 px-3 pb-3">
+        <nav className="flex flex-col gap-0.5 px-3 pb-3">
           {items.map((item) => {
             const isActive =
               item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
@@ -51,9 +51,9 @@ export function MobileNav() {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  'min-h-11 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'min-h-11 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-primary/15 text-primary'
+                    ? 'bg-accent/15 text-accent font-semibold'
                     : 'text-foreground hover:bg-muted',
                 )}
               >

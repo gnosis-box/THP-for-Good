@@ -13,7 +13,7 @@ export function MentorSkillTags({ skills, className }: SkillTagsProps) {
       {skills.map((skill) => (
         <span
           key={skill}
-          className="inline-flex rounded-full bg-muted px-2 py-0.5 text-xs leading-snug text-muted-foreground"
+          className="inline-flex rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-medium leading-snug text-accent/90 ring-1 ring-accent/20"
         >
           {skill}
         </span>

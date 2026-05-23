@@ -34,21 +34,21 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
     <Link
       href={`/mentor/${mentor.id}`}
       aria-label={`Book ${mentor.name}, ${mentor.price_crc} CRC per session`}
-      className="block w-full min-w-0 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      className="group block w-full min-w-0 rounded-2xl bg-card ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-200 hover:-translate-y-[3px] hover:shadow-[var(--shadow-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <div className="flex w-full items-start gap-3 px-3 py-3 sm:px-4 sm:py-4">
-        <Avatar className="size-11 shrink-0 sm:size-12">
+      <div className="flex w-full items-start gap-4 p-4">
+        <Avatar className="size-12 shrink-0">
           {circles?.imageUrl ? (
             <AvatarImage src={circles.imageUrl} alt="" />
           ) : null}
-          <AvatarFallback className="text-sm font-semibold">
+          <AvatarFallback className="bg-primary/20 text-sm font-bold text-primary">
             {mentor.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <div className="min-w-0 flex-1 space-y-1">
+        <div className="min-w-0 flex-1 space-y-2">
           <div className="flex items-start justify-between gap-2">
-            <p className="truncate font-semibold leading-tight sm:text-base">{mentor.name}</p>
-            <CrcAmount amount={mentor.price_crc} className="shrink-0 text-sm text-foreground" />
+            <p className="truncate font-display text-base font-semibold leading-tight">{mentor.name}</p>
+            <CrcAmount amount={mentor.price_crc} className="shrink-0 text-sm font-semibold text-accent" />
           </div>
           {circles !== null && circles.trustedByCount !== null && (
             <p className="text-xs text-muted-foreground">Trusted by {circles.trustedByCount}</p>
