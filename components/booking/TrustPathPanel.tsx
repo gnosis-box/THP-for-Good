@@ -27,9 +27,15 @@ function LegRow({ label, maxFormatted, legCrc }: LegRowProps) {
         <span className="tabular-nums text-muted-foreground">
           ~{maxFormatted} / {legCrc} CRC
           {ok ? (
-            <Check className="ml-1 inline size-3.5 text-success" aria-label="Sufficient" />
+            <span className="ml-1 inline-flex items-center gap-0.5 text-success">
+              <Check className="size-3.5" aria-hidden />
+              <span>OK</span>
+            </span>
           ) : (
-            <AlertTriangle className="ml-1 inline size-3.5 text-warning" aria-label="May be insufficient" />
+            <span className="ml-1 inline-flex items-center gap-0.5 text-warning">
+              <AlertTriangle className="size-3.5" aria-hidden />
+              <span>Low</span>
+            </span>
           )}
         </span>
       </div>

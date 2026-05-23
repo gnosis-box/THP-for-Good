@@ -16,7 +16,7 @@ type Props = {
 
 export function MentorSearch({ value, onChange }: Props) {
   return (
-    <InputGroup>
+    <InputGroup className="min-h-11 h-auto">
       <InputGroupAddon>
         <Search className="size-4" aria-hidden />
       </InputGroupAddon>

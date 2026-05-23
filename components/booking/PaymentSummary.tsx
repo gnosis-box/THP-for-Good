@@ -43,6 +43,7 @@ export function PaymentSummary({
               onChange={(e) => onEmailChange(e.target.value)}
               placeholder="you@example.com"
               autoComplete="email"
+              className="min-h-11"
             />
           </Field>
         </>

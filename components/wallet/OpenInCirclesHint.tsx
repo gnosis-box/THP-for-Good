@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { ExternalLink } from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { UI_COPY } from '@/lib/ui-copy';
+import { cn } from '@/lib/utils';
 
 export function OpenInCirclesHint() {
   const { isMiniappHost } = useWallet();
@@ -25,9 +26,14 @@ export function OpenInCirclesHint() {
       <AlertTitle>{UI_COPY.circlesHint.title}</AlertTitle>
       <AlertDescription className="flex flex-col gap-2">
         <p>{UI_COPY.circlesHint.body}</p>
-        <Button variant="outline" size="sm" className="w-fit" render={<a href={href} target="_blank" rel="noopener noreferrer" />}>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'inline-flex min-h-11 w-fit items-center')}
+        >
           {UI_COPY.circlesHint.cta}
-        </Button>
+        </a>
       </AlertDescription>
     </Alert>
   );

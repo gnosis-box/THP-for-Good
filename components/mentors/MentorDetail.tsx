@@ -121,7 +121,8 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
             hasSlot={hasSlot}
             onReview={() => setDrawerOpen(true)}
           />
-          <PayDrawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <div className="md:hidden">
+            <PayDrawer open={drawerOpen} onOpenChange={setDrawerOpen}>
             <PayButton
               mentor={mentor}
               selectedSlot={selectedSlot}
@@ -130,7 +131,8 @@ export function MentorDetail({ mentor: initialMentor }: { mentor: MentorRow }) {
               onSuccess={() => setDrawerOpen(false)}
               showEmail
             />
-          </PayDrawer>
+            </PayDrawer>
+          </div>
         </>
       )}
     </>

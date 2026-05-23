@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { DonationSection } from '@/components/about/DonationSection';
+import { cn } from '@/lib/utils';
 
 export default function AboutPage() {
   return (
@@ -103,8 +104,15 @@ export default function AboutPage() {
 
       {/* CTA */}
       <section className="flex flex-col gap-3 sm:flex-row">
-        <Button render={<Link href="/" />}>Find an expert</Button>
-        <Button variant="outline" render={<Link href="/mentor/register" />}>Offer your expertise</Button>
+        <Link href="/" className={cn(buttonVariants(), 'inline-flex min-h-11 items-center justify-center')}>
+          Find an expert
+        </Link>
+        <Link
+          href="/mentor/register"
+          className={cn(buttonVariants({ variant: 'outline' }), 'inline-flex min-h-11 items-center justify-center')}
+        >
+          Offer your expertise
+        </Link>
       </section>
 
     </div>

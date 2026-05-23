@@ -28,26 +28,32 @@ export function BookingStepper({ hasSlot, hasEmail }: Props) {
       {STEPS.map((label, i) => {
         const done = i < current;
         const active = i === current;
+        const status = done ? 'completed' : active ? 'current' : 'upcoming';
         return (
-          <li key={label} className="flex flex-1 flex-col items-center gap-1.5">
+          <li
+            key={label}
+            className="flex flex-1 flex-col items-center gap-1.5"
+            aria-current={active ? 'step' : undefined}
+          >
             <div
               className={cn(
-                'flex size-8 items-center justify-center rounded-full border text-xs font-semibold transition-colors',
+                'flex size-8 min-h-8 min-w-8 items-center justify-center rounded-full border text-xs font-semibold sm:size-9',
                 done && 'border-primary bg-primary text-primary-foreground',
                 active && !done && 'border-primary text-primary',
                 !done && !active && 'border-border text-muted-foreground',
               )}
-              aria-current={active ? 'step' : undefined}
+              aria-hidden
             >
               {done ? <Check className="size-4" aria-hidden /> : i + 1}
             </div>
             <span
               className={cn(
-                'text-center text-[10px] font-medium leading-tight sm:text-xs',
+                'text-center text-xs font-medium leading-snug',
                 active ? 'text-foreground' : 'text-muted-foreground',
               )}
             >
               {label}
+              <span className="sr-only">{` — ${status}`}</span>
             </span>
           </li>
         );

@@ -35,6 +35,7 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
   return (
     <Link
       href={`/mentor/${mentor.id}`}
+      aria-label={`Book ${mentor.name}, ${mentor.price_crc} CRC per session`}
       className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <Card className="h-full border-border/80 transition-colors hover:border-primary/30 hover:shadow-md">

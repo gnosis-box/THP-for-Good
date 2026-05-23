@@ -20,7 +20,12 @@ export function StickyPayBar({ priceCrc, hasSlot, onReview }: Props) {
           <span className="text-xs text-muted-foreground">{UI_COPY.booking.bookSession}</span>
           <CrcAmount amount={priceCrc} className="text-base" />
         </div>
-        <Button type="button" size="lg" onClick={onReview} className="min-h-11 shrink-0">
+        <Button
+          type="button"
+          size="lg"
+          onClick={onReview}
+          className="min-h-11 max-w-[55%] shrink px-3 text-sm sm:max-w-none sm:px-4 sm:text-base"
+        >
           {UI_COPY.booking.reviewAndPay}
         </Button>
       </div>

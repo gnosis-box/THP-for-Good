@@ -175,13 +175,13 @@ export function RegisterForm() {
           </p>
         )}
         {balance.status === 'not-registered' && (
-          <p className="mt-1 text-amber-700">
+          <p className="mt-1 text-sm text-warning">
             This address is not a registered Circles avatar. Open the app in the Circles playground to
             connect with your avatar.
           </p>
         )}
         {profile.status === 'not-registered' && (
-          <p className="mt-1 text-amber-700">
+          <p className="mt-1 text-sm text-warning">
             No Circles profile name found for this wallet. Sign up at{' '}
             <a
               href="https://www.aboutcircles.com"

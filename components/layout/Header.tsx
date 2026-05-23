@@ -17,6 +17,7 @@ export function Header() {
             width={28}
             height={28}
             className="rounded-sm ring-1 ring-border"
+            style={{ height: 'auto', width: 'auto', maxHeight: 28, maxWidth: 28 }}
           />
           <span className="hidden truncate sm:inline">THP for Good</span>
         </Link>
