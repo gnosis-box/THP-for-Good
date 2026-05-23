@@ -1,16 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ExternalLink } from 'lucide-react';
 
+import { ContentPanel, ContentSection } from '@/components/ui-patterns/content-section';
+import {
+  MetricsActions,
+  MetricsExternalLink,
+  MetricsHero,
+  MetricsPanel,
+  MetricsPanelMono,
+  MetricsPanelTitle,
+  StatCell,
+  StatGrid,
+} from '@/components/ui-patterns/metrics-panel';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
-import { buttonVariants } from '@/components/ui/button';
-import { buildExplorerTxUrl, DUNE_GNOSIS_OVERVIEW_URL } from '@/lib/analytics-explorer';
-import { getUmamiShareUrl } from '@/lib/analytics-umami';
+import { buildExplorerTxUrl } from '@/lib/analytics-explorer';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { StatsApiResponse } from '@/lib/stats-api';
-import { cn, shortenAddress } from '@/lib/utils';
+import { WebAnalyticsPanel } from '@/components/stats/WebAnalyticsPanel';
+import { MentorCard } from '@/components/mentors/MentorCard';
+import { ExternalLink } from 'lucide-react';
 
 function fmt(n: number) {
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(n);
@@ -22,32 +31,6 @@ function fmtDate(iso: string) {
     month: 'short',
     day: 'numeric',
   });
-}
-
-function ExplorerLink({
-  href,
-  children,
-  className,
-}: {
-  href: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={cn(
-        buttonVariants({ variant: 'outline', size: 'sm' }),
-        'inline-flex min-h-9 items-center gap-1.5',
-        className,
-      )}
-    >
-      {children}
-      <ExternalLink className="size-3.5 shrink-0 opacity-70" aria-hidden />
-    </a>
-  );
 }
 
 export function StatsDashboard() {
@@ -74,26 +57,16 @@ export function StatsDashboard() {
   }, []);
 
   if (error) {
-    return (
-      <StatusAlert variant="error" title={copy.loadError} />
-    );
+    return <StatusAlert variant="error" title={copy.loadError} />;
   }
 
   if (!data) {
     return <p className="text-sm text-muted-foreground animate-pulse">{copy.loading}</p>;
   }
 
-  const umamiShareUrl = getUmamiShareUrl();
-
   return (
     <div className="flex flex-col gap-10">
-      <section
-        className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 px-4 py-4 sm:px-5 sm:py-5"
-        aria-labelledby="stats-how-to-read"
-      >
-        <h2 id="stats-how-to-read" className="text-sm font-semibold">
-          {copy.howToReadTitle}
-        </h2>
+      <ContentPanel title={copy.howToReadTitle} titleId="stats-how-to-read">
         <ul className="flex flex-col gap-2 pl-4 text-sm text-muted-foreground list-disc marker:text-muted-foreground/70">
           {copy.howToReadBullets.map((line) => (
             <li key={line}>{line}</li>
@@ -102,21 +75,9 @@ export function StatsDashboard() {
             <li>{copy.analyticsFromBlock(data.meta.startBlock)}</li>
           )}
         </ul>
-      </section>
+      </ContentPanel>
 
-      <section className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:p-5">
-        <h2 className="text-base font-semibold">{copy.umamiTitle}</h2>
-        <p className="text-xs text-muted-foreground">{copy.umamiNote}</p>
-        <ExplorerLink href={umamiShareUrl}>{copy.openUmamiDashboard}</ExplorerLink>
-      </section>
-
-      <section className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:p-5">
-        <h2 className="text-base font-semibold">{copy.ecosystemTitle}</h2>
-        <p className="text-xs text-muted-foreground">{copy.ecosystemNote}</p>
-        <div className="flex flex-wrap gap-2">
-          <ExplorerLink href={DUNE_GNOSIS_OVERVIEW_URL}>{copy.openDuneOverview}</ExplorerLink>
-        </div>
-      </section>
+      <WebAnalyticsPanel data={data.webAnalytics} />
 
       {data.reconcile.pendingTxCount > 0 && (
         <StatusAlert
@@ -125,112 +86,67 @@ export function StatsDashboard() {
         />
       )}
 
-      {/* Treasury */}
-      <section className="flex flex-col gap-4 rounded-xl border border-border p-4 sm:p-5">
-        <h2 className="text-base font-semibold">{copy.treasuryTitle}</h2>
-        <p className="text-xs font-mono text-muted-foreground break-all">{data.treasury.address}</p>
-        <div>
-          <p className="text-xs text-muted-foreground">{copy.treasuryBalance}</p>
-          <p className="text-2xl font-semibold tabular-nums">
-            {data.treasury.balanceCrc != null
+      <MetricsPanel>
+        <MetricsPanelTitle>{copy.treasuryTitle}</MetricsPanelTitle>
+        <MetricsPanelMono>{data.treasury.address}</MetricsPanelMono>
+        <MetricsHero
+          label={copy.treasuryBalance}
+          value={
+            data.treasury.balanceCrc != null
               ? `${fmt(data.treasury.balanceCrc)} CRC`
-              : copy.treasuryBalanceUnavailable}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ExplorerLink href={data.treasury.eventsUrl}>{copy.viewOnChainActivity}</ExplorerLink>
-          <ExplorerLink href={data.treasury.graphUrl}>{copy.trustGraph}</ExplorerLink>
-        </div>
-      </section>
+              : copy.treasuryBalanceUnavailable
+          }
+        />
+        <MetricsActions>
+          <MetricsExternalLink href={data.treasury.eventsUrl}>
+            {copy.viewOnChainActivity}
+          </MetricsExternalLink>
+          <MetricsExternalLink href={data.treasury.graphUrl}>{copy.trustGraph}</MetricsExternalLink>
+        </MetricsActions>
+      </MetricsPanel>
 
-      {/* Group */}
-      <section className="flex flex-col gap-4 rounded-xl border border-border p-4 sm:p-5">
-        <h2 className="text-base font-semibold">{copy.groupTitle}</h2>
-        <p className="text-xs font-mono text-muted-foreground break-all">{data.group.address}</p>
-        <div>
-          <p className="text-xs text-muted-foreground">{copy.groupBalance}</p>
-          <p className="text-2xl font-semibold tabular-nums">
-            {data.group.balanceCrc != null
-              ? `${fmt(data.group.balanceCrc)} CRC`
-              : copy.treasuryBalanceUnavailable}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ExplorerLink href={data.group.eventsUrl}>{copy.viewOnChainActivity}</ExplorerLink>
-          <ExplorerLink href={data.group.graphUrl}>{copy.trustGraph}</ExplorerLink>
-        </div>
-      </section>
-
-      {/* Experts */}
-      <section className="flex flex-col gap-4">
-        <h2 className="text-base font-semibold">{copy.expertsTitle}</h2>
+      <section className="flex flex-col items-center gap-4">
+        <MetricsPanelTitle>{copy.expertsTitle}</MetricsPanelTitle>
         {data.experts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{copy.expertsEmpty}</p>
+          <p className="text-center text-sm text-muted-foreground">{copy.expertsEmpty}</p>
         ) : (
-          <ul className="flex flex-col divide-y divide-border rounded-xl border border-border">
-            {data.experts.map((expert) => (
+          <ul className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2">
+            {data.experts.map(({ mentor, paidSessionCount }) => (
               <li
-                key={expert.id}
-                className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                key={mentor.id}
+                className="w-full min-w-0 overflow-hidden rounded-xl border border-border bg-card"
               >
-                <div className="min-w-0">
-                  <Link
-                    href={`/mentor/${expert.id}`}
-                    className="font-medium hover:text-primary truncate block"
-                  >
-                    {expert.name}
-                  </Link>
-                  <p className="text-xs font-mono text-muted-foreground truncate">
-                    {shortenAddress(expert.address, 6)}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2 shrink-0">
-                  <ExplorerLink href={expert.eventsUrl}>{copy.viewOnChainActivity}</ExplorerLink>
-                  <ExplorerLink href={expert.graphUrl}>{copy.trustGraph}</ExplorerLink>
-                </div>
+                <MentorCard mentor={mentor} paidSessionCount={paidSessionCount} />
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      {/* Snapshot */}
-      <section className="flex flex-col gap-4 rounded-xl border border-border bg-muted/30 p-4 sm:p-5">
-        <div>
-          <h2 className="text-base font-semibold">{copy.snapshotTitle}</h2>
-          <p className="text-xs text-muted-foreground mt-1">{copy.snapshotOffChainNote}</p>
-        </div>
-        <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div>
-            <dt className="text-xs text-muted-foreground">{copy.activeExperts}</dt>
-            <dd className="text-lg font-semibold tabular-nums">
-              {data.enrichment.activeExperts}
-              <span className="text-sm font-normal text-muted-foreground">
-                {' '}/ {data.enrichment.totalExperts}
-              </span>
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">{copy.paidBookings}</dt>
-            <dd className="text-lg font-semibold tabular-nums">{data.enrichment.paidBookingCount}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">{copy.bookingIntent}</dt>
-            <dd className="text-lg font-semibold tabular-nums">
-              {data.enrichment.bookingIntentCount}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">{copy.trustAttestations}</dt>
-            <dd className="text-lg font-semibold tabular-nums">
-              {data.enrichment.trustAttestationCount}
-            </dd>
-          </div>
-        </dl>
+      <MetricsPanel muted>
+        <MetricsPanelTitle>{copy.snapshotTitle}</MetricsPanelTitle>
+        <p className="text-center text-xs text-muted-foreground">{copy.snapshotOffChainNote}</p>
+        <StatGrid columns={4}>
+          <StatCell
+            label={copy.activeExperts}
+            value={
+              <>
+                {data.enrichment.activeExperts}
+                <span className="text-sm font-normal text-muted-foreground">
+                  {' '}
+                  / {data.enrichment.totalExperts}
+                </span>
+              </>
+            }
+          />
+          <StatCell label={copy.paidBookings} value={data.enrichment.paidBookingCount} />
+          <StatCell label={copy.bookingIntent} value={data.enrichment.bookingIntentCount} />
+          <StatCell label={copy.trustAttestations} value={data.enrichment.trustAttestationCount} />
+        </StatGrid>
         {data.enrichment.tagCounts.length > 0 && (
-          <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2">{copy.topSkills}</p>
-            <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-xs font-medium text-muted-foreground">{copy.topSkills}</p>
+            <div className="flex flex-wrap justify-center gap-2">
               {data.enrichment.tagCounts.slice(0, 8).map((tag) => (
                 <span
                   key={tag.label}
@@ -243,11 +159,9 @@ export function StatsDashboard() {
             </div>
           </div>
         )}
-      </section>
+      </MetricsPanel>
 
-      {/* Recent paid */}
-      <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold">{copy.recentPaidTitle}</h2>
+      <ContentSection title={copy.recentPaidTitle}>
         {data.enrichment.recentPaidBookings.length === 0 ? (
           <p className="text-sm text-muted-foreground">{copy.recentPaidEmpty}</p>
         ) : (
@@ -284,7 +198,7 @@ export function StatsDashboard() {
             </table>
           </div>
         )}
-      </section>
+      </ContentSection>
     </div>
   );
 }

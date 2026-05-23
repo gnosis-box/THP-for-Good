@@ -256,6 +256,23 @@ export function insertMentor(data: InsertMentorData): number {
   return run() as number;
 }
 
+/** Re-apply seed language fields for an existing mentor (idempotent). */
+export function syncMentorLanguages(
+  circlesAddress: string,
+  spoken: string[],
+  call: string[],
+): boolean {
+  const spokenSerialized = spoken.length > 0 ? spoken.join(',') : null;
+  const callSerialized = serializeCallLanguageCodes(call.length > 0 ? call : spoken);
+  const result = db
+    .prepare(
+      `UPDATE mentors SET spoken_languages = ?, call_languages = ?
+       WHERE LOWER(circles_address) = LOWER(?)`,
+    )
+    .run(spokenSerialized, callSerialized, circlesAddress);
+  return result.changes > 0;
+}
+
 export function getAllTags(includePending = false): TagRow[] {
   if (includePending) {
     return db
@@ -497,6 +514,7 @@ export type StatsEnrichment = {
   totalExperts: number;
   tagCounts: StatsTagCount[];
   trustAttestationCount: number;
+  trustAttestationsWithTxHash: number;
   paidBookingCount: number;
   bookingIntentCount: number;
   recentPaidBookings: StatsRecentPaidBooking[];
@@ -506,6 +524,17 @@ export type StatsReconcile = {
   pendingTxCount: number;
   oldestPendingAgeHours: number | null;
 };
+
+export function getExpertPaidSessionCounts(): Map<number, number> {
+  const rows = db
+    .prepare(
+      `SELECT mentor_id, COUNT(*) AS n FROM bookings
+       WHERE tx_hash IS NOT NULL AND TRIM(tx_hash) != ''
+       GROUP BY mentor_id`,
+    )
+    .all() as { mentor_id: number; n: number }[];
+  return new Map(rows.map((r) => [r.mentor_id, r.n]));
+}
 
 export function getStatsEnrichment(): StatsEnrichment {
   const activeExperts = (
@@ -525,6 +554,14 @@ export function getStatsEnrichment(): StatsEnrichment {
     .all() as StatsTagCount[];
   const trustAttestationCount = (
     db.prepare('SELECT COUNT(*) AS n FROM trust_attestations').get() as { n: number }
+  ).n;
+  const trustAttestationsWithTxHash = (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM trust_attestations
+         WHERE trust_tx_hash IS NOT NULL AND TRIM(trust_tx_hash) != ''`,
+      )
+      .get() as { n: number }
   ).n;
   const paidBookingCount = (
     db
@@ -558,6 +595,7 @@ export function getStatsEnrichment(): StatsEnrichment {
     totalExperts,
     tagCounts,
     trustAttestationCount,
+    trustAttestationsWithTxHash,
     paidBookingCount,
     bookingIntentCount,
     recentPaidBookings,
@@ -591,6 +629,46 @@ export function getStatsReconcile(): StatsReconcile {
   }
 
   return { pendingTxCount, oldestPendingAgeHours };
+}
+
+export function insertTrustAttestation(bookingId: number, trustTxHash?: string | null): void {
+  db.prepare(
+    `INSERT OR IGNORE INTO trust_attestations (booking_id, trust_tx_hash) VALUES (?, ?)`,
+  ).run(bookingId, trustTxHash?.trim() || null);
+}
+
+export function getMentorPaidBookingCount(mentorId: number): number {
+  return (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM bookings
+         WHERE mentor_id = ? AND tx_hash IS NOT NULL AND TRIM(tx_hash) != ''`,
+      )
+      .get(mentorId) as { n: number }
+  ).n;
+}
+
+export function getMentorTrustAttestationCount(mentorId: number): number {
+  return (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM trust_attestations t
+         JOIN bookings b ON b.id = t.booking_id
+         WHERE b.mentor_id = ?`,
+      )
+      .get(mentorId) as { n: number }
+  ).n;
+}
+
+export function getMentorBookingIntentCount(mentorId: number): number {
+  return (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM bookings
+         WHERE mentor_id = ? AND (tx_hash IS NULL OR TRIM(tx_hash) = '')`,
+      )
+      .get(mentorId) as { n: number }
+  ).n;
 }
 
 export default db;

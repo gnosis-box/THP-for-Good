@@ -72,12 +72,15 @@ export function TrustButton({ mentorAddress, mentorName, bookingId, mentorId }: 
     setActionLoading(true);
     setActionError(null);
     try {
-      await addTrust(address, mentorAddress);
+      const trustTxHash = await addTrust(address, mentorAddress);
 
       fetch('/api/trust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ booking_id: bookingId }),
+        body: JSON.stringify({
+          booking_id: bookingId,
+          trust_tx_hash: trustTxHash ?? undefined,
+        }),
       }).catch(() => undefined);
 
       setRefetchTick((t) => t + 1);

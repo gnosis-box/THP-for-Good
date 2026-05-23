@@ -6,12 +6,19 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { MentorSkillTags, MentorLanguageTags, MentorSplitShare } from '@/components/ui-patterns/MentorMeta';
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
+import { UI_COPY } from '@/lib/ui-copy';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
 type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 
-export function MentorCard({ mentor }: { mentor: MentorRow }) {
+export function MentorCard({
+  mentor,
+  paidSessionCount,
+}: {
+  mentor: MentorRow;
+  paidSessionCount?: number;
+}) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
   const share = mentor.mentor_share_percent ?? 20;
   const callLanguages =
@@ -50,8 +57,17 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
         </Avatar>
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="truncate font-semibold leading-tight sm:text-base">{mentor.name}</p>
-            <CrcAmount amount={mentor.price_crc} className="shrink-0 text-sm text-foreground" />
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <p className="truncate font-semibold leading-tight sm:text-base">{mentor.name}</p>
+              <MentorLanguageTags languages={callLanguages} className="shrink-0" />
+            </div>
+            {paidSessionCount != null ? (
+              <p className="shrink-0 text-sm tabular-nums text-foreground">
+                {UI_COPY.stats.expertPaidSessions(paidSessionCount)}
+              </p>
+            ) : (
+              <CrcAmount amount={mentor.price_crc} className="shrink-0 text-sm text-foreground" />
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             {circles !== null && circles.trustedByCount !== null && (
@@ -63,7 +79,6 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
               compact
             />
           </div>
-          <MentorLanguageTags languages={callLanguages} />
           <MentorSkillTags skills={mentor.skills} />
           <MentorSplitShare expertPercent={share} />
         </div>

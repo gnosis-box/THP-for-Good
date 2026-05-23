@@ -1,32 +1,35 @@
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { DonationSection } from '@/components/about/DonationSection';
+import { MetricsPanel } from '@/components/ui-patterns/metrics-panel';
 import { cn } from '@/lib/utils';
 
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 flex flex-col gap-12">
 
-      {/* Hero */}
-      <section className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">What is THP for Good?</h1>
-        <p className="text-muted-foreground leading-relaxed">
-          THP for Good is a solidarity-based initiative by{' '}
-          <a href="https://www.thehackingproject.org" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2">
-            The Hacking Project
-          </a>{' '}
-          that connects people building public good projects with experienced web3 mentors — and funds
-          their training through the{' '}
-          <a href="https://aboutcircles.com" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2">
-            Circles
-          </a>{' '}
-          trust network.
-        </p>
-        <p className="text-muted-foreground leading-relaxed">
-          The program empowers the community to choose who receives support, fostering inclusivity,
-          collaboration, and purpose-driven learning.
-        </p>
-      </section>
+      <MetricsPanel muted>
+        <PageHeader title="What is THP for Good?" />
+        <div className="mx-auto flex max-w-lg flex-col gap-4 text-center">
+          <p className="text-muted-foreground leading-relaxed">
+            THP for Good is a solidarity-based initiative by{' '}
+            <a href="https://www.thehackingproject.org" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2">
+              The Hacking Project
+            </a>{' '}
+            that connects people building public good projects with experienced web3 mentors — and funds
+            their training through the{' '}
+            <a href="https://aboutcircles.com" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2">
+              Circles
+            </a>{' '}
+            trust network.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            The program empowers the community to choose who receives support, fostering inclusivity,
+            collaboration, and purpose-driven learning.
+          </p>
+        </div>
+      </MetricsPanel>
 
       {/* How it works */}
       <section className="flex flex-col gap-6">

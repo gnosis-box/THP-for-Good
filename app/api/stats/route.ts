@@ -3,34 +3,29 @@ import { NextResponse } from 'next/server';
 import {
   explorerLinksForAddress,
   getAnalyticsStartBlock,
-  getGroupAddress,
   TREASURY_ORG_ADDRESS,
 } from '@/lib/analytics-explorer';
 import { fetchAvatarBalanceCrc } from '@/lib/analytics-rpc';
-import { getAllMentors, getStatsEnrichment, getStatsReconcile } from '@/lib/db';
+import { getAllMentors, getExpertPaidSessionCounts, getStatsEnrichment, getStatsReconcile } from '@/lib/db';
 import type { StatsApiResponse } from '@/lib/stats-api';
+import { fetchWebAnalytics } from '@/lib/umami-share-client';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const treasuryLinks = explorerLinksForAddress(TREASURY_ORG_ADDRESS);
-  const groupAddress = getGroupAddress();
-  const groupLinks = explorerLinksForAddress(groupAddress);
 
-  const experts = getAllMentors(undefined, false).map((m) => {
-    const links = explorerLinksForAddress(m.circles_address);
-    return {
-      id: m.id,
-      name: m.name,
-      address: links.address,
-      eventsUrl: links.eventsUrl,
-      graphUrl: links.graphUrl,
-    };
-  });
+  const mentorRows = getAllMentors(undefined, false);
+  const paidSessionCounts = getExpertPaidSessionCounts();
 
-  const [treasuryBalanceCrc, groupBalanceCrc] = await Promise.all([
+  const experts = mentorRows.map((m) => ({
+    mentor: m,
+    paidSessionCount: paidSessionCounts.get(m.id) ?? 0,
+  }));
+
+  const [treasuryBalanceCrc, webAnalytics] = await Promise.all([
     fetchAvatarBalanceCrc(TREASURY_ORG_ADDRESS),
-    fetchAvatarBalanceCrc(groupAddress),
+    fetchWebAnalytics(),
   ]);
 
   const body: StatsApiResponse = {
@@ -40,15 +35,10 @@ export async function GET() {
       eventsUrl: treasuryLinks.eventsUrl,
       graphUrl: treasuryLinks.graphUrl,
     },
-    group: {
-      address: groupLinks.address,
-      balanceCrc: groupBalanceCrc,
-      eventsUrl: groupLinks.eventsUrl,
-      graphUrl: groupLinks.graphUrl,
-    },
     experts,
     enrichment: getStatsEnrichment(),
     reconcile: getStatsReconcile(),
+    webAnalytics,
     meta: {
       startBlock: getAnalyticsStartBlock(),
       generatedAt: new Date().toISOString(),

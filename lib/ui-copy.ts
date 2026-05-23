@@ -97,13 +97,11 @@ export const UI_COPY = {
     treasuryBalanceUnavailable: 'Balance unavailable',
     viewOnChainActivity: 'View on-chain activity',
     trustGraph: 'Trust graph',
-    groupTitle: 'THP Circles group',
-    groupBalance: 'CRC balance (on-chain)',
     analyticsFromBlock: (block: number) =>
       `Circles Explorer links below filter activity from block ${block.toLocaleString()}.`,
-    ecosystemTitle: 'Ecosystem dashboards',
-    ecosystemNote: 'Cross-app on-chain metrics on Gnosis — not financial totals from this app.',
-    openDuneOverview: 'Gnosis app overview (Dune)',
+    expertBalancesTruncated: 'CRC balances shown for the first active experts only.',
+    expertPaidSessions: (count: number) =>
+      count === 1 ? '1 paid session' : `${count} paid sessions`,
     expertsTitle: 'Active experts',
     expertsEmpty: 'No active experts listed yet.',
     snapshotTitle: 'Activity snapshot',
@@ -121,8 +119,13 @@ export const UI_COPY = {
     loading: 'Loading stats…',
     loadError: 'Could not load stats. Try again later.',
     umamiTitle: 'Web analytics',
-    umamiNote: 'Page views and funnel — not financial data.',
-    openUmamiDashboard: 'Open Umami dashboard',
+    viewPublicAnalyticsDashboard: 'View more on public analytics dashboard',
+    webAnalyticsVisitors: 'Visitors',
+    webAnalyticsVisits: 'Visits',
+    webAnalyticsViews: 'Page views',
+    webAnalyticsBounce: 'Bounce rate',
+    webAnalyticsDuration: 'Avg. visit',
+    webAnalyticsUnavailable: 'Web analytics summary is temporarily unavailable.',
   },
 } as const;
 

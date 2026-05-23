@@ -21,6 +21,7 @@ import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPick
 import { defaultCallLanguagesFromSpoken, filterCallLanguageCodes } from '@/lib/languages';
 import { LanguagePicker } from '@/components/mentors/LanguagePicker';
 import { StopExpertButton } from '@/components/mentors/StopExpertButton';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { UI_COPY } from '@/lib/ui-copy';
 
 export function RegisterForm() {
@@ -212,15 +213,14 @@ export function RegisterForm() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {isEditMode ? UI_COPY.register.editTitle : UI_COPY.register.title}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {isEditMode
+      <PageHeader
+        title={isEditMode ? UI_COPY.register.editTitle : UI_COPY.register.title}
+        subtitle={
+          isEditMode
             ? UI_COPY.register.editSubtitle
-            : 'Share your expertise with the THP community. Each booking generates CRC revenue for the THP for Good fund.'}
-        </p>
+            : 'Share your expertise with the THP community. Each booking generates CRC revenue for the THP for Good fund.'
+        }
+      >
         {isEditMode && existingMentor ? (
           <Link
             href={`/mentor/${existingMentor.id}`}
@@ -229,7 +229,7 @@ export function RegisterForm() {
             {UI_COPY.register.viewPublicProfile}
           </Link>
         ) : null}
-      </div>
+      </PageHeader>
 
       {isEditMode && existingMentor?.active === 0 ? (
         <StatusAlert

@@ -1,13 +1,11 @@
+import { PageHeader } from '@/components/layout/PageHeader';
 import { PageNav } from '@/components/layout/PageNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ActionsPage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Actions</h1>
-        <p className="text-sm text-muted-foreground">Placeholder route.</p>
-      </div>
+      <PageHeader title="Actions" subtitle="Placeholder route." />
 
       <Card>
         <CardHeader>

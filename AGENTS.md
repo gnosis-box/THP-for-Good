@@ -6,6 +6,17 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Miniapps Boilerplate — Agent Guide
 
+## Language policy (mandatory)
+
+| Context | Language |
+| --- | --- |
+| **Chat with Florian** | **French** |
+| **Everything else in this repo** | **English** — code, comments, commit messages, **GitHub issue titles & bodies**, PR descriptions, user-facing UI strings (MVP), agent-written docs in-repo |
+
+Spec files may stay bilingual or French where already established (`spec/PRD-MVP.md`, decisions). **Never open GitHub issues or write implementation comments in French** unless the user explicitly requests French for a named deliverable.
+
+---
+
 This is a starter template for building [Circles](https://aboutcircles.com) miniapps. A miniapp is a web app that loads inside the Circles host (https://circles.gnosis.io/playground) via an iframe; the host injects a wallet and your app drives interactions through the SDK. The boilerplate ships with the minimum plumbing — wallet provider, sign-in demo, profile lookup, layout — so a developer can clone it and start writing business logic immediately.
 
 ## Product spec & project workflow (mandatory)
@@ -49,7 +60,7 @@ Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**
 
 Use when adding post-MVP features, external link curation, or multi-phase specs (see skill **`thp-for-good-backlog`** for full commands).
 
-**Issue IDs:** `FEAT-L4-*` (epic/planning) · `IMPL-L4-*` (code) · `DIV-L4-*` (decision, no code). Issue bodies: **English**.
+**Issue IDs:** `FEAT-L4-*` (epic/planning) · `IMPL-L4-*` (code) · `DIV-L4-*` (decision, no code). See [Language policy](#language-policy-mandatory) — issue bodies in **English**.
 
 **After creating an issue:**
 
@@ -238,6 +249,11 @@ The dashboard (`/`) intentionally has no `<PageNav />` because [`NavCards`](comp
 - **shadcn primitives** in `components/ui/`. **Do not hand-edit** them — they are CLI-generated. To update a component, regenerate it with `pnpm dlx shadcn@latest add <name> --overwrite`.
 - **shadcn uses Base UI** (`@base-ui/react`), not Radix. Trigger components accept a `render={<Button … />}` prop, not `asChild`. See `MobileNav.tsx` for an example.
 - **Dark-only theme.** Set `class="dark"` on `<html>` in `app/layout.tsx`. Tokens live in `app/globals.css` (`:root` mirrored to `.dark`). See `spec/design-tokens.md`.
+- **Surface contours** use `border border-border` (token `--border`; `--input` aliases it). Do not use `ring-foreground/*` for card outlines.
+- **Layout patterns** (reuse — do not reinvent):
+  - **Page hero** — `PageHeader` (`components/layout/PageHeader.tsx`): centered title + subtitle on every main route.
+  - **KPI / treasury / analytics card** — `MetricsPanel`, `StatCell`, `StatGrid`, `MetricsHero`, `MetricsActions`, `MetricsExternalLink` (`components/ui-patterns/metrics-panel.tsx`): centered title, label-above-value stats, centered CTAs.
+  - **Lists / tables / prose** — `ContentSection`, `ContentPanel` (`components/ui-patterns/content-section.tsx`): left-aligned title; use for experts lists, how-to blocks, tables, forms.
 
 ## Common workflows
 

@@ -72,8 +72,9 @@
   --accent: oklch(0.72 0.16 45);
   --accent-foreground: oklch(0.18 0.04 285);
   --destructive: oklch(0.62 0.22 25);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
+  /* Single contour token — cards, inputs, dividers. Tune opacity here only. */
+  --border: oklch(1 0 0 / 20%);
+  --input: var(--border);
   --ring: oklch(0.52 0.28 285 / 60%);
   --success: oklch(0.78 0.12 155);
   --success-foreground: oklch(0.18 0.04 155);
