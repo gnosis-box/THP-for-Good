@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import db, { getMentorById } from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
 import { clampMentorShare } from '@/lib/crc-pay';
+import {
+  normalizeMentorLanguages,
+  serializeCallLanguageCodes,
+  serializeLanguageCodes,
+} from '@/lib/languages';
 
 export async function GET(
   _request: NextRequest,
@@ -56,9 +61,22 @@ export async function PATCH(
   const fields: string[] = [];
   const values: unknown[] = [];
 
-  const allowed = ['name', 'bio', 'calendar_link', 'cal_event_type_id', 'price_crc', 'active', 'mentor_share_percent'] as const;
+  const allowed = [
+    'name',
+    'bio',
+    'calendar_link',
+    'cal_event_type_id',
+    'price_crc',
+    'active',
+    'mentor_share_percent',
+    'spoken_languages',
+    'call_languages',
+  ] as const;
   for (const key of allowed) {
     if (key in patch) {
+      if (key === 'spoken_languages' || key === 'call_languages') {
+        continue;
+      }
       fields.push(`${key} = ?`);
       values.push(
         key === 'mentor_share_percent'
@@ -66,6 +84,20 @@ export async function PATCH(
           : patch[key],
       );
     }
+  }
+
+  if ('spoken_languages' in patch || 'call_languages' in patch) {
+    const spokenRaw = patch.spoken_languages ?? existing.spoken_languages;
+    const callRaw = patch.call_languages ?? existing.call_languages;
+    const languages = normalizeMentorLanguages(spokenRaw, callRaw);
+    if ('error' in languages) {
+      return NextResponse.json({ error: languages.error }, { status: 400 });
+    }
+    fields.push('spoken_languages = ?', 'call_languages = ?');
+    values.push(
+      serializeLanguageCodes(languages.spoken_languages),
+      serializeCallLanguageCodes(languages.call_languages),
+    );
   }
 
   if (fields.length > 0) {

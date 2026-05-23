@@ -46,17 +46,8 @@ export async function createCalBooking(params: {
   slotTime: string;
   attendeeName: string;
   attendeeEmail: string;
-  mentorName: string;
   txHash?: string;
-}): Promise<{ uid: string } | null> {
-  const title = `[THP For Good] ${params.attendeeName} => ${params.mentorName}`;
-  const notes = [
-    params.txHash
-      ? `CRC payment tx: https://explorer.aboutcircles.com/tx/${params.txHash}/social-graph`
-      : 'CRC payment tx: pending',
-    'Need to reschedule or cancel? ( No refunds )',
-  ].join('\n');
-
+}): Promise<{ uid: string; meetingUrl?: string } | null> {
   const res = await fetch(`${CAL_API}/bookings`, {
     method: 'POST',
     headers: authHeaders(CAL_BOOKING_VERSION),
@@ -65,11 +56,12 @@ export async function createCalBooking(params: {
       start: params.slotTime,
       timeZone: 'Europe/Paris',
       language: 'en',
-      title,
       responses: {
         name: params.attendeeName,
         email: params.attendeeEmail,
-        notes,
+        notes: params.txHash
+          ? `CRC payment tx: https://explorer.aboutcircles.com/tx/${params.txHash}/social-graph`
+          : 'CRC payment tx: pending',
       },
       metadata: {},
     }),
@@ -81,7 +73,19 @@ export async function createCalBooking(params: {
     return null;
   }
 
-  const data = (await res.json()) as { status: string; data?: { uid: string } };
+  const data = (await res.json()) as {
+    status: string;
+    data?: {
+      uid: string;
+      meetingUrl?: string;
+      references?: { meetingUrl?: string }[];
+    };
+  };
   if (data.status !== 'success' || !data.data?.uid) return null;
-  return { uid: data.data.uid };
+
+  const meetingUrl =
+    data.data.meetingUrl ??
+    data.data.references?.find((r) => r.meetingUrl)?.meetingUrl;
+
+  return { uid: data.data.uid, meetingUrl };
 }

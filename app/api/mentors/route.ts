@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllMentors, getMentorByCirclesAddress, insertMentor } from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
 import { clampMentorShare } from '@/lib/crc-pay';
+import { normalizeMentorLanguages } from '@/lib/languages';
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -15,10 +16,11 @@ export function GET(request: NextRequest) {
   }
 
   const skill = searchParams.get('skill') ?? undefined;
+  const callLanguage = searchParams.get('call_language') ?? undefined;
   const q = searchParams.get('q')?.toLowerCase();
   const all = searchParams.get('all') === '1' && isAdminRequest(request);
 
-  let mentors = getAllMentors(skill, all);
+  let mentors = getAllMentors(skill, all, callLanguage ?? undefined);
 
   if (q) {
     mentors = mentors.filter(
@@ -60,6 +62,8 @@ export async function POST(request: NextRequest) {
     price_crc?: number;
     mentor_share_percent?: number;
     skills: string[];
+    spoken_languages?: string[];
+    call_languages?: string[];
   };
 
   if (!data.circles_address.trim()) {
@@ -70,6 +74,14 @@ export async function POST(request: NextRequest) {
   }
   if (!data.skills.every((s) => typeof s === 'string')) {
     return NextResponse.json({ error: 'skills must be an array of strings' }, { status: 400 });
+  }
+
+  const languages = normalizeMentorLanguages(
+    data.spoken_languages ?? [],
+    data.call_languages,
+  );
+  if ('error' in languages) {
+    return NextResponse.json({ error: languages.error }, { status: 400 });
   }
 
   try {
@@ -83,6 +95,8 @@ export async function POST(request: NextRequest) {
       price_crc: data.price_crc,
       mentor_share_percent: clampMentorShare(data.mentor_share_percent ?? 20),
       skills: data.skills,
+      spoken_languages: languages.spoken_languages,
+      call_languages: languages.call_languages,
     });
     return NextResponse.json({ id }, { status: 201 });
   } catch (err) {

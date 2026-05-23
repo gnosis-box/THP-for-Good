@@ -1,0 +1,64 @@
+name: Feature request
+description: Propose a new capability or product improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What user or operator pain does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: High-level UX or API shape. Link mockups if any.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Primary audience
+      options:
+        - Participant (books sessions)
+        - Expert (offers sessions)
+        - Admin / foundation
+        - All users
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Suggested layer
+      description: See AGENTS.md — L4 = post-MVP unless it blocks hackathon demo.
+      options:
+        - L4 — Post-MVP
+        - L3 — UX & Demo
+        - L2 — Integration
+        - Unsure — needs triage
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] …
+        - [ ] …
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I checked spec/PRD-MVP.md and this is not already tracked
+          required: true

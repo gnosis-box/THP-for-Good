@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CalConnect } from '@/components/mentors/CalConnect';
 import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
+import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPicker';
+import { defaultCallLanguagesFromSpoken, filterCallLanguageCodes } from '@/lib/languages';
+import { LanguagePicker } from '@/components/mentors/LanguagePicker';
+import { StopExpertButton } from '@/components/mentors/StopExpertButton';
 import type { MentorRow, TagRow } from '@/lib/db';
 
 type Props = {
@@ -12,13 +16,20 @@ type Props = {
   walletAddress: string;
   onSaved: () => void;
   onCancel: () => void;
+  onDeactivated?: () => void;
 };
 
-export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Props) {
+export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel, onDeactivated }: Props) {
   const [tags, setTags] = useState<TagRow[]>([]);
   const [name, setName] = useState(mentor.name);
   const [bio, setBio] = useState(mentor.bio ?? '');
   const [selectedSkills, setSelectedSkills] = useState<string[]>(mentor.skills);
+  const [spokenLanguages, setSpokenLanguages] = useState<string[]>(mentor.spoken_languages);
+  const [callLanguages, setCallLanguages] = useState<string[]>(
+    mentor.call_languages.length > 0
+      ? filterCallLanguageCodes(mentor.call_languages)
+      : defaultCallLanguagesFromSpoken(mentor.spoken_languages),
+  );
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(mentor.cal_event_type_id);
   const [priceCrc, setPriceCrc] = useState(mentor.price_crc);
   const [mentorShare, setMentorShare] = useState(clampMentorShare(mentor.mentor_share_percent ?? 20));
@@ -33,23 +44,20 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
       .catch(() => {});
   }, []);
 
-  function toggleSkill(label: string) {
-    setSelectedSkills((prev) =>
-      prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label],
-    );
-  }
-
   function addNewSkill() {
     const label = newSkill.trim();
     if (!label) return;
-    if (!tags.some((t) => t.label.toLowerCase() === label.toLowerCase())) {
-      setTags((prev) => [...prev, { id: -(prev.length + 1), label, status: 'approved' as const }]);
-    }
+    setTags((prev) => mergeSkillTag(prev, label, 'approved'));
     setSelectedSkills((prev) => (prev.includes(label) ? prev : [...prev, label]));
     setNewSkill('');
   }
 
   async function handleSave() {
+    if (selectedSkills.length === 0) {
+      setError('Please select at least one skill.');
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
@@ -63,6 +71,12 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
           price_crc: priceCrc,
           mentor_share_percent: mentorShare,
           skills: selectedSkills,
+          spoken_languages: spokenLanguages,
+          call_languages:
+            callLanguages.length > 0
+              ? filterCallLanguageCodes(callLanguages)
+              : defaultCallLanguagesFromSpoken(spokenLanguages),
+          active: 1,
         }),
       });
       if (!res.ok) {
@@ -79,7 +93,6 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-border p-4">
-      {/* Name */}
       <div className="flex flex-col gap-1">
         <label className="text-xs font-medium">Name</label>
         <input
@@ -90,7 +103,6 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
         />
       </div>
 
-      {/* Bio */}
       <div className="flex flex-col gap-1">
         <label className="text-xs font-medium">Bio</label>
         <textarea
@@ -102,48 +114,24 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
         />
       </div>
 
-      {/* Skills */}
-      <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium">Skills</span>
-        <div className="flex flex-wrap gap-1.5">
-          {tags.map((tag) => {
-            const active = selectedSkills.includes(tag.label);
-            return (
-              <button
-                key={tag.id}
-                type="button"
-                onClick={() => toggleSkill(tag.label)}
-                className={cn(
-                  'rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors',
-                  active ? 'bg-primary text-primary-foreground' : 'border border-border bg-background hover:bg-muted',
-                )}
-              >
-                {tag.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newSkill}
-            onChange={(e) => setNewSkill(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addNewSkill())}
-            placeholder="Add a skill…"
-            className="h-7 flex-1 rounded-lg border border-border bg-background px-2.5 text-xs outline-none focus-visible:border-ring"
-          />
-          <button
-            type="button"
-            onClick={addNewSkill}
-            disabled={!newSkill.trim()}
-            className="h-7 rounded-lg border border-border px-2.5 text-xs hover:bg-muted disabled:opacity-40"
-          >
-            Add
-          </button>
-        </div>
-      </div>
+      <SkillTagPicker
+        tags={tags}
+        selected={selectedSkills}
+        onSelectedChange={setSelectedSkills}
+        size="sm"
+        newSkill={newSkill}
+        onNewSkillChange={setNewSkill}
+        onAddNewSkill={addNewSkill}
+      />
 
-      {/* Cal.com */}
+      <LanguagePicker
+        spoken={spokenLanguages}
+        call={callLanguages}
+        onSpokenChange={setSpokenLanguages}
+        onCallChange={setCallLanguages}
+        size="sm"
+      />
+
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium">Cal.com event type</span>
         {calEventTypeId && (
@@ -152,7 +140,6 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
         <CalConnect onConnect={setCalEventTypeId} />
       </div>
 
-      {/* Payment split */}
       <div className="flex flex-col gap-1.5">
         <span className="text-xs font-medium">Payment split</span>
         <div className="flex flex-wrap gap-2">
@@ -174,7 +161,6 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
         </div>
       </div>
 
-      {/* Price */}
       <div className="flex items-center gap-3">
         <label className="text-xs font-medium">CRC per session</label>
         <input
@@ -189,13 +175,26 @@ export function MentorEditForm({ mentor, walletAddress, onSaved, onCancel }: Pro
       {error && <p className="text-xs text-destructive">{error}</p>}
 
       <div className="flex gap-2">
-        <Button type="button" size="sm" onClick={handleSave} disabled={submitting || !name.trim()}>
+        <Button
+          type="button"
+          size="sm"
+          onClick={handleSave}
+          disabled={submitting || !name.trim() || selectedSkills.length === 0}
+        >
           {submitting ? 'Saving…' : 'Save'}
         </Button>
         <Button type="button" size="sm" variant="outline" onClick={onCancel} disabled={submitting}>
           Cancel
         </Button>
       </div>
+
+      {mentor.active === 1 ? (
+        <StopExpertButton
+          mentorId={mentor.id}
+          walletAddress={walletAddress}
+          onDeactivated={onDeactivated}
+        />
+      ) : null}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CalConnect } from '@/components/mentors/CalConnect';
 import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
+import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPicker';
 import type { MentorRow, TagRow } from '@/lib/db';
 
 type MemberEntry = {
@@ -111,25 +112,10 @@ export function PromoteSection({
     setForm(null);
   }
 
-  function toggleSkill(label: string) {
-    setForm((prev) =>
-      prev
-        ? {
-            ...prev,
-            selectedSkills: prev.selectedSkills.includes(label)
-              ? prev.selectedSkills.filter((s) => s !== label)
-              : [...prev.selectedSkills, label],
-          }
-        : prev,
-    );
-  }
-
   function addNewSkill() {
     const label = newSkill.trim();
     if (!label) return;
-    if (!localTags.some((t) => t.label.toLowerCase() === label.toLowerCase())) {
-      setLocalTags((prev) => [...prev, { id: -(prev.length + 1), label, status: 'pending' as const }]);
-    }
+    setLocalTags((prev) => mergeSkillTag(prev, label, 'pending'));
     setForm((prev) =>
       prev && !prev.selectedSkills.includes(label)
         ? { ...prev, selectedSkills: [...prev.selectedSkills, label] }
@@ -319,48 +305,18 @@ export function PromoteSection({
                       />
                     </div>
 
-                    {/* Skills */}
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-xs font-medium">Skills</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {localTags.map((tag) => {
-                          const active = form.selectedSkills.includes(tag.label);
-                          return (
-                            <button
-                              key={tag.id}
-                              type="button"
-                              onClick={() => toggleSkill(tag.label)}
-                              className={cn(
-                                'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors',
-                                active
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'border border-border bg-background hover:bg-muted',
-                              )}
-                            >
-                              {tag.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newSkill}
-                          onChange={(e) => setNewSkill(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addNewSkill())}
-                          placeholder="Add a skill…"
-                          className="h-7 flex-1 rounded-lg border border-border bg-background px-2.5 text-xs outline-none focus-visible:border-ring"
-                        />
-                        <button
-                          type="button"
-                          onClick={addNewSkill}
-                          disabled={!newSkill.trim()}
-                          className="h-7 rounded-lg border border-border px-2.5 text-xs hover:bg-muted disabled:opacity-40"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    </div>
+                    <SkillTagPicker
+                      tags={localTags}
+                      selected={form.selectedSkills}
+                      onSelectedChange={(skills) =>
+                        setForm((prev) => prev && { ...prev, selectedSkills: skills })
+                      }
+                      size="sm"
+                      helperText="Select at least one skill for this expert."
+                      newSkill={newSkill}
+                      onNewSkillChange={setNewSkill}
+                      onAddNewSkill={addNewSkill}
+                    />
 
                     {/* Cal.com */}
                     <div className="flex flex-col gap-1">

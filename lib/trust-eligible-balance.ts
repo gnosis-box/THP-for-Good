@@ -66,8 +66,8 @@ export async function queryTrustPathLimits(
   const foundationSink = PAY_FOUNDATION as `0x${string}`;
 
   const [toExpertCrc, toFoundationCrc] = await Promise.all([
-    maxFlowCrc(from, expert, false),
-    maxFlowCrc(from, foundationSink, false),
+    maxFlowCrc(from, expert, true),
+    maxFlowCrc(from, foundationSink, true),
   ]);
 
   return {

@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
-import { MentorSkillTags, MentorSplitShare } from '@/components/ui-patterns/MentorMeta';
+import { MentorSkillTags, MentorLanguageTags, MentorSplitShare } from '@/components/ui-patterns/MentorMeta';
+import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
 
@@ -13,6 +14,8 @@ type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 export function MentorCard({ mentor }: { mentor: MentorRow }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
   const share = mentor.mentor_share_percent ?? 20;
+  const callLanguages =
+    mentor.call_languages.length > 0 ? mentor.call_languages : mentor.spoken_languages;
 
   useEffect(() => {
     (async () => {
@@ -50,9 +53,17 @@ export function MentorCard({ mentor }: { mentor: MentorRow }) {
             <p className="truncate font-semibold leading-tight sm:text-base">{mentor.name}</p>
             <CrcAmount amount={mentor.price_crc} className="shrink-0 text-sm text-foreground" />
           </div>
-          {circles !== null && circles.trustedByCount !== null && (
-            <p className="text-xs text-muted-foreground">Trusted by {circles.trustedByCount}</p>
-          )}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {circles !== null && circles.trustedByCount !== null && (
+              <p className="text-xs text-muted-foreground">Trusted by {circles.trustedByCount}</p>
+            )}
+            <ExpertTrustControl
+              expertAddress={mentor.circles_address}
+              expertName={mentor.name}
+              compact
+            />
+          </div>
+          <MentorLanguageTags languages={callLanguages} />
           <MentorSkillTags skills={mentor.skills} />
           <MentorSplitShare expertPercent={share} />
         </div>

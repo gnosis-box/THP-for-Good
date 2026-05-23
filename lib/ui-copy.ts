@@ -8,6 +8,8 @@ export const UI_COPY = {
     emptySearch: 'No mentors found for this search.',
     searchPlaceholder: 'Search by name, skill or bio…',
     filterAll: 'All',
+    languageFilterLabel: 'Session language',
+    languageFilterAll: 'Any language',
   },
   circlesHint: {
     title: 'Open in Circles to pay with CRC',
@@ -24,6 +26,11 @@ export const UI_COPY = {
     bookSession: 'Book session',
     reviewAndPay: 'Review & pay',
     selectSlotFirst: 'Select a slot above first.',
+    successTrustReminder: (expertName: string) =>
+      `After your call, trust ${expertName} on My Calls to strengthen the Circles network.`,
+    viewMyCalls: 'View my calls',
+    openCalBooking: 'Open Cal.com booking',
+    openExpertCalendar: 'Open expert calendar',
     noCalSelf:
       'No availability configured yet. Click "Edit my profile" to connect your Cal.com.',
     noCalVisitor: 'Availability not configured for this mentor yet.',
@@ -35,8 +42,38 @@ export const UI_COPY = {
     emptyEmitted: 'No bookings yet. Book a session with an expert.',
     emptyReceived: 'No incoming bookings yet.',
   },
+  support: {
+    reportIssue: 'Report issue',
+    reportIssueAria: 'Report an issue or send feedback on GitHub',
+  },
+  trustCard: {
+    loading: 'Trust…',
+    trust: 'Trust',
+    trustBack: 'Trust back',
+    trusting: 'Trusting…',
+    trustsYou: 'Trusts you',
+    youTrust: 'You trust',
+    mutual: 'Mutual trust',
+    trustFailed: 'Trust failed. Please try again.',
+  },
   register: {
     title: 'Offer your expertise',
+    editTitle: 'Edit your expert profile',
+    editSubtitle: 'Update your skills, availability, and session details.',
+    inactiveNotice:
+      'Your profile is hidden from the expert directory. Save your changes to publish it again.',
+    viewPublicProfile: 'View public profile',
+    saveChanges: 'Save changes',
+    publishProfile: 'Publish profile',
+    saving: 'Saving…',
+    registering: 'Registering…',
+    registerCta: 'Register as expert',
+    stopExpertHint:
+      'You will no longer appear in the expert directory. Existing bookings are kept.',
+    stopExpertCta: 'Stop offering sessions',
+    stopExpertLoading: 'Updating…',
+    stopExpertConfirm:
+      'Remove your expert profile from the directory? You can register again later.',
   },
 } as const;
 

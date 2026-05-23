@@ -2,23 +2,20 @@
 
 import { usePathname } from 'next/navigation';
 
-import { ADMIN_NAV_ITEM, NAV } from '@/lib/nav';
+import { useIsAdmin } from '@/hooks/use-is-admin';
+import { findNavItem } from '@/lib/nav';
 
+/** Optional page crumb — use in page content, not in the crowded header bar. */
 export function CurrentPage() {
   const pathname = usePathname();
-  const current =
-    pathname.startsWith('/admin')
-      ? ADMIN_NAV_ITEM
-      : NAV.find((item) =>
-          item.href === '/' ? pathname === '/' : pathname.startsWith(item.href),
-        );
+  const { isAdmin } = useIsAdmin();
+  const current = findNavItem(pathname, isAdmin);
 
   if (!current) return null;
 
   return (
-    <span className="hidden text-sm text-muted-foreground sm:inline">
-      <span aria-hidden className="mx-2 text-muted-foreground/40">/</span>
+    <p className="text-sm text-muted-foreground" aria-current="page">
       {current.label}
-    </span>
+    </p>
   );
 }

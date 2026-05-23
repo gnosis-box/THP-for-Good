@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
+import { parseCallLanguageCodes, parseLanguageCodes, serializeCallLanguageCodes } from '@/lib/languages';
 
 export type TagRow = {
   id: number;
@@ -21,6 +22,8 @@ export type MentorRow = {
   active: number;
   created_at: string;
   skills: string[];
+  spoken_languages: string[];
+  call_languages: string[];
 };
 
 export type BookingRow = {
@@ -44,6 +47,8 @@ export type InsertMentorData = {
   price_crc?: number;
   mentor_share_percent?: number;
   skills: string[];
+  spoken_languages?: string[];
+  call_languages?: string[];
 };
 
 export type InsertBookingData = {
@@ -55,7 +60,20 @@ export type InsertBookingData = {
   cal_booking_uid?: string;
 };
 
-type MentorRowRaw = Omit<MentorRow, 'skills'> & { skills: string };
+type MentorRowRaw = Omit<MentorRow, 'skills' | 'spoken_languages' | 'call_languages'> & {
+  skills: string;
+  spoken_languages: string | null;
+  call_languages: string | null;
+};
+
+function mapMentorRow(row: MentorRowRaw): MentorRow {
+  return {
+    ...row,
+    skills: row.skills ? row.skills.split(',') : [],
+    spoken_languages: parseLanguageCodes(row.spoken_languages),
+    call_languages: parseCallLanguageCodes(row.call_languages),
+  };
+}
 
 const dataDir = path.join(process.cwd(), 'data');
 fs.mkdirSync(dataDir, { recursive: true });
@@ -77,11 +95,17 @@ for (const sql of [
   'ALTER TABLE bookings ADD COLUMN cal_booking_uid TEXT',
   "ALTER TABLE skill_tags ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'",
   'ALTER TABLE mentors ADD COLUMN mentor_share_percent INTEGER DEFAULT 20',
+  'ALTER TABLE mentors ADD COLUMN spoken_languages TEXT',
+  'ALTER TABLE mentors ADD COLUMN call_languages TEXT',
 ]) {
   try { db.exec(sql); } catch { /* column already exists */ }
 }
 
-export function getAllMentors(skillFilter?: string, includeInactive = false): MentorRow[] {
+export function getAllMentors(
+  skillFilter?: string,
+  includeInactive = false,
+  callLanguageFilter?: string,
+): MentorRow[] {
   let sql = `
     SELECT
       m.*,
@@ -105,13 +129,23 @@ export function getAllMentors(skillFilter?: string, includeInactive = false): Me
     params.push(skillFilter);
   }
 
+  if (callLanguageFilter) {
+    sql += `
+      AND (
+        m.call_languages LIKE ?
+        OR m.call_languages LIKE ?
+        OR m.call_languages LIKE ?
+        OR m.call_languages = ?
+      )
+    `;
+    const code = callLanguageFilter.toLowerCase();
+    params.push(`${code},%`, `%,${code}`, `%,${code},%`, code);
+  }
+
   sql += ' GROUP BY m.id';
 
   const rows = db.prepare(sql).all(...params) as MentorRowRaw[];
-  return rows.map((r) => ({
-    ...r,
-    skills: r.skills ? r.skills.split(',') : [],
-  }));
+  return rows.map(mapMentorRow);
 }
 
 export function getMentorById(id: number): MentorRow | undefined {
@@ -127,7 +161,7 @@ export function getMentorById(id: number): MentorRow | undefined {
   `;
   const row = db.prepare(sql).get(id) as MentorRowRaw | undefined;
   if (!row) return undefined;
-  return { ...row, skills: row.skills ? row.skills.split(',') : [] };
+  return mapMentorRow(row);
 }
 
 export function getMentorByCirclesAddress(address: string): MentorRow | undefined {
@@ -143,13 +177,25 @@ export function getMentorByCirclesAddress(address: string): MentorRow | undefine
   `;
   const row = db.prepare(sql).get(address) as MentorRowRaw | undefined;
   if (!row) return undefined;
-  return { ...row, skills: row.skills ? row.skills.split(',') : [] };
+  return mapMentorRow(row);
 }
 
 export function insertMentor(data: InsertMentorData): number {
   const insertMentorStmt = db.prepare(`
-    INSERT OR IGNORE INTO mentors (circles_address, name, bio, calendar_link, google_calendar_id, cal_event_type_id, price_crc, mentor_share_percent)
-    VALUES (@circles_address, @name, @bio, @calendar_link, @google_calendar_id, @cal_event_type_id, @price_crc, @mentor_share_percent)
+    INSERT OR IGNORE INTO mentors (
+      circles_address, name, bio, calendar_link, google_calendar_id, cal_event_type_id,
+      price_crc, mentor_share_percent, spoken_languages, call_languages
+    )
+    VALUES (
+      @circles_address, @name, @bio, @calendar_link, @google_calendar_id, @cal_event_type_id,
+      @price_crc, @mentor_share_percent, @spoken_languages, @call_languages
+    )
+  `);
+
+  const updateLanguagesStmt = db.prepare(`
+    UPDATE mentors
+    SET spoken_languages = @spoken_languages, call_languages = @call_languages
+    WHERE id = @id
   `);
 
   const upsertTagStmt = db.prepare(`
@@ -166,6 +212,15 @@ export function insertMentor(data: InsertMentorData): number {
   );
 
   const run = db.transaction(() => {
+    const spokenSerialized =
+      data.spoken_languages && data.spoken_languages.length > 0
+        ? data.spoken_languages.join(',')
+        : null;
+    const callSerialized =
+      data.call_languages && data.call_languages.length > 0
+        ? serializeCallLanguageCodes(data.call_languages)
+        : serializeCallLanguageCodes(data.spoken_languages ?? []);
+
     insertMentorStmt.run({
       circles_address: data.circles_address,
       name: data.name,
@@ -175,10 +230,20 @@ export function insertMentor(data: InsertMentorData): number {
       cal_event_type_id: data.cal_event_type_id ?? null,
       price_crc: data.price_crc ?? 100,
       mentor_share_percent: data.mentor_share_percent ?? 20,
+      spoken_languages: spokenSerialized,
+      call_languages: callSerialized,
     });
 
     const row = getMentorIdStmt.get(data.circles_address) as { id: number };
     const mentorId = row.id;
+
+    if (spokenSerialized !== null) {
+      updateLanguagesStmt.run({
+        spoken_languages: spokenSerialized,
+        call_languages: callSerialized,
+        id: mentorId,
+      });
+    }
 
     for (const skill of data.skills) {
       upsertTagStmt.run(skill);
@@ -278,6 +343,144 @@ export function getBookingsByProviderAddress(providerAddress: string): BookingWi
        ORDER BY b.created_at DESC`,
     )
     .all(providerAddress) as BookingWithMentorName[];
+}
+
+export type AdminHealthStats = {
+  bookings: {
+    total: number;
+    today: number;
+    last7Days: number;
+    withTx: number;
+    withoutTx: number;
+    withoutTrust: number;
+  };
+  mentors: {
+    total: number;
+    active: number;
+    inactive: number;
+    activeWithoutCal: number;
+    activeWithoutLanguages: number;
+  };
+  tags: {
+    pending: number;
+    approved: number;
+  };
+  recentBookings: Array<{
+    id: number;
+    mentor_name: string;
+    booker_address: string;
+    tx_hash: string | null;
+    slot_time: string | null;
+    created_at: string;
+    has_trust: boolean;
+  }>;
+};
+
+export function getAdminHealthStats(): AdminHealthStats {
+  const bookingCounts = db
+    .prepare(
+      `SELECT
+         COUNT(*) AS total,
+         SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END) AS today,
+         SUM(CASE WHEN datetime(created_at) >= datetime('now', '-7 days') THEN 1 ELSE 0 END) AS last7_days,
+         SUM(CASE WHEN tx_hash IS NOT NULL AND tx_hash != '' THEN 1 ELSE 0 END) AS with_tx,
+         SUM(CASE WHEN tx_hash IS NULL OR tx_hash = '' THEN 1 ELSE 0 END) AS without_tx,
+         SUM(CASE WHEN (tx_hash IS NOT NULL AND tx_hash != '')
+           AND NOT EXISTS (SELECT 1 FROM trust_attestations t WHERE t.booking_id = bookings.id)
+           THEN 1 ELSE 0 END) AS without_trust
+       FROM bookings`,
+    )
+    .get() as {
+      total: number;
+      today: number;
+      last7_days: number;
+      with_tx: number;
+      without_tx: number;
+      without_trust: number;
+    };
+
+  const mentorCounts = db
+    .prepare(
+      `SELECT
+         COUNT(*) AS total,
+         SUM(CASE WHEN active = 1 THEN 1 ELSE 0 END) AS active,
+         SUM(CASE WHEN active != 1 THEN 1 ELSE 0 END) AS inactive,
+         SUM(CASE WHEN active = 1 AND cal_event_type_id IS NULL THEN 1 ELSE 0 END) AS active_without_cal,
+         SUM(CASE WHEN active = 1 AND (call_languages IS NULL OR call_languages = '') THEN 1 ELSE 0 END) AS active_without_languages
+       FROM mentors`,
+    )
+    .get() as {
+      total: number;
+      active: number;
+      inactive: number;
+      active_without_cal: number;
+      active_without_languages: number;
+    };
+
+  const tagCounts = db
+    .prepare(
+      `SELECT
+         SUM(CASE WHEN COALESCE(status, 'approved') = 'pending' THEN 1 ELSE 0 END) AS pending,
+         SUM(CASE WHEN COALESCE(status, 'approved') = 'approved' THEN 1 ELSE 0 END) AS approved
+       FROM skill_tags`,
+    )
+    .get() as { pending: number; approved: number };
+
+  const recentBookings = db
+    .prepare(
+      `SELECT
+         b.id,
+         m.name AS mentor_name,
+         b.booker_address,
+         b.tx_hash,
+         b.slot_time,
+         b.created_at,
+         EXISTS(SELECT 1 FROM trust_attestations t WHERE t.booking_id = b.id) AS has_trust
+       FROM bookings b
+       JOIN mentors m ON m.id = b.mentor_id
+       ORDER BY b.created_at DESC
+       LIMIT 10`,
+    )
+    .all() as Array<{
+      id: number;
+      mentor_name: string;
+      booker_address: string;
+      tx_hash: string | null;
+      slot_time: string | null;
+      created_at: string;
+      has_trust: number;
+    }>;
+
+  return {
+    bookings: {
+      total: bookingCounts.total ?? 0,
+      today: bookingCounts.today ?? 0,
+      last7Days: bookingCounts.last7_days ?? 0,
+      withTx: bookingCounts.with_tx ?? 0,
+      withoutTx: bookingCounts.without_tx ?? 0,
+      withoutTrust: bookingCounts.without_trust ?? 0,
+    },
+    mentors: {
+      total: mentorCounts.total ?? 0,
+      active: mentorCounts.active ?? 0,
+      inactive: mentorCounts.inactive ?? 0,
+      activeWithoutCal: mentorCounts.active_without_cal ?? 0,
+      activeWithoutLanguages: mentorCounts.active_without_languages ?? 0,
+    },
+    tags: {
+      pending: tagCounts.pending ?? 0,
+      approved: tagCounts.approved ?? 0,
+    },
+    recentBookings: recentBookings.map((row) => ({
+      id: row.id,
+      mentor_name: row.mentor_name,
+      booker_address: row.booker_address,
+      tx_hash: row.tx_hash,
+      slot_time: row.slot_time,
+      created_at: row.created_at,
+      has_trust: row.has_trust === 1,
+    })),
+  };
 }
 
 export default db;

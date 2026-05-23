@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS mentors (
   cal_event_type_id  INTEGER,
   price_crc            INTEGER DEFAULT 100,
   mentor_share_percent INTEGER DEFAULT 20,
+  spoken_languages     TEXT,
+  call_languages       TEXT,
   active               INTEGER DEFAULT 1,
   created_at         TEXT    DEFAULT (datetime('now'))
 );

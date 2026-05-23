@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
-import { MentorSkillTags, MentorSplitShare } from '@/components/ui-patterns/MentorMeta';
+import { MentorSkillTags, MentorLanguageTags, MentorSplitShare } from '@/components/ui-patterns/MentorMeta';
+import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { MentorRow } from '@/lib/db';
@@ -14,6 +15,8 @@ export function MentorProfileHero({ mentor }: Props) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [trustedBy, setTrustedBy] = useState<number | null>(null);
   const share = mentor.mentor_share_percent ?? 20;
+  const callLanguages =
+    mentor.call_languages.length > 0 ? mentor.call_languages : mentor.spoken_languages;
 
   useEffect(() => {
     (async () => {
@@ -44,9 +47,16 @@ export function MentorProfileHero({ mentor }: Props) {
             </h1>
             <CrcAmount amount={mentor.price_crc} className="shrink-0 text-sm sm:text-base" />
           </div>
-          {trustedBy !== null && (
-            <p className="text-xs text-muted-foreground">Trusted by {trustedBy}</p>
-          )}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {trustedBy !== null && (
+              <p className="text-xs text-muted-foreground">Trusted by {trustedBy}</p>
+            )}
+            <ExpertTrustControl
+              expertAddress={mentor.circles_address}
+              expertName={mentor.name}
+            />
+          </div>
+          <MentorLanguageTags languages={callLanguages} className="sm:text-sm" />
           <MentorSkillTags skills={mentor.skills} className="sm:[&_span]:text-sm" />
           <MentorSplitShare expertPercent={share} className="sm:text-sm" />
         </div>

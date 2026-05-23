@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Header } from '@/components/layout/Header';
+import { ReportIssueLink } from '@/components/layout/ReportIssueLink';
 import { OpenInCirclesHint } from '@/components/wallet/OpenInCirclesHint';
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -13,6 +14,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {children}
         </div>
       </main>
+      <ReportIssueLink />
     </div>
   );
 }
