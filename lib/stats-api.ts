@@ -9,6 +9,7 @@ export type StatsTreasuryPayload = {
 
 export type StatsGroupPayload = {
   address: string;
+  balanceCrc: number | null;
   eventsUrl: string;
   graphUrl: string;
 };

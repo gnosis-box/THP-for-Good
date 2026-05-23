@@ -498,6 +498,7 @@ export type StatsEnrichment = {
   tagCounts: StatsTagCount[];
   trustAttestationCount: number;
   paidBookingCount: number;
+  bookingIntentCount: number;
   recentPaidBookings: StatsRecentPaidBooking[];
 };
 
@@ -533,6 +534,14 @@ export function getStatsEnrichment(): StatsEnrichment {
       )
       .get() as { n: number }
   ).n;
+  const bookingIntentCount = (
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM bookings
+         WHERE tx_hash IS NULL OR TRIM(tx_hash) = ''`,
+      )
+      .get() as { n: number }
+  ).n;
   const recentPaidBookings = db
     .prepare(
       `SELECT b.id AS id, m.name AS mentorName, b.tx_hash AS txHash, b.created_at AS createdAt
@@ -550,6 +559,7 @@ export function getStatsEnrichment(): StatsEnrichment {
     tagCounts,
     trustAttestationCount,
     paidBookingCount,
+    bookingIntentCount,
     recentPaidBookings,
   };
 }

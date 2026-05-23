@@ -30,6 +30,15 @@ export function getUmamiDashboardUrl(): string | null {
   return url || null;
 }
 
+/** Public Umami share dashboard — read-only, no login. */
+export const DEFAULT_UMAMI_SHARE_URL =
+  'https://stats.thp.gnosis.box/share/JAi7kUoC7s6BvPah' as const;
+
+export function getUmamiShareUrl(): string {
+  const url = process.env.NEXT_PUBLIC_UMAMI_SHARE_URL?.trim();
+  return url || DEFAULT_UMAMI_SHARE_URL;
+}
+
 export function trackUmamiEvent(name: string, data?: UmamiEventPayload): void {
   if (typeof window === 'undefined') return;
   const payload = sanitizePayload(data);

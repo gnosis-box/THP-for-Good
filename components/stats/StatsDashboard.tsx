@@ -6,8 +6,8 @@ import { ExternalLink } from 'lucide-react';
 
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { buttonVariants } from '@/components/ui/button';
-import { buildExplorerTxUrl } from '@/lib/analytics-explorer';
-import { getUmamiDashboardUrl, isUmamiEnabled } from '@/lib/analytics-umami';
+import { buildExplorerTxUrl, DUNE_GNOSIS_OVERVIEW_URL } from '@/lib/analytics-explorer';
+import { getUmamiShareUrl } from '@/lib/analytics-umami';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { StatsApiResponse } from '@/lib/stats-api';
 import { cn, shortenAddress } from '@/lib/utils';
@@ -83,8 +83,7 @@ export function StatsDashboard() {
     return <p className="text-sm text-muted-foreground animate-pulse">{copy.loading}</p>;
   }
 
-  const umamiDashboardUrl = getUmamiDashboardUrl();
-  const showUmami = isUmamiEnabled() && umamiDashboardUrl;
+  const umamiShareUrl = getUmamiShareUrl();
 
   return (
     <div className="flex flex-col gap-10">
@@ -99,16 +98,25 @@ export function StatsDashboard() {
           {copy.howToReadBullets.map((line) => (
             <li key={line}>{line}</li>
           ))}
+          {data.meta.startBlock != null && (
+            <li>{copy.analyticsFromBlock(data.meta.startBlock)}</li>
+          )}
         </ul>
       </section>
 
-      {showUmami && (
-        <section className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:p-5">
-          <h2 className="text-base font-semibold">{copy.umamiTitle}</h2>
-          <p className="text-xs text-muted-foreground">{copy.umamiNote}</p>
-          <ExplorerLink href={umamiDashboardUrl}>{copy.openUmamiDashboard}</ExplorerLink>
-        </section>
-      )}
+      <section className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:p-5">
+        <h2 className="text-base font-semibold">{copy.umamiTitle}</h2>
+        <p className="text-xs text-muted-foreground">{copy.umamiNote}</p>
+        <ExplorerLink href={umamiShareUrl}>{copy.openUmamiDashboard}</ExplorerLink>
+      </section>
+
+      <section className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:p-5">
+        <h2 className="text-base font-semibold">{copy.ecosystemTitle}</h2>
+        <p className="text-xs text-muted-foreground">{copy.ecosystemNote}</p>
+        <div className="flex flex-wrap gap-2">
+          <ExplorerLink href={DUNE_GNOSIS_OVERVIEW_URL}>{copy.openDuneOverview}</ExplorerLink>
+        </div>
+      </section>
 
       {data.reconcile.pendingTxCount > 0 && (
         <StatusAlert
@@ -136,9 +144,17 @@ export function StatsDashboard() {
       </section>
 
       {/* Group */}
-      <section className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:p-5">
+      <section className="flex flex-col gap-4 rounded-xl border border-border p-4 sm:p-5">
         <h2 className="text-base font-semibold">{copy.groupTitle}</h2>
         <p className="text-xs font-mono text-muted-foreground break-all">{data.group.address}</p>
+        <div>
+          <p className="text-xs text-muted-foreground">{copy.groupBalance}</p>
+          <p className="text-2xl font-semibold tabular-nums">
+            {data.group.balanceCrc != null
+              ? `${fmt(data.group.balanceCrc)} CRC`
+              : copy.treasuryBalanceUnavailable}
+          </p>
+        </div>
         <div className="flex flex-wrap gap-2">
           <ExplorerLink href={data.group.eventsUrl}>{copy.viewOnChainActivity}</ExplorerLink>
           <ExplorerLink href={data.group.graphUrl}>{copy.trustGraph}</ExplorerLink>
@@ -184,7 +200,7 @@ export function StatsDashboard() {
           <h2 className="text-base font-semibold">{copy.snapshotTitle}</h2>
           <p className="text-xs text-muted-foreground mt-1">{copy.snapshotOffChainNote}</p>
         </div>
-        <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div>
             <dt className="text-xs text-muted-foreground">{copy.activeExperts}</dt>
             <dd className="text-lg font-semibold tabular-nums">
@@ -197,6 +213,12 @@ export function StatsDashboard() {
           <div>
             <dt className="text-xs text-muted-foreground">{copy.paidBookings}</dt>
             <dd className="text-lg font-semibold tabular-nums">{data.enrichment.paidBookingCount}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-muted-foreground">{copy.bookingIntent}</dt>
+            <dd className="text-lg font-semibold tabular-nums">
+              {data.enrichment.bookingIntentCount}
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-muted-foreground">{copy.trustAttestations}</dt>
