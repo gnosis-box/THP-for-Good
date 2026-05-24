@@ -12,32 +12,30 @@ const GROUP_ADDRESS = (
   process.env.GROUP_ADDRESS ?? '0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00'
 ) as `0x${string}`;
 
+// Minimum balance to show (0.01 CRC in atto-CRC) — filters out mint dust
+const MIN_BALANCE = BigInt('10000000000000000');
+
 export async function GET() {
   try {
     const { Sdk } = await import('@aboutcircles/sdk');
     const sdk = new Sdk();
-    const query = sdk.groups.getHolders(GROUP_ADDRESS, 100);
 
-    const allHolders: { holder: `0x${string}`; demurragedTotalBalance: bigint }[] = [];
-    while (await query.queryNextPage()) {
-      const page = query.currentPage!;
-      allHolders.push(
-        ...page.results.map((r) => ({
-          holder: r.holder as `0x${string}`,
-          demurragedTotalBalance: r.demurragedTotalBalance,
-        })),
-      );
-      if (!page.hasMore) break;
-    }
+    // sdk.tokens.getHolders uses circles_getTokenHolders (works);
+    // sdk.groups.getHolders uses V_Crc_TokenBalances table (not available on this RPC)
+    const result = await sdk.tokens.getHolders(GROUP_ADDRESS, 200);
+
+    const holders = result.results.filter(
+      (r) => BigInt(r.balance) >= MIN_BALANCE,
+    );
 
     const settled = await Promise.allSettled<DaoSupporterDto>(
-      allHolders.map(async (row) => {
-        const view = await sdk.rpc.profile.getProfileView(row.holder);
+      holders.map(async (row) => {
+        const view = await sdk.rpc.profile.getProfileView(row.account);
         const raw = view.profile as typeof view.profile & { picture?: string };
-        const balanceCrc = (Number(row.demurragedTotalBalance) / 1e18).toFixed(2);
+        const balanceCrc = (Number(BigInt(row.balance)) / 1e18).toFixed(2);
         return {
-          address: row.holder,
-          name: raw?.name ?? `${row.holder.slice(0, 8)}…`,
+          address: row.account as `0x${string}`,
+          name: raw?.name ?? `${row.account.slice(0, 8)}…`,
           imageUrl: toHttpImageUrl(raw?.picture ?? raw?.previewImageUrl ?? raw?.imageUrl),
           balanceCrc,
         };
