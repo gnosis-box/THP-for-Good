@@ -256,11 +256,82 @@ sequenceDiagram
 - [x] Seed/demo senders mapped to [`spec/seed.md`](seed.md)
 - [x] Group `0x2b5E…` vs org `0xc02D…` clarified per [`useful-links.md`](useful-links.md)
 
-### 8.1 Spike remaining (implementation)
+### 8.1 Spike (implementation)
 
-- [ ] Confirm WSS from browser + Circles playground iframe
-- [ ] Wire `circles_subscribe` and log one live donation end-to-end
-- [ ] Prototype single coin flight + reconcile loop
+- [x] Confirm WSS from browser (`wss://rpc.aboutcircles.com/ws/subscribe` → HTTP 101)
+- [x] Prototype single coin flight + reconcile loop
+- [ ] One live donation end-to-end in Circles playground iframe (manual QA)
+
+### 8.2 Manual testing & dev tools (no on-chain tx)
+
+The floating **Treasury coin demo** panel is **disabled by default** (`TREASURY_COIN_DEV_PANEL_ENABLED = false`). In development, [`TreasuryCoinDevController`](../components/treasury/TreasuryCoinDevController.tsx) still mounts (no UI) and handles **URL auto-fire** + **`window.__THP_TREASURY_DEMO__`**. Re-enable the panel only for extended UI tuning.
+
+#### URL query (auto-fire once on load)
+
+| URL | Effect |
+|-----|--------|
+| `/about?demo-coin=10&demo-from=external` | External inflow → cagnote (top-right spawn) |
+| `/about?demo-coin=25&demo-from=button` | Donate-button spawn → cagnote |
+| `/expert/[id]?demo-coin=8&demo-from=pay` | Pay treasury leg → bottom chip |
+
+Aliases: `demo-treasury`, `demo-spawn` (same as `demo-from`).
+
+#### Browser console (development only)
+
+Register the panel temporarily (`TREASURY_COIN_DEV_PANEL_ENABLED = true`) **or** use the global API (always available in `pnpm dev` via `TreasuryCoinDevController`):
+
+```javascript
+window.dispatchEvent(new CustomEvent('thp:treasury-local', {
+  detail: {
+    txHash: '0xlocal' + Date.now().toString(16),
+    nominalCrc: 10,
+    spawnRect: { x: 400, y: 600, width: 140, height: 40 }, // optional; omit for external spawn
+  },
+}));
+```
+
+With the dev panel enabled:
+
+```javascript
+__THP_TREASURY_DEMO__.fireInbound({ nominalCrc: 10, spawn: 'external' });
+__THP_TREASURY_DEMO__.fireDonate(25);
+__THP_TREASURY_DEMO__.firePay(8);  // best on /expert/[id] with Pay drawer open
+```
+
+#### Spawn anchors (real buttons)
+
+| `data-*` attribute | Element |
+|------------------|---------|
+| `data-treasury-donate-btn` | Donate button on `/about` |
+| `data-treasury-pay-btn` | Pay button on `/expert/[id]` |
+
+Dev helpers in [`lib/treasury-coin-demo.ts`](../lib/treasury-coin-demo.ts) resolve these when present.
+
+#### WSS probe (Node 22+)
+
+```bash
+node scripts/probe-treasury-ws.mjs
+```
+
+Logs `CrcV2_TransferSummary` inbound to treasury (Ctrl+C to exit).
+
+#### Animation constants & gotchas
+
+| Item | Value / note |
+|------|----------------|
+| Flight duration | `COIN_FLIGHT_DURATION_S` = **1.05s** in [`crc-coin-flight.tsx`](../components/motion/crc-coin-flight.tsx) |
+| Rule | **1 tx = 1 coin** labeled `+X CRC` |
+| Spawn rects | App uses `{ x, y, width, height }` — `rectCenter()` accepts both `SpawnRect` and `DOMRect` |
+| Demo tx hashes | Prefix `0xdemo` / `0xlocal` skip RPC reconcile (optimistic bump visible in dev) |
+| Reduced motion | No flight; CountUp + progress pulse only |
+
+#### Surfaces
+
+| Page | Coin target | Trigger |
+|------|-------------|---------|
+| `/about` | Cagnote block (`impactTargetRef`: % + bar + CRC raised) | Donate success, WSS external, demo |
+| `/stats` | Treasury balance hero | WSS when panel visible (IntersectionObserver) |
+| `/expert/[id]` | Pay treasury chip (bottom) | PAY treasury leg via `PayTreasuryFeedback` |
 
 ---
 

@@ -26,6 +26,7 @@ This is a starter template for building [Circles](https://aboutcircles.com) mini
 | **Centre de vérité (statut, priorité, exécution)** | [GitHub Project #1](https://github.com/orgs/gnosis-box/projects/1/views/1) |
 | **Index (liens, décisions verrouillées, anti-doublon)** | [`spec/PRD-MVP.md`](spec/PRD-MVP.md) · [`spec/useful-links.md`](spec/useful-links.md) |
 | **L4 backlog workflow (agents)** | This file § [L4 backlog workflow](#l4-backlog-workflow) · skill `thp-for-good-backlog` |
+| **Live treasury counter (L4)** | [`spec/live-crc-counter.md`](spec/live-crc-counter.md) · this file § [Live treasury counter](#live-treasury-counter-l4) |
 
 Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**. Group by **Priority**.
 
@@ -144,6 +145,14 @@ components/
     SignInDemo.tsx              signMessage() demo
   profile/
     ProfileLookup.tsx           Profile lookup via getProfileView + getProfileByCid
+  treasury/
+    TreasuryProviders.tsx       Layout wrapper: pending-tx context + PayTreasuryFeedback
+    TreasuryCoinDevController.tsx  Dev-only URL/console triggers (no UI)
+    TreasuryCoinDevPanel.tsx    Optional floating dev UI (disabled by default)
+  motion/
+    crc-coin-flight.tsx         Portal coin animation
+    live-treasury-counter.tsx   WSS balance + CountUp + coin layer
+    pay-treasury-feedback.tsx   Post-PAY treasury leg chip
   ui/                           shadcn primitives — DO NOT hand-edit; regenerate via the CLI
 hooks/
   use-wallet.ts                 Re-export of useWallet
@@ -286,6 +295,36 @@ Components land in `components/ui/`. They use Base UI primitives, not Radix.
    curl -s -X POST https://rpc.aboutcircles.com/ -H "Content-Type: application/json" \
      -d '{"jsonrpc":"2.0","id":1,"method":"circles_<method>","params":[…]}'
    ```
+
+## Live treasury counter (L4)
+
+Implemented on **`impl/l4-live-crc-counter`** · spec [`spec/live-crc-counter.md`](spec/live-crc-counter.md) · issue [#87](https://github.com/gnosis-box/THP-for-Good/issues/87).
+
+| Fact | Value |
+| --- | --- |
+| Treasury org | `0xc02D5aaCA64dE428D571dA42538232C431E0CDeD` (`FOUNDATION_ADDRESS` in [`lib/crc-pay.ts`](lib/crc-pay.ts)) |
+| Balance source | `getProfileView(address).v2Balance` via [`fetchTreasuryBalanceCrc`](lib/analytics-rpc.ts) |
+| Live events | WSS `wss://rpc.aboutcircles.com/ws/subscribe` + `circles_subscribe`; polling fallback 30s |
+| Inbound filter | `CrcV2_TransferSummary` with `to === treasury`, `from !==` group `0x2b5E…` |
+
+**UI surfaces:** `/about` (cagnote + donate coin), `/stats` (treasury hero; WSS when visible), `/expert/[id]` (post-PAY treasury leg chip). **1 transaction = 1 coin** particle (`+X CRC` label).
+
+**Key modules:**
+
+```
+lib/treasury-events.ts       parse TransferSummary, dedupe
+lib/treasury-ws.ts           WSS client + reconnect
+hooks/use-live-treasury-balance.ts
+hooks/use-coin-burst-queue.ts
+components/motion/crc-coin-flight.tsx
+components/motion/live-treasury-counter.tsx
+contexts/TreasuryPendingTxContext.tsx   same-tab dedupe (donate + pay)
+components/treasury/TreasuryProviders.tsx  wraps layout; PayTreasuryFeedback global
+```
+
+**Manual / fake coin testing (no on-chain tx):** see spec **§8.2**. Floating panel **off by default**; in dev, `TreasuryCoinDevController` handles URL params + `__THP_TREASURY_DEMO__`. WSS probe: `node scripts/probe-treasury-ws.mjs` (Node 22+).
+
+**Do not** confuse group `0x2b5E…` with treasury org `0xc02D…` when filtering WSS events.
 
 ## Commands
 

@@ -1,6 +1,13 @@
 /** Live Circles RPC reads for public stats — no wallet or booking data. */
 
+import { TREASURY_ORG_ADDRESS } from '@/lib/analytics-explorer';
+
 const DEFAULT_RPC_TIMEOUT_MS = 8_000;
+
+/** Client or server: THP for Good DAO treasury CRC balance. */
+export async function fetchTreasuryBalanceCrc(): Promise<number | null> {
+  return fetchAvatarBalanceCrc(TREASURY_ORG_ADDRESS);
+}
 
 export function getStatsMaxExpertBalances(): number {
   const raw = process.env.THP_STATS_MAX_EXPERT_BALANCES?.trim();
