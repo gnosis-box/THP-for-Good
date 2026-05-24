@@ -33,7 +33,7 @@ export default function HomeLoading() {
       </section>
 
       {/* Mentor card grid skeleton */}
-      <ul className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2">
+      <ul className="flex w-full flex-col gap-4">
         {[1, 2, 3, 4].map((i) => (
           <li
             key={i}

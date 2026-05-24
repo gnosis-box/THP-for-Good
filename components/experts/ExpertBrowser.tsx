@@ -170,7 +170,7 @@ export function ExpertBrowser({ experts, tags }: Props) {
       ) : (
         <AnimatedList
           listKey={listKey}
-          className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2"
+          className="flex w-full flex-col gap-4"
         >
           {experts.map((expert, index) => (
             <AnimatedListItem
