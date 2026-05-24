@@ -16,7 +16,7 @@ export default function AboutPage() {
       <section className="flex flex-col gap-2">
         <Link
           href="/stats"
-          className="text-sm text-primary underline underline-offset-2 w-fit"
+          className="text-sm text-foreground underline underline-offset-2 w-fit"
         >
           View transparency dashboard →
         </Link>
@@ -34,7 +34,7 @@ export default function AboutPage() {
           href="https://aboutcircles.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-primary underline underline-offset-2 w-fit"
+          className="text-sm text-foreground underline underline-offset-2 w-fit"
         >
           Learn more about Circles →
         </a>

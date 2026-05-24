@@ -28,7 +28,7 @@ export function StickyPayBar({ priceCrc, hasSlot, onReview }: Props) {
       <div className="mx-auto flex max-w-lg items-center justify-between gap-3 md:max-w-2xl">
         <div className="flex flex-col gap-0.5">
           <span className="text-xs text-muted-foreground">{UI_COPY.booking.bookSession}</span>
-          <CrcAmount amount={priceCrc} className="text-base" />
+          <CrcAmount amount={priceCrc} variant="highlight" className="text-base" />
         </div>
         <Button
           type="button"

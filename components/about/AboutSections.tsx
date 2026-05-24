@@ -67,7 +67,7 @@ const STEPS = [
     title: 'Payment split — solidarity by design',
     body: (
       <>
-        <blockquote className="motion-quote-border border-l-2 border-transparent pl-3 text-sm text-accent">
+        <blockquote className="motion-quote-border border-l-2 border-accent pl-3 text-sm text-foreground">
           At least 50% of every session goes to THP for Good to fund future learners.
         </blockquote>
         <p className="text-sm text-muted-foreground">

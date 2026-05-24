@@ -12,7 +12,15 @@ import { PAY_COPY } from '@/lib/pay-copy';
 import { cn } from '@/lib/utils';
 import type { TrustEligibleBalanceState } from '@/hooks/use-trust-eligible-balance';
 
-function TrustProgressBar({ pct, label }: { pct: number; label: string }) {
+function TrustProgressBar({
+  pct,
+  label,
+  fillClass = 'bg-primary',
+}: {
+  pct: number;
+  label: string;
+  fillClass?: string;
+}) {
   const reducedMotion = usePrefersReducedMotion();
   const [mounted, setMounted] = useState(false);
 
@@ -25,7 +33,7 @@ function TrustProgressBar({ pct, label }: { pct: number; label: string }) {
 
   return (
     <div
-      className="h-2 w-full overflow-hidden rounded-full bg-secondary"
+      className="h-2 w-full overflow-hidden rounded-full bg-muted"
       role="progressbar"
       aria-valuenow={Math.round(pct)}
       aria-valuemin={0}
@@ -34,7 +42,8 @@ function TrustProgressBar({ pct, label }: { pct: number; label: string }) {
     >
       <div
         className={cn(
-          'motion-progress-fill h-full rounded-full bg-primary',
+          'motion-progress-fill h-full rounded-full',
+          fillClass,
           !reducedMotion && 'transition-transform duration-[var(--motion-normal)] ease-out',
         )}
         style={{ transform: `scaleX(${scale})` }}
@@ -69,9 +78,10 @@ type LegRowProps = {
   label: string;
   maxFormatted: string;
   legCrc: number;
+  fillClass?: string;
 };
 
-function LegRow({ label, maxFormatted, legCrc }: LegRowProps) {
+function LegRow({ label, maxFormatted, legCrc, fillClass = 'bg-primary' }: LegRowProps) {
   const maxNum = parseFloat(maxFormatted) || 0;
   const pct = legCrc > 0 ? Math.min(100, (maxNum / legCrc) * 100) : 0;
   const ok = maxNum >= legCrc;
@@ -95,7 +105,7 @@ function LegRow({ label, maxFormatted, legCrc }: LegRowProps) {
           )}
         </span>
       </div>
-      <TrustProgressBar pct={pct} label={`${label}: ${maxFormatted} of ${legCrc} CRC`} />
+      <TrustProgressBar pct={pct} label={`${label}: ${maxFormatted} of ${legCrc} CRC`} fillClass={fillClass} />
     </div>
   );
 }
@@ -136,6 +146,7 @@ function TrustPathContent({
           label={PAY_COPY.thpForGood}
           maxFormatted={trustEligible.formatted.foundation}
           legCrc={treasuryLegCrc}
+          fillClass="bg-accent"
         />
       )}
       <p className="text-xs text-muted-foreground">

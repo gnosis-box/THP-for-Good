@@ -151,25 +151,7 @@ Dark mode is standard in **Web3 wallets** (Phantom, Rainbow, Zerion) and reads a
 
 ### 6.1 Theme strategy
 
-**Decision:** **Dark-only** — set `class="dark"` on `<html>` permanently; define tokens only under `.dark` (optional `:root` mirror for SSR flash prevention).
-
-Implementation path ([shadcn theming](https://ui.shadcn.com/docs/theming)):
-
-```css
-/* app/globals.css — target structure */
-.dark {
-  --background: oklch(0.13 0.01 260);   /* deep blue-gray */
-  --foreground: oklch(0.97 0.01 260);
-  --card: oklch(0.17 0.015 260);
-  --muted: oklch(0.22 0.015 260);
-  --muted-foreground: oklch(0.65 0.02 260);
-  --primary: oklch(0.72 0.14 145);        /* solidarity green — tune to brand */
-  --primary-foreground: oklch(0.15 0.02 145);
-  --border: oklch(1 0 0 / 8%);
-  --ring: oklch(0.72 0.14 145 / 60%);
-  /* + destructive, warning, success semantic tokens */
-}
-```
+**Decision:** **Dark-only Solarpunk** — see [solarpunk-theme-decisions.md](./solarpunk-theme-decisions.md). Tokens in `app/theme/solarpunk.tokens.css` + derived map in `app/globals.css`.
 
 Add semantic extensions (not in default shadcn):
 
@@ -380,15 +362,15 @@ Align with project workflow: create **`IMPL-L4-UI-*`** issues on board after a *
 
 ## 12. Locked decisions (DIV-L4-UI — 2026-05-21)
 
-| # | Decision | Choice |
-|---|----------|--------|
-| 1 | Primary accent | **Violet** CTA (`#6B2BFF`) for Pay / TRUST + **orange** (`#FF8C60`) for solidarity / THP for Good highlights |
-| 2 | Booking stepper | **A — Visual stepper** (Time → Details → Pay) |
-| 3 | Sticky pay bar on mobile | **A — Yes** + bottom **drawer** “Review & pay” on tap |
-| 4 | Font | **A — Keep Geist** (Sans + Mono) |
-| 5 | Logo | **A — Keep existing asset**; tune contrast on dark surfaces if needed |
+> **Superseded (2026-05-24):** Palette and typography below are **historical**. Active theme: **[Solarpunk](./solarpunk-theme-decisions.md)** — green primary, teal trust, amber accent, Poppins/Inter/JetBrains. Token snapshot: [design-tokens.md](./design-tokens.md).
 
-Token snapshot: [design-tokens.md](./design-tokens.md).
+| # | Decision | Choice (historical) |
+|---|----------|--------|
+| 1 | Primary accent | ~~Violet `#6B2BFF`~~ → **Solarpunk green `#22c55e`** |
+| 2 | Booking stepper | **A — Visual stepper** (Time → Details → Pay) — still valid |
+| 3 | Sticky pay bar on mobile | **A — Yes** + bottom **drawer** — still valid |
+| 4 | Font | ~~Geist~~ → **Poppins / Inter / JetBrains Mono** |
+| 5 | Logo | **Keep existing asset**; tune contrast on dark surfaces if needed |
 
 ---
 

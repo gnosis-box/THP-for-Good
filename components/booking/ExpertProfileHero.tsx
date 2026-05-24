@@ -45,7 +45,7 @@ export function ExpertProfileHero({ expert }: Props) {
         <CrcAmount amount={expert.price_crc} variant="highlight" className="sm:text-base" />
         <div className="flex flex-wrap items-center justify-center gap-1.5">
           {trustedBy !== null && (
-            <p className="text-xs text-muted-foreground">Trusted by {trustedBy}</p>
+            <p className="text-xs text-subtle-foreground">Trusted by {trustedBy}</p>
           )}
           <ExpertTrustControl expertAddress={expert.circles_address} expertName={expert.name} />
         </div>

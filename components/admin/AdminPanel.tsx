@@ -198,7 +198,7 @@ export function AdminPanel() {
       {health ? <PlatformHealthSection stats={health} /> : null}
 
       <p className="text-sm">
-        <Link href="/stats" className="text-primary underline underline-offset-2">
+        <Link href="/stats" className="text-foreground underline underline-offset-2">
           Public stats →
         </Link>
       </p>
@@ -220,7 +220,7 @@ export function AdminPanel() {
                   }}
                   className="w-28 bg-transparent text-sm outline-none"
                 />
-                <button type="button" onClick={() => void renameTag(tag.id, editingTagLabel)} className="text-xs font-medium text-primary hover:underline">Save</button>
+                <button type="button" onClick={() => void renameTag(tag.id, editingTagLabel)} className="text-xs font-medium text-foreground underline-offset-2 hover:underline">Save</button>
                 <button type="button" onClick={() => setEditingTagId(null)} className="text-muted-foreground hover:text-destructive leading-none">×</button>
               </span>
             ) : (
@@ -241,7 +241,7 @@ export function AdminPanel() {
                       triggerFlash(`tag-${tag.id}`);
                       load();
                     }}
-                    className="text-xs font-medium text-primary hover:underline"
+                    className="text-xs font-medium text-foreground underline-offset-2 hover:underline"
                   >
                     Approve
                   </button>
@@ -342,7 +342,7 @@ export function AdminPanel() {
                     <span className="font-medium truncate">{expert.name}</span>
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        expert.active ? 'bg-green-100 text-green-800' : 'bg-muted text-muted-foreground'
+                        expert.active ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {expert.active ? 'Active' : 'Inactive'}

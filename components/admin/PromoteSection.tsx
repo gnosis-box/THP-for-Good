@@ -261,7 +261,7 @@ export function PromoteSection({
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     {isExpert ? (
-                      <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">
+                      <span className="rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
                         Expert
                       </span>
                     ) : (

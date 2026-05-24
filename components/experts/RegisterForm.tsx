@@ -225,7 +225,7 @@ export function RegisterForm() {
         {isEditMode && existingExpert ? (
           <Link
             href={`/expert/${existingExpert.id}`}
-            className="text-sm text-primary underline-offset-4 hover:underline"
+            className="text-sm text-foreground underline-offset-4 hover:underline"
           >
             {UI_COPY.register.viewPublicProfile}
           </Link>

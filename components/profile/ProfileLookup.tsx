@@ -179,7 +179,7 @@ export function ProfileLookup() {
           <p className="text-muted-foreground">
             This address is not a registered Circles avatar. Sign up at{' '}
             <a
-              className="underline"
+              className="text-foreground underline underline-offset-2"
               href="https://app.metri.xyz"
               target="_blank"
               rel="noreferrer"

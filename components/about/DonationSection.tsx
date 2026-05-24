@@ -77,7 +77,7 @@ export function DonationSection() {
         <span className="text-sm text-muted-foreground">goal: {fmt(FORMATION_GOAL_CRC)} CRC</span>
         <div className="h-3 w-full max-w-md rounded-full bg-muted overflow-hidden">
           <div
-            className="motion-progress-fill h-full w-full rounded-full bg-primary"
+            className="motion-progress-fill h-full w-full rounded-full bg-accent"
             style={{
               transform: `scaleX(${pct / 100})`,
               transformOrigin: 'left center',
@@ -105,8 +105,8 @@ export function DonationSection() {
               }}
               className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                 !custom && selected === amt
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border text-foreground hover:border-primary'
+                  ? 'border-accent bg-accent text-accent-foreground'
+                  : 'border-border text-foreground hover:border-accent/60'
               }`}
             >
               {amt} CRC

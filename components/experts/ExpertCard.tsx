@@ -80,7 +80,7 @@ export function ExpertCard({
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
               {circles !== null && circles.trustedByCount !== null && (
-                <p className="text-xs text-muted-foreground">Trusted by {circles.trustedByCount}</p>
+                <p className="text-xs text-subtle-foreground">Trusted by {circles.trustedByCount}</p>
               )}
               <ExpertTrustControl
                 expertAddress={expert.circles_address}

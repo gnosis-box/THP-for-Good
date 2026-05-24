@@ -25,11 +25,11 @@ const navLinkClass = (active: boolean, compact = false) =>
     'inline-flex min-h-11 items-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     compact ? 'relative px-2.5 pb-1 text-xs' : 'px-3 text-sm',
     active
-      ? 'font-semibold text-accent'
-      : 'text-foreground hover:bg-muted',
+      ? 'font-semibold text-foreground'
+      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
     compact &&
       active &&
-      'after:absolute after:inset-x-1 after:bottom-0 after:h-0.5 after:rounded-full after:bg-accent',
+      'after:absolute after:inset-x-1 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary',
   );
 
 type NavLinksProps = {
@@ -72,7 +72,7 @@ function NavLinks({
               {active ? (
                 <motion.span
                   layoutId="desktop-nav-underline"
-                  className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-accent"
+                  className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary"
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
               ) : null}

@@ -247,7 +247,7 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
                   href={expert.calendar_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary underline-offset-4 hover:underline"
+                  className="text-xs text-foreground underline-offset-4 hover:underline"
                 >
                   Open calendar link
                 </a>

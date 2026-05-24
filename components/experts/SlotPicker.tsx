@@ -98,7 +98,7 @@ function SlotPickerContent({
                   <ToggleGroupItem
                     key={iso}
                     value={iso}
-                    className="h-11 w-20 shrink-0 justify-center rounded-lg bg-secondary text-secondary-foreground transition-transform duration-[var(--motion-fast)] hover:bg-secondary/80 data-pressed:scale-[1.02] data-pressed:bg-primary data-pressed:text-primary-foreground data-pressed:ring-2 data-pressed:ring-primary/60 data-pressed:motion-slot-selected"
+                    className="h-11 w-20 shrink-0 justify-center rounded-lg bg-muted text-foreground transition-transform duration-[var(--motion-fast)] hover:bg-muted/80 data-pressed:scale-[1.02] data-pressed:bg-primary data-pressed:text-primary-foreground data-pressed:ring-2 data-pressed:ring-primary/60 data-pressed:motion-slot-selected"
                     aria-label={fmtTime(iso)}
                   >
                     {fmtTime(iso)}

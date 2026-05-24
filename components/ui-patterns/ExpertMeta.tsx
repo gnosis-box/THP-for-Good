@@ -12,7 +12,7 @@ export function ExpertSkillTags({ skills, className }: SkillTagsProps) {
   return (
     <div className={cn('flex flex-wrap gap-1.5', className)} aria-label="Expertise">
       {skills.map((skill) => (
-        <span key={skill} className={highlightPillClass('text-xs')}>
+        <span key={skill} className={highlightPillClass('skill', 'text-xs')}>
           {skill}
         </span>
       ))}
@@ -115,7 +115,7 @@ export function ExpertLanguageTags({ languages, className, prefix = 'Calls' }: L
       aria-label={`${prefix}: ${languages.map((c) => c.toUpperCase()).join(', ')}`}
     >
       {languages.map((code) => (
-        <span key={code} className={highlightPillClass('text-[11px] uppercase tracking-wide sm:text-xs')}>
+        <span key={code} className={highlightPillClass('skill', 'text-[11px] uppercase tracking-wide sm:text-xs')}>
           {code}
         </span>
       ))}

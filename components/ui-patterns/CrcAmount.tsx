@@ -20,7 +20,7 @@ export function CrcAmount({ amount, suffix = 'CRC', className, variant = 'defaul
 
   if (variant === 'highlight') {
     return (
-      <span className={highlightPillClass(cn('tabular-nums text-sm', className))}>
+      <span className={highlightPillClass('price', cn('text-sm', className))}>
         {amount} {suffix}
       </span>
     );

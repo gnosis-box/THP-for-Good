@@ -223,7 +223,7 @@ export function StatsDashboard() {
                         href={buildExplorerTxUrl(row.txHash)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary text-xs hover:underline inline-flex items-center gap-1"
+                        className="text-trust text-xs hover:underline inline-flex items-center gap-1"
                       >
                         {copy.viewTx}
                         <ExternalLink className="size-3" aria-hidden />
