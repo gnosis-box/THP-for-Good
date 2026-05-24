@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useToast } from '@/components/ui/toast';
+import { CountUp } from '@/components/motion/count-up';
 import {
   MetricsPanel,
   MetricsPanelMono,
   MetricsPanelTitle,
 } from '@/components/ui-patterns/metrics-panel';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { FOUNDATION_ADDRESS, FORMATION_GOAL_CRC, buildDonationTransactions } from '@/lib/crc-pay';
 
 const PRESET_AMOUNTS = [10, 25, 50, 100];
@@ -20,6 +22,7 @@ function fmt(n: number) {
 export function DonationSection() {
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
+  const reducedMotion = usePrefersReducedMotion();
   const [balance, setBalance] = useState<number | null>(null);
   const [selected, setSelected] = useState<number>(25);
   const [custom, setCustom] = useState('');
@@ -69,13 +72,17 @@ export function DonationSection() {
 
       <div className="flex flex-col items-center gap-2 text-center">
         <span className="text-5xl font-extrabold leading-none tracking-tight">
-          {balance === null ? '—' : `${pct}%`}
+          {balance === null ? '—' : <CountUp key={raised} value={pct} suffix="%" />}
         </span>
         <span className="text-sm text-muted-foreground">goal: {fmt(FORMATION_GOAL_CRC)} CRC</span>
         <div className="h-3 w-full max-w-md rounded-full bg-muted overflow-hidden">
           <div
-            className="h-full rounded-full bg-primary transition-all duration-700"
-            style={{ width: `${pct}%` }}
+            className="motion-progress-fill h-full w-full rounded-full bg-accent"
+            style={{
+              transform: `scaleX(${pct / 100})`,
+              transformOrigin: 'left center',
+              transition: reducedMotion ? undefined : 'transform var(--motion-slow) ease-out',
+            }}
           />
         </div>
         <p className="text-sm text-muted-foreground">
@@ -98,8 +105,8 @@ export function DonationSection() {
               }}
               className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                 !custom && selected === amt
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border text-foreground hover:border-primary'
+                  ? 'border-accent bg-accent text-accent-foreground'
+                  : 'border-border text-foreground hover:border-accent/60'
               }`}
             >
               {amt} CRC

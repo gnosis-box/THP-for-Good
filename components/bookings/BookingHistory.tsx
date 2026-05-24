@@ -117,7 +117,7 @@ export function BookingHistory() {
                   href={`https://explorer.aboutcircles.com/tx/${booking.tx_hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs text-primary underline-offset-4 hover:underline"
+                  className="font-mono text-xs text-trust underline-offset-4 hover:underline"
                 >
                   {shortenAddress(booking.tx_hash, 6)}
                 </a>

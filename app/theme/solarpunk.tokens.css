@@ -1,0 +1,37 @@
+/**
+ * THP Solarpunk — canonical semantic tokens (dark-only).
+ * Brand hues: moss green + ochre amber (solarpunk garden), desaturated toward neutral sage.
+ * Hex fallbacks; OKLCH overrides where supported (perceptual chroma control).
+ */
+:root,
+:root[data-theme="solarpunk"],
+.dark {
+  --background: #0a1210;
+  --foreground: #e8efe9;
+
+  /* Muted brand: mix leaf/sunflower toward --neutral-400 to avoid neon on dark surfaces */
+  --primary: #5a9f76;
+  --secondary: #4d948c;
+  --accent: #c49a62;
+  --success: #8ba86a;
+  --warning: #c4a860;
+  /* Reserved for errors/alerts only — do not use as decorative accent */
+  --destructive: #f87171;
+
+  --background-elevated: #141f1c;
+  --text-muted: #8fa89e;
+  --subtle-foreground: #6b7f78;
+}
+
+@supports (color: oklch(0.5 0.1 0)) {
+  :root,
+  :root[data-theme="solarpunk"],
+  .dark {
+    /* Chroma ~0.09–0.12 vs ~0.17–0.19 on raw Tailwind 500 — less “flash”, still readable */
+    --primary: oklch(0.64 0.11 155);
+    --secondary: oklch(0.58 0.08 185);
+    --accent: oklch(0.72 0.1 78);
+    --success: oklch(0.68 0.1 130);
+    --warning: oklch(0.74 0.1 85);
+  }
+}

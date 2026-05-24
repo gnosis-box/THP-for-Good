@@ -22,6 +22,7 @@ import { defaultCallLanguagesFromSpoken, filterCallLanguageCodes } from '@/lib/l
 import { LanguagePicker } from '@/components/experts/LanguagePicker';
 import { StopExpertButton } from '@/components/experts/StopExpertButton';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { CollapsibleSection } from '@/components/motion/collapsible-section';
 import { UI_COPY } from '@/lib/ui-copy';
 
 export function RegisterForm() {
@@ -224,7 +225,7 @@ export function RegisterForm() {
         {isEditMode && existingExpert ? (
           <Link
             href={`/expert/${existingExpert.id}`}
-            className="text-sm text-primary underline-offset-4 hover:underline"
+            className="text-sm text-foreground underline-offset-4 hover:underline"
           >
             {UI_COPY.register.viewPublicProfile}
           </Link>
@@ -240,134 +241,147 @@ export function RegisterForm() {
       ) : null}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
-          <p className="font-medium">Connected wallet</p>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">{shortenAddress(address!, 8)}</p>
-          {profile.status === 'found' && (
-            <p className="mt-1 text-muted-foreground">
-              Circles profile: <strong className="text-foreground">{profile.name}</strong>
-            </p>
-          )}
-          {balance.status === 'ready' && (
-            <p className="mt-1 text-muted-foreground">
-              CRC balance: <strong className="text-foreground">{balance.formatted}</strong>
-            </p>
-          )}
-          {balance.status === 'not-registered' && (
-            <p className="mt-1 text-sm text-warning">
-              This address is not a registered Circles avatar. Open the app in the Circles playground to
-              connect with your avatar.
-            </p>
-          )}
-          {profile.status === 'not-registered' && (
-            <p className="mt-1 text-sm text-warning">
-              No Circles profile name found for this wallet. Sign up at{' '}
-              <a
-                href="https://www.aboutcircles.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                aboutcircles.com
-              </a>{' '}
-              first.
-            </p>
-          )}
-          {profile.status === 'error' && (
-            <p className="mt-1 text-destructive">{profile.message}</p>
-          )}
-        </div>
+        <CollapsibleSection title="Profile" defaultOpen>
+          <div className="flex flex-col gap-4">
+            <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
+              <p className="font-medium">Connected wallet</p>
+              <p className="mt-1 font-mono text-xs text-muted-foreground">{shortenAddress(address!, 8)}</p>
+              {profile.status === 'found' && (
+                <p className="mt-1 text-muted-foreground">
+                  Circles profile: <strong className="text-foreground">{profile.name}</strong>
+                </p>
+              )}
+              {balance.status === 'ready' && (
+                <p className="mt-1 text-muted-foreground">
+                  CRC balance: <strong className="text-foreground">{balance.formatted}</strong>
+                </p>
+              )}
+              {balance.status === 'not-registered' && (
+                <p className="mt-1 text-sm text-warning">
+                  This address is not a registered Circles avatar. Open the app in the Circles playground to
+                  connect with your avatar.
+                </p>
+              )}
+              {profile.status === 'not-registered' && (
+                <p className="mt-1 text-sm text-warning">
+                  No Circles profile name found for this wallet. Sign up at{' '}
+                  <a
+                    href="https://www.aboutcircles.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    aboutcircles.com
+                  </a>{' '}
+                  first.
+                </p>
+              )}
+              {profile.status === 'error' && (
+                <p className="mt-1 text-destructive">{profile.message}</p>
+              )}
+            </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Field>
-            <FieldLabel htmlFor="name">
-              Name <span className="text-destructive">*</span>
-            </FieldLabel>
-            <Input
-              id="name"
-              type="text"
+            <div className="flex flex-col gap-1.5">
+              <Field>
+                <FieldLabel htmlFor="name">
+                  Name <span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="name"
+                  type="text"
+                  required
+                  readOnly={nameFromWallet}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your Circles profile name"
+                  className={cn(nameFromWallet && 'cursor-default bg-muted/60')}
+                />
+              </Field>
+              {nameFromWallet && (
+                <p className="text-xs text-muted-foreground">Taken from your connected Circles wallet.</p>
+              )}
+            </div>
+
+            <Field>
+              <FieldLabel htmlFor="bio">Bio</FieldLabel>
+              <Textarea
+                id="bio"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Tell mentees about yourself..."
+                rows={4}
+              />
+            </Field>
+          </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Skills & languages" defaultOpen={isEditMode}>
+          <div className="flex flex-col gap-4">
+            <SkillTagPicker
+              tags={tags}
+              selected={selectedSkills}
+              onSelectedChange={setSelectedSkills}
+              loading={tagsLoading}
               required
-              readOnly={nameFromWallet}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your Circles profile name"
-              className={cn(nameFromWallet && 'cursor-default bg-muted/60')}
+              newSkill={newSkill}
+              onNewSkillChange={setNewSkill}
+              onAddNewSkill={addNewSkill}
             />
-          </Field>
-          {nameFromWallet && (
-            <p className="text-xs text-muted-foreground">Taken from your connected Circles wallet.</p>
-          )}
-        </div>
 
-        <Field>
-          <FieldLabel htmlFor="bio">Bio</FieldLabel>
-          <Textarea
-            id="bio"
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="Tell mentees about yourself..."
-            rows={4}
-          />
-        </Field>
+            <LanguagePicker
+              spoken={spokenLanguages}
+              call={callLanguages}
+              onSpokenChange={setSpokenLanguages}
+              onCallChange={setCallLanguages}
+            />
+          </div>
+        </CollapsibleSection>
 
-        <SkillTagPicker
-          tags={tags}
-          selected={selectedSkills}
-          onSelectedChange={setSelectedSkills}
-          loading={tagsLoading}
-          required
-          newSkill={newSkill}
-          onNewSkillChange={setNewSkill}
-          onAddNewSkill={addNewSkill}
-        />
+        <CollapsibleSection title="Availability (Cal.com)" defaultOpen={isEditMode}>
+          <div className="flex flex-col gap-1.5">
+            <CalConnect onConnect={setCalEventTypeId} />
+            {calEventTypeId && (
+              <p className="text-xs text-muted-foreground">Event type ID: {calEventTypeId}</p>
+            )}
+          </div>
+        </CollapsibleSection>
 
-        <LanguagePicker
-          spoken={spokenLanguages}
-          call={callLanguages}
-          onSpokenChange={setSpokenLanguages}
-          onCallChange={setCallLanguages}
-        />
+        <CollapsibleSection title="Pricing & payment split" defaultOpen={isEditMode}>
+          <div className="flex flex-col gap-4">
+            <Field>
+              <FieldLabel htmlFor="price">CRC price per session</FieldLabel>
+              <Input
+                id="price"
+                type="number"
+                min={1}
+                value={priceCrc}
+                onChange={(e) => setPriceCrc(parseInt(e.target.value, 10) || 1)}
+                className="w-32"
+              />
+            </Field>
 
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">
-            Availability (Cal.com) <span className="text-destructive">*</span>
-          </span>
-          <CalConnect onConnect={setCalEventTypeId} />
-          {calEventTypeId && (
-            <p className="text-xs text-muted-foreground">Event type ID: {calEventTypeId}</p>
-          )}
-        </div>
-
-        <Field>
-          <FieldLabel htmlFor="price">CRC price per session</FieldLabel>
-          <Input
-            id="price"
-            type="number"
-            min={1}
-            value={priceCrc}
-            onChange={(e) => setPriceCrc(parseInt(e.target.value, 10) || 1)}
-            className="w-32"
-          />
-        </Field>
-
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">Payment split</span>
-          <p className="text-xs text-muted-foreground">Your share — at least 50% always goes to THP for Good.</p>
-          <RadioGroup
-            value={String(expertShare)}
-            onValueChange={(v) => setExpertShare(clampExpertShare(parseInt(v, 10)))}
-            className="flex flex-col gap-2"
-          >
-            {EXPERT_SHARE_OPTIONS.map((opt) => (
-              <div key={opt} className="flex min-h-11 items-center gap-2">
-                <RadioGroupItem value={String(opt)} id={`share-${opt}`} />
-                <Label htmlFor={`share-${opt}`} className="cursor-pointer font-normal">
-                  {opt}% me · {100 - opt}% THP for Good
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">Payment split</span>
+              <p className="text-xs text-muted-foreground">
+                Your share — at least 50% always goes to THP for Good.
+              </p>
+              <RadioGroup
+                value={String(expertShare)}
+                onValueChange={(v) => setExpertShare(clampExpertShare(parseInt(v, 10)))}
+                className="flex flex-col gap-2"
+              >
+                {EXPERT_SHARE_OPTIONS.map((opt) => (
+                  <div key={opt} className="flex min-h-11 items-center gap-2">
+                    <RadioGroupItem value={String(opt)} id={`share-${opt}`} />
+                    <Label htmlFor={`share-${opt}`} className="cursor-pointer font-normal">
+                      {opt}% me · {100 - opt}% THP for Good
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+          </div>
+        </CollapsibleSection>
 
         {error && <StatusAlert variant="error" title="Registration failed" description={error} />}
 

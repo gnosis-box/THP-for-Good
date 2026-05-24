@@ -10,6 +10,9 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { AnimatedList, AnimatedListItem } from '@/components/motion/animated-list';
+import { FadeContent } from '@/components/motion/fade-content';
+import { MotionEmpty } from '@/components/motion/motion-empty';
 import { ExpertCard } from './ExpertCard';
 import { ExpertSearch } from './ExpertSearch';
 import { SkillFilter } from './SkillFilter';
@@ -40,9 +43,13 @@ export function ExpertBrowser({ experts, tags }: Props) {
     return matchSkill && matchLanguage && matchSearch;
   });
 
+  const listKey = `${selectedSkill}|${selectedLanguages.join(',')}|${searchQuery}`;
+
   return (
     <div className="flex w-full flex-col gap-8">
-      <PageHeader title={UI_COPY.home.title} subtitle={UI_COPY.home.subtitle} />
+      <FadeContent>
+        <PageHeader title={UI_COPY.home.title} subtitle={UI_COPY.home.subtitle} />
+      </FadeContent>
 
       <section className="flex flex-col gap-4">
         <p className="text-sm font-medium">{UI_COPY.home.filterLabel}</p>
@@ -52,23 +59,29 @@ export function ExpertBrowser({ experts, tags }: Props) {
       </section>
 
       {filtered.length === 0 ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>No experts</EmptyTitle>
-            <EmptyDescription>{UI_COPY.home.emptySearch}</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <MotionEmpty>
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>No experts</EmptyTitle>
+              <EmptyDescription>{UI_COPY.home.emptySearch}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </MotionEmpty>
       ) : (
-        <ul className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2">
-          {filtered.map((expert) => (
-            <li
+        <AnimatedList
+          listKey={listKey}
+          className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2"
+        >
+          {filtered.map((expert, index) => (
+            <AnimatedListItem
               key={expert.id}
+              index={index}
               className="w-full min-w-0 overflow-hidden rounded-xl border border-border bg-card"
             >
               <ExpertCard expert={expert} />
-            </li>
+            </AnimatedListItem>
           ))}
-        </ul>
+        </AnimatedList>
       )}
     </div>
   );

@@ -15,8 +15,11 @@ import {
 } from '@/components/ui/empty';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TrustButton } from '@/components/bookings/TrustButton';
+import { MotionEmpty } from '@/components/motion/motion-empty';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
-import { shortenAddress } from '@/lib/utils';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { motionClass, motionStaggerStyle } from '@/lib/motion';
+import { cn, shortenAddress } from '@/lib/utils';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { BookingRow, ExpertRow } from '@/lib/db';
 
@@ -41,6 +44,18 @@ export function CallsView() {
   const [received, setReceived] = useState<EnrichedReceivedBooking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [skeletonVisible, setSkeletonVisible] = useState(true);
+  const reducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    if (loading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSkeletonVisible(true);
+      return;
+    }
+    const t = window.setTimeout(() => setSkeletonVisible(false), 180);
+    return () => window.clearTimeout(t);
+  }, [loading]);
 
   useEffect(() => {
     if (!address) return;
@@ -128,8 +143,13 @@ export function CallsView() {
           </TabsTrigger>
         </TabsList>
 
-        {loading && (
-          <div className="mt-4 flex flex-col gap-4">
+        {(loading || skeletonVisible) && (
+          <div
+            className={cn(
+              'mt-4 flex flex-col gap-4 transition-opacity duration-200',
+              !loading && 'pointer-events-none opacity-0',
+            )}
+          >
             {[1, 2].map((n) => (
               <Skeleton key={n} className="h-32 w-full rounded-xl" />
             ))}
@@ -144,10 +164,16 @@ export function CallsView() {
 
         {!loading && !error && (
           <>
-            <TabsContent value="emitted" className="mt-4">
+            <TabsContent
+              value="emitted"
+              className={cn('mt-4', motionClass('', 'motion-tab-panel-in', reducedMotion))}
+            >
               <CallsEmittedList bookings={emitted} />
             </TabsContent>
-            <TabsContent value="received" className="mt-4">
+            <TabsContent
+              value="received"
+              className={cn('mt-4', motionClass('', 'motion-tab-panel-in', reducedMotion))}
+            >
               <CallsReceivedList bookings={received} />
             </TabsContent>
           </>
@@ -158,23 +184,31 @@ export function CallsView() {
 }
 
 function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
+  const reducedMotion = usePrefersReducedMotion();
+
   if (bookings.length === 0) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>No calls yet</EmptyTitle>
-          <EmptyDescription>{UI_COPY.calls.emptyEmitted}</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <MotionEmpty>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>No calls yet</EmptyTitle>
+            <EmptyDescription>{UI_COPY.calls.emptyEmitted}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </MotionEmpty>
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
-      {bookings.map((booking) => {
+      {bookings.map((booking, index) => {
         const { expert } = booking;
         return (
-          <Card key={booking.id}>
+          <Card
+            key={booking.id}
+            className={motionClass('', 'motion-list-item-in', reducedMotion)}
+            style={motionStaggerStyle(index, reducedMotion, 8)}
+          >
             <CardHeader>
               <CardTitle className="text-base font-semibold">{expert.name}</CardTitle>
               {expert.skills.length > 0 && (
@@ -213,7 +247,7 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
                   href={expert.calendar_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary underline-offset-4 hover:underline"
+                  className="text-xs text-foreground underline-offset-4 hover:underline"
                 >
                   Open calendar link
                 </a>
@@ -236,21 +270,29 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
 }
 
 function CallsReceivedList({ bookings }: { bookings: EnrichedReceivedBooking[] }) {
+  const reducedMotion = usePrefersReducedMotion();
+
   if (bookings.length === 0) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>No incoming bookings</EmptyTitle>
-          <EmptyDescription>{UI_COPY.calls.emptyReceived}</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <MotionEmpty>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>No incoming bookings</EmptyTitle>
+            <EmptyDescription>{UI_COPY.calls.emptyReceived}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </MotionEmpty>
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
-      {bookings.map((booking) => (
-        <Card key={booking.id}>
+      {bookings.map((booking, index) => (
+        <Card
+          key={booking.id}
+          className={motionClass('', 'motion-list-item-in', reducedMotion)}
+          style={motionStaggerStyle(index, reducedMotion, 8)}
+        >
           <CardHeader>
             <div className="flex items-center gap-3">
               <Avatar className="size-10 shrink-0">

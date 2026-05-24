@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
-import { toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
+import { toHttpImageUrl, fetchCirclesScore, cn } from '@/lib/utils';
+import { useRowFlash } from '@/hooks/use-row-flash';
 import { PromoteSection } from './PromoteSection';
 import { PlatformHealthSection } from './PlatformHealthSection';
 import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
@@ -13,6 +14,7 @@ import type { AdminHealthStats, ExpertRow, TagRow, AdminRow } from '@/lib/db';
 
 export function AdminPanel() {
   const { address, isConnected } = useWallet();
+  const { flashKey, triggerFlash } = useRowFlash();
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [groupAddress, setGroupAddress] = useState<string | null>(null);
@@ -28,6 +30,7 @@ export function AdminPanel() {
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editingTagLabel, setEditingTagLabel] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [exitingTagIds, setExitingTagIds] = useState<Set<number>>(() => new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -135,7 +138,14 @@ export function AdminPanel() {
   }
 
   async function deleteTag(id: number) {
+    setExitingTagIds((prev) => new Set(prev).add(id));
+    await new Promise((resolve) => setTimeout(resolve, 200));
     await fetch(`/api/tags/${id}`, { method: 'DELETE', headers: headers() });
+    setExitingTagIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
     load();
   }
 
@@ -188,7 +198,7 @@ export function AdminPanel() {
       {health ? <PlatformHealthSection stats={health} /> : null}
 
       <p className="text-sm">
-        <Link href="/stats" className="text-primary underline underline-offset-2">
+        <Link href="/stats" className="text-foreground underline underline-offset-2">
           Public stats →
         </Link>
       </p>
@@ -210,13 +220,17 @@ export function AdminPanel() {
                   }}
                   className="w-28 bg-transparent text-sm outline-none"
                 />
-                <button type="button" onClick={() => void renameTag(tag.id, editingTagLabel)} className="text-xs font-medium text-primary hover:underline">Save</button>
+                <button type="button" onClick={() => void renameTag(tag.id, editingTagLabel)} className="text-xs font-medium text-foreground underline-offset-2 hover:underline">Save</button>
                 <button type="button" onClick={() => setEditingTagId(null)} className="text-muted-foreground hover:text-destructive leading-none">×</button>
               </span>
             ) : (
               <span
                 key={tag.id}
-                className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm"
+                className={cn(
+                  'flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm',
+                  flashKey === `tag-${tag.id}` && 'motion-row-flash',
+                  exitingTagIds.has(tag.id) && 'motion-tag-exit',
+                )}
               >
                 {tag.label}
                 {tag.status === 'pending' && (
@@ -224,9 +238,10 @@ export function AdminPanel() {
                     type="button"
                     onClick={async () => {
                       await fetch(`/api/tags/${tag.id}/approve`, { method: 'POST', headers: headers() });
+                      triggerFlash(`tag-${tag.id}`);
                       load();
                     }}
-                    className="text-xs font-medium text-primary hover:underline"
+                    className="text-xs font-medium text-foreground underline-offset-2 hover:underline"
                   >
                     Approve
                   </button>
@@ -241,7 +256,7 @@ export function AdminPanel() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteTag(tag.id)}
+                  onClick={() => void deleteTag(tag.id)}
                   className="text-muted-foreground hover:text-destructive transition-colors leading-none"
                   aria-label={`Delete ${tag.label}`}
                 >
@@ -327,7 +342,7 @@ export function AdminPanel() {
                     <span className="font-medium truncate">{expert.name}</span>
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        expert.active ? 'bg-green-100 text-green-800' : 'bg-muted text-muted-foreground'
+                        expert.active ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {expert.active ? 'Active' : 'Inactive'}
@@ -376,6 +391,7 @@ export function AdminPanel() {
                 <ExpertEditForm
                   expert={expert}
                   walletAddress={address ?? ''}
+                  expandAll
                   onSaved={() => { setEditingExpertId(null); load(); }}
                   onCancel={() => setEditingExpertId(null)}
                 />

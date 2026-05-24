@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useRowFlash } from '@/hooks/use-row-flash';
 import { CalConnect } from '@/components/experts/CalConnect';
 import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
 import { SkillTagPicker, mergeSkillTag } from '@/components/experts/SkillTagPicker';
@@ -58,6 +59,7 @@ export function PromoteSection({
   onAdminAdded,
   onReloadMembers,
 }: Props) {
+  const { flashKey, triggerFlash } = useRowFlash();
   const [groupAddress, setGroupAddress] = useState(initialGroupAddress ?? '');
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [manualMembers, setManualMembers] = useState<MemberEntry[] | null>(null);
@@ -152,7 +154,9 @@ export function PromoteSection({
         throw new Error(json.error ?? 'Failed to promote member');
       }
 
+      const promotedAddress = promotingAddress;
       cancelPromote();
+      triggerFlash(promotedAddress);
       onExpertAdded();
     } catch (err) {
       setForm((prev) =>
@@ -168,12 +172,13 @@ export function PromoteSection({
   );
   const adminAddresses = new Set(admins.map((a) => a.toLowerCase()));
 
-  async function makeAdmin(address: string) {
+  async function makeAdmin(memberAddress: string) {
     await fetch('/api/admin/admins', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-wallet-address': walletAddress },
-      body: JSON.stringify({ address }),
+      body: JSON.stringify({ address: memberAddress }),
     });
+    triggerFlash(memberAddress);
     onAdminAdded();
   }
 
@@ -229,7 +234,13 @@ export function PromoteSection({
             const isPromoting = promotingAddress === member.address;
 
             return (
-              <div key={member.address} className="flex flex-col gap-3 rounded-xl border border-border p-4">
+              <div
+                key={member.address}
+                className={cn(
+                  'flex flex-col gap-3 rounded-xl border border-border p-4',
+                  flashKey === member.address && 'motion-row-flash',
+                )}
+              >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
                     {member.imageUrl ? (
@@ -250,7 +261,7 @@ export function PromoteSection({
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     {isExpert ? (
-                      <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">
+                      <span className="rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
                         Expert
                       </span>
                     ) : (
