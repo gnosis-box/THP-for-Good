@@ -10,11 +10,19 @@ export default function ExpertDetailLoading() {
       <Skeleton className="h-9 w-16 rounded-md" />
 
       {/* Booking stepper */}
-      <div className="flex items-center gap-0">
+      <div className="mx-auto flex w-full max-w-sm items-start sm:max-w-md">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="flex flex-1 items-center">
-            <Skeleton className="size-8 shrink-0 rounded-full" />
-            {i < 3 ? <Skeleton className="mx-1 h-0.5 flex-1 rounded-full" /> : null}
+          <div key={i} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+            <div className="flex w-full items-center">
+              <div className="flex h-8 flex-1 items-center sm:h-9">
+                {i > 1 ? <Skeleton className="h-0.5 w-full rounded-full" /> : null}
+              </div>
+              <Skeleton className="size-8 shrink-0 rounded-full sm:size-9" />
+              <div className="flex h-8 flex-1 items-center sm:h-9">
+                {i < 3 ? <Skeleton className="h-0.5 w-full rounded-full" /> : null}
+              </div>
+            </div>
+            <Skeleton className="h-3 w-16 rounded-sm" />
           </div>
         ))}
       </div>
