@@ -52,7 +52,7 @@ Expert **skills** and **languages** are critical discovery signals but the curre
 | U4 | **Expert list card** (`ExpertCard`): **full language labels** on the first meta row (e.g. `English · French`), not ISO codes. |
 | U5 | Skill overflow on cards: **tap to expand** (mobile-first); desktop may expand inline or on tap — no hover-only tooltip. |
 | U6 | Push branch to origin **once** at end of branch (before PR). |
-| U7 | Dedicated GitHub **IMPL** issue; link FEAT #64 as parent/related. |
+| U7 | Dedicated GitHub **IMPL** issue; link FEAT #64 as parent/related. | ✅ [#94](https://github.com/gnosis-box/THP-for-Good/issues/94) |
 
 ### 3.2 Technical decisions
 
@@ -126,49 +126,49 @@ Question **U6 / old Q6** referred only to **`ExpertCard`** (home + stats listing
 
 Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases complete (or split only if review asks).
 
-### Phase 1 — Foundation (lib + tokens)
+### Phase 1 — Foundation (lib + tokens) ✅
 
 **Purpose:** shared helpers and pill tokens before touching every surface.
 
-| Task | How |
-|------|-----|
-| Add `getDisplayCallLanguages(expert: ExpertRow): string[]` | `lib/languages.ts` — single fallback rule |
-| Add `formatSessionLanguages(codes, variant: 'compact' \| 'full')` | Wraps `formatLanguageBadges` / `formatLanguageList` |
-| Extend `highlight-pill.ts` | Add `PillRole = 'language'` + `highlightPillClass('language', …)` using muted surface (distinct from skill border weight or add `--pill-language-*` in `globals.css` if needed) |
-| Extend `getAllExperts` | Accept `skillFilters?: string[]`, `callLanguageFilters?: string[]` (OR logic); keep backward-compatible single-string overload or replace callers |
-| Add `lib/expert-filters.ts` | Pure functions: `filterExpertsClientSide(experts, { skills, languages, q })` for tests + fallback |
+| Task | How | Status |
+|------|-----|--------|
+| Add `getDisplayCallLanguages(expert: ExpertRow): string[]` | `lib/languages.ts` — single fallback rule | ✅ |
+| Add `formatSessionLanguages(codes, variant: 'compact' \| 'full' \| 'card')` | Wraps `formatLanguageBadges` / `formatLanguageList` | ✅ |
+| Extend `highlight-pill.ts` | Add `PillRole = 'language'` + `--pill-language-*` in `globals.css` | ✅ |
+| Extend `getAllExperts` | `GetAllExpertsFilters` with skills/languages OR arrays | ✅ |
+| Add `lib/expert-filters.ts` | `filterExpertsClientSide`, URL parse/build helpers | ✅ |
 
 **Files:** `lib/languages.ts`, `lib/db.ts`, `lib/expert-filters.ts`, `components/ui-patterns/highlight-pill.ts`, `app/globals.css` (if new CSS vars)
 
 ---
 
-### Phase 2 — Display components
+### Phase 2 — Display components ✅
 
-| Task | How |
-|------|-----|
-| Refactor `ExpertLanguageTags` | Globe icon; `variant="compact" \| "full"`; use `formatSessionLanguages`; never reuse `skill` pill role |
-| Refactor `ExpertSkillTags` | Props: `maxVisible?: number`, `onOverflowClick?`; render `+N` pill with `title` tooltip listing hidden skills |
-| Restructure `ExpertCard` | Row order per §4.1; remove languages inline with truncated name |
-| Update `ExpertProfileHero` | "Sessions in …" line; full skills |
-| Fix `ExpertDetailBody` | Remove language block under bio; keep bio-only section |
-| Align `CallsView` / `BookingHistory` | Replace raw `Badge` skills with `ExpertSkillTags` (compact, `maxVisible={2}`) |
-| Align `AdminPanel` expert list | Use `ExpertSkillTags` + compact language line where shown |
+| Task | How | Status |
+|------|-----|--------|
+| Refactor `ExpertLanguageTags` | Globe icon; `variant="card" \| "prose"`; `formatSessionLanguages`; not skill pill | ✅ |
+| Refactor `ExpertSkillTags` | `maxVisible` + tap expand `+N ▾` | ✅ |
+| Restructure `ExpertCard` | Row order per §4.1 | ✅ |
+| Update `ExpertProfileHero` | "Sessions in …" line; full skills | ✅ |
+| Fix `ExpertDetailBody` | Remove language block under bio | ✅ |
+| Align `CallsView` / `BookingHistory` | `ExpertSkillTags` + `ExpertLanguageTags` (`maxVisible={2}`) | ✅ |
+| Align `AdminPanel` expert list | `ExpertSkillTags` + language row | ✅ |
 
 **Files:** `ExpertMeta.tsx`, `ExpertCard.tsx`, `ExpertProfileHero.tsx`, `ExpertDetailBody.tsx`, `CallsView.tsx`, `BookingHistory.tsx`, `AdminPanel.tsx`
 
 ---
 
-### Phase 3 — Discover filters (homepage)
+### Phase 3 — Discover filters (homepage) ✅
 
-| Task | How |
-|------|-----|
-| Create `ExpertFilterState` type | `{ skills: string[]; languages: string[]; query: string }` |
-| Create `ExpertFilterSheet` | Sheet + sections for skills (multi) and languages (multi); uses `tagChipClass` / `filterChipClass` |
-| Create `ActiveFilterChips` | Removable chips below search; clears individual or all |
-| Replace `SkillFilter` + `LanguageFilter` in `ExpertBrowser` | Filter button opens sheet; optional: keep quick EN/FR chips on desktop only if sheet feels heavy — default: sheet only |
-| Wire filtering | URL search params `?skill=Web3&skill=DeFi&lang=fr` — **required** (U2); sync on Apply |
-| SSR path | **Required** (U3): `app/page.tsx` reads `searchParams`, calls extended `getAllExperts(...)` |
-| Update `ExpertSearch` | Include language labels in search (optional P1.5): match `languageLabel(code)` |
+| Task | How | Status |
+|------|-----|--------|
+| Create `ExpertFilterState` type | `lib/expert-filters.ts` | ✅ |
+| Create `ExpertFilterSheet` | Sheet + multi skill/language sections | ✅ |
+| Create `ActiveFilterChips` | Removable chips; clear all | ✅ |
+| Replace `SkillFilter` + `LanguageFilter` in `ExpertBrowser` | Filter button opens sheet only | ✅ |
+| Wire filtering | URL `?skill=&lang=&q=`; sync on Apply / chip remove | ✅ |
+| SSR path | `app/page.tsx` reads `searchParams` → `getAllExperts` + `q` filter | ✅ |
+| Update search | Match `languageLabel(code)` in `filterExpertsClientSide` | ✅ |
 
 **Files:** new `components/experts/ExpertFilterSheet.tsx`, `ActiveFilterChips.tsx`, `ExpertBrowser.tsx`, `app/page.tsx`, `lib/ui-copy.ts` (copy keys)
 
@@ -206,25 +206,25 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 
 ### New
 
-- `lib/expert-filters.ts`
-- `components/experts/ExpertFilterSheet.tsx`
-- `components/experts/ActiveFilterChips.tsx`
-- `components/experts/ExpertProfileFields.tsx` (or `hooks/use-expert-profile-form.ts`)
-- `hooks/use-skill-tags.ts`
+- `lib/expert-filters.ts` ✅
+- `components/experts/ExpertFilterSheet.tsx` ✅
+- `components/experts/ActiveFilterChips.tsx` ✅
+- `components/experts/ExpertProfileFields.tsx` (or `hooks/use-expert-profile-form.ts`) — Phase 4
+- `hooks/use-skill-tags.ts` — Phase 4
 
 ### Modified
 
-- `lib/languages.ts`, `lib/db.ts`, `lib/ui-copy.ts`
-- `components/ui-patterns/highlight-pill.ts`, `ExpertMeta.tsx`
-- `components/experts/ExpertCard.tsx`, `ExpertBrowser.tsx`, `ExpertSearch.tsx`
-- `components/experts/ExpertProfileHero.tsx`, `ExpertDetailBody.tsx`
-- `components/experts/RegisterForm.tsx`, `ExpertEditForm.tsx`, `SkillTagPicker.tsx`, `LanguagePicker.tsx`
-- `components/experts/SkillFilter.tsx`, `LanguageFilter.tsx` — **deprecate or repurpose** as sheet internals
-- `components/admin/PromoteSection.tsx`, `AdminPanel.tsx`
-- `components/bookings/CallsView.tsx`, `BookingHistory.tsx`
-- `app/page.tsx` (searchParams SSR)
-- `app/globals.css` (optional `--pill-language-*`)
-- `spec/solarpunk-theme-decisions.md`, `AGENTS.md`, `spec/useful-links.md`
+- `lib/languages.ts`, `lib/db.ts`, `lib/ui-copy.ts` ✅
+- `components/ui-patterns/highlight-pill.ts`, `ExpertMeta.tsx` ✅
+- `components/experts/ExpertCard.tsx`, `ExpertBrowser.tsx`, `ExpertSearch.tsx` (copy only) ✅
+- `components/experts/ExpertProfileHero.tsx`, `ExpertDetailBody.tsx` ✅
+- `components/experts/RegisterForm.tsx`, `ExpertEditForm.tsx`, … — Phase 4
+- `components/experts/SkillFilter.tsx`, `LanguageFilter.tsx` — **unused on home**; keep for now
+- `components/admin/PromoteSection.tsx`, `AdminPanel.tsx` (partial ✅ display)
+- `components/bookings/CallsView.tsx`, `BookingHistory.tsx` ✅
+- `app/page.tsx` (searchParams SSR) ✅
+- `app/globals.css` (`--pill-language-*`) ✅
+- `spec/solarpunk-theme-decisions.md`, `AGENTS.md`, `spec/useful-links.md` — Phase 5
 
 ### Possibly removed
 
@@ -234,16 +234,16 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 
 ## 7. Acceptance criteria
 
-- [ ] Card: languages visually distinct from skills; **full labels** on row 1 (`ExpertCard`)
-- [ ] Card: max 3 skills + `+N`; **tap to expand** remaining skills (mobile-first)
-- [ ] Homepage: filter sheet; multi skill OR; multi language OR; active chips removable
-- [ ] Detail: languages shown once; no bio-gated duplicate
-- [ ] Register + inline edit + promote: same language picker behaviour
-- [ ] Promote flow persists spoken + call languages
-- [ ] Calls/history/admin: skill pills match design system
-- [ ] `getDisplayCallLanguages` used everywhere (no inline fallback copies)
-- [ ] `pnpm build` + manual QA: home filters, card scan, register, expert detail, promote admin
-- [ ] Reduced motion: no new motion-only affordances required for filter sheet
+- [x] Card: languages visually distinct from skills; **full labels** on row 1 (`ExpertCard`)
+- [x] Card: max 3 skills + `+N`; **tap to expand** remaining skills (mobile-first)
+- [x] Homepage: filter sheet; multi skill OR; multi language OR; active chips removable
+- [x] Detail: languages shown once; no bio-gated duplicate
+- [ ] Register + inline edit + promote: same language picker behaviour (Phase 4)
+- [ ] Promote flow persists spoken + call languages (Phase 4)
+- [x] Calls/history/admin: skill pills match design system
+- [x] `getDisplayCallLanguages` used everywhere (no inline fallback copies)
+- [x] `pnpm build` + manual QA: home filters, card scan, register, expert detail, promote admin (build ✅; manual QA pending)
+- [ ] Reduced motion: no new motion-only affordances required for filter sheet (Phase 5 review)
 
 ---
 
