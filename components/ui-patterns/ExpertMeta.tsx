@@ -174,10 +174,13 @@ export function ExpertLanguageTags({
       ? 'text-xs text-muted-foreground sm:text-sm'
       : 'text-sm text-muted-foreground';
 
+  const ariaLabel =
+    variant === 'prose' ? `${prefix} ${fullLabel}` : `Session languages: ${fullLabel}`;
+
   return (
     <p
       className={cn('flex min-w-0 items-center gap-1.5', rowClass, className)}
-      aria-label={`Session languages: ${fullLabel}`}
+      aria-label={ariaLabel}
     >
       <Globe className="size-3.5 shrink-0 opacity-80 sm:size-4" aria-hidden />
       <span className="min-w-0 truncate">{displayText}</span>

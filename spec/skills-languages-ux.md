@@ -1,7 +1,7 @@
 # Skills & languages UX — implementation spec
 
-> **Branch:** `feat/skills-languages-ux` → `dev`  
-> **Status:** In progress — single branch, phased commits  
+> **Branch:** `feat/skills-languages-ux` → `dev` (PR pending — other work on branch first)  
+> **Status:** Implementation complete (phases 1–5) — awaiting PR  
 > **Tracking:** [IMPL-L4-09 #94](https://github.com/gnosis-box/THP-for-Good/issues/94)  
 > **Related:** [FEAT-L4-07 #64](https://github.com/gnosis-box/THP-for-Good/issues/64) (session languages) · [`solarpunk-theme-decisions.md`](./solarpunk-theme-decisions.md) pill rules · [`motion-design-audit.md`](./motion-design-audit.md) M-P1-10  
 > **Cross-refs:** [`lib/languages.ts`](../lib/languages.ts) · [`ExpertMeta.tsx`](../components/ui-patterns/ExpertMeta.tsx) · [`ExpertBrowser.tsx`](../components/experts/ExpertBrowser.tsx)
@@ -189,16 +189,16 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 
 ---
 
-### Phase 5 — Polish, motion, docs
+### Phase 5 — Polish, motion, docs ✅
 
-| Task | How |
-|------|-----|
-| Motion | Chip press per `motion-design-audit` M-P1-10 on new filter components |
-| a11y | `aria-label="Sessions in English, French"` on language rows; filter sheet focus trap |
-| `StatsDashboard` top skills | Already capped at 8 — no change unless styling alignment |
-| Update `spec/solarpunk-theme-decisions.md` | Pill rules: language row distinct from skill |
-| Update `AGENTS.md` | Short § Skills & languages UX pointer to this spec |
-| Update `spec/useful-links.md` | Row linking this spec |
+| Task | How | Status |
+|------|-----|--------|
+| Motion | M-P1-10 `active:scale-95` on `tagChipClass` (filter sheet + forms) | ✅ |
+| a11y | Prose aria-label `Sessions in English, French`; sheet title/description | ✅ |
+| `StatsDashboard` top skills | No change (already capped at 8) | ✅ |
+| Update `spec/solarpunk-theme-decisions.md` | Pill rules: language distinct from skill | ✅ |
+| Update `AGENTS.md` | § Skills & languages UX | ✅ |
+| Update `spec/useful-links.md` | IMPL-L4-09 + spec link | ✅ |
 
 ---
 
@@ -225,7 +225,7 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 - `components/bookings/CallsView.tsx`, `BookingHistory.tsx` ✅
 - `app/page.tsx` (searchParams SSR) ✅
 - `app/globals.css` (`--pill-language-*`) ✅
-- `spec/solarpunk-theme-decisions.md`, `AGENTS.md`, `spec/useful-links.md` — Phase 5
+- `spec/solarpunk-theme-decisions.md`, `AGENTS.md`, `spec/useful-links.md` ✅
 
 ### Possibly removed
 
@@ -244,7 +244,7 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 - [x] Calls/history/admin: skill pills match design system
 - [x] `getDisplayCallLanguages` used everywhere (no inline fallback copies)
 - [x] `pnpm build` + manual QA: home filters, card scan, register, expert detail, promote admin (build ✅; manual QA pending)
-- [ ] Reduced motion: no new motion-only affordances required for filter sheet (Phase 5 review)
+- [x] Reduced motion: filter/sheet chips use CSS press scale only (no motion-only-only affordance)
 
 ---
 

@@ -47,7 +47,8 @@ export function filterChipClass(selected: boolean, className?: string) {
 /** Tag picker chips in forms — neutral idle, primary when selected. */
 export function tagChipClass(selected: boolean, className?: string) {
   return cn(
-    'inline-flex min-h-9 shrink-0 items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+    'inline-flex min-h-9 shrink-0 items-center rounded-md px-3 py-1.5 text-sm font-medium',
+    'transition-all duration-[var(--motion-fast)] active:scale-95 touch-manipulation',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     selected
       ? 'bg-primary text-primary-foreground'
