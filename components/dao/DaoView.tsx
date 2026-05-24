@@ -6,12 +6,20 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { shortenAddress } from '@/lib/utils';
+import { JoinSupporterButton } from '@/components/dao/JoinSupporterButton';
 import type { DaoMemberDto } from '@/app/api/dao/members/route';
 import type { DaoSupporterDto } from '@/app/api/dao/supporters/route';
 
+const GNOSIS_APP_BASE = 'https://app.gnosis.io';
+
 function MemberCard({ address, name, imageUrl, trustsReceivedCount }: DaoMemberDto) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+    <a
+      href={`${GNOSIS_APP_BASE}/${address}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:bg-accent"
+    >
       <Avatar size="lg" className="shrink-0">
         {imageUrl && <AvatarImage src={imageUrl} alt={name} />}
         <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
@@ -25,13 +33,18 @@ function MemberCard({ address, name, imageUrl, trustsReceivedCount }: DaoMemberD
           <span className="text-xs text-muted-foreground">Trusted by {trustsReceivedCount}</span>
         )}
       </div>
-    </div>
+    </a>
   );
 }
 
 function SupporterCard({ address, name, imageUrl }: DaoSupporterDto) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+    <a
+      href={`${GNOSIS_APP_BASE}/${address}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:bg-accent"
+    >
       <Avatar size="lg" className="shrink-0">
         {imageUrl && <AvatarImage src={imageUrl} alt={name} />}
         <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
@@ -42,7 +55,7 @@ function SupporterCard({ address, name, imageUrl }: DaoSupporterDto) {
           {shortenAddress(address)}
         </span>
       </div>
-    </div>
+    </a>
   );
 }
 
@@ -133,7 +146,8 @@ export function DaoView() {
         )}
       </TabsContent>
 
-      <TabsContent value="supporters">
+      <TabsContent value="supporters" className="flex flex-col gap-4">
+        <JoinSupporterButton />
         {supportersLoading ? (
           <SkeletonGrid />
         ) : supportersError ? (
