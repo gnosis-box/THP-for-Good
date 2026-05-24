@@ -92,6 +92,8 @@ export const UI_COPY = {
     stopExpertLoading: 'Updating…',
     stopExpertConfirm:
       'Remove your expert profile from the directory? You can register again later.',
+    previewUnpin: 'Let preview scroll',
+    previewPin: 'Keep preview visible',
   },
   stats: {
     title: 'Stats',
