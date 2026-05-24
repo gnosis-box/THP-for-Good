@@ -15,7 +15,7 @@ export function LanguageFilter({ selected, onChange }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm font-medium">{UI_COPY.home.languageFilterLabel}</p>
-      <ScrollArea className="w-full whitespace-nowrap">
+      <ScrollArea className="motion-scroll-fade-x w-full whitespace-nowrap">
         <div className="inline-flex w-max min-h-11 items-center gap-2 pb-1">
           <button
             type="button"

@@ -1,6 +1,6 @@
 # Motion design audit — THP for Good
 
-> **Status:** Phase 1 shipped · Phase 2 shipped (`56f89fd`, wave 2 on `docs/l4-motion-design`)  
+> **Status:** Phase 1–3 shipped (`docs/l4-motion-design`, waves 1–3)  
 > **Date:** 2026-05-24  
 > **Scope:** Full app tour — routes, components, shadcn primitives, iframe constraints  
 > **Related:** [`UI-REDESIGN.md` §6.5](./UI-REDESIGN.md), [`UI-SHADCN-INVENTORY.md`](./UI-SHADCN-INVENTORY.md)
@@ -95,20 +95,17 @@ Reference: [Web animation best practices gist](https://gist.github.com/w0rd-driv
 | `components/ui/drawer` | Bottom sheet slide | PayDrawer shell |
 | `components/ui/tooltip` | Fade + zoom + directional slide | |
 | `components/ui/tabs` | Underline opacity transition | Calls tabs |
-| `DonationSection` | Progress bar `transition-all duration-700` | P2 candidate |
+| `DonationSection` | Progress bar scaleX + count-up | M-P2-03 ✅ |
 | `components/ui/button` | `active:translate-y-px` | Press feedback |
 | Loading states | `animate-pulse`, `animate-spin` | Widespread |
 
-### 3.2 Remaining gaps (P2+)
+### 3.2 Remaining gaps (P3+)
 
 | Location | Gap |
 | --- | --- |
-| `StatsDashboard` | KPI numbers hard-cut when data loads |
-| `About` numbered steps | Static — no scroll reveal |
-| `RegisterForm` / `ExpertEditForm` | Long forms — no section reveal |
 | `SlotPicker` loading → slots | Skeleton crossfade to content |
 | `MobileNav` Sheet | Nav link stagger optional |
-| `ExpertTrustControl` | Trust pill loading → state crossfade |
+| `ExpertEditForm` (admin inline) | Section accordion — deferred (RegisterForm only) |
 
 ---
 
@@ -292,7 +289,7 @@ Align with project workflow: optional **`DIV-L4-MOTION`** to choose **CSS-only v
 | **Phase 0 — Foundation** | M-P0-09 | `lib/motion.ts`, CSS tokens, `usePrefersReducedMotion` hook | `docs/l4-motion-design` | ✅ Shipped |
 | **Phase 1 — Booking funnel** | M-P0-01 … M-P0-08 | Slot, stepper, sticky bar, pay, success, toast, trust | `docs/l4-motion-design` | ✅ Shipped (`56f89fd`) |
 | **Phase 2 — Discovery & calls** | M-P1-01 … M-P1-12 | Lists, cards, tabs, modal parity, shell polish | `docs/l4-motion-design` | ✅ Shipped (wave 2) |
-| **Phase 3 — Secondary** | P2 | Stats, about, register, admin flashes | `impl/l4-motion-polish` | ⬜ Todo |
+| **Phase 3 — Secondary** | P2 | Stats, about, register, admin flashes | `docs/l4-motion-design` | ✅ Shipped (wave 3) |
 
 **Bundle gate:** If `motion` package added, measure iframe load on throttled 4G + mid-range Android before Phase 2 list staggers.
 
@@ -419,6 +416,18 @@ npx shadcn@latest add https://reactbits.dev/r/Stepper-TS-TW
 | M-P1-10 | ✅ Done | wave 2 | `SkillFilter.tsx`, `LanguageFilter.tsx` | Chip press scale |
 | M-P1-11 | ✅ Done | wave 2 | `WalletStatus.tsx` | Connect fade-in |
 | M-P1-12 | ✅ Done | wave 2 | `PayButton.tsx`, `TrustPathPanel.tsx` | `motion-alert-in` |
+| M-P2-01 | ✅ Done | wave 3 | `ExpertBrowser.tsx` | PageHeader `FadeContent` |
+| M-P2-02 | ✅ Done | wave 3 | `StatsDashboard.tsx`, `motion/count-up.tsx` | KPI count-up + stagger |
+| M-P2-03 | ✅ Done | wave 3 | `DonationSection.tsx` | scaleX bar + pct count-up |
+| M-P2-04 | ✅ Done | wave 3 | `AboutSections.tsx`, `motion/scroll-reveal.tsx` | Scroll reveal steps |
+| M-P2-05 | ✅ Done | wave 3 | `AboutSections.tsx`, `globals.css` | Quote border draw-in |
+| M-P2-06 | ✅ Done | wave 3 | `RegisterForm.tsx`, `motion/collapsible-section.tsx` | 4-section accordion |
+| M-P2-07 | ✅ Done | wave 3 | `AdminPanel.tsx`, `PromoteSection.tsx`, `use-row-flash.ts` | Row flash 600ms |
+| M-P2-08 | ✅ Done | wave 3 | `NavCards.tsx` | Card hover lift |
+| M-P2-09 | ✅ Done | wave 3 | `SkillFilter.tsx`, `LanguageFilter.tsx` | Scroll fade masks |
+| M-P2-10 | ✅ Done | wave 3 | `ExpertTrustControl.tsx` | Skeleton → fade |
+| M-P2-11 | N/A | — | `app/history/page.tsx` | Redirects to `/calls` (M-P1 patterns) |
+| M-P2-12 | ✅ Done | wave 3 | `BookingSuccessDialog.tsx` | Bounce + sound sync |
 
 ---
 

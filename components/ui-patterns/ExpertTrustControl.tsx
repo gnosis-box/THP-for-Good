@@ -3,7 +3,9 @@
 import { useState, type MouseEvent, type SyntheticEvent } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useTrustRelation } from '@/hooks/use-trust-relation';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { addTrust } from '@/lib/trust-actions';
+import { motionClass } from '@/lib/motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -28,6 +30,7 @@ export function ExpertTrustControl({
   className,
 }: Props) {
   const { address, isConnected } = useWallet();
+  const reducedMotion = usePrefersReducedMotion();
   const [refetchTick, setRefetchTick] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -58,18 +61,27 @@ export function ExpertTrustControl({
 
   const pillSize = compact ? 'h-7 px-2 text-[10px]' : 'h-8 px-2.5 text-xs';
 
+  if (relation.status === 'loading') {
+    return (
+      <div className={cn('inline-flex', className)} onClick={stopBubble} onPointerDown={stopBubble}>
+        <span
+          className={cn('inline-block rounded-full bg-muted', pillSize, compact ? 'w-14' : 'w-16')}
+          aria-label={UI_COPY.trustCard.loading}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
-      className={cn('inline-flex flex-col gap-0.5', className)}
+      className={cn(
+        'inline-flex flex-col gap-0.5',
+        motionClass('', 'motion-trust-fade-in', reducedMotion),
+        className,
+      )}
       onClick={stopBubble}
       onPointerDown={stopBubble}
     >
-      {relation.status === 'loading' && (
-        <Badge variant="secondary" className={cn('font-normal animate-pulse', pillSize)}>
-          {UI_COPY.trustCard.loading}
-        </Badge>
-      )}
-
       {relation.status === 'none' && (
         <Button
           type="button"

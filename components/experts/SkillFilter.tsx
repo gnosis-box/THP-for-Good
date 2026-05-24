@@ -13,7 +13,7 @@ type Props = {
 
 export function SkillFilter({ tags, selected, onSelect }: Props) {
   return (
-    <ScrollArea className="w-full whitespace-nowrap">
+    <ScrollArea className="motion-scroll-fade-x w-full whitespace-nowrap">
       <ToggleGroup
         value={selected ? [selected] : ['']}
         onValueChange={(values) => {

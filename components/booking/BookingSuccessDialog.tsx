@@ -37,8 +37,13 @@ export function BookingSuccessDialog({
   const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    if (open) playBookingSuccessSound();
-  }, [open]);
+    if (!open || reducedMotion) {
+      if (open && reducedMotion) playBookingSuccessSound();
+      return;
+    }
+    const timer = window.setTimeout(() => playBookingSuccessSound(), 50);
+    return () => window.clearTimeout(timer);
+  }, [open, reducedMotion]);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -72,7 +77,12 @@ export function BookingSuccessDialog({
           </Dialog.Close>
 
           <div className="flex flex-col items-center gap-4 pt-2 text-center">
-            <div className="booking-success-icon flex size-16 items-center justify-center rounded-full bg-success/15">
+            <div
+              className={cn(
+                'flex size-16 items-center justify-center rounded-full bg-success/15',
+                motionClass('booking-success-icon', 'motion-success-icon-bounce', reducedMotion),
+              )}
+            >
               <CheckCircle2 className="size-10 text-success" strokeWidth={2} />
             </div>
 

@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
-import { toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
+import { toHttpImageUrl, fetchCirclesScore, cn } from '@/lib/utils';
+import { useRowFlash } from '@/hooks/use-row-flash';
 import { PromoteSection } from './PromoteSection';
 import { PlatformHealthSection } from './PlatformHealthSection';
 import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
@@ -13,6 +14,7 @@ import type { AdminHealthStats, ExpertRow, TagRow, AdminRow } from '@/lib/db';
 
 export function AdminPanel() {
   const { address, isConnected } = useWallet();
+  const { flashKey, triggerFlash } = useRowFlash();
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [groupAddress, setGroupAddress] = useState<string | null>(null);
@@ -216,7 +218,10 @@ export function AdminPanel() {
             ) : (
               <span
                 key={tag.id}
-                className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm"
+                className={cn(
+                  'flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm',
+                  flashKey === `tag-${tag.id}` && 'motion-row-flash',
+                )}
               >
                 {tag.label}
                 {tag.status === 'pending' && (
@@ -224,6 +229,7 @@ export function AdminPanel() {
                     type="button"
                     onClick={async () => {
                       await fetch(`/api/tags/${tag.id}/approve`, { method: 'POST', headers: headers() });
+                      triggerFlash(`tag-${tag.id}`);
                       load();
                     }}
                     className="text-xs font-medium text-primary hover:underline"
