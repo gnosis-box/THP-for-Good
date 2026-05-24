@@ -53,16 +53,19 @@ function MentorCardSkeleton() {
       {/* Avatar */}
       <Skeleton className="size-11 shrink-0 rounded-full sm:size-12" />
       <div className="min-w-0 flex-1 space-y-2">
-        {/* Name + price row */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 items-baseline gap-2">
-            <Skeleton className="h-5 w-28 rounded-md" />
-            <Skeleton className="h-4 w-8 rounded-sm" />
+        {/* Name + trust | price row */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Skeleton className="h-4 w-20 shrink-0 rounded-md" />
+            <Skeleton className="h-6 w-14 shrink-0 rounded-full" />
           </div>
-          <Skeleton className="h-4 w-16 shrink-0 rounded-md" />
+          <Skeleton className="h-5 w-14 shrink-0 rounded-md" />
         </div>
-        {/* Trusted by */}
-        <Skeleton className="h-3 w-24 rounded-sm" />
+        {/* Languages | trusted by row */}
+        <div className="flex items-center justify-between gap-2">
+          <Skeleton className="h-4 w-28 shrink-0 rounded-sm" />
+          <Skeleton className="h-3 w-16 shrink-0 rounded-sm" />
+        </div>
         {/* Skill tags */}
         <div className="flex flex-wrap gap-1.5">
           {[1, 2].map((i) => (

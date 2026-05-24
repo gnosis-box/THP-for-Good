@@ -59,7 +59,9 @@ export function ExpertTrustControl({
     return null;
   }
 
-  const pillSize = compact ? 'h-7 px-2 text-[10px]' : 'h-8 px-2.5 text-xs';
+  const pillSize = compact ? 'h-6 px-1.5 text-[10px]' : 'h-8 px-2.5 text-xs';
+  const incomingLayout = compact ? 'flex flex-nowrap items-center gap-1' : 'flex flex-wrap items-center gap-1';
+  const rootLayout = compact ? 'inline-flex flex-row items-center gap-1' : 'inline-flex flex-col gap-0.5';
 
   if (relation.status === 'loading') {
     return (
@@ -75,7 +77,7 @@ export function ExpertTrustControl({
   return (
     <div
       className={cn(
-        'inline-flex flex-col gap-0.5',
+        rootLayout,
         motionClass('', 'motion-trust-fade-in', reducedMotion),
         className,
       )}
@@ -96,7 +98,7 @@ export function ExpertTrustControl({
       )}
 
       {relation.status === 'incoming' && (
-        <div className="flex flex-wrap items-center gap-1">
+        <div className={incomingLayout}>
           <Badge
             variant="secondary"
             className={cn('border-trust/20 bg-muted text-muted-foreground font-medium', pillSize)}

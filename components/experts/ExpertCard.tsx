@@ -26,6 +26,8 @@ export function ExpertCard({
   const reducedMotion = usePrefersReducedMotion();
   const share = expert.expert_share_percent ?? 20;
   const sessionLanguages = getDisplayCallLanguages(expert);
+  const hasLanguages = sessionLanguages.length > 0;
+  const showTrustedBy = circles !== null && circles.trustedByCount !== null;
 
   useEffect(() => {
     (async () => {
@@ -65,28 +67,50 @@ export function ExpertCard({
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1 space-y-1">
-            <div className="flex items-start justify-between gap-2">
-              <p className="min-w-0 truncate font-semibold leading-tight sm:text-base">{expert.name}</p>
-              {paidSessionCount != null ? (
-                <p className="shrink-0 text-sm tabular-nums text-foreground">
-                  {UI_COPY.stats.expertPaidSessions(paidSessionCount)}
+            <div className="flex min-w-0 items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden sm:gap-2">
+                <p className="min-w-0 shrink truncate font-semibold leading-tight text-sm sm:text-base">
+                  {expert.name}
                 </p>
-              ) : (
-                <CrcAmount amount={expert.price_crc} variant="highlight" />
-              )}
+                <ExpertTrustControl
+                  expertAddress={expert.circles_address}
+                  expertName={expert.name}
+                  compact
+                  className="shrink-0"
+                />
+              </div>
+              <div className="shrink-0">
+                {paidSessionCount != null ? (
+                  <p className="text-xs tabular-nums text-foreground sm:text-sm">
+                    {UI_COPY.stats.expertPaidSessions(paidSessionCount)}
+                  </p>
+                ) : (
+                  <CrcAmount amount={expert.price_crc} variant="highlight" className="text-xs sm:text-sm" />
+                )}
+              </div>
             </div>
-            <ExpertLanguageTags languages={sessionLanguages} variant="card" />
+            {(hasLanguages || showTrustedBy) && (
+              <div
+                className={cn(
+                  'flex min-w-0 items-center gap-2',
+                  hasLanguages ? 'justify-between' : 'justify-end',
+                )}
+              >
+                {hasLanguages ? (
+                  <ExpertLanguageTags
+                    languages={sessionLanguages}
+                    variant="card"
+                    className="min-w-0 flex-1"
+                  />
+                ) : null}
+                {showTrustedBy && (
+                  <span className="shrink-0 whitespace-nowrap text-right text-[10px] text-subtle-foreground sm:text-xs">
+                    Trusted by {circles.trustedByCount}
+                  </span>
+                )}
+              </div>
+            )}
             <ExpertSkillTags skills={expert.skills} maxVisible={3} />
-            <div className="flex flex-wrap items-center gap-1.5">
-              {circles !== null && circles.trustedByCount !== null && (
-                <p className="text-xs text-subtle-foreground">Trusted by {circles.trustedByCount}</p>
-              )}
-              <ExpertTrustControl
-                expertAddress={expert.circles_address}
-                expertName={expert.name}
-                compact
-              />
-            </div>
           </div>
         </div>
         <ExpertSplitShare
