@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/empty';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AnimatedList, AnimatedListItem } from '@/components/motion/animated-list';
+import { FadeContent } from '@/components/motion/fade-content';
 import { MotionEmpty } from '@/components/motion/motion-empty';
 import { ExpertCard } from './ExpertCard';
 import { ExpertSearch } from './ExpertSearch';
@@ -46,7 +47,9 @@ export function ExpertBrowser({ experts, tags }: Props) {
 
   return (
     <div className="flex w-full flex-col gap-8">
-      <PageHeader title={UI_COPY.home.title} subtitle={UI_COPY.home.subtitle} />
+      <FadeContent>
+        <PageHeader title={UI_COPY.home.title} subtitle={UI_COPY.home.subtitle} />
+      </FadeContent>
 
       <section className="flex flex-col gap-4">
         <p className="text-sm font-medium">{UI_COPY.home.filterLabel}</p>

@@ -328,6 +328,112 @@
   .motion-progress-fill {
     transform-origin: left center;
   }
+
+  @keyframes motion-quote-border-in {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes motion-row-flash {
+    0% {
+      background-color: oklch(0.52 0.28 285 / 25%);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  @keyframes motion-trust-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes motion-success-icon-bounce {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.06);
+    }
+  }
+
+  .motion-quote-border {
+    position: relative;
+  }
+
+  .motion-quote-border::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--accent);
+    transform-origin: left center;
+    animation: motion-quote-border-in var(--motion-slow) ease-out both;
+  }
+
+  .motion-nav-card-hover {
+    transition:
+      transform var(--motion-fast) ease-out,
+      box-shadow var(--motion-fast) ease-out,
+      background-color var(--motion-fast) ease-out;
+  }
+
+  @media (hover: hover) {
+    .motion-nav-card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px oklch(0.52 0.28 285 / 15%);
+    }
+  }
+
+  .motion-scroll-fade-x {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 1.5rem,
+      black calc(100% - 1.5rem),
+      transparent
+    );
+  }
+
+  .motion-row-flash {
+    animation: motion-row-flash 600ms ease-out 1;
+  }
+
+  .motion-trust-fade-in {
+    animation: motion-trust-fade-in var(--motion-normal) ease-out both;
+  }
+
+  .booking-success-icon.motion-success-icon-bounce {
+    animation:
+      booking-success-pop var(--motion-slow) var(--motion-ease-spring) both,
+      motion-success-icon-bounce 400ms var(--motion-ease-spring) 520ms 1;
+  }
+
+  .motion-collapsible .motion-collapsible-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--motion-normal) ease-out;
+  }
+
+  .motion-collapsible[open] .motion-collapsible-body {
+    grid-template-rows: 1fr;
+  }
+
+  .motion-collapsible .motion-collapsible-body > div {
+    overflow: hidden;
+    padding: 0 1rem 1rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
