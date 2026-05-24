@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -8,7 +8,9 @@ import { BookingSuccessDialog } from '@/components/booking/BookingSuccessDialog'
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { TrustPathPanel } from '@/components/booking/TrustPathPanel';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
+import { dispatchPayTreasuryFeedback } from '@/components/motion/pay-treasury-feedback';
 import { useToast } from '@/components/ui/toast';
+import { useTreasuryPendingTx } from '@/contexts/TreasuryPendingTxContext';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { useTrustEligibleBalance } from '@/hooks/use-trust-eligible-balance';
@@ -66,6 +68,8 @@ export function PayButton({
 }: Props) {
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
+  const { registerPending } = useTreasuryPendingTx();
+  const payButtonRef = useRef<HTMLButtonElement>(null);
   const balance = useCrcBalance(address);
   const sharePercent = clampExpertShare(expert.expert_share_percent ?? 20) as ExpertSharePercent;
   const { expertLegCrc, treasuryLegCrc } = splitLegCrc(expert.price_crc, sharePercent);
@@ -131,6 +135,19 @@ export function PayButton({
       );
       const hashes = await sendTransactions(txs);
       const txHash = hashes[0];
+
+      if (treasuryLegCrc > 0) {
+        const rect = payButtonRef.current?.getBoundingClientRect();
+        registerPending({
+          txHash,
+          nominalCrc: treasuryLegCrc,
+          source: 'pay',
+          spawnRect: rect
+            ? { x: rect.left, y: rect.top, width: rect.width, height: rect.height }
+            : undefined,
+        });
+        dispatchPayTreasuryFeedback(txHash, treasuryLegCrc);
+      }
 
       const bookingRes = await fetch('/api/bookings', {
         method: 'POST',
@@ -295,6 +312,8 @@ export function PayButton({
           )}
           <div className="pay-drawer-section">
             <Button
+              ref={payButtonRef}
+              data-treasury-pay-btn
               disabled={!canPay}
               onClick={handlePay}
               size="lg"

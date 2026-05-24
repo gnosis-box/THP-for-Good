@@ -4,11 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { ContentPanel, ContentSection } from '@/components/ui-patterns/content-section';
 import {
-  MetricsActions,
-  MetricsExternalLink,
-  MetricsHero,
   MetricsPanel,
-  MetricsPanelMono,
   MetricsPanelTitle,
   StatCell,
   StatGrid,
@@ -23,11 +19,8 @@ import type { StatsApiResponse } from '@/lib/stats-api';
 import { WebAnalyticsPanel } from '@/components/stats/WebAnalyticsPanel';
 import { ExpertCard } from '@/components/experts/ExpertCard';
 import { ExternalLink } from 'lucide-react';
+import { LiveTreasuryMetricsPanel } from '@/components/stats/LiveTreasuryMetricsPanel';
 import { cn } from '@/lib/utils';
-
-function fmt(n: number) {
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(n);
-}
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -91,28 +84,12 @@ export function StatsDashboard() {
         />
       )}
 
-      <MetricsPanel>
-        <MetricsPanelTitle>{copy.treasuryTitle}</MetricsPanelTitle>
-        <MetricsPanelMono>{data.treasury.address}</MetricsPanelMono>
-        <MetricsHero
-          label={copy.treasuryBalance}
-          value={
-            data.treasury.balanceCrc != null ? (
-              <>
-                <CountUp value={data.treasury.balanceCrc} format={fmt} /> CRC
-              </>
-            ) : (
-              copy.treasuryBalanceUnavailable
-            )
-          }
-        />
-        <MetricsActions>
-          <MetricsExternalLink href={data.treasury.eventsUrl}>
-            {copy.viewOnChainActivity}
-          </MetricsExternalLink>
-          <MetricsExternalLink href={data.treasury.graphUrl}>{copy.trustGraph}</MetricsExternalLink>
-        </MetricsActions>
-      </MetricsPanel>
+      <LiveTreasuryMetricsPanel
+        address={data.treasury.address}
+        initialBalance={data.treasury.balanceCrc}
+        eventsUrl={data.treasury.eventsUrl}
+        graphUrl={data.treasury.graphUrl}
+      />
 
       <section className="flex flex-col items-center gap-4">
         <MetricsPanelTitle>{copy.expertsTitle}</MetricsPanelTitle>

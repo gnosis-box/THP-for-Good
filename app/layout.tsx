@@ -4,6 +4,7 @@ import './globals.css';
 
 import { AppShell } from '@/components/layout/AppShell';
 import { UmamiScript } from '@/components/analytics/UmamiScript';
+import { TreasuryProviders } from '@/components/treasury/TreasuryProviders';
 import { ToastProvider } from '@/components/ui/toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { WalletProvider } from '@/components/wallet/WalletProvider';
@@ -48,7 +49,9 @@ export default function RootLayout({
         <WalletProvider>
           <TooltipProvider>
             <ToastProvider>
-              <AppShell>{children}</AppShell>
+              <TreasuryProviders>
+                <AppShell>{children}</AppShell>
+              </TreasuryProviders>
             </ToastProvider>
           </TooltipProvider>
         </WalletProvider>

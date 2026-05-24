@@ -346,6 +346,20 @@
     transform-origin: left center;
   }
 
+  @keyframes motion-treasury-bar-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+    50% {
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 45%, transparent);
+    }
+  }
+
+  .motion-treasury-bar-pulse {
+    animation: motion-treasury-bar-pulse 400ms ease-out;
+  }
+
   @keyframes motion-quote-border-in {
     from {
       transform: scaleX(0);
