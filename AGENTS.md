@@ -322,7 +322,7 @@ contexts/TreasuryPendingTxContext.tsx   same-tab dedupe (donate + pay)
 components/treasury/TreasuryProviders.tsx  wraps layout; PayTreasuryFeedback global
 ```
 
-**Manual / fake coin testing (no on-chain tx):** see spec **§8.2**. Floating panel **off by default**; in dev, `TreasuryCoinDevController` handles URL params + `__THP_TREASURY_DEMO__`. WSS probe: `node scripts/probe-treasury-ws.mjs` (Node 22+).
+**Manual / fake coin testing (no on-chain tx):** see spec **§8.3**. Floating panel **off by default**; in dev, `TreasuryCoinDevController` handles URL params + `__THP_TREASURY_DEMO__`. WSS probe: `node scripts/probe-treasury-ws.mjs` (Node 22+).
 
 **Do not** confuse group `0x2b5E…` with treasury org `0xc02D…` when filtering WSS events.
 
