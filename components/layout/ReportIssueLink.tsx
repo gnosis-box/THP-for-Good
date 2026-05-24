@@ -5,11 +5,13 @@ import { usePathname } from 'next/navigation';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { UI_COPY } from '@/lib/ui-copy';
 
-const DEFAULT_ISSUES_URL =
+const DEFAULT_REPORT_URL =
   'https://github.com/gnosis-box/THP-for-Good/issues/new?template=user_feedback.yml';
 
-function buildReportIssueUrl(pathname: string, isMiniappHost: boolean): string {
-  const base = process.env.NEXT_PUBLIC_GITHUB_ISSUES_URL?.trim() || DEFAULT_ISSUES_URL;
+const DEFAULT_FEEDBACK_URL =
+  'https://github.com/gnosis-box/THP-for-Good/issues/new?template=general_feedback.yml';
+
+function buildGithubUrl(base: string, pathname: string, isMiniappHost: boolean): string {
   const url = new URL(base);
 
   const lines = [
@@ -31,22 +33,43 @@ function buildReportIssueUrl(pathname: string, isMiniappHost: boolean): string {
 export function ReportIssueLink() {
   const pathname = usePathname();
   const { isMiniappHost } = useWallet();
-  const href = useMemo(
-    () => buildReportIssueUrl(pathname, isMiniappHost),
+
+  const reportHref = useMemo(
+    () =>
+      buildGithubUrl(
+        process.env.NEXT_PUBLIC_GITHUB_ISSUES_URL?.trim() || DEFAULT_REPORT_URL,
+        pathname,
+        isMiniappHost,
+      ),
+    [pathname, isMiniappHost],
+  );
+
+  const feedbackHref = useMemo(
+    () => buildGithubUrl(DEFAULT_FEEDBACK_URL, pathname, isMiniappHost),
     [pathname, isMiniappHost],
   );
 
   return (
     <footer className="border-t border-border px-4 py-3 md:px-6">
-      <div className="mx-auto flex w-full max-w-lg justify-center md:max-w-2xl">
+      <div className="mx-auto flex w-full max-w-lg items-center justify-center gap-1 md:max-w-2xl">
         <a
-          href={href}
+          href={reportHref}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex min-h-11 items-center px-3 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={UI_COPY.support.reportIssueAria}
         >
           {UI_COPY.support.reportIssue}
+        </a>
+        <span className="text-xs text-muted-foreground/40" aria-hidden>·</span>
+        <a
+          href={feedbackHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-11 items-center px-3 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label={UI_COPY.support.giveFeedbackAria}
+        >
+          {UI_COPY.support.giveFeedback}
         </a>
       </div>
     </footer>
