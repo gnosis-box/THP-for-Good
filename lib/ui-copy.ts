@@ -2,7 +2,7 @@
 
 export const UI_COPY = {
   home: {
-    title: 'Find an expert',
+    title: 'Find an EXPERT to help you',
     subtitle: 'Book a 1:1 session. Pay in CRC. Fund the next student.',
     filterLabel: 'Which domain do you want help with?',
     emptySearch: 'No experts found for this search.',
