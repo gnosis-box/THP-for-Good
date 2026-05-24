@@ -47,6 +47,7 @@ Central index of project, product, and ecosystem URLs.
 | UI mockup | [`spec/mockup.png`](mockup.png) |
 | shadcn inventory | [`spec/UI-SHADCN-INVENTORY.md`](UI-SHADCN-INVENTORY.md) |
 | Motion design audit (P0–P2) | [`spec/motion-design-audit.md`](motion-design-audit.md) |
+| Live CRC treasury counter (WSS + coin animation) | [`spec/live-crc-counter.md`](live-crc-counter.md) |
 | cal.diy spike | [`docs/spike-cal-diy.md`](../docs/spike-cal-diy.md) |
 
 ### App routes (target)
@@ -232,4 +233,4 @@ pnpm tsx scripts/seed.ts
 
 ---
 
-*Last updated: 2026-05-21 — Circles ecosystem links curated; group vs org addresses clarified.*
+*Last updated: 2026-05-24 — live CRC counter spec; Circles ecosystem links; group vs org addresses clarified.*
