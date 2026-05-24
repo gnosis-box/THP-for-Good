@@ -42,7 +42,7 @@ export function ExpertProfileHero({ expert }: Props) {
       </Avatar>
       <div className="flex w-full max-w-lg flex-col items-center gap-2">
         <h1 className="text-display text-xl font-semibold tracking-tight sm:text-2xl">{expert.name}</h1>
-        <CrcAmount amount={expert.price_crc} className="text-sm sm:text-base" />
+        <CrcAmount amount={expert.price_crc} variant="highlight" className="sm:text-base" />
         <div className="flex flex-wrap items-center justify-center gap-1.5">
           {trustedBy !== null && (
             <p className="text-xs text-muted-foreground">Trusted by {trustedBy}</p>
@@ -50,8 +50,8 @@ export function ExpertProfileHero({ expert }: Props) {
           <ExpertTrustControl expertAddress={expert.circles_address} expertName={expert.name} />
         </div>
         <ExpertLanguageTags languages={callLanguages} className="sm:text-sm" prefix="Sessions" />
-        <ExpertSkillTags skills={expert.skills} className="justify-center sm:[&_span]:text-sm" />
-        <ExpertSplitShare expertPercent={share} className="sm:text-sm" />
+        <ExpertSkillTags skills={expert.skills} className="justify-center" />
+        <ExpertSplitShare expertPercent={share} variant="inline" className="mt-1 w-full" />
       </div>
     </FadeContent>
   );

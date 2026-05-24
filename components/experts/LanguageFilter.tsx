@@ -1,8 +1,7 @@
 'use client';
 
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
+import { filterChipClass } from '@/components/ui-patterns/highlight-pill';
 import { CALL_LANGUAGES } from '@/lib/languages';
 import { UI_COPY } from '@/lib/ui-copy';
 
@@ -12,41 +11,45 @@ type Props = {
 };
 
 export function LanguageFilter({ selected, onChange }: Props) {
+  const anySelected = selected.length === 0;
+
+  function toggleLanguage(code: string) {
+    if (selected.includes(code)) {
+      const next = selected.filter((c) => c !== code);
+      onChange(next);
+      return;
+    }
+    onChange([...selected, code]);
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm font-medium">{UI_COPY.home.languageFilterLabel}</p>
       <ScrollArea className="motion-scroll-fade-x w-full whitespace-nowrap">
-        <div className="inline-flex w-max min-h-11 items-center gap-2 pb-1">
+        <div
+          role="group"
+          aria-label="Filter experts by call language"
+          className="inline-flex w-max min-h-11 items-center gap-2 pb-1"
+        >
           <button
             type="button"
-            aria-pressed={selected.length === 0}
+            aria-pressed={anySelected}
             onClick={() => onChange([])}
-            className={cn(
-              'inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors transition-transform duration-[var(--motion-fast)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              selected.length === 0
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border bg-background hover:bg-muted',
-            )}
+            className={filterChipClass(anySelected)}
           >
             {UI_COPY.home.languageFilterAll}
           </button>
-          <ToggleGroup
-            value={selected}
-            onValueChange={onChange}
-            multiple
-            aria-label="Filter experts by call language"
-            className="inline-flex gap-2"
-          >
-            {CALL_LANGUAGES.map(({ code, label }) => (
-              <ToggleGroupItem
-                key={code}
-                value={code}
-                className="min-h-11 shrink-0 rounded-full px-4 transition-transform duration-[var(--motion-fast)] active:scale-95"
-              >
-                {label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+          {CALL_LANGUAGES.map(({ code, label }) => (
+            <button
+              key={code}
+              type="button"
+              aria-pressed={selected.includes(code)}
+              onClick={() => toggleLanguage(code)}
+              className={filterChipClass(selected.includes(code))}
+            >
+              {label}
+            </button>
+          ))}
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
