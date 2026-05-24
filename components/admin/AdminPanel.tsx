@@ -407,7 +407,6 @@ export function AdminPanel() {
 
       {/* Group members → promote */}
       <PromoteSection
-        tags={tags}
         experts={experts}
         admins={dbAdmins.map((a) => a.circles_address)}
         walletAddress={address ?? ''}

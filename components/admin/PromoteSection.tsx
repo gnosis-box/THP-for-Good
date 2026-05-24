@@ -6,8 +6,11 @@ import { cn } from '@/lib/utils';
 import { useRowFlash } from '@/hooks/use-row-flash';
 import { CalConnect } from '@/components/experts/CalConnect';
 import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
-import { SkillTagPicker, mergeSkillTag } from '@/components/experts/SkillTagPicker';
-import type { ExpertRow, TagRow } from '@/lib/db';
+import { addExpertSkillDraft } from '@/components/experts/SkillTagPicker';
+import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
+import { buildExpertLanguagePayload } from '@/lib/expert-profile';
+import { useSkillTags } from '@/hooks/use-skill-tags';
+import type { ExpertRow } from '@/lib/db';
 
 type MemberEntry = {
   address: `0x${string}`;
@@ -24,16 +27,28 @@ type PromoteFormState = {
   expertShare: 0 | 10 | 20 | 30 | 50;
   priceCrc: number;
   selectedSkills: string[];
+  spokenLanguages: string[];
+  callLanguages: string[];
   submitting: boolean;
   error: string | null;
 };
 
 function defaultForm(name: string): PromoteFormState {
-  return { name, bio: '', calEventTypeId: null, expertShare: 20, priceCrc: 100, selectedSkills: [], submitting: false, error: null };
+  return {
+    name,
+    bio: '',
+    calEventTypeId: null,
+    expertShare: 20,
+    priceCrc: 100,
+    selectedSkills: [],
+    spokenLanguages: [],
+    callLanguages: [],
+    submitting: false,
+    error: null,
+  };
 }
 
 type Props = {
-  tags: TagRow[];
   experts: ExpertRow[];
   admins: string[];
   walletAddress: string;
@@ -47,7 +62,6 @@ type Props = {
 };
 
 export function PromoteSection({
-  tags,
   experts,
   admins,
   walletAddress,
@@ -60,6 +74,7 @@ export function PromoteSection({
   onReloadMembers,
 }: Props) {
   const { flashKey, triggerFlash } = useRowFlash();
+  const { tags, setTags } = useSkillTags({ walletAddress });
   const [groupAddress, setGroupAddress] = useState(initialGroupAddress ?? '');
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [manualMembers, setManualMembers] = useState<MemberEntry[] | null>(null);
@@ -70,11 +85,6 @@ export function PromoteSection({
   const [promotingAddress, setPromotingAddress] = useState<string | null>(null);
   const [form, setForm] = useState<PromoteFormState | null>(null);
   const [newSkill, setNewSkill] = useState('');
-  const [localTags, setLocalTags] = useState<TagRow[]>(tags);
-
-  useEffect(() => {
-    setLocalTags(tags);
-  }, [tags]);
 
   useEffect(() => {
     if (initialGroupAddress) setGroupAddress(initialGroupAddress);
@@ -115,15 +125,18 @@ export function PromoteSection({
   }
 
   function addNewSkill() {
-    const label = newSkill.trim();
-    if (!label) return;
-    setLocalTags((prev) => mergeSkillTag(prev, label, 'pending'));
-    setForm((prev) =>
-      prev && !prev.selectedSkills.includes(label)
-        ? { ...prev, selectedSkills: [...prev.selectedSkills, label] }
-        : prev,
-    );
-    setNewSkill('');
+    if (!form) return;
+    if (
+      addExpertSkillDraft(
+        setTags,
+        form.selectedSkills,
+        (skills) => setForm((prev) => prev && { ...prev, selectedSkills: skills }),
+        newSkill,
+        'pending',
+      )
+    ) {
+      setNewSkill('');
+    }
   }
 
   async function submitPromote() {
@@ -146,6 +159,7 @@ export function PromoteSection({
           expert_share_percent: form.expertShare,
           price_crc: form.priceCrc,
           skills: form.selectedSkills,
+          ...buildExpertLanguagePayload(form.spokenLanguages, form.callLanguages),
         }),
       });
 
@@ -293,7 +307,6 @@ export function PromoteSection({
 
                 {isPromoting && form && (
                   <div className="flex flex-col gap-3 border-t border-border pt-3">
-                    {/* Name */}
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-medium">Name</label>
                       <input
@@ -304,7 +317,6 @@ export function PromoteSection({
                       />
                     </div>
 
-                    {/* Bio */}
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-medium">Bio</label>
                       <textarea
@@ -316,20 +328,27 @@ export function PromoteSection({
                       />
                     </div>
 
-                    <SkillTagPicker
-                      tags={localTags}
-                      selected={form.selectedSkills}
-                      onSelectedChange={(skills) =>
+                    <ExpertProfileFields
+                      tags={tags}
+                      selectedSkills={form.selectedSkills}
+                      onSelectedSkillsChange={(skills) =>
                         setForm((prev) => prev && { ...prev, selectedSkills: skills })
                       }
-                      size="sm"
-                      helperText="Select at least one skill for this expert."
+                      spokenLanguages={form.spokenLanguages}
+                      callLanguages={form.callLanguages}
+                      onSpokenLanguagesChange={(spokenLanguages) =>
+                        setForm((prev) => prev && { ...prev, spokenLanguages })
+                      }
+                      onCallLanguagesChange={(callLanguages) =>
+                        setForm((prev) => prev && { ...prev, callLanguages })
+                      }
                       newSkill={newSkill}
                       onNewSkillChange={setNewSkill}
                       onAddNewSkill={addNewSkill}
+                      size="sm"
+                      skillsHelperText="Select at least one skill for this expert."
                     />
 
-                    {/* Cal.com */}
                     <div className="flex flex-col gap-1">
                       <span className="text-xs font-medium">Availability (Cal.com)</span>
                       <CalConnect
@@ -340,7 +359,6 @@ export function PromoteSection({
                       )}
                     </div>
 
-                    {/* Payment split */}
                     <div className="flex flex-col gap-1.5">
                       <span className="text-xs font-medium">Payment split</span>
                       <div className="flex flex-wrap gap-2">
@@ -362,7 +380,6 @@ export function PromoteSection({
                       </div>
                     </div>
 
-                    {/* Price */}
                     <div className="flex items-center gap-3">
                       <label className="text-xs font-medium">CRC per session</label>
                       <input

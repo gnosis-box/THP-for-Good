@@ -14,16 +14,17 @@ import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { cn, shortenAddress } from '@/lib/utils';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { useCirclesProfile } from '@/hooks/use-circles-profile';
-import type { ExpertRow, TagRow } from '@/lib/db';
+import type { ExpertRow } from '@/lib/db';
 import { CalConnect } from '@/components/experts/CalConnect';
 import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
-import { SkillTagPicker, mergeSkillTag } from '@/components/experts/SkillTagPicker';
-import { defaultCallLanguagesFromSpoken, filterCallLanguageCodes } from '@/lib/languages';
-import { LanguagePicker } from '@/components/experts/LanguagePicker';
+import { addExpertSkillDraft } from '@/components/experts/SkillTagPicker';
+import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
+import { buildExpertLanguagePayload, initialCallLanguagesFromExpert } from '@/lib/expert-profile';
 import { StopExpertButton } from '@/components/experts/StopExpertButton';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { CollapsibleSection } from '@/components/motion/collapsible-section';
 import { UI_COPY } from '@/lib/ui-copy';
+import { useSkillTags } from '@/hooks/use-skill-tags';
 
 export function RegisterForm() {
   const { address, isConnected } = useWallet();
@@ -31,8 +32,7 @@ export function RegisterForm() {
   const profile = useCirclesProfile(address);
   const balance = useCrcBalance(address);
 
-  const [tags, setTags] = useState<TagRow[]>([]);
-  const [tagsLoading, setTagsLoading] = useState(true);
+  const { tags, loading: tagsLoading, setTags } = useSkillTags();
   const [loadingExpert, setLoadingExpert] = useState(false);
   const [existingExpert, setExistingExpert] = useState<ExpertRow | null>(null);
   const [newSkill, setNewSkill] = useState('');
@@ -49,14 +49,6 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
 
   const isEditMode = existingExpert !== null;
-
-  useEffect(() => {
-    fetch('/api/tags')
-      .then((res) => res.json())
-      .then((data: TagRow[]) => setTags(data))
-      .catch(() => {})
-      .finally(() => setTagsLoading(false));
-  }, []);
 
   useEffect(() => {
     if (!address) {
@@ -88,9 +80,7 @@ export function RegisterForm() {
         setSelectedSkills(expert.skills);
         setSpokenLanguages(expert.spoken_languages);
         setCallLanguages(
-          expert.call_languages.length > 0
-            ? filterCallLanguageCodes(expert.call_languages)
-            : defaultCallLanguagesFromSpoken(expert.spoken_languages),
+          initialCallLanguagesFromExpert(expert.spoken_languages, expert.call_languages),
         );
       })
       .catch(() => {
@@ -113,11 +103,9 @@ export function RegisterForm() {
   }, [profile, isEditMode]);
 
   function addNewSkill() {
-    const label = newSkill.trim();
-    if (!label) return;
-    setTags((prev) => mergeSkillTag(prev, label, 'approved'));
-    setSelectedSkills((prev) => (prev.includes(label) ? prev : [...prev, label]));
-    setNewSkill('');
+    if (addExpertSkillDraft(setTags, selectedSkills, setSelectedSkills, newSkill, 'approved')) {
+      setNewSkill('');
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -147,11 +135,7 @@ export function RegisterForm() {
         price_crc: priceCrc,
         expert_share_percent: expertShare,
         skills: selectedSkills,
-        spoken_languages: spokenLanguages,
-        call_languages:
-          callLanguages.length > 0
-            ? filterCallLanguageCodes(callLanguages)
-            : defaultCallLanguagesFromSpoken(spokenLanguages),
+        ...buildExpertLanguagePayload(spokenLanguages, callLanguages),
       };
 
       if (isEditMode && existingExpert) {
@@ -316,25 +300,20 @@ export function RegisterForm() {
         </CollapsibleSection>
 
         <CollapsibleSection title="Skills & languages" defaultOpen={isEditMode}>
-          <div className="flex flex-col gap-4">
-            <SkillTagPicker
-              tags={tags}
-              selected={selectedSkills}
-              onSelectedChange={setSelectedSkills}
-              loading={tagsLoading}
-              required
-              newSkill={newSkill}
-              onNewSkillChange={setNewSkill}
-              onAddNewSkill={addNewSkill}
-            />
-
-            <LanguagePicker
-              spoken={spokenLanguages}
-              call={callLanguages}
-              onSpokenChange={setSpokenLanguages}
-              onCallChange={setCallLanguages}
-            />
-          </div>
+          <ExpertProfileFields
+            tags={tags}
+            tagsLoading={tagsLoading}
+            selectedSkills={selectedSkills}
+            onSelectedSkillsChange={setSelectedSkills}
+            spokenLanguages={spokenLanguages}
+            callLanguages={callLanguages}
+            onSpokenLanguagesChange={setSpokenLanguages}
+            onCallLanguagesChange={setCallLanguages}
+            newSkill={newSkill}
+            onNewSkillChange={setNewSkill}
+            onAddNewSkill={addNewSkill}
+            skillsRequired
+          />
         </CollapsibleSection>
 
         <CollapsibleSection title="Availability (Cal.com)" defaultOpen={isEditMode}>

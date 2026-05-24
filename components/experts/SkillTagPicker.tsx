@@ -133,3 +133,23 @@ export function mergeSkillTag(
   }
   return [...tags, { id: -(tags.length + 1), label, status }];
 }
+
+/**
+ * Add a skill to local tag list + selection.
+ * Status convention: register/edit → `approved`; admin promote → `pending` (awaiting approval).
+ */
+export function addExpertSkillDraft(
+  setTags: React.Dispatch<React.SetStateAction<TagRow[]>>,
+  selected: string[],
+  onSelectedChange: (skills: string[]) => void,
+  label: string,
+  status: TagRow['status'] = 'approved',
+): boolean {
+  const trimmed = label.trim();
+  if (!trimmed) return false;
+  setTags((prev) => mergeSkillTag(prev, trimmed, status));
+  if (!selected.includes(trimmed)) {
+    onSelectedChange([...selected, trimmed]);
+  }
+  return true;
+}

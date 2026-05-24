@@ -174,16 +174,16 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 
 ---
 
-### Phase 4 — Forms & admin (dedupe)
+### Phase 4 — Forms & admin (dedupe) ✅
 
-| Task | How |
-|------|-----|
-| Extract `useExpertProfileForm` hook OR `ExpertProfileFields` component | Shared: name, bio, skills (`SkillTagPicker`), languages (`LanguagePicker`), price, split, cal |
-| Slim `RegisterForm` | Collapsible sections wrap shared fields |
-| Slim `ExpertEditForm` | Same shared fields |
-| Add `LanguagePicker` to `PromoteSection` | Same as register; validate on promote API |
-| Unify tag fetch | Single `useSkillTags()` hook (`/api/tags`) used by Register, Edit, Promote, Filter sheet |
-| Fix `mergeSkillTag` status | Document: register → `approved`, promote → `pending`; no UX change unless product asks |
+| Task | How | Status |
+|------|-----|--------|
+| Extract `ExpertProfileFields` | Shared `SkillTagPicker` + `LanguagePicker` | ✅ |
+| Slim `RegisterForm` | Uses hook + shared fields + `buildExpertLanguagePayload` | ✅ |
+| Slim `ExpertEditForm` | Same shared fields | ✅ |
+| Add `LanguagePicker` to `PromoteSection` | POST includes spoken + call languages | ✅ |
+| Unify tag fetch | `useSkillTags()` — register, edit, promote (admin header) | ✅ |
+| `mergeSkillTag` status | Documented: register/edit → `approved`, promote → `pending` | ✅ |
 
 **Files:** new `hooks/use-skill-tags.ts`, `components/experts/ExpertProfileFields.tsx` (or hook), `RegisterForm.tsx`, `ExpertEditForm.tsx`, `PromoteSection.tsx`, `SkillTagPicker.tsx` (if hook injection)
 
@@ -209,8 +209,9 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 - `lib/expert-filters.ts` ✅
 - `components/experts/ExpertFilterSheet.tsx` ✅
 - `components/experts/ActiveFilterChips.tsx` ✅
-- `components/experts/ExpertProfileFields.tsx` (or `hooks/use-expert-profile-form.ts`) — Phase 4
-- `hooks/use-skill-tags.ts` — Phase 4
+- `components/experts/ExpertProfileFields.tsx` ✅
+- `hooks/use-skill-tags.ts` ✅
+- `lib/expert-profile.ts` ✅
 
 ### Modified
 
@@ -218,7 +219,7 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 - `components/ui-patterns/highlight-pill.ts`, `ExpertMeta.tsx` ✅
 - `components/experts/ExpertCard.tsx`, `ExpertBrowser.tsx`, `ExpertSearch.tsx` (copy only) ✅
 - `components/experts/ExpertProfileHero.tsx`, `ExpertDetailBody.tsx` ✅
-- `components/experts/RegisterForm.tsx`, `ExpertEditForm.tsx`, … — Phase 4
+- `components/experts/RegisterForm.tsx`, `ExpertEditForm.tsx`, `PromoteSection.tsx` ✅
 - `components/experts/SkillFilter.tsx`, `LanguageFilter.tsx` — **unused on home**; keep for now
 - `components/admin/PromoteSection.tsx`, `AdminPanel.tsx` (partial ✅ display)
 - `components/bookings/CallsView.tsx`, `BookingHistory.tsx` ✅
@@ -238,8 +239,8 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 - [x] Card: max 3 skills + `+N`; **tap to expand** remaining skills (mobile-first)
 - [x] Homepage: filter sheet; multi skill OR; multi language OR; active chips removable
 - [x] Detail: languages shown once; no bio-gated duplicate
-- [ ] Register + inline edit + promote: same language picker behaviour (Phase 4)
-- [ ] Promote flow persists spoken + call languages (Phase 4)
+- [x] Register + inline edit + promote: same language picker behaviour (Phase 4)
+- [x] Promote flow persists spoken + call languages (Phase 4)
 - [x] Calls/history/admin: skill pills match design system
 - [x] `getDisplayCallLanguages` used everywhere (no inline fallback copies)
 - [x] `pnpm build` + manual QA: home filters, card scan, register, expert detail, promote admin (build ✅; manual QA pending)
