@@ -1,12 +1,46 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import { AlertTriangle, Check } from 'lucide-react';
 
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
-import { Progress } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { PAY_COPY } from '@/lib/pay-copy';
+import { cn } from '@/lib/utils';
 import type { TrustEligibleBalanceState } from '@/hooks/use-trust-eligible-balance';
+
+function TrustProgressBar({ pct, label }: { pct: number; label: string }) {
+  const reducedMotion = usePrefersReducedMotion();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  const scale = mounted ? pct / 100 : 0;
+
+  return (
+    <div
+      className="h-2 w-full overflow-hidden rounded-full bg-secondary"
+      role="progressbar"
+      aria-valuenow={Math.round(pct)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={label}
+    >
+      <div
+        className={cn(
+          'motion-progress-fill h-full rounded-full bg-primary',
+          !reducedMotion && 'transition-transform duration-[var(--motion-normal)] ease-out',
+        )}
+        style={{ transform: `scaleX(${scale})` }}
+      />
+    </div>
+  );
+}
 
 type LegRowProps = {
   label: string;
@@ -38,7 +72,7 @@ function LegRow({ label, maxFormatted, legCrc }: LegRowProps) {
           )}
         </span>
       </div>
-      <Progress value={pct} aria-label={`${label}: ${maxFormatted} of ${legCrc} CRC`} />
+      <TrustProgressBar pct={pct} label={`${label}: ${maxFormatted} of ${legCrc} CRC`} />
     </div>
   );
 }
@@ -104,6 +138,7 @@ export function TrustPathPanel({
           variant="warning"
           title="Trust path shortfall"
           description={PAY_COPY.trustEstimateShortfall}
+          className="motion-alert-in"
         />
       )}
     </section>

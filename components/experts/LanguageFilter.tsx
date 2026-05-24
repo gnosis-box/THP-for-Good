@@ -22,7 +22,7 @@ export function LanguageFilter({ selected, onChange }: Props) {
             aria-pressed={selected.length === 0}
             onClick={() => onChange([])}
             className={cn(
-              'inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors transition-transform duration-[var(--motion-fast)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               selected.length === 0
                 ? 'border-primary bg-primary text-primary-foreground'
                 : 'border-border bg-background hover:bg-muted',
@@ -41,7 +41,7 @@ export function LanguageFilter({ selected, onChange }: Props) {
               <ToggleGroupItem
                 key={code}
                 value={code}
-                className="min-h-11 shrink-0 rounded-full px-4"
+                className="min-h-11 shrink-0 rounded-full px-4 transition-transform duration-[var(--motion-fast)] active:scale-95"
               >
                 {label}
               </ToggleGroupItem>

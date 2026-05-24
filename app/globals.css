@@ -246,6 +246,88 @@
   .motion-success-stagger-3 {
     animation-delay: 240ms;
   }
+
+  @keyframes motion-alert-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes motion-hint-glow-once {
+    0% {
+      box-shadow: 0 0 0 0 oklch(0.52 0.28 285 / 50%);
+    }
+    100% {
+      box-shadow: 0 0 0 8px oklch(0.52 0.28 285 / 0%);
+    }
+  }
+
+  @keyframes motion-empty-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes motion-wallet-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .motion-list-item-in {
+    animation: motion-fade-up-in var(--motion-normal) ease-out both;
+  }
+
+  .motion-tab-panel-in {
+    animation: motion-fade-up-in 200ms ease-out both;
+  }
+
+  .motion-card-hover {
+    transition:
+      transform var(--motion-fast) ease-out,
+      box-shadow var(--motion-fast) ease-out,
+      background-color var(--motion-fast) ease-out;
+  }
+
+  @media (hover: hover) {
+    .motion-card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px oklch(0.52 0.28 285 / 15%);
+    }
+  }
+
+  .motion-hint-glow-once {
+    animation: motion-hint-glow-once var(--motion-slow) ease-out 1;
+  }
+
+  .motion-empty-in {
+    animation: motion-empty-in var(--motion-normal) ease-out both;
+  }
+
+  .motion-alert-in {
+    animation: motion-alert-in var(--motion-normal) ease-out both;
+  }
+
+  .motion-wallet-in {
+    animation: motion-wallet-in 200ms ease-out both;
+  }
+
+  .motion-progress-fill {
+    transform-origin: left center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

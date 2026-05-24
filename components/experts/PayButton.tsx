@@ -284,6 +284,7 @@ export function PayButton({
                 variant="warning"
                 title="Wallet not registered"
                 description="Your wallet is not a registered Circles avatar. Open the app in the Circles playground to pay with CRC."
+                className="motion-alert-in"
               />
             </div>
           )}

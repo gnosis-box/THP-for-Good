@@ -6,6 +6,7 @@ import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/components/ui-patterns/ExpertMeta';
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { FadeContent } from '@/components/motion/fade-content';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { ExpertRow } from '@/lib/db';
 
@@ -32,7 +33,7 @@ export function ExpertProfileHero({ expert }: Props) {
   }, [expert.circles_address]);
 
   return (
-    <div className="flex flex-col items-center gap-4 text-center">
+    <FadeContent className="flex flex-col items-center gap-4 text-center">
       <Avatar className="size-16 shrink-0">
         {imageUrl ? <AvatarImage src={imageUrl} alt={expert.name} /> : null}
         <AvatarFallback className="text-lg font-semibold">
@@ -52,6 +53,6 @@ export function ExpertProfileHero({ expert }: Props) {
         <ExpertSkillTags skills={expert.skills} className="justify-center sm:[&_span]:text-sm" />
         <ExpertSplitShare expertPercent={share} className="sm:text-sm" />
       </div>
-    </div>
+    </FadeContent>
   );
 }

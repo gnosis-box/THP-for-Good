@@ -23,14 +23,14 @@ export function SkillFilter({ tags, selected, onSelect }: Props) {
         aria-label="Filter experts by skill"
         className="inline-flex w-max min-h-11 gap-2 pb-1"
       >
-        <ToggleGroupItem value="" className="min-h-11 shrink-0 rounded-full px-4">
+        <ToggleGroupItem value="" className="min-h-11 shrink-0 rounded-full px-4 transition-transform duration-[var(--motion-fast)] active:scale-95">
           {UI_COPY.home.filterAll}
         </ToggleGroupItem>
         {tags.map((tag) => (
           <ToggleGroupItem
             key={tag.id}
             value={tag.label}
-            className="min-h-11 shrink-0 rounded-full px-4"
+            className="min-h-11 shrink-0 rounded-full px-4 transition-transform duration-[var(--motion-fast)] active:scale-95"
           >
             {tag.label}
           </ToggleGroupItem>

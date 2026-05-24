@@ -7,7 +7,7 @@ import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/components/ui-patterns/ExpertMeta';
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { UI_COPY } from '@/lib/ui-copy';
-import { toHttpImageUrl } from '@/lib/utils';
+import { cn, toHttpImageUrl } from '@/lib/utils';
 import type { ExpertRow } from '@/lib/db';
 
 type CirclesData = { imageUrl?: string; trustedByCount: number | null };
@@ -44,7 +44,9 @@ export function ExpertCard({
     <Link
       href={`/expert/${expert.id}`}
       aria-label={`Book ${expert.name}, ${expert.price_crc} CRC per session`}
-      className="block w-full min-w-0 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      className={cn(
+        'motion-card-hover block w-full min-w-0 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+      )}
     >
       <div className="flex w-full items-start gap-3 px-3 py-3 sm:px-4 sm:py-4">
         <Avatar className="size-11 shrink-0 sm:size-12">

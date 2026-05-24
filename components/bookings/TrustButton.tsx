@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { Check } from 'lucide-react';
+import { Dialog } from '@base-ui/react/dialog';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { resolveTrustRelation } from '@/lib/trust-relation';
 import { addTrust, removeTrust } from '@/lib/trust-actions';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { motionClass } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +30,7 @@ type Props = {
 
 export function TrustButton({ expertAddress, expertName, bookingId, expertId }: Props) {
   const { address } = useWallet();
+  const reducedMotion = usePrefersReducedMotion();
   const [trustState, setTrustState] = useState<TrustState>({ kind: 'loading' });
   const [refetchTick, setRefetchTick] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
@@ -175,7 +178,7 @@ export function TrustButton({ expertAddress, expertName, bookingId, expertId }: 
           <Check
             className={cn(
               'mr-1.5 size-3.5',
-              motionClass('', 'motion-fade-up', false),
+              motionClass('', 'motion-fade-up', reducedMotion),
               !justTrusted && 'opacity-70',
             )}
             aria-hidden
@@ -187,11 +190,15 @@ export function TrustButton({ expertAddress, expertName, bookingId, expertId }: 
 
       {showModal && (
         <UntrustModal
+          open={showModal}
+          onOpenChange={(open) => {
+            setShowModal(open);
+            if (!open) setActionError(null);
+          }}
           expertName={expertName}
           expertAvatar={expertAvatar}
           loading={actionLoading}
           onConfirm={handleUntrust}
-          onCancel={() => { setShowModal(false); setActionError(null); }}
         />
       )}
     </>
@@ -199,75 +206,76 @@ export function TrustButton({ expertAddress, expertName, bookingId, expertId }: 
 }
 
 function UntrustModal({
+  open,
+  onOpenChange,
   expertName,
   expertAvatar,
   loading,
   onConfirm,
-  onCancel,
 }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   expertName: string;
   expertAvatar: string | null;
   loading: boolean;
   onConfirm: () => void;
-  onCancel: () => void;
 }) {
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4"
-      onClick={onCancel}
-    >
-      {/* backdrop */}
-      <div className="absolute inset-0 bg-black/50" />
-
-      <div
-        className="relative z-10 w-full max-w-sm rounded-2xl bg-background p-6 flex flex-col gap-4 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Avatars row */}
-        <div className="flex items-center justify-center gap-1">
-          <div className="size-14 rounded-full bg-muted overflow-hidden border-2 border-background shadow-md flex items-center justify-center text-xl font-bold">
-            {/* my side — generic person icon */}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="size-8 text-muted-foreground">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-            </svg>
-          </div>
-          {/* trust link indicator */}
-          <div className="flex items-center gap-0.5 text-muted-foreground">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-            </svg>
-          </div>
-          <div className="size-14 rounded-full bg-muted overflow-hidden border-2 border-background shadow-md flex items-center justify-center">
-            {expertAvatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={expertAvatar} alt={expertName} className="size-full object-cover" />
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="size-8 text-muted-foreground">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-              </svg>
-            )}
-          </div>
-        </div>
-
-        {/* Text */}
-        <div className="flex flex-col gap-2">
-          <p className="text-base font-semibold">You trust {expertName}</p>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            This means you have verified their humanity and accept their personal CRC.
-            Untrust to stop accepting their CRC.
-          </p>
-        </div>
-
-        {/* Action */}
-        <Button
-          variant="destructive"
-          className="w-full"
-          onClick={onConfirm}
-          disabled={loading}
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Backdrop
+          className={cn(
+            'fixed inset-0 z-50 bg-black/50 supports-backdrop-filter:backdrop-blur-xs',
+            'data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0',
+          )}
+        />
+        <Dialog.Popup
+          className={cn(
+            'fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2',
+            'rounded-2xl border border-border bg-popover p-6 shadow-xl outline-none',
+            'data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-open:slide-in-from-bottom-4',
+            'data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
+            'duration-300',
+          )}
         >
-          {loading ? 'Untrusting…' : 'Untrust'}
-        </Button>
-      </div>
-    </div>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-center gap-1">
+              <div className="flex size-14 items-center justify-center overflow-hidden rounded-full border-2 border-background bg-muted shadow-md">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="size-8 text-muted-foreground">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+              </div>
+              <div className="flex items-center gap-0.5 text-muted-foreground">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="size-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                </svg>
+              </div>
+              <div className="flex size-14 items-center justify-center overflow-hidden rounded-full border-2 border-background bg-muted shadow-md">
+                {expertAvatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={expertAvatar} alt={expertName} className="size-full object-cover" />
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="size-8 text-muted-foreground">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 text-center">
+              <Dialog.Title className="text-base font-semibold">You trust {expertName}</Dialog.Title>
+              <Dialog.Description className="text-sm leading-relaxed text-muted-foreground">
+                This means you have verified their humanity and accept their personal CRC.
+                Untrust to stop accepting their CRC.
+              </Dialog.Description>
+            </div>
+
+            <Button variant="destructive" className="w-full" onClick={onConfirm} disabled={loading}>
+              {loading ? 'Untrusting…' : 'Untrust'}
+            </Button>
+          </div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
