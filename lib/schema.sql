@@ -4,31 +4,31 @@ CREATE TABLE IF NOT EXISTS skill_tags (
   status TEXT    NOT NULL DEFAULT 'approved'
 );
 
-CREATE TABLE IF NOT EXISTS mentors (
-  id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-  circles_address    TEXT    UNIQUE NOT NULL,
-  name               TEXT    NOT NULL,
-  bio                TEXT,
-  calendar_link      TEXT    NOT NULL,
-  google_calendar_id TEXT,
-  cal_event_type_id  INTEGER,
+CREATE TABLE IF NOT EXISTS experts (
+  id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+  circles_address      TEXT    UNIQUE NOT NULL,
+  name                 TEXT    NOT NULL,
+  bio                  TEXT,
+  calendar_link        TEXT    NOT NULL,
+  google_calendar_id   TEXT,
+  cal_event_type_id    INTEGER,
   price_crc            INTEGER DEFAULT 100,
-  mentor_share_percent INTEGER DEFAULT 20,
+  expert_share_percent INTEGER DEFAULT 20,
   spoken_languages     TEXT,
   call_languages       TEXT,
   active               INTEGER DEFAULT 1,
-  created_at         TEXT    DEFAULT (datetime('now'))
+  created_at           TEXT    DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS mentor_skills (
-  mentor_id INTEGER NOT NULL REFERENCES mentors(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS expert_skills (
+  expert_id INTEGER NOT NULL REFERENCES experts(id) ON DELETE CASCADE,
   tag_id    INTEGER NOT NULL REFERENCES skill_tags(id) ON DELETE CASCADE,
-  PRIMARY KEY (mentor_id, tag_id)
+  PRIMARY KEY (expert_id, tag_id)
 );
 
 CREATE TABLE IF NOT EXISTS bookings (
   id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-  mentor_id           INTEGER NOT NULL REFERENCES mentors(id),
+  expert_id           INTEGER NOT NULL REFERENCES experts(id),
   booker_address      TEXT    NOT NULL,
   tx_hash             TEXT,
   slot_time           TEXT,

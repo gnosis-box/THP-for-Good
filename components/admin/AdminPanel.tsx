@@ -7,16 +7,16 @@ import { Button } from '@/components/ui/button';
 import { toHttpImageUrl, fetchCirclesScore } from '@/lib/utils';
 import { PromoteSection } from './PromoteSection';
 import { PlatformHealthSection } from './PlatformHealthSection';
-import { MentorEditForm } from '@/components/mentors/MentorEditForm';
+import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
 import type { GroupMemberDto } from '@/lib/admin';
-import type { AdminHealthStats, MentorRow, TagRow, AdminRow } from '@/lib/db';
+import type { AdminHealthStats, ExpertRow, TagRow, AdminRow } from '@/lib/db';
 
 export function AdminPanel() {
   const { address, isConnected } = useWallet();
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [groupAddress, setGroupAddress] = useState<string | null>(null);
-  const [mentors, setMentors] = useState<MentorRow[]>([]);
+  const [experts, setExperts] = useState<ExpertRow[]>([]);
   const [tags, setTags] = useState<TagRow[]>([]);
   const [dbAdmins, setDbAdmins] = useState<AdminRow[]>([]);
   const [health, setHealth] = useState<AdminHealthStats | null>(null);
@@ -24,7 +24,7 @@ export function AdminPanel() {
   const [membersError, setMembersError] = useState<string | null>(null);
   type AdminProfile = { name: string; imageUrl?: string; trustsReceivedCount: number; score: number | null };
   const [adminProfiles, setAdminProfiles] = useState<Record<string, AdminProfile>>({});
-  const [editingMentorId, setEditingMentorId] = useState<number | null>(null);
+  const [editingExpertId, setEditingExpertId] = useState<number | null>(null);
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editingTagLabel, setEditingTagLabel] = useState('');
   const [newTag, setNewTag] = useState('');
@@ -57,7 +57,7 @@ export function AdminPanel() {
       if (!admin) return;
 
       const [mRes, tRes, aRes, hRes, memRes] = await Promise.all([
-        fetch('/api/mentors?all=1', { headers: hdrs }),
+        fetch('/api/experts?all=1', { headers: hdrs }),
         fetch('/api/tags', { headers: hdrs }),
         fetch('/api/admin/admins', { headers: hdrs }),
         fetch('/api/admin/health', { headers: hdrs }),
@@ -66,8 +66,8 @@ export function AdminPanel() {
           : Promise.resolve(null),
       ]);
 
-      const mentorsJson = await mRes.json();
-      setMentors(Array.isArray(mentorsJson) ? mentorsJson : []);
+      const expertsJson = await mRes.json();
+      setExperts(Array.isArray(expertsJson) ? expertsJson : []);
       setTags(await tRes.json());
       setDbAdmins(await aRes.json());
       if (hRes.ok) {
@@ -120,17 +120,17 @@ export function AdminPanel() {
     })();
   }, [dbAdmins]);
 
-  async function toggleActive(mentor: MentorRow) {
-    await fetch(`/api/mentors/${mentor.id}`, {
+  async function toggleActive(expert: ExpertRow) {
+    await fetch(`/api/experts/${expert.id}`, {
       method: 'PATCH',
       headers: headers(),
-      body: JSON.stringify({ active: mentor.active ? 0 : 1 }),
+      body: JSON.stringify({ active: expert.active ? 0 : 1 }),
     });
     load();
   }
 
-  async function deleteMentor(id: number) {
-    await fetch(`/api/mentors/${id}`, { method: 'DELETE', headers: headers() });
+  async function deleteExpert(id: number) {
+    await fetch(`/api/experts/${id}`, { method: 'DELETE', headers: headers() });
     load();
   }
 
@@ -312,36 +312,36 @@ export function AdminPanel() {
         </div>
       </section>
 
-      {/* Mentors */}
+      {/* Experts */}
       <section className="flex flex-col gap-4">
-        <h2 className="text-base font-semibold">Mentors ({mentors.length})</h2>
+        <h2 className="text-base font-semibold">Experts ({experts.length})</h2>
         <div className="flex flex-col gap-3">
-          {mentors.length === 0 && (
-            <p className="text-sm text-muted-foreground">No mentors yet.</p>
+          {experts.length === 0 && (
+            <p className="text-sm text-muted-foreground">No experts yet.</p>
           )}
-          {mentors.map((mentor) => (
-            <div key={mentor.id} className="flex flex-col gap-3 rounded-xl border border-border p-4">
+          {experts.map((expert) => (
+            <div key={expert.id} className="flex flex-col gap-3 rounded-xl border border-border p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-col gap-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium truncate">{mentor.name}</span>
+                    <span className="font-medium truncate">{expert.name}</span>
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        mentor.active ? 'bg-green-100 text-green-800' : 'bg-muted text-muted-foreground'
+                        expert.active ? 'bg-green-100 text-green-800' : 'bg-muted text-muted-foreground'
                       }`}
                     >
-                      {mentor.active ? 'Active' : 'Inactive'}
+                      {expert.active ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground font-mono truncate">{mentor.circles_address}</p>
-                  {mentor.skills.length > 0 && (
-                    <p className="text-xs text-muted-foreground">{mentor.skills.join(', ')}</p>
+                  <p className="text-xs text-muted-foreground font-mono truncate">{expert.circles_address}</p>
+                  {expert.skills.length > 0 && (
+                    <p className="text-xs text-muted-foreground">{expert.skills.join(', ')}</p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    {mentor.price_crc} CRC · {mentor.mentor_share_percent ?? 20}% mentor / {100 - (mentor.mentor_share_percent ?? 20)}% foundation
+                    {expert.price_crc} CRC · {expert.expert_share_percent ?? 20}% expert / {100 - (expert.expert_share_percent ?? 20)}% foundation
                   </p>
-                  {mentor.cal_event_type_id && (
-                    <p className="text-xs text-muted-foreground">Cal.com event type: {mentor.cal_event_type_id}</p>
+                  {expert.cal_event_type_id && (
+                    <p className="text-xs text-muted-foreground">Cal.com event type: {expert.cal_event_type_id}</p>
                   )}
                 </div>
                 <div className="flex shrink-0 gap-2">
@@ -349,35 +349,35 @@ export function AdminPanel() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setEditingMentorId(editingMentorId === mentor.id ? null : mentor.id)}
+                    onClick={() => setEditingExpertId(editingExpertId === expert.id ? null : expert.id)}
                   >
-                    {editingMentorId === mentor.id ? 'Cancel' : 'Edit'}
+                    {editingExpertId === expert.id ? 'Cancel' : 'Edit'}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => toggleActive(mentor)}
+                    onClick={() => toggleActive(expert)}
                   >
-                    {mentor.active ? 'Deactivate' : 'Activate'}
+                    {expert.active ? 'Deactivate' : 'Activate'}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     className="text-destructive hover:bg-destructive/10"
-                    onClick={() => deleteMentor(mentor.id)}
+                    onClick={() => deleteExpert(expert.id)}
                   >
                     Delete
                   </Button>
                 </div>
               </div>
-              {editingMentorId === mentor.id && (
-                <MentorEditForm
-                  mentor={mentor}
+              {editingExpertId === expert.id && (
+                <ExpertEditForm
+                  expert={expert}
                   walletAddress={address ?? ''}
-                  onSaved={() => { setEditingMentorId(null); load(); }}
-                  onCancel={() => setEditingMentorId(null)}
+                  onSaved={() => { setEditingExpertId(null); load(); }}
+                  onCancel={() => setEditingExpertId(null)}
                 />
               )}
             </div>
@@ -388,14 +388,14 @@ export function AdminPanel() {
       {/* Group members → promote */}
       <PromoteSection
         tags={tags}
-        mentors={mentors}
+        experts={experts}
         admins={dbAdmins.map((a) => a.circles_address)}
         walletAddress={address ?? ''}
         initialGroupAddress={groupAddress}
         members={groupMembers}
         membersError={membersError}
         membersLoading={loading}
-        onMentorAdded={load}
+        onExpertAdded={load}
         onAdminAdded={load}
         onReloadMembers={load}
       />

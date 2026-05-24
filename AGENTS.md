@@ -87,13 +87,13 @@ Use when adding post-MVP features, external link curation, or multi-phase specs 
 | --- | --- | --- |
 | **DIV-L0-01** | **A — SQLite + API** | `better-sqlite3`, `lib/db.ts`, `lib/schema.sql`, `app/api/*`. No `mentors.json` / no client `localStorage` for bookings or trust. |
 | **DIV-L0-02** | **A — Coolify + Docker + volume** | Deploy on Coolify (not Vercel MVP). Add/maintain `Dockerfile`, `output: 'standalone'` in `next.config.ts`, persistent volume for `data/` SQLite. Set `NEXT_PUBLIC_FRAME_ANCESTOR_ORIGIN` at build. |
-| **DIV-L0-03** | **A′ — PRD routes + `/calls`** | **Target:** `/`, `/mentor/[id]`, `/mentor/register`, **`/calls`**, `/admin` (not `/mentors/*`). **Repo may still use `/history` until an `implementation` task is done.** |
-| **DIV-L1-01** | **A — Per-mentor price** | `price_crc` per mentor in DB; shown on card and PAY button. |
-| **DIV-L1-02** | **D — Split payment** | Admin: **min 50%** to foundation (`0x2b5E…`). Mentor picks **10 / 20 / 30 / 50%** to self; remainder to foundation. Not 100% treasury-only. |
-| **DIV-L1-03** | **C — Tags workflow** | Admin canonical catalogue; mentor **proposes** tag from mentor page; admin **approves/edits** tags. |
+| **DIV-L0-03** | **A′ — PRD routes + `/calls`** | **Target:** `/`, `/expert/[id]`, `/expert/register`, **`/calls`**, `/admin`. Legacy `/mentor/*` redirects to `/expert/*`. |
+| **DIV-L1-01** | **A — Per-expert price** | `price_crc` per expert in DB; shown on card and PAY button. |
+| **DIV-L1-02** | **D — Split payment** | Admin: **min 50%** to foundation (`0x2b5E…`). Expert picks **10 / 20 / 30 / 50%** to self; remainder to foundation. Not 100% treasury-only. |
+| **DIV-L1-03** | **C — Tags workflow** | Admin canonical catalogue; expert **proposes** tag from expert page; admin **approves/edits** tags. |
 | **DIV-L1-04** | **A — TRUST expert (MVP)** | Post-call on `/calls` Emitted: one `trust.add(expert)` per booking. **Per-domain trust-back / reputation** → L4 feature (see PRD § FEAT Trust-back), not MVP. |
 | **DIV-L1-05** | **A — Slots UI only** | Static `SlotPicker`; after PAY open `calendar_link`. Optional `slot_label` in DB later. No Google Calendar API in MVP. |
-| **DIV-L1-06** | **A′ — Dual onboarding** | Self-register at `/mentor/register` → public if `active=1`. Admin can promote members and activate/deactivate listings. Not admin-only seed. |
+| **DIV-L1-06** | **A′ — Dual onboarding** | Self-register at `/expert/register` → public if `active=1`. Admin can promote members and activate/deactivate listings. Not admin-only seed. |
 | **DIV-L1-07** | **A — Admin hidden from nav** | No Admin item in `NAV`; access `/admin` by URL only. |
 | **DIV-L1-08** | **D — Unified `/calls`** | One page: **Emitted** (booker) + **Received** (expert profile). No `/my-slots`. Prefer UI terms *participant / expert* over student/mentor. |
 | **DIV-L1-09** | **B — Balance error on click** | Do not pre-disable PAY for low CRC; on failed tx show **toast** (e.g. “Not enough CRC”). Not A (pre-disable) or C (both). |

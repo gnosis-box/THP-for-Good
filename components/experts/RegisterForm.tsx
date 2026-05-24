@@ -14,13 +14,13 @@ import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { cn, shortenAddress } from '@/lib/utils';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { useCirclesProfile } from '@/hooks/use-circles-profile';
-import type { MentorRow, TagRow } from '@/lib/db';
-import { CalConnect } from '@/components/mentors/CalConnect';
-import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
-import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPicker';
+import type { ExpertRow, TagRow } from '@/lib/db';
+import { CalConnect } from '@/components/experts/CalConnect';
+import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
+import { SkillTagPicker, mergeSkillTag } from '@/components/experts/SkillTagPicker';
 import { defaultCallLanguagesFromSpoken, filterCallLanguageCodes } from '@/lib/languages';
-import { LanguagePicker } from '@/components/mentors/LanguagePicker';
-import { StopExpertButton } from '@/components/mentors/StopExpertButton';
+import { LanguagePicker } from '@/components/experts/LanguagePicker';
+import { StopExpertButton } from '@/components/experts/StopExpertButton';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { UI_COPY } from '@/lib/ui-copy';
 
@@ -32,22 +32,22 @@ export function RegisterForm() {
 
   const [tags, setTags] = useState<TagRow[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
-  const [loadingMentor, setLoadingMentor] = useState(false);
-  const [existingMentor, setExistingMentor] = useState<MentorRow | null>(null);
+  const [loadingExpert, setLoadingExpert] = useState(false);
+  const [existingExpert, setExistingExpert] = useState<ExpertRow | null>(null);
   const [newSkill, setNewSkill] = useState('');
   const [name, setName] = useState('');
   const [nameFromWallet, setNameFromWallet] = useState(false);
   const [bio, setBio] = useState('');
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(null);
   const [priceCrc, setPriceCrc] = useState(100);
-  const [mentorShare, setMentorShare] = useState(clampMentorShare(20));
+  const [expertShare, setExpertShare] = useState(clampExpertShare(20));
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [spokenLanguages, setSpokenLanguages] = useState<string[]>([]);
   const [callLanguages, setCallLanguages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isEditMode = existingMentor !== null;
+  const isEditMode = existingExpert !== null;
 
   useEffect(() => {
     fetch('/api/tags')
@@ -59,7 +59,7 @@ export function RegisterForm() {
 
   useEffect(() => {
     if (!address) {
-      setExistingMentor(null);
+      setExistingExpert(null);
       setName('');
       setNameFromWallet(false);
       setBio('');
@@ -67,36 +67,36 @@ export function RegisterForm() {
     }
 
     let cancelled = false;
-    setLoadingMentor(true);
+    setLoadingExpert(true);
 
-    fetch(`/api/mentors?circles_address=${encodeURIComponent(address)}`)
+    fetch(`/api/experts?circles_address=${encodeURIComponent(address)}`)
       .then(async (res) => {
         if (!res.ok) {
-          if (!cancelled) setExistingMentor(null);
+          if (!cancelled) setExistingExpert(null);
           return;
         }
-        const mentor = (await res.json()) as MentorRow;
+        const expert = (await res.json()) as ExpertRow;
         if (cancelled) return;
-        setExistingMentor(mentor);
-        setName(mentor.name);
+        setExistingExpert(expert);
+        setName(expert.name);
         setNameFromWallet(false);
-        setBio(mentor.bio ?? '');
-        setCalEventTypeId(mentor.cal_event_type_id);
-        setPriceCrc(mentor.price_crc);
-        setMentorShare(clampMentorShare(mentor.mentor_share_percent ?? 20));
-        setSelectedSkills(mentor.skills);
-        setSpokenLanguages(mentor.spoken_languages);
+        setBio(expert.bio ?? '');
+        setCalEventTypeId(expert.cal_event_type_id);
+        setPriceCrc(expert.price_crc);
+        setExpertShare(clampExpertShare(expert.expert_share_percent ?? 20));
+        setSelectedSkills(expert.skills);
+        setSpokenLanguages(expert.spoken_languages);
         setCallLanguages(
-          mentor.call_languages.length > 0
-            ? filterCallLanguageCodes(mentor.call_languages)
-            : defaultCallLanguagesFromSpoken(mentor.spoken_languages),
+          expert.call_languages.length > 0
+            ? filterCallLanguageCodes(expert.call_languages)
+            : defaultCallLanguagesFromSpoken(expert.spoken_languages),
         );
       })
       .catch(() => {
-        if (!cancelled) setExistingMentor(null);
+        if (!cancelled) setExistingExpert(null);
       })
       .finally(() => {
-        if (!cancelled) setLoadingMentor(false);
+        if (!cancelled) setLoadingExpert(false);
       });
 
     return () => {
@@ -144,7 +144,7 @@ export function RegisterForm() {
         bio: bio.trim() || null,
         cal_event_type_id: calEventTypeId,
         price_crc: priceCrc,
-        mentor_share_percent: mentorShare,
+        expert_share_percent: expertShare,
         skills: selectedSkills,
         spoken_languages: spokenLanguages,
         call_languages:
@@ -153,8 +153,8 @@ export function RegisterForm() {
             : defaultCallLanguagesFromSpoken(spokenLanguages),
       };
 
-      if (isEditMode && existingMentor) {
-        const res = await fetch(`/api/mentors/${existingMentor.id}`, {
+      if (isEditMode && existingExpert) {
+        const res = await fetch(`/api/experts/${existingExpert.id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -169,13 +169,13 @@ export function RegisterForm() {
           const json = (await res.json()) as { error?: string };
           throw new Error(json.error ?? 'Save failed');
         }
-        const updated = (await res.json()) as MentorRow;
-        setExistingMentor(updated);
-        router.push(`/mentor/${updated.id}`);
+        const updated = (await res.json()) as ExpertRow;
+        setExistingExpert(updated);
+        router.push(`/expert/${updated.id}`);
         return;
       }
 
-      const res = await fetch('/api/mentors', {
+      const res = await fetch('/api/experts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -191,7 +191,7 @@ export function RegisterForm() {
       }
 
       const { id } = (await res.json()) as { id: number };
-      router.push(`/mentor/${id}`);
+      router.push(`/expert/${id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
@@ -202,12 +202,12 @@ export function RegisterForm() {
   if (!isConnected) {
     return (
       <p className="text-sm text-muted-foreground">
-        Connect your wallet in Circles to register as a mentor.
+        Connect your wallet in Circles to register as an expert.
       </p>
     );
   }
 
-  if (loadingMentor || profile.status === 'loading') {
+  if (loadingExpert || profile.status === 'loading') {
     return <p className="text-sm text-muted-foreground">Loading your Circles profile…</p>;
   }
 
@@ -221,9 +221,9 @@ export function RegisterForm() {
             : 'Share your expertise with the THP community. Each booking generates CRC revenue for the THP for Good fund.'
         }
       >
-        {isEditMode && existingMentor ? (
+        {isEditMode && existingExpert ? (
           <Link
-            href={`/mentor/${existingMentor.id}`}
+            href={`/expert/${existingExpert.id}`}
             className="text-sm text-primary underline-offset-4 hover:underline"
           >
             {UI_COPY.register.viewPublicProfile}
@@ -231,7 +231,7 @@ export function RegisterForm() {
         ) : null}
       </PageHeader>
 
-      {isEditMode && existingMentor?.active === 0 ? (
+      {isEditMode && existingExpert?.active === 0 ? (
         <StatusAlert
           variant="info"
           title="Profile hidden"
@@ -354,11 +354,11 @@ export function RegisterForm() {
           <span className="text-sm font-medium">Payment split</span>
           <p className="text-xs text-muted-foreground">Your share — at least 50% always goes to THP for Good.</p>
           <RadioGroup
-            value={String(mentorShare)}
-            onValueChange={(v) => setMentorShare(clampMentorShare(parseInt(v, 10)))}
+            value={String(expertShare)}
+            onValueChange={(v) => setExpertShare(clampExpertShare(parseInt(v, 10)))}
             className="flex flex-col gap-2"
           >
-            {MENTOR_SHARE_OPTIONS.map((opt) => (
+            {EXPERT_SHARE_OPTIONS.map((opt) => (
               <div key={opt} className="flex min-h-11 items-center gap-2">
                 <RadioGroupItem value={String(opt)} id={`share-${opt}`} />
                 <Label htmlFor={`share-${opt}`} className="cursor-pointer font-normal">
@@ -387,15 +387,15 @@ export function RegisterForm() {
               ? UI_COPY.register.saving
               : UI_COPY.register.registering
             : isEditMode
-              ? existingMentor?.active === 0
+              ? existingExpert?.active === 0
                 ? UI_COPY.register.publishProfile
                 : UI_COPY.register.saveChanges
               : UI_COPY.register.registerCta}
         </Button>
       </form>
 
-      {isEditMode && existingMentor?.active === 1 && address ? (
-        <StopExpertButton mentorId={existingMentor.id} walletAddress={address} />
+      {isEditMode && existingExpert?.active === 1 && address ? (
+        <StopExpertButton expertId={existingExpert.id} walletAddress={address} />
       ) : null}
     </div>
   );

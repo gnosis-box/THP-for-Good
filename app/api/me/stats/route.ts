@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { explorerLinksForAddress } from '@/lib/analytics-explorer';
 import { fetchAvatarBalanceCrc } from '@/lib/analytics-rpc';
 import {
-  getMentorBookingIntentCount,
-  getMentorByCirclesAddress,
-  getMentorPaidBookingCount,
-  getMentorTrustAttestationCount,
+  getExpertBookingIntentCount,
+  getExpertByCirclesAddress,
+  getExpertPaidBookingCount,
+  getExpertTrustAttestationCount,
 } from '@/lib/db';
 import type { MeStatsResponse } from '@/lib/me-stats-api';
 
@@ -18,24 +18,24 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Wallet address required' }, { status: 401 });
   }
 
-  const mentor = getMentorByCirclesAddress(address);
-  if (!mentor || mentor.active !== 1) {
+  const expert = getExpertByCirclesAddress(address);
+  if (!expert || expert.active !== 1) {
     return NextResponse.json({ error: 'Not an active expert' }, { status: 404 });
   }
 
-  const links = explorerLinksForAddress(mentor.circles_address);
-  const balanceCrc = await fetchAvatarBalanceCrc(mentor.circles_address);
+  const links = explorerLinksForAddress(expert.circles_address);
+  const balanceCrc = await fetchAvatarBalanceCrc(expert.circles_address);
 
   const body: MeStatsResponse = {
-    mentorId: mentor.id,
-    mentorName: mentor.name,
+    expertId: expert.id,
+    expertName: expert.name,
     address: links.address,
     balanceCrc,
     eventsUrl: links.eventsUrl,
     graphUrl: links.graphUrl,
-    paidBookingCount: getMentorPaidBookingCount(mentor.id),
-    bookingIntentCount: getMentorBookingIntentCount(mentor.id),
-    trustAttestationCount: getMentorTrustAttestationCount(mentor.id),
+    paidBookingCount: getExpertPaidBookingCount(expert.id),
+    bookingIntentCount: getExpertBookingIntentCount(expert.id),
+    trustAttestationCount: getExpertTrustAttestationCount(expert.id),
   };
 
   return NextResponse.json(body);

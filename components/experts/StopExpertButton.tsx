@@ -8,12 +8,12 @@ import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { UI_COPY } from '@/lib/ui-copy';
 
 type Props = {
-  mentorId: number;
+  expertId: number;
   walletAddress: string;
   onDeactivated?: () => void;
 };
 
-export function StopExpertButton({ mentorId, walletAddress, onDeactivated }: Props) {
+export function StopExpertButton({ expertId, walletAddress, onDeactivated }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export function StopExpertButton({ mentorId, walletAddress, onDeactivated }: Pro
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/mentors/${mentorId}`, {
+      const res = await fetch(`/api/experts/${expertId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

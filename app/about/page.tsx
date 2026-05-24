@@ -17,7 +17,7 @@ export default function AboutPage() {
             <a href="https://www.thehackingproject.org" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2">
               The Hacking Project
             </a>{' '}
-            that connects people building public good projects with experienced web3 mentors — and funds
+            that connects people building public good projects with experienced web3 experts — and funds
             their training through the{' '}
             <a href="https://aboutcircles.com" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2">
               Circles
@@ -40,7 +40,7 @@ export default function AboutPage() {
             <div className="flex flex-col gap-1">
               <p className="font-medium">Browse experts</p>
               <p className="text-sm text-muted-foreground">
-                Explore mentors from The Hacking Project community — each with their skills, price per
+                Explore experts from The Hacking Project community — each with their skills, price per
                 session, and their Circles trust score.
               </p>
             </div>
@@ -65,8 +65,8 @@ export default function AboutPage() {
               </blockquote>
               <p className="text-sm text-muted-foreground">
                 Every session payment is automatically split: at least <strong>50% goes to the THP for
-                Good foundation</strong> to fund future learners, the rest to the mentor. The exact
-                split is set by each mentor.
+                Good foundation</strong> to fund future learners, the rest to the expert. The exact
+                split is set by each expert.
               </p>
             </div>
           </li>
@@ -121,7 +121,7 @@ export default function AboutPage() {
           Find an expert
         </Link>
         <Link
-          href="/mentor/register"
+          href="/expert/register"
           className={cn(buttonVariants({ variant: 'outline' }), 'inline-flex min-h-11 items-center justify-center')}
         >
           Offer your expertise

@@ -2,10 +2,10 @@
 
 export const UI_COPY = {
   home: {
-    title: 'Find a mentor',
+    title: 'Find an EXPERT to help you',
     subtitle: 'Book a 1:1 session. Pay in CRC. Fund the next student.',
     filterLabel: 'Which domain do you want help with?',
-    emptySearch: 'No mentors found for this search.',
+    emptySearch: 'No experts found for this search.',
     searchPlaceholder: 'Search by name, skill or bio…',
     filterAll: 'All',
     languageFilterLabel: 'Session language',
@@ -40,7 +40,7 @@ export const UI_COPY = {
     openExpertCalendar: 'Open expert calendar',
     noCalSelf:
       'No availability configured yet. Click "Edit my profile" to connect your Cal.com.',
-    noCalVisitor: 'Availability not configured for this mentor yet.',
+    noCalVisitor: 'Availability not configured for this expert yet.',
     about: 'About',
   },
   calls: {

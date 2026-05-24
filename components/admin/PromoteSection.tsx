@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { CalConnect } from '@/components/mentors/CalConnect';
-import { MENTOR_SHARE_OPTIONS, clampMentorShare } from '@/lib/crc-pay';
-import { SkillTagPicker, mergeSkillTag } from '@/components/mentors/SkillTagPicker';
-import type { MentorRow, TagRow } from '@/lib/db';
+import { CalConnect } from '@/components/experts/CalConnect';
+import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
+import { SkillTagPicker, mergeSkillTag } from '@/components/experts/SkillTagPicker';
+import type { ExpertRow, TagRow } from '@/lib/db';
 
 type MemberEntry = {
   address: `0x${string}`;
@@ -20,7 +20,7 @@ type PromoteFormState = {
   name: string;
   bio: string;
   calEventTypeId: number | null;
-  mentorShare: 0 | 10 | 20 | 30 | 50;
+  expertShare: 0 | 10 | 20 | 30 | 50;
   priceCrc: number;
   selectedSkills: string[];
   submitting: boolean;
@@ -28,33 +28,33 @@ type PromoteFormState = {
 };
 
 function defaultForm(name: string): PromoteFormState {
-  return { name, bio: '', calEventTypeId: null, mentorShare: 20, priceCrc: 100, selectedSkills: [], submitting: false, error: null };
+  return { name, bio: '', calEventTypeId: null, expertShare: 20, priceCrc: 100, selectedSkills: [], submitting: false, error: null };
 }
 
 type Props = {
   tags: TagRow[];
-  mentors: MentorRow[];
+  experts: ExpertRow[];
   admins: string[];
   walletAddress: string;
   initialGroupAddress: string | null;
   members: MemberEntry[];
   membersError: string | null;
   membersLoading: boolean;
-  onMentorAdded: () => void;
+  onExpertAdded: () => void;
   onAdminAdded: () => void;
   onReloadMembers: () => void;
 };
 
 export function PromoteSection({
   tags,
-  mentors,
+  experts,
   admins,
   walletAddress,
   initialGroupAddress,
   members,
   membersError,
   membersLoading,
-  onMentorAdded,
+  onExpertAdded,
   onAdminAdded,
   onReloadMembers,
 }: Props) {
@@ -133,7 +133,7 @@ export function PromoteSection({
     setForm((prev) => prev && { ...prev, submitting: true, error: null });
 
     try {
-      const res = await fetch('/api/mentors', {
+      const res = await fetch('/api/experts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-wallet-address': walletAddress },
         body: JSON.stringify({
@@ -141,7 +141,7 @@ export function PromoteSection({
           name: form.name.trim(),
           bio: form.bio.trim() || undefined,
           cal_event_type_id: form.calEventTypeId ?? undefined,
-          mentor_share_percent: form.mentorShare,
+          expert_share_percent: form.expertShare,
           price_crc: form.priceCrc,
           skills: form.selectedSkills,
         }),
@@ -153,7 +153,7 @@ export function PromoteSection({
       }
 
       cancelPromote();
-      onMentorAdded();
+      onExpertAdded();
     } catch (err) {
       setForm((prev) =>
         prev
@@ -163,8 +163,8 @@ export function PromoteSection({
     }
   }
 
-  const mentorAddresses = new Set(
-    (Array.isArray(mentors) ? mentors : []).map((m) => m.circles_address.toLowerCase()),
+  const expertAddresses = new Set(
+    (Array.isArray(experts) ? experts : []).map((m) => m.circles_address.toLowerCase()),
   );
   const adminAddresses = new Set(admins.map((a) => a.toLowerCase()));
 
@@ -179,7 +179,7 @@ export function PromoteSection({
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-base font-semibold">Promote Group Member to Mentor</h2>
+      <h2 className="text-base font-semibold">Promote Group Member to Expert</h2>
 
       {!initialGroupAddress && (
         <div className="flex gap-2">
@@ -224,7 +224,7 @@ export function PromoteSection({
       {!isLoading && displayMembers.length > 0 && (
         <div className="flex flex-col gap-3">
           {displayMembers.map((member) => {
-            const isMentor = mentorAddresses.has(member.address.toLowerCase());
+            const isExpert = expertAddresses.has(member.address.toLowerCase());
             const isAdmin = adminAddresses.has(member.address.toLowerCase());
             const isPromoting = promotingAddress === member.address;
 
@@ -249,9 +249,9 @@ export function PromoteSection({
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    {isMentor ? (
+                    {isExpert ? (
                       <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">
-                        Mentor
+                        Expert
                       </span>
                     ) : (
                       <Button
@@ -260,7 +260,7 @@ export function PromoteSection({
                         size="sm"
                         onClick={() => (isPromoting ? cancelPromote() : startPromote(member))}
                       >
-                        {isPromoting ? 'Cancel' : 'Promote mentor'}
+                        {isPromoting ? 'Cancel' : 'Promote expert'}
                       </Button>
                     )}
                     {isAdmin ? (
@@ -333,14 +333,14 @@ export function PromoteSection({
                     <div className="flex flex-col gap-1.5">
                       <span className="text-xs font-medium">Payment split</span>
                       <div className="flex flex-wrap gap-2">
-                        {MENTOR_SHARE_OPTIONS.map((opt) => (
+                        {EXPERT_SHARE_OPTIONS.map((opt) => (
                           <button
                             key={opt}
                             type="button"
-                            onClick={() => setForm((prev) => prev && { ...prev, mentorShare: clampMentorShare(opt) })}
+                            onClick={() => setForm((prev) => prev && { ...prev, expertShare: clampExpertShare(opt) })}
                             className={cn(
                               'rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors border',
-                              form.mentorShare === opt
+                              form.expertShare === opt
                                 ? 'bg-primary text-primary-foreground border-primary'
                                 : 'border-border bg-background hover:bg-muted',
                             )}

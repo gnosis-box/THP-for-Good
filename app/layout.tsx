@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "THP for Good",
-  description: "Book a session with a THP mentor, pay in CRC",
+  description: "Book a session with a THP expert, pay in CRC",
 };
 
 export default function RootLayout({

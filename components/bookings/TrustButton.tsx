@@ -16,28 +16,28 @@ type TrustState =
   | { kind: 'mutual' };
 
 type Props = {
-  mentorAddress: string;
-  mentorName: string;
-  mentorSkills: string[];
-  mentorId: number;
+  expertAddress: string;
+  expertName: string;
+  expertSkills: string[];
+  expertId: number;
   bookingId: number;
 };
 
-export function TrustButton({ mentorAddress, mentorName, bookingId, mentorId }: Props) {
+export function TrustButton({ expertAddress, expertName, bookingId, expertId }: Props) {
   const { address } = useWallet();
   const [trustState, setTrustState] = useState<TrustState>({ kind: 'loading' });
   const [refetchTick, setRefetchTick] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [mentorAvatar, setMentorAvatar] = useState<string | null>(null);
+  const [expertAvatar, setExpertAvatar] = useState<string | null>(null);
 
   useEffect(() => {
     if (!address) return;
     let cancelled = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTrustState({ kind: 'loading' });
-    resolveTrustRelation(address, mentorAddress)
+    resolveTrustRelation(address, expertAddress)
       .then((kind) => {
         if (cancelled) return;
         setTrustState({ kind });
@@ -46,33 +46,33 @@ export function TrustButton({ mentorAddress, mentorName, bookingId, mentorId }: 
         if (!cancelled) setTrustState({ kind: 'none' });
       });
     return () => { cancelled = true; };
-  }, [address, mentorAddress, refetchTick]);
+  }, [address, expertAddress, refetchTick]);
 
   useEffect(() => {
-    if (!mentorAddress) return;
+    if (!expertAddress) return;
     (async () => {
       try {
         const { Sdk } = await import('@aboutcircles/sdk');
         const sdk = new Sdk();
-        const view = await sdk.rpc.profile.getProfileView(mentorAddress as `0x${string}`);
+        const view = await sdk.rpc.profile.getProfileView(expertAddress as `0x${string}`);
         if (view?.avatarInfo?.cidV0) {
           const profile = await sdk.rpc.profile.getProfileByCid(view.avatarInfo.cidV0);
-          if (profile?.previewImageUrl) setMentorAvatar(profile.previewImageUrl);
-          else if (profile?.imageUrl) setMentorAvatar(profile.imageUrl);
+          if (profile?.previewImageUrl) setExpertAvatar(profile.previewImageUrl);
+          else if (profile?.imageUrl) setExpertAvatar(profile.imageUrl);
         }
       } catch {
         // no avatar — fine
       }
     })();
-  }, [mentorAddress]);
+  }, [expertAddress]);
 
   async function handleTrust() {
     if (!address) return;
-    trackUmamiEvent('trust_click', { mentor_id: mentorId });
+    trackUmamiEvent('trust_click', { expert_id: expertId });
     setActionLoading(true);
     setActionError(null);
     try {
-      const trustTxHash = await addTrust(address, mentorAddress);
+      const trustTxHash = await addTrust(address, expertAddress);
 
       fetch('/api/trust', {
         method: 'POST',
@@ -96,7 +96,7 @@ export function TrustButton({ mentorAddress, mentorName, bookingId, mentorId }: 
     setActionLoading(true);
     setActionError(null);
     try {
-      await removeTrust(address, mentorAddress);
+      await removeTrust(address, expertAddress);
 
       setShowModal(false);
       setRefetchTick((t) => t + 1);
@@ -125,7 +125,7 @@ export function TrustButton({ mentorAddress, mentorName, bookingId, mentorId }: 
           onClick={handleTrust}
           disabled={actionLoading || !address}
         >
-          {actionLoading ? 'Trusting…' : `TRUST ${mentorName}`}
+          {actionLoading ? 'Trusting…' : `TRUST ${expertName}`}
         </Button>
         {actionError && <p className="text-xs text-destructive">{actionError}</p>}
       </div>
@@ -152,8 +152,8 @@ export function TrustButton({ mentorAddress, mentorName, bookingId, mentorId }: 
 
       {showModal && (
         <UntrustModal
-          mentorName={mentorName}
-          mentorAvatar={mentorAvatar}
+          expertName={expertName}
+          expertAvatar={expertAvatar}
           loading={actionLoading}
           onConfirm={handleUntrust}
           onCancel={() => { setShowModal(false); setActionError(null); }}
@@ -164,14 +164,14 @@ export function TrustButton({ mentorAddress, mentorName, bookingId, mentorId }: 
 }
 
 function UntrustModal({
-  mentorName,
-  mentorAvatar,
+  expertName,
+  expertAvatar,
   loading,
   onConfirm,
   onCancel,
 }: {
-  mentorName: string;
-  mentorAvatar: string | null;
+  expertName: string;
+  expertAvatar: string | null;
   loading: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -203,9 +203,9 @@ function UntrustModal({
             </svg>
           </div>
           <div className="size-14 rounded-full bg-muted overflow-hidden border-2 border-background shadow-md flex items-center justify-center">
-            {mentorAvatar ? (
+            {expertAvatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={mentorAvatar} alt={mentorName} className="size-full object-cover" />
+              <img src={expertAvatar} alt={expertName} className="size-full object-cover" />
             ) : (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="size-8 text-muted-foreground">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
@@ -216,7 +216,7 @@ function UntrustModal({
 
         {/* Text */}
         <div className="flex flex-col gap-2">
-          <p className="text-base font-semibold">You trust {mentorName}</p>
+          <p className="text-base font-semibold">You trust {expertName}</p>
           <p className="text-sm text-muted-foreground leading-relaxed">
             This means you have verified their humanity and accept their personal CRC.
             Untrust to stop accepting their CRC.

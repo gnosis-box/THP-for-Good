@@ -8,30 +8,30 @@ export const FORMATION_GOAL_CRC = 50_000;
 /** User-facing label for the treasury leg (not "foundation"). */
 export const THP_FOR_GOOD_LABEL = 'THP for Good';
 
-export const MENTOR_SHARE_OPTIONS = [0, 10, 20, 30, 50] as const;
-export type MentorSharePercent = (typeof MENTOR_SHARE_OPTIONS)[number];
+export const EXPERT_SHARE_OPTIONS = [0, 10, 20, 30, 50] as const;
+export type ExpertSharePercent = (typeof EXPERT_SHARE_OPTIONS)[number];
 
-export function clampMentorShare(percent: number): MentorSharePercent {
-  const allowed = MENTOR_SHARE_OPTIONS as readonly number[];
-  if (allowed.includes(percent)) return percent as MentorSharePercent;
+export function clampExpertShare(percent: number): ExpertSharePercent {
+  const allowed = EXPERT_SHARE_OPTIONS as readonly number[];
+  if (allowed.includes(percent)) return percent as ExpertSharePercent;
   return 20;
 }
 
 export function splitLegCrc(
   priceCrc: number,
-  mentorSharePercent: MentorSharePercent,
+  expertSharePercent: ExpertSharePercent,
 ): { expertLegCrc: number; treasuryLegCrc: number } {
-  const expertLegCrc = (priceCrc * mentorSharePercent) / 100;
+  const expertLegCrc = (priceCrc * expertSharePercent) / 100;
   return { expertLegCrc, treasuryLegCrc: priceCrc - expertLegCrc };
 }
 
-export function splitAmounts(totalWei: bigint, mentorPercent: MentorSharePercent): {
-  mentorWei: bigint;
+export function splitAmounts(totalWei: bigint, expertPercent: ExpertSharePercent): {
+  expertWei: bigint;
   foundationWei: bigint;
 } {
-  const mentorWei = (totalWei * BigInt(mentorPercent)) / 100n;
-  const foundationWei = totalWei - mentorWei;
-  return { mentorWei, foundationWei };
+  const expertWei = (totalWei * BigInt(expertPercent)) / 100n;
+  const foundationWei = totalWei - expertWei;
+  return { expertWei, foundationWei };
 }
 
 export type TransferTx = { to: string; data: string; value: string };
@@ -52,9 +52,9 @@ export async function buildDonationTransactions(
 
 export async function buildSplitPayTransactions(
   from: `0x${string}`,
-  mentor: `0x${string}`,
+  expert: `0x${string}`,
   totalCrc: number,
-  mentorPercent: MentorSharePercent,
+  expertPercent: ExpertSharePercent,
 ): Promise<TransferTx[]> {
   const [{ TransferBuilder }, { circlesConfig }] = await Promise.all([
     import('@aboutcircles/sdk-transfers'),
@@ -63,11 +63,11 @@ export async function buildSplitPayTransactions(
 
   const builder = new TransferBuilder(circlesConfig[100]);
   const totalWei = BigInt(totalCrc) * 10n ** 18n;
-  const { mentorWei, foundationWei } = splitAmounts(totalWei, mentorPercent);
+  const { expertWei, foundationWei } = splitAmounts(totalWei, expertPercent);
 
   const legPromises = [
     builder.constructAdvancedTransfer(from, FOUNDATION_ADDRESS, foundationWei, { useWrappedBalances: true }),
-    ...(mentorWei > 0n ? [builder.constructAdvancedTransfer(from, mentor, mentorWei, { useWrappedBalances: true })] : []),
+    ...(expertWei > 0n ? [builder.constructAdvancedTransfer(from, expert, expertWei, { useWrappedBalances: true })] : []),
   ];
 
   const results = await Promise.all(legPromises);

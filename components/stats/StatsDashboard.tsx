@@ -18,7 +18,7 @@ import { buildExplorerTxUrl } from '@/lib/analytics-explorer';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { StatsApiResponse } from '@/lib/stats-api';
 import { WebAnalyticsPanel } from '@/components/stats/WebAnalyticsPanel';
-import { MentorCard } from '@/components/mentors/MentorCard';
+import { ExpertCard } from '@/components/experts/ExpertCard';
 import { ExternalLink } from 'lucide-react';
 
 function fmt(n: number) {
@@ -111,12 +111,12 @@ export function StatsDashboard() {
           <p className="text-center text-sm text-muted-foreground">{copy.expertsEmpty}</p>
         ) : (
           <ul className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2">
-            {data.experts.map(({ mentor, paidSessionCount }) => (
+            {data.experts.map(({ expert, paidSessionCount }) => (
               <li
-                key={mentor.id}
+                key={expert.id}
                 className="w-full min-w-0 overflow-hidden rounded-xl border border-border bg-card"
               >
-                <MentorCard mentor={mentor} paidSessionCount={paidSessionCount} />
+                <ExpertCard expert={expert} paidSessionCount={paidSessionCount} />
               </li>
             ))}
           </ul>
@@ -177,7 +177,7 @@ export function StatsDashboard() {
               <tbody>
                 {data.enrichment.recentPaidBookings.map((row) => (
                   <tr key={row.id} className="border-b border-border last:border-0">
-                    <td className="px-4 py-2.5 font-medium">{row.mentorName}</td>
+                    <td className="px-4 py-2.5 font-medium">{row.expertName}</td>
                     <td className="px-4 py-2.5 text-muted-foreground tabular-nums">
                       {fmtDate(row.createdAt)}
                     </td>
