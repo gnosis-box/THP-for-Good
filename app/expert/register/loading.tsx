@@ -1,7 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * /mentor/register loading skeleton — mirrors RegisterForm layout:
+ * /expert/register loading skeleton — mirrors RegisterForm layout:
  * PageHeader + form fields (name, bio, price, calendar link, skills, languages)
  */
 export default function RegisterLoading() {

@@ -1,10 +1,10 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * /mentor/[id] loading skeleton — mirrors MentorDetail layout:
+ * /expert/[id] loading skeleton — mirrors ExpertDetail layout:
  * Profile hero (avatar + name + bio) + skills + slot picker + pay button
  */
-export default function MentorDetailLoading() {
+export default function ExpertDetailLoading() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       {/* Profile hero section */}

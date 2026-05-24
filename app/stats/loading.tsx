@@ -78,7 +78,7 @@ export default function StatsLoading() {
         <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-muted/40 p-6">
           <Skeleton className="h-5 w-36 rounded-md" />
           <Skeleton className="h-3 w-52 rounded-sm" />
-          <div className="grid w-full grid-cols-4 gap-4">
+          <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex flex-col items-center gap-1">
                 <Skeleton className="h-3 w-14 rounded-sm" />
