@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { shortenAddress } from '@/lib/utils';
+import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import type { DaoMemberDto } from '@/app/api/dao/members/route';
 import type { DaoSupporterDto } from '@/app/api/dao/supporters/route';
 
@@ -23,7 +24,7 @@ function MemberCard({ address, name, imageUrl, trustsReceivedCount }: DaoMemberD
         {imageUrl && <AvatarImage src={imageUrl} alt={name} />}
         <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
       </Avatar>
-      <div className="flex min-w-0 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate text-sm font-medium">{name}</span>
         <span className="truncate font-mono text-xs text-muted-foreground">
           {shortenAddress(address)}
@@ -32,6 +33,7 @@ function MemberCard({ address, name, imageUrl, trustsReceivedCount }: DaoMemberD
           <span className="text-xs text-muted-foreground">Trusted by {trustsReceivedCount}</span>
         )}
       </div>
+      <ExpertTrustControl expertAddress={address} expertName={name} compact className="shrink-0" />
     </a>
   );
 }
@@ -53,12 +55,13 @@ function SupporterCard({ address, name, imageUrl, isNew }: DaoSupporterDto & { i
         {imageUrl && <AvatarImage src={imageUrl} alt={name} />}
         <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
       </Avatar>
-      <div className="flex min-w-0 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate text-sm font-medium">{name}</span>
         <span className="truncate font-mono text-xs text-muted-foreground">
           {shortenAddress(address)}
         </span>
       </div>
+      <ExpertTrustControl expertAddress={address} expertName={name} compact className="shrink-0" />
     </a>
   );
 }
