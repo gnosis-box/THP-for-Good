@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Check } from 'lucide-react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Spinner } from '@/components/ui/spinner';
 import { resolveTrustRelation } from '@/lib/trust-relation';
 import { addTrust, removeTrust } from '@/lib/trust-actions';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
+import { motionClass } from '@/lib/motion';
+import { cn } from '@/lib/utils';
 
 type TrustState =
   | { kind: 'loading' }
@@ -31,6 +34,7 @@ export function TrustButton({ expertAddress, expertName, bookingId, expertId }: 
   const [actionError, setActionError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [expertAvatar, setExpertAvatar] = useState<string | null>(null);
+  const [justTrusted, setJustTrusted] = useState(false);
 
   useEffect(() => {
     if (!address) return;
@@ -84,6 +88,7 @@ export function TrustButton({ expertAddress, expertName, bookingId, expertId }: 
       }).catch(() => undefined);
 
       setRefetchTick((t) => t + 1);
+      setJustTrusted(true);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Trust failed. Please try again.');
     } finally {
@@ -109,9 +114,10 @@ export function TrustButton({ expertAddress, expertName, bookingId, expertId }: 
 
   if (trustState.kind === 'loading') {
     return (
-      <Badge variant="secondary" className="text-xs text-muted-foreground animate-pulse">
+      <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+        <Spinner className="size-3.5" />
         Loading trust…
-      </Badge>
+      </div>
     );
   }
 
@@ -124,8 +130,22 @@ export function TrustButton({ expertAddress, expertName, bookingId, expertId }: 
           size="sm"
           onClick={handleTrust}
           disabled={actionLoading || !address}
+          className="relative min-w-[8rem] overflow-hidden"
         >
-          {actionLoading ? 'Trusting…' : `TRUST ${expertName}`}
+          <span
+            className={cn(
+              'inline-flex items-center gap-1.5 transition-opacity duration-[var(--motion-fast)]',
+              actionLoading ? 'opacity-0' : 'opacity-100',
+            )}
+          >
+            {`TRUST ${expertName}`}
+          </span>
+          {actionLoading ? (
+            <span className="absolute inset-0 inline-flex items-center justify-center gap-1.5">
+              <Spinner className="size-3.5" />
+              Trusting…
+            </span>
+          ) : null}
         </Button>
         {actionError && <p className="text-xs text-destructive">{actionError}</p>}
       </div>
@@ -141,10 +161,25 @@ export function TrustButton({ expertAddress, expertName, bookingId, expertId }: 
           type="button"
           variant="secondary"
           size="sm"
-          className="text-muted-foreground"
-          onClick={() => setShowModal(true)}
+          className={cn(
+            'text-muted-foreground transition-colors duration-[var(--motion-normal)]',
+            justTrusted &&
+              'border-success/40 bg-success/15 text-success hover:bg-success/20',
+          )}
+          onClick={() => {
+            setJustTrusted(false);
+            setShowModal(true);
+          }}
           disabled={actionLoading}
         >
+          <Check
+            className={cn(
+              'mr-1.5 size-3.5',
+              motionClass('', 'motion-fade-up', false),
+              !justTrusted && 'opacity-70',
+            )}
+            aria-hidden
+          />
           {label}
         </Button>
         {actionError && <p className="text-xs text-destructive">{actionError}</p>}
