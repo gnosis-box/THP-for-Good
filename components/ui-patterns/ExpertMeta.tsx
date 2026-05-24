@@ -66,7 +66,9 @@ type SplitShareProps = {
   variant?: 'footer' | 'inline';
 };
 
-const MIN_LABEL_PERCENT = 14;
+const MIN_TREASURY_LABEL_PERCENT = 14;
+/** Minimum width so "10% expert" stays readable on narrow cards. */
+const EXPERT_LABEL_MIN_WIDTH = '4.875rem';
 
 export function ExpertSplitShare({
   expertPercent,
@@ -89,10 +91,9 @@ export function ExpertSplitShare({
     >
       {treasuryPercent > 0 ? (
         <div
-          className="relative flex h-full min-w-0 items-center bg-primary px-2 sm:px-2.5"
-          style={{ width: treasuryPercent === 100 ? '100%' : `${treasuryPercent}%` }}
+          className="relative flex h-full min-w-0 flex-1 items-center bg-primary px-2 sm:px-2.5"
         >
-          {treasuryPercent >= MIN_LABEL_PERCENT ? (
+          {treasuryPercent >= MIN_TREASURY_LABEL_PERCENT ? (
             <span className="relative z-[1] truncate text-[11px] font-semibold tracking-tight text-primary-foreground sm:text-xs">
               {treasuryPercent}% THP for Good
             </span>
@@ -103,24 +104,20 @@ export function ExpertSplitShare({
       {clampedExpert > 0 ? (
         <div
           className={cn(
-            'relative flex h-full min-w-0 items-center bg-accent px-2 sm:px-2.5',
-            treasuryPercent === 0 ? 'w-full justify-end' : 'flex-1 justify-end',
+            'relative flex h-full shrink-0 items-center justify-end border-white/25 bg-accent px-2 shadow-[inset_1px_0_0_oklch(0_0_0/15%)] sm:px-2.5',
+            treasuryPercent > 0 && 'border-l',
+            treasuryPercent === 0 && 'w-full',
           )}
+          style={
+            treasuryPercent > 0
+              ? { flex: `0 0 max(${clampedExpert}%, ${EXPERT_LABEL_MIN_WIDTH})` }
+              : undefined
+          }
         >
-          {clampedExpert >= MIN_LABEL_PERCENT ? (
-            <span className="relative z-[1] truncate text-[11px] font-semibold tracking-tight text-accent-foreground sm:text-xs">
-              {clampedExpert}% expert
-            </span>
-          ) : null}
+          <span className="relative z-[1] whitespace-nowrap text-[11px] font-semibold tracking-tight text-accent-foreground sm:text-xs">
+            {clampedExpert}% expert
+          </span>
         </div>
-      ) : null}
-
-      {clampedExpert > 0 && treasuryPercent > 0 ? (
-        <div
-          className="pointer-events-none absolute top-0 bottom-0 z-[2] w-px bg-white/25 shadow-[1px_0_0_oklch(0_0_0/15%)]"
-          style={{ left: `${treasuryPercent}%` }}
-          aria-hidden
-        />
       ) : null}
 
       <div
