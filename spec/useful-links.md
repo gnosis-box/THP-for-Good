@@ -46,6 +46,7 @@ Central index of project, product, and ecosystem URLs.
 | Seed data (admins + experts) | [`spec/seed.md`](seed.md), [`scripts/seed.ts`](../scripts/seed.ts) |
 | UI mockup | [`spec/mockup.png`](mockup.png) |
 | shadcn inventory | [`spec/UI-SHADCN-INVENTORY.md`](UI-SHADCN-INVENTORY.md) |
+| Motion design audit (P0–P2) | [`spec/motion-design-audit.md`](motion-design-audit.md) |
 | cal.diy spike | [`docs/spike-cal-diy.md`](../docs/spike-cal-diy.md) |
 
 ### App routes (target)

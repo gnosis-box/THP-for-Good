@@ -1,6 +1,6 @@
 # Motion design audit — THP for Good
 
-> **Status:** Discovery / planning (no `IMPL-*` yet)  
+> **Status:** Phase 1 shipped · Phase 2 shipped (`56f89fd`, wave 2 on `docs/l4-motion-design`)  
 > **Date:** 2026-05-24  
 > **Scope:** Full app tour — routes, components, shadcn primitives, iframe constraints  
 > **Related:** [`UI-REDESIGN.md` §6.5](./UI-REDESIGN.md), [`UI-SHADCN-INVENTORY.md`](./UI-SHADCN-INVENTORY.md)
@@ -26,12 +26,16 @@
 | Layer | What exists |
 | --- | --- |
 | **`tw-animate-css`** | Tailwind animate utilities (`animate-in`, `fade-in`, `zoom-in`, `slide-in`, …) |
-| **`app/globals.css`** | `@keyframes booking-success-pop` + global `prefers-reduced-motion: reduce` kill-switch |
+| **`app/globals.css`** | Motion tokens (`--motion-*`), booking/slot/toast/list/hover keyframes + global `prefers-reduced-motion: reduce` kill-switch |
+| **`motion@12.40.0`** | Stepper indicators (`components/motion/stepper.tsx`) |
+| **`lib/motion.ts`** | `motionClass`, `staggerDelay`, `motionStaggerStyle` |
+| **`hooks/use-prefers-reduced-motion.ts`** | Client PRM hook |
+| **`components/motion/`** | `stepper`, `animated-list`, `fade-content`, `motion-empty` |
 | **shadcn primitives** | Sheet, Drawer, Dialog, Tooltip — enter/exit via data-state + `tw-animate-css` |
-| **Micro CSS** | `transition-colors` / `transition-all` on buttons, cards, filters, progress bars |
+| **Micro CSS** | `transition-colors` / `transition-all` on buttons, cards, filters |
 | **Loading** | `animate-pulse` (skeletons, stats loading), `animate-spin` (Spinner) |
 
-**Not installed:** `motion` (Framer Motion), `@formkit/auto-animate`, `react-spring`, Lottie.
+**Not installed:** `@formkit/auto-animate`, `react-spring`, Lottie.
 
 ### 1.3 Recommended library strategy
 
@@ -40,6 +44,8 @@
 | **CSS + `tw-animate-css` only** | Zero JS overhead | Overlays, simple fades, reduced-motion-friendly defaults |
 | **[Motion](https://motion.dev) (`motion/react`)** | ~30–40 kB gzip; compositor-friendly if limited to `opacity` + `transform` | Layout transitions, stagger lists, stepper state, `AnimatePresence` for toasts |
 | **`@formkit/auto-animate`** | ~2 kB | Filter grid reorder, expert list reflow — zero-config list morph |
+
+**Adopted strategy (2026-05-24):** hybrid **CSS tokens + Motion** for stepper; CSS-first for lists, hovers, and modals. `@formkit/auto-animate` deferred — CSS stagger + list `key` remount on filter change used instead.
 
 **Iframe rule (locked):** Circles playground embeds the app in a constrained viewport (~390px). Prefer **GPU-composited** properties (`transform`, `opacity`) only; avoid animating `width`, `height`, `top`, `left`, or layout-heavy properties on long lists ([Motion perf guide](https://motion.dev/docs/react-motion-component), [DEV: Framer Motion pitfalls](https://dev.to/whoffagents/framer-motion-animations-that-dont-kill-performance-patterns-and-pitfalls-5cki)).
 
@@ -69,34 +75,40 @@ Reference: [Web animation best practices gist](https://gist.github.com/w0rd-driv
 
 | Location | Animation | Notes |
 | --- | --- | --- |
-| `BookingSuccessDialog` | Backdrop fade + popup zoom/slide + `booking-success-pop` on icon | **Best reference implementation** |
+| `BookingSuccessDialog` | Backdrop fade + popup zoom/slide + stagger CTAs + `booking-success-pop` | M-P0-06 |
+| `BookingStepper` | Step ring pulse + check morph | M-P0-02 · `components/motion/stepper` |
+| `SlotPicker` | Scale + ring pulse on select | M-P0-01 |
+| `StickyPayBar` | Slide-up entrance | M-P0-03 |
+| `PayDrawer` / `PayButton` | Drawer stagger + PAY/spinner crossfade | M-P0-04, M-P0-05 |
+| `TrustPathPanel` | `scaleX` progress fill | M-P1-04 |
+| `ToastProvider` | Slide up/down enter/exit | M-P0-07 |
+| `TrustButton` | Success green morph + Dialog untrust | M-P0-08, M-P1-07 |
+| `ExpertBrowser` | List stagger on mount/filter; empty fade-in | M-P1-01, M-P1-08 |
+| `ExpertCard` | Hover lift + glow (`@media (hover:hover)`) | M-P1-02 |
+| `ExpertProfileHero` | Mount fade-up | M-P1-03 |
+| `SkillFilter` / `LanguageFilter` | Chip press scale | M-P1-10 |
+| `CallsView` | Tab panel fade; card stagger; skeleton fade-out | M-P1-05, M-P1-06 |
+| `OpenInCirclesHint` | One-shot border glow | M-P1-09 |
+| `WalletStatus` | Fade-in on connect | M-P1-11 |
+| `StatusAlert` (pay flow) | Slide-in from top | M-P1-12 |
 | `components/ui/sheet` | Slide + fade (vaul/Base UI) | Mobile nav |
-| `components/ui/drawer` | Bottom sheet slide (PayDrawer) | Mobile pay flow |
+| `components/ui/drawer` | Bottom sheet slide | PayDrawer shell |
 | `components/ui/tooltip` | Fade + zoom + directional slide | |
-| `components/ui/tabs` | Underline opacity transition | Calls Emitted/Received |
-| `DonationSection` | Progress bar `transition-all duration-700` | Only width animation in app — watch perf |
-| `components/ui/progress` | `transition-all` on fill | TrustPathPanel legs |
+| `components/ui/tabs` | Underline opacity transition | Calls tabs |
+| `DonationSection` | Progress bar `transition-all duration-700` | P2 candidate |
 | `components/ui/button` | `active:translate-y-px` | Press feedback |
 | Loading states | `animate-pulse`, `animate-spin` | Widespread |
 
-### 3.2 Explicitly static (high-impact gaps) ❌
+### 3.2 Remaining gaps (P2+)
 
 | Location | Gap |
 | --- | --- |
-| `BookingStepper` | Step completion jumps instantly — no circle fill / check morph |
-| `SlotPicker` | Slot select toggles with no selection feedback beyond color |
-| `ExpertBrowser` | Filter changes swap list instantly — no exit/enter |
-| `StickyPayBar` | Appears/disappears when slot selected — no slide-up |
-| `ToastProvider` | Toasts pop in/out with no motion |
-| `TrustButton` | State change (none → outgoing → mutual) is instant |
-| `TrustButton` `UntrustModal` | Custom modal — **no** backdrop/dialog animation (unlike BookingSuccessDialog) |
-| `CallsView` | Tab content swap instant; skeleton → content hard cut |
-| `StatusAlert` | Errors/warnings appear abruptly |
-| `OpenInCirclesHint` | Static CTA — no gentle attention pulse (spec said no decorative loops — use once on mount only) |
-| `ExpertCard` | Hover color only — no lift/glow per UI-REDESIGN §8.1 |
 | `StatsDashboard` | KPI numbers hard-cut when data loads |
 | `About` numbered steps | Static — no scroll reveal |
 | `RegisterForm` / `ExpertEditForm` | Long forms — no section reveal |
+| `SlotPicker` loading → slots | Skeleton crossfade to content |
+| `MobileNav` Sheet | Nav link stagger optional |
+| `ExpertTrustControl` | Trust pill loading → state crossfade |
 
 ---
 
@@ -275,12 +287,12 @@ These directly support the **book → pay → success → trust** funnel and mob
 
 Align with project workflow: optional **`DIV-L4-MOTION`** to choose **CSS-only vs Motion library** before coding.
 
-| Phase | IDs | Deliverable | PR scope |
-| --- | --- | --- | --- |
-| **Phase 0 — Foundation** | M-P0-09 | `lib/motion.ts`, CSS tokens, `usePrefersReducedMotion` hook | `docs/motion-foundation` |
-| **Phase 1 — Booking funnel** | M-P0-01 … M-P0-08 | Slot, stepper, sticky bar, pay, success, toast, trust | `impl/l4-motion-booking` |
-| **Phase 2 — Discovery & calls** | M-P1-01 … M-P1-07 | Lists, cards, tabs, modal parity | `impl/l4-motion-discovery` |
-| **Phase 3 — Secondary** | P1 remainder + P2 | Stats, about, register, admin flashes | `impl/l4-motion-polish` |
+| Phase | IDs | Deliverable | PR scope | Status |
+| --- | --- | --- | --- | --- |
+| **Phase 0 — Foundation** | M-P0-09 | `lib/motion.ts`, CSS tokens, `usePrefersReducedMotion` hook | `docs/l4-motion-design` | ✅ Shipped |
+| **Phase 1 — Booking funnel** | M-P0-01 … M-P0-08 | Slot, stepper, sticky bar, pay, success, toast, trust | `docs/l4-motion-design` | ✅ Shipped (`56f89fd`) |
+| **Phase 2 — Discovery & calls** | M-P1-01 … M-P1-12 | Lists, cards, tabs, modal parity, shell polish | `docs/l4-motion-design` | ✅ Shipped (wave 2) |
+| **Phase 3 — Secondary** | P2 | Stats, about, register, admin flashes | `impl/l4-motion-polish` | ⬜ Todo |
 
 **Bundle gate:** If `motion` package added, measure iframe load on throttled 4G + mid-range Android before Phase 2 list staggers.
 
@@ -289,11 +301,11 @@ Align with project workflow: optional **`DIV-L4-MOTION`** to choose **CSS-only v
 ## 7. Testing checklist
 
 - [ ] Playground iframe 390×844 — no jank during pay flow
-- [ ] `prefers-reduced-motion: reduce` — all P0 feedback still understandable (instant state change OK)
-- [ ] Keyboard focus visible during/after animations
+- [x] `prefers-reduced-motion: reduce` — all P0/P1 feedback still understandable (instant state change OK)
+- [x] Keyboard focus visible during/after animations (Dialog untrust uses Base UI)
 - [ ] No animation blocks tx signing modal (Circles host overlay)
 - [ ] Lighthouse performance regression < 5 points on `/` and `/expert/[id]`
-- [ ] `pnpm build` — no SSR `window` leaks from motion imports (client-only dynamic import)
+- [x] `pnpm build` — no SSR `window` leaks from motion imports (client-only)
 
 ---
 
@@ -379,6 +391,34 @@ npx shadcn@latest add https://reactbits.dev/r/Stepper-TS-TW
 | **3 — Polish** | Counter, Count Up, Scroll Reveal, Animated Content | `impl/l4-motion-polish` |
 
 **Highest ROI trio:** Stepper + Animated List + Counter — covers most P0–P1 perceived polish with three installs.
+
+---
+
+## 11. Implementation tracker
+
+| ID | Status | Commit / branch | Primary files | Notes |
+| --- | --- | --- | --- | --- |
+| M-P0-01 | ✅ Done | `56f89fd` | `SlotPicker.tsx`, `globals.css` | Ring pulse + scale |
+| M-P0-02 | ✅ Done | `56f89fd` | `BookingStepper.tsx`, `motion/stepper.tsx` | Motion step indicators |
+| M-P0-03 | ✅ Done | `56f89fd` | `StickyPayBar.tsx` | Slide-up bar |
+| M-P0-04 | ✅ Done | `56f89fd` | `PayDrawer.tsx`, `PayButton.tsx` | Content stagger |
+| M-P0-05 | ⚠️ Partial | `56f89fd` + wave 2 | `PayButton.tsx`, `TrustPathPanel.tsx` | PAY crossfade ✅; trust bars → M-P1-04 |
+| M-P0-06 | ✅ Done | `56f89fd` | `BookingSuccessDialog.tsx` | Stagger CTAs |
+| M-P0-07 | ✅ Done | `56f89fd` | `toast.tsx` | Enter/exit + mobile offset |
+| M-P0-08 | ✅ Done | `56f89fd` | `TrustButton.tsx` | Green success morph |
+| M-P0-09 | ✅ Done | `56f89fd` | `lib/motion.ts`, `use-prefers-reduced-motion.ts`, `globals.css` | Foundation |
+| M-P1-01 | ✅ Done | wave 2 | `ExpertBrowser.tsx`, `motion/animated-list.tsx` | Stagger + filter key remount |
+| M-P1-02 | ✅ Done | wave 2 | `ExpertCard.tsx`, `globals.css` | Hover lift/glow |
+| M-P1-03 | ✅ Done | wave 2 | `ExpertProfileHero.tsx`, `motion/fade-content.tsx` | Mount fade-up |
+| M-P1-04 | ✅ Done | wave 2 | `TrustPathPanel.tsx` | `scaleX` progress bars |
+| M-P1-05 | ✅ Done | wave 2 | `CallsView.tsx` | Tab panel fade |
+| M-P1-06 | ✅ Done | wave 2 | `CallsView.tsx` | Card stagger (cap 8) |
+| M-P1-07 | ✅ Done | wave 2 | `TrustButton.tsx` | Untrust → Base UI Dialog |
+| M-P1-08 | ✅ Done | wave 2 | `motion/motion-empty.tsx`, browser + calls | Empty fade-in |
+| M-P1-09 | ✅ Done | wave 2 | `OpenInCirclesHint.tsx` | One-shot glow |
+| M-P1-10 | ✅ Done | wave 2 | `SkillFilter.tsx`, `LanguageFilter.tsx` | Chip press scale |
+| M-P1-11 | ✅ Done | wave 2 | `WalletStatus.tsx` | Connect fade-in |
+| M-P1-12 | ✅ Done | wave 2 | `PayButton.tsx`, `TrustPathPanel.tsx` | `motion-alert-in` |
 
 ---
 
