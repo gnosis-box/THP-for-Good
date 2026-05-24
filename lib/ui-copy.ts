@@ -30,6 +30,7 @@ export const UI_COPY = {
     back: '← Back',
     editProfile: 'Edit my profile',
     availability: 'Availability',
+    selectAvailabilitySlot: 'Select an availability slot',
     bookSession: 'Book session',
     reviewAndPay: 'Review & pay',
     selectSlotFirst: 'Select a slot above first.',
@@ -49,6 +50,7 @@ export const UI_COPY = {
       'No availability configured yet. Click "Edit my profile" to connect your Cal.com.',
     noCalVisitor: 'Availability not configured for this expert yet.',
     about: 'About',
+    skills: 'Skills',
   },
   calls: {
     emitted: 'Emitted',

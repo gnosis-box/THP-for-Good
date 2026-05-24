@@ -3,6 +3,7 @@
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { MotionStepConnector, MotionStepIndicator } from '@/components/motion/stepper';
 import { UI_COPY } from '@/lib/ui-copy';
+import { cn } from '@/lib/utils';
 
 const STEPS = [
   UI_COPY.booking.stepTime,
@@ -13,6 +14,7 @@ const STEPS = [
 type Props = {
   hasSlot: boolean;
   hasEmail: boolean;
+  className?: string;
 };
 
 function stepIndex(hasSlot: boolean, hasEmail: boolean): number {
@@ -21,13 +23,13 @@ function stepIndex(hasSlot: boolean, hasEmail: boolean): number {
   return 2;
 }
 
-export function BookingStepper({ hasSlot, hasEmail }: Props) {
+export function BookingStepper({ hasSlot, hasEmail, className }: Props) {
   const reducedMotion = usePrefersReducedMotion();
   const current = stepIndex(hasSlot, hasEmail);
   const currentStep = current + 1;
 
   return (
-    <div className="flex items-center gap-0" role="list" aria-label="Booking progress">
+    <div className={cn('flex items-center gap-0', className)} role="list" aria-label="Booking progress">
       {STEPS.map((label, i) => {
         const stepNumber = i + 1;
         const isNotLast = i < STEPS.length - 1;
