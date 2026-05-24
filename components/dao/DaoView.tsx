@@ -18,7 +18,7 @@ function MemberCard({ address, name, imageUrl, trustsReceivedCount }: DaoMemberD
       href={`${GNOSIS_APP_BASE}/${address}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:bg-accent"
+      className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-border/80 hover:bg-white/[0.03]"
     >
       <Avatar size="lg" className="shrink-0">
         {imageUrl && <AvatarImage src={imageUrl} alt={name} />}
@@ -43,7 +43,7 @@ function SupporterCard({ address, name, imageUrl }: DaoSupporterDto) {
       href={`${GNOSIS_APP_BASE}/${address}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:bg-accent"
+      className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-border/80 hover:bg-white/[0.03]"
     >
       <Avatar size="lg" className="shrink-0">
         {imageUrl && <AvatarImage src={imageUrl} alt={name} />}
