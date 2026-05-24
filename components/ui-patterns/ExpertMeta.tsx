@@ -85,31 +85,31 @@ export function ExpertSplitShare({
         className,
       )}
       role="img"
-      aria-label={`${clampedExpert}% to expert, ${treasuryPercent}% to THP for Good`}
+      aria-label={`${treasuryPercent}% to THP for Good, ${clampedExpert}% to expert`}
     >
-      {clampedExpert > 0 ? (
+      {treasuryPercent > 0 ? (
         <div
           className="relative flex h-full min-w-0 items-center bg-primary px-2 sm:px-2.5"
-          style={{ width: clampedExpert === 100 ? '100%' : `${clampedExpert}%` }}
+          style={{ width: treasuryPercent === 100 ? '100%' : `${treasuryPercent}%` }}
         >
-          {clampedExpert >= MIN_LABEL_PERCENT ? (
+          {treasuryPercent >= MIN_LABEL_PERCENT ? (
             <span className="relative z-[1] truncate text-[11px] font-semibold tracking-tight text-primary-foreground sm:text-xs">
-              {clampedExpert}% expert
+              {treasuryPercent}% THP for Good
             </span>
           ) : null}
         </div>
       ) : null}
 
-      {treasuryPercent > 0 ? (
+      {clampedExpert > 0 ? (
         <div
           className={cn(
             'relative flex h-full min-w-0 items-center bg-accent px-2 sm:px-2.5',
-            clampedExpert === 0 ? 'w-full justify-end' : 'flex-1 justify-end',
+            treasuryPercent === 0 ? 'w-full justify-end' : 'flex-1 justify-end',
           )}
         >
-          {treasuryPercent >= MIN_LABEL_PERCENT ? (
+          {clampedExpert >= MIN_LABEL_PERCENT ? (
             <span className="relative z-[1] truncate text-[11px] font-semibold tracking-tight text-accent-foreground sm:text-xs">
-              {treasuryPercent}% THP for Good
+              {clampedExpert}% expert
             </span>
           ) : null}
         </div>
@@ -118,7 +118,7 @@ export function ExpertSplitShare({
       {clampedExpert > 0 && treasuryPercent > 0 ? (
         <div
           className="pointer-events-none absolute top-0 bottom-0 z-[2] w-px bg-white/25 shadow-[1px_0_0_oklch(0_0_0/15%)]"
-          style={{ left: `${clampedExpert}%` }}
+          style={{ left: `${treasuryPercent}%` }}
           aria-hidden
         />
       ) : null}
