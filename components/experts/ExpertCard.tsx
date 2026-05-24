@@ -7,6 +7,7 @@ import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/components/ui-patterns/ExpertMeta';
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { UI_COPY } from '@/lib/ui-copy';
+import { getDisplayCallLanguages } from '@/lib/languages';
 import { motionClass } from '@/lib/motion';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { cn, toHttpImageUrl } from '@/lib/utils';
@@ -24,8 +25,7 @@ export function ExpertCard({
   const [circles, setCircles] = useState<CirclesData | null>(null);
   const reducedMotion = usePrefersReducedMotion();
   const share = expert.expert_share_percent ?? 20;
-  const callLanguages =
-    expert.call_languages.length > 0 ? expert.call_languages : expert.spoken_languages;
+  const sessionLanguages = getDisplayCallLanguages(expert);
 
   useEffect(() => {
     (async () => {
@@ -66,10 +66,7 @@ export function ExpertCard({
           </Avatar>
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <p className="truncate font-semibold leading-tight sm:text-base">{expert.name}</p>
-                <ExpertLanguageTags languages={callLanguages} className="shrink-0" />
-              </div>
+              <p className="min-w-0 truncate font-semibold leading-tight sm:text-base">{expert.name}</p>
               {paidSessionCount != null ? (
                 <p className="shrink-0 text-sm tabular-nums text-foreground">
                   {UI_COPY.stats.expertPaidSessions(paidSessionCount)}
@@ -78,6 +75,8 @@ export function ExpertCard({
                 <CrcAmount amount={expert.price_crc} variant="highlight" />
               )}
             </div>
+            <ExpertLanguageTags languages={sessionLanguages} variant="card" />
+            <ExpertSkillTags skills={expert.skills} maxVisible={3} />
             <div className="flex flex-wrap items-center gap-1.5">
               {circles !== null && circles.trustedByCount !== null && (
                 <p className="text-xs text-subtle-foreground">Trusted by {circles.trustedByCount}</p>
@@ -88,7 +87,6 @@ export function ExpertCard({
                 compact
               />
             </div>
-            <ExpertSkillTags skills={expert.skills} />
           </div>
         </div>
         <ExpertSplitShare

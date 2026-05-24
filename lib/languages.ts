@@ -114,13 +114,15 @@ export function getDisplayCallLanguages(expert: ExpertLanguageFields): string[] 
   return filterCallLanguageCodes(expert.spoken_languages);
 }
 
-export type SessionLanguageFormat = 'compact' | 'full';
+export type SessionLanguageFormat = 'compact' | 'full' | 'card';
 
-/** Display helper — compact: "EN · FR"; full: "English, French". */
+/** Display helper — compact: "EN · FR"; full: "English, French"; card: "English · French". */
 export function formatSessionLanguages(
   codes: string[],
   variant: SessionLanguageFormat = 'full',
 ): string {
   if (codes.length === 0) return '';
-  return variant === 'compact' ? formatLanguageBadges(codes) : formatLanguageList(codes);
+  if (variant === 'compact') return formatLanguageBadges(codes);
+  if (variant === 'card') return codes.map(languageLabel).join(' · ');
+  return formatLanguageList(codes);
 }

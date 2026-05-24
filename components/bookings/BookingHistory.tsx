@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ExpertLanguageTags, ExpertSkillTags } from '@/components/ui-patterns/ExpertMeta';
 import { TrustButton } from '@/components/bookings/TrustButton';
 import { shortenAddress } from '@/lib/utils';
+import { getDisplayCallLanguages } from '@/lib/languages';
 import type { BookingRow, ExpertRow } from '@/lib/db';
 
 type EnrichedBooking = BookingRow & { expert: ExpertRow };
@@ -97,17 +98,14 @@ export function BookingHistory() {
 
         return (
           <Card key={booking.id}>
-            <CardHeader>
+            <CardHeader className="gap-2">
               <CardTitle className="text-base font-semibold">{expert.name}</CardTitle>
-              {expert.skills.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {expert.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+              <ExpertLanguageTags
+                languages={getDisplayCallLanguages(expert)}
+                variant="card"
+                maxVisible={2}
+              />
+              <ExpertSkillTags skills={expert.skills} maxVisible={2} />
             </CardHeader>
 
             <CardContent className="flex flex-col gap-1.5 text-sm text-muted-foreground">

@@ -17,6 +17,7 @@ import { ExpertCard } from './ExpertCard';
 import { ExpertSearch } from './ExpertSearch';
 import { SkillFilter } from './SkillFilter';
 import { LanguageFilter } from './LanguageFilter';
+import { getDisplayCallLanguages } from '@/lib/languages';
 
 type Props = {
   experts: ExpertRow[];
@@ -30,7 +31,7 @@ export function ExpertBrowser({ experts, tags }: Props) {
 
   const filtered = experts.filter((m) => {
     const matchSkill = !selectedSkill || m.skills.includes(selectedSkill);
-    const callLanguages = m.call_languages.length > 0 ? m.call_languages : m.spoken_languages;
+    const callLanguages = getDisplayCallLanguages(m);
     const matchLanguage =
       selectedLanguages.length === 0 ||
       selectedLanguages.some((code) => callLanguages.includes(code));

@@ -8,7 +8,6 @@ import { PayButton } from '@/components/experts/PayButton';
 import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
 import { SlotPicker } from '@/components/experts/SlotPicker';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
-import { ExpertLanguageTags } from '@/components/ui-patterns/ExpertMeta';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { ExpertRow } from '@/lib/db';
@@ -155,14 +154,6 @@ function BookingView({
           <p className="max-w-lg whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
             {expert.bio}
           </p>
-          {(expert.call_languages.length > 0 || expert.spoken_languages.length > 0) && (
-            <ExpertLanguageTags
-              languages={
-                expert.call_languages.length > 0 ? expert.call_languages : expert.spoken_languages
-              }
-              prefix="Sessions"
-            />
-          )}
         </section>
       )}
 

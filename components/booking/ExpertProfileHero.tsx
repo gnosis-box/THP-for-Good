@@ -7,6 +7,7 @@ import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/compone
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FadeContent } from '@/components/motion/fade-content';
+import { getDisplayCallLanguages } from '@/lib/languages';
 import { toHttpImageUrl } from '@/lib/utils';
 import type { ExpertRow } from '@/lib/db';
 
@@ -16,8 +17,7 @@ export function ExpertProfileHero({ expert }: Props) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [trustedBy, setTrustedBy] = useState<number | null>(null);
   const share = expert.expert_share_percent ?? 20;
-  const callLanguages =
-    expert.call_languages.length > 0 ? expert.call_languages : expert.spoken_languages;
+  const sessionLanguages = getDisplayCallLanguages(expert);
 
   useEffect(() => {
     (async () => {
@@ -49,7 +49,12 @@ export function ExpertProfileHero({ expert }: Props) {
           )}
           <ExpertTrustControl expertAddress={expert.circles_address} expertName={expert.name} />
         </div>
-        <ExpertLanguageTags languages={callLanguages} className="sm:text-sm" prefix="Sessions" />
+        <ExpertLanguageTags
+          languages={sessionLanguages}
+          variant="prose"
+          prefix="Sessions in"
+          className="justify-center"
+        />
         <ExpertSkillTags skills={expert.skills} className="justify-center" />
         <ExpertSplitShare expertPercent={share} variant="inline" className="mt-1 w-full" />
       </div>

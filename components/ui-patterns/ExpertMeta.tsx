@@ -1,21 +1,60 @@
+'use client';
+
+import { useState } from 'react';
+import { Globe } from 'lucide-react';
 import { highlightPillClass } from '@/components/ui-patterns/highlight-pill';
+import { formatSessionLanguages } from '@/lib/languages';
 import { cn } from '@/lib/utils';
 
 type SkillTagsProps = {
   skills: string[];
   className?: string;
+  maxVisible?: number;
 };
 
-export function ExpertSkillTags({ skills, className }: SkillTagsProps) {
+export function ExpertSkillTags({ skills, className, maxVisible }: SkillTagsProps) {
+  const [expanded, setExpanded] = useState(false);
+
   if (skills.length === 0) return null;
 
+  const hasCap = maxVisible != null && maxVisible >= 0 && skills.length > maxVisible;
+  const visibleSkills =
+    hasCap && !expanded ? skills.slice(0, maxVisible) : skills;
+  const hiddenCount = hasCap && !expanded ? skills.length - maxVisible! : 0;
+  const hiddenSkills = hasCap && !expanded ? skills.slice(maxVisible!) : [];
+
   return (
-    <div className={cn('flex flex-wrap gap-1.5', className)} aria-label="Expertise">
-      {skills.map((skill) => (
+    <div className={cn('flex flex-wrap items-center gap-1.5', className)} aria-label="Expertise">
+      {visibleSkills.map((skill) => (
         <span key={skill} className={highlightPillClass('skill', 'text-xs')}>
           {skill}
         </span>
       ))}
+      {hiddenCount > 0 ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setExpanded((open) => !open);
+          }}
+          className={cn(
+            highlightPillClass('skill', 'text-xs'),
+            'cursor-pointer touch-manipulation hover:opacity-90',
+          )}
+          aria-expanded={expanded}
+          aria-label={
+            expanded
+              ? 'Collapse skills'
+              : `Show ${hiddenCount} more skills: ${hiddenSkills.join(', ')}`
+          }
+        >
+          {expanded ? '−' : `+${hiddenCount}`}
+          <span aria-hidden className="ml-0.5 text-[10px] opacity-80">
+            {expanded ? '▴' : '▾'}
+          </span>
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -103,22 +142,60 @@ export function ExpertSplitShare({
 type LanguageTagsProps = {
   languages: string[];
   className?: string;
+  /** card: globe + "English · French"; prose: "Sessions in English, French" */
+  variant?: 'card' | 'prose';
   prefix?: string;
+  maxVisible?: number;
 };
 
-export function ExpertLanguageTags({ languages, className, prefix = 'Calls' }: LanguageTagsProps) {
+export function ExpertLanguageTags({
+  languages,
+  className,
+  variant = 'prose',
+  prefix = 'Sessions in',
+  maxVisible,
+}: LanguageTagsProps) {
+  const [expanded, setExpanded] = useState(false);
+
   if (languages.length === 0) return null;
 
+  const fullLabel = formatSessionLanguages(languages, 'full');
+  const hasCap = maxVisible != null && maxVisible >= 0 && languages.length > maxVisible;
+  const visibleCodes =
+    hasCap && !expanded ? languages.slice(0, maxVisible) : languages;
+  const hiddenCount = hasCap && !expanded ? languages.length - maxVisible! : 0;
+  const displayText =
+    variant === 'card'
+      ? formatSessionLanguages(visibleCodes, 'card')
+      : `${prefix} ${formatSessionLanguages(visibleCodes, 'full')}`;
+
+  const rowClass =
+    variant === 'card'
+      ? 'text-xs text-muted-foreground sm:text-sm'
+      : 'text-sm text-muted-foreground';
+
   return (
-    <div
-      className={cn('flex flex-wrap items-center gap-1.5', className)}
-      aria-label={`${prefix}: ${languages.map((c) => c.toUpperCase()).join(', ')}`}
+    <p
+      className={cn('flex min-w-0 items-center gap-1.5', rowClass, className)}
+      aria-label={`Session languages: ${fullLabel}`}
     >
-      {languages.map((code) => (
-        <span key={code} className={highlightPillClass('skill', 'text-[11px] uppercase tracking-wide sm:text-xs')}>
-          {code}
-        </span>
-      ))}
-    </div>
+      <Globe className="size-3.5 shrink-0 opacity-80 sm:size-4" aria-hidden />
+      <span className="min-w-0 truncate">{displayText}</span>
+      {hiddenCount > 0 ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setExpanded((open) => !open);
+          }}
+          className="shrink-0 text-xs font-medium text-foreground underline-offset-2 hover:underline touch-manipulation"
+          aria-expanded={expanded}
+          aria-label={expanded ? 'Collapse languages' : `Show ${hiddenCount} more languages`}
+        >
+          {expanded ? 'Less' : `+${hiddenCount}`}
+        </button>
+      ) : null}
+    </p>
   );
 }

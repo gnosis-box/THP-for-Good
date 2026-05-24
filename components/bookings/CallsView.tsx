@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ExpertLanguageTags, ExpertSkillTags } from '@/components/ui-patterns/ExpertMeta';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Empty,
@@ -21,6 +21,7 @@ import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { motionClass, motionStaggerStyle } from '@/lib/motion';
 import { cn, shortenAddress } from '@/lib/utils';
 import { UI_COPY } from '@/lib/ui-copy';
+import { getDisplayCallLanguages } from '@/lib/languages';
 import type { BookingRow, ExpertRow } from '@/lib/db';
 
 type EnrichedBooking = BookingRow & { expert: ExpertRow };
@@ -209,17 +210,14 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
             className={motionClass('', 'motion-list-item-in', reducedMotion)}
             style={motionStaggerStyle(index, reducedMotion, 8)}
           >
-            <CardHeader>
+            <CardHeader className="gap-2">
               <CardTitle className="text-base font-semibold">{expert.name}</CardTitle>
-              {expert.skills.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {expert.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+              <ExpertLanguageTags
+                languages={getDisplayCallLanguages(expert)}
+                variant="card"
+                maxVisible={2}
+              />
+              <ExpertSkillTags skills={expert.skills} maxVisible={2} />
             </CardHeader>
             <CardContent className="flex flex-col gap-1.5 text-sm text-muted-foreground">
               <span>{fmtDate(booking.created_at)}</span>
