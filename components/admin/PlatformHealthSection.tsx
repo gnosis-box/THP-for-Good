@@ -154,7 +154,7 @@ export function PlatformHealthSection({ stats }: Props) {
             </ul>
           )}
           <p className="mt-3 text-xs text-muted-foreground">
-            Participant view: <Link href="/calls" className="text-primary underline underline-offset-2">/calls</Link>
+            Participant view: <Link href="/calls" className="text-foreground underline underline-offset-2">/calls</Link>
           </p>
         </CardContent>
       </Card>

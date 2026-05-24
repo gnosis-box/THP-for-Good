@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { tagChipClass } from '@/components/ui-patterns/highlight-pill';
 import { cn } from '@/lib/utils';
 import type { TagRow } from '@/lib/db';
 
@@ -82,13 +83,7 @@ export function SkillTagPicker({
                   type="button"
                   aria-pressed={active}
                   onClick={() => toggleSkill(tag.label)}
-                  className={cn(
-                    'shrink-0 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    styles.pill,
-                    active
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-border bg-background text-foreground hover:bg-muted',
-                  )}
+                  className={cn(styles.pill, tagChipClass(active))}
                 >
                   {tag.label}
                   {tag.status === 'pending' ? (

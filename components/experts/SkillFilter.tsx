@@ -1,7 +1,7 @@
 'use client';
 
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { filterChipClass } from '@/components/ui-patterns/highlight-pill';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { TagRow } from '@/lib/db';
 
@@ -13,29 +13,32 @@ type Props = {
 
 export function SkillFilter({ tags, selected, onSelect }: Props) {
   return (
-    <ScrollArea className="w-full whitespace-nowrap">
-      <ToggleGroup
-        value={selected ? [selected] : ['']}
-        onValueChange={(values) => {
-          const v = values[values.length - 1] ?? '';
-          onSelect(v === '' ? '' : v);
-        }}
+    <ScrollArea className="motion-scroll-fade-x w-full whitespace-nowrap">
+      <div
+        role="group"
         aria-label="Filter experts by skill"
-        className="inline-flex w-max min-h-11 gap-2 pb-1"
+        className="inline-flex w-max min-h-11 items-center gap-2 pb-1"
       >
-        <ToggleGroupItem value="" className="min-h-11 shrink-0 rounded-full px-4">
+        <button
+          type="button"
+          aria-pressed={selected === ''}
+          onClick={() => onSelect('')}
+          className={filterChipClass(selected === '')}
+        >
           {UI_COPY.home.filterAll}
-        </ToggleGroupItem>
+        </button>
         {tags.map((tag) => (
-          <ToggleGroupItem
+          <button
             key={tag.id}
-            value={tag.label}
-            className="min-h-11 shrink-0 rounded-full px-4"
+            type="button"
+            aria-pressed={selected === tag.label}
+            onClick={() => onSelect(tag.label)}
+            className={filterChipClass(selected === tag.label)}
           >
             {tag.label}
-          </ToggleGroupItem>
+          </button>
         ))}
-      </ToggleGroup>
+      </div>
       <ScrollBar orientation="horizontal" />
     </ScrollArea>
   );

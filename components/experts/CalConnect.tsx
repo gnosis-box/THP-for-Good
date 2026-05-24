@@ -37,7 +37,7 @@ export function CalConnect({ onConnect }: Props) {
   if (eventTypes !== null) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-green-700 font-medium">Found {eventTypes.length} event type{eventTypes.length !== 1 ? 's' : ''} — select one:</p>
+        <p className="text-xs text-success font-medium">Found {eventTypes.length} event type{eventTypes.length !== 1 ? 's' : ''} — select one:</p>
         <select
           defaultValue=""
           onChange={(e) => onConnect(parseInt(e.target.value, 10))}

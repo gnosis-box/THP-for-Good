@@ -4,26 +4,23 @@ import { useEffect, useState } from 'react';
 
 import { ContentPanel, ContentSection } from '@/components/ui-patterns/content-section';
 import {
-  MetricsActions,
-  MetricsExternalLink,
-  MetricsHero,
   MetricsPanel,
-  MetricsPanelMono,
   MetricsPanelTitle,
   StatCell,
   StatGrid,
 } from '@/components/ui-patterns/metrics-panel';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
+import { CountUp } from '@/components/motion/count-up';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { motionClass, motionStaggerStyle } from '@/lib/motion';
 import { buildExplorerTxUrl } from '@/lib/analytics-explorer';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { StatsApiResponse } from '@/lib/stats-api';
 import { WebAnalyticsPanel } from '@/components/stats/WebAnalyticsPanel';
 import { ExpertCard } from '@/components/experts/ExpertCard';
 import { ExternalLink } from 'lucide-react';
-
-function fmt(n: number) {
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(n);
-}
+import { LiveTreasuryMetricsPanel } from '@/components/stats/LiveTreasuryMetricsPanel';
+import { cn } from '@/lib/utils';
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -35,6 +32,7 @@ function fmtDate(iso: string) {
 
 export function StatsDashboard() {
   const copy = UI_COPY.stats;
+  const reducedMotion = usePrefersReducedMotion();
   const [data, setData] = useState<StatsApiResponse | null>(null);
   const [error, setError] = useState(false);
 
@@ -86,24 +84,12 @@ export function StatsDashboard() {
         />
       )}
 
-      <MetricsPanel>
-        <MetricsPanelTitle>{copy.treasuryTitle}</MetricsPanelTitle>
-        <MetricsPanelMono>{data.treasury.address}</MetricsPanelMono>
-        <MetricsHero
-          label={copy.treasuryBalance}
-          value={
-            data.treasury.balanceCrc != null
-              ? `${fmt(data.treasury.balanceCrc)} CRC`
-              : copy.treasuryBalanceUnavailable
-          }
-        />
-        <MetricsActions>
-          <MetricsExternalLink href={data.treasury.eventsUrl}>
-            {copy.viewOnChainActivity}
-          </MetricsExternalLink>
-          <MetricsExternalLink href={data.treasury.graphUrl}>{copy.trustGraph}</MetricsExternalLink>
-        </MetricsActions>
-      </MetricsPanel>
+      <LiveTreasuryMetricsPanel
+        address={data.treasury.address}
+        initialBalance={data.treasury.balanceCrc}
+        eventsUrl={data.treasury.eventsUrl}
+        graphUrl={data.treasury.graphUrl}
+      />
 
       <section className="flex flex-col items-center gap-4">
         <MetricsPanelTitle>{copy.expertsTitle}</MetricsPanelTitle>
@@ -127,21 +113,42 @@ export function StatsDashboard() {
         <MetricsPanelTitle>{copy.snapshotTitle}</MetricsPanelTitle>
         <p className="text-center text-xs text-muted-foreground">{copy.snapshotOffChainNote}</p>
         <StatGrid columns={4}>
-          <StatCell
-            label={copy.activeExperts}
-            value={
-              <>
-                {data.enrichment.activeExperts}
-                <span className="text-sm font-normal text-muted-foreground">
-                  {' '}
-                  / {data.enrichment.totalExperts}
-                </span>
-              </>
-            }
-          />
-          <StatCell label={copy.paidBookings} value={data.enrichment.paidBookingCount} />
-          <StatCell label={copy.bookingIntent} value={data.enrichment.bookingIntentCount} />
-          <StatCell label={copy.trustAttestations} value={data.enrichment.trustAttestationCount} />
+          {(
+            [
+              {
+                label: copy.activeExperts,
+                value: (
+                  <>
+                    <CountUp value={data.enrichment.activeExperts} />
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {' '}
+                      / {data.enrichment.totalExperts}
+                    </span>
+                  </>
+                ),
+              },
+              {
+                label: copy.paidBookings,
+                value: <CountUp value={data.enrichment.paidBookingCount} />,
+              },
+              {
+                label: copy.bookingIntent,
+                value: <CountUp value={data.enrichment.bookingIntentCount} />,
+              },
+              {
+                label: copy.trustAttestations,
+                value: <CountUp value={data.enrichment.trustAttestationCount} />,
+              },
+            ] as const
+          ).map((cell, index) => (
+            <div
+              key={cell.label}
+              className={motionClass('', 'motion-fade-up', reducedMotion)}
+              style={motionStaggerStyle(index, reducedMotion)}
+            >
+              <StatCell label={cell.label} value={cell.value} />
+            </div>
+          ))}
         </StatGrid>
         {data.enrichment.tagCounts.length > 0 && (
           <div className="flex flex-col items-center gap-2">
@@ -175,8 +182,15 @@ export function StatsDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {data.enrichment.recentPaidBookings.map((row) => (
-                  <tr key={row.id} className="border-b border-border last:border-0">
+                {data.enrichment.recentPaidBookings.map((row, index) => (
+                  <tr
+                    key={row.id}
+                    className={cn(
+                      'border-b border-border last:border-0',
+                      index < 10 && motionClass('', 'motion-fade-up', reducedMotion),
+                    )}
+                    style={index < 10 ? motionStaggerStyle(index, reducedMotion, 10) : undefined}
+                  >
                     <td className="px-4 py-2.5 font-medium">{row.expertName}</td>
                     <td className="px-4 py-2.5 text-muted-foreground tabular-nums">
                       {fmtDate(row.createdAt)}
@@ -186,7 +200,7 @@ export function StatsDashboard() {
                         href={buildExplorerTxUrl(row.txHash)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary text-xs hover:underline inline-flex items-center gap-1"
+                        className="text-trust text-xs hover:underline inline-flex items-center gap-1"
                       >
                         {copy.viewTx}
                         <ExternalLink className="size-3" aria-hidden />

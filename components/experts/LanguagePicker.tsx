@@ -1,5 +1,6 @@
 'use client';
 
+import { tagChipClass } from '@/components/ui-patterns/highlight-pill';
 import { cn } from '@/lib/utils';
 import { CALL_LANGUAGES, SESSION_LANGUAGES, filterCallLanguageCodes } from '@/lib/languages';
 
@@ -62,13 +63,7 @@ export function LanguagePicker({
                 type="button"
                 aria-pressed={active}
                 onClick={() => toggleSpoken(code)}
-                className={cn(
-                  'shrink-0 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  pill,
-                  active
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border border-border bg-background text-foreground hover:bg-muted',
-                )}
+                className={cn(pill, tagChipClass(active))}
               >
                 {label}
               </button>
@@ -103,11 +98,10 @@ export function LanguagePicker({
                     aria-pressed={active}
                     onClick={() => toggleCall(code)}
                     className={cn(
-                      'shrink-0 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       pill,
                       active
                         ? 'bg-accent text-accent-foreground'
-                        : 'border border-border bg-background text-muted-foreground hover:bg-muted',
+                        : tagChipClass(false),
                     )}
                   >
                     {label}

@@ -30,7 +30,7 @@ export function NavCards() {
           href={item.href}
           className="rounded-xl outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          <Card className="h-full transition-colors hover:bg-accent/50">
+          <Card className="motion-nav-card-hover h-full transition-colors hover:bg-accent/50">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 {item.title}

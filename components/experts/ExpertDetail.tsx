@@ -4,16 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { BookingStepper } from '@/components/booking/BookingStepper';
-import { ExpertProfileHero } from '@/components/booking/ExpertProfileHero';
 import { PayDrawer } from '@/components/booking/PayDrawer';
 import { StickyPayBar } from '@/components/booking/StickyPayBar';
-import { PaymentSummary } from '@/components/booking/PaymentSummary';
-import { SlotPicker } from '@/components/experts/SlotPicker';
 import { PayButton } from '@/components/experts/PayButton';
-import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
-import { ExpertLanguageTags } from '@/components/ui-patterns/ExpertMeta';
+import { ExpertDetailBody } from '@/components/experts/ExpertDetailBody';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { UI_COPY } from '@/lib/ui-copy';
@@ -47,7 +41,6 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
 
   const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
   const hasSlot = !!selectedSlot;
-  const hasEmail = !!email.trim();
 
   async function reloadExpert() {
     const res = await fetch(`/api/experts/${expert.id}`);
@@ -56,6 +49,10 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
       setExpert(updated);
     }
     setEditing(false);
+  }
+
+  function handlePaySuccess() {
+    setDrawerOpen(false);
   }
 
   return (
@@ -80,77 +77,21 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           )}
         </div>
 
-        {editing ? (
-          <ExpertEditForm
-            expert={expert}
-            walletAddress={address!}
-            onSaved={reloadExpert}
-            onCancel={() => setEditing(false)}
-            onDeactivated={() => router.push('/')}
-          />
-        ) : (
-          <>
-            <BookingStepper hasSlot={hasSlot} hasEmail={hasEmail} />
-            <ExpertProfileHero expert={expert} />
-
-            {expert.bio && (
-              <section className="flex flex-col items-center gap-2 text-center">
-                <h2 className="text-center text-sm font-semibold">{UI_COPY.booking.about}</h2>
-                <p className="max-w-lg whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                  {expert.bio}
-                </p>
-                {(expert.call_languages.length > 0 || expert.spoken_languages.length > 0) && (
-                  <ExpertLanguageTags
-                    languages={
-                      expert.call_languages.length > 0
-                        ? expert.call_languages
-                        : expert.spoken_languages
-                    }
-                    prefix="Sessions"
-                  />
-                )}
-              </section>
-            )}
-
-            <Separator />
-
-            <section className="flex flex-col items-center gap-3">
-              <h2 className="text-center text-sm font-semibold">{UI_COPY.booking.availability}</h2>
-              {expert.cal_event_type_id ? (
-                <SlotPicker expertId={expert.id} selected={selectedSlot} onSelect={setSelectedSlot} />
-              ) : (
-                <p className="text-center text-sm text-muted-foreground">
-                  {isSelf ? UI_COPY.booking.noCalSelf : UI_COPY.booking.noCalVisitor}
-                </p>
-              )}
-            </section>
-
-            {hasSlot && (
-              <section className="hidden flex-col gap-3 md:flex">
-                <h2 className="text-title text-sm font-semibold">{UI_COPY.booking.bookSession}</h2>
-                <PayButton
-                  expert={expert}
-                  selectedSlot={selectedSlot}
-                  email={email}
-                  onEmailChange={setEmail}
-                  onSuccess={() => setDrawerOpen(false)}
-                />
-              </section>
-            )}
-
-            {hasSlot && (
-              <section className="flex flex-col gap-3 md:hidden">
-                <h2 className="text-title text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
-                <PaymentSummary
-                  balance={balance}
-                  sharePercent={expert.expert_share_percent ?? 20}
-                  email={email}
-                  onEmailChange={setEmail}
-                />
-              </section>
-            )}
-          </>
-        )}
+        <ExpertDetailBody
+          editing={editing}
+          expert={expert}
+          isSelf={isSelf}
+          walletAddress={address}
+          selectedSlot={selectedSlot}
+          onSelectSlot={setSelectedSlot}
+          email={email}
+          onEmailChange={setEmail}
+          balance={balance}
+          onSaved={reloadExpert}
+          onCancelEdit={() => setEditing(false)}
+          onDeactivated={() => router.push('/')}
+          onPaySuccess={handlePaySuccess}
+        />
       </div>
 
       {!editing && hasSlot && (
@@ -162,14 +103,14 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           />
           <div className="md:hidden">
             <PayDrawer open={drawerOpen} onOpenChange={handleDrawerOpenChange}>
-            <PayButton
-              expert={expert}
-              selectedSlot={selectedSlot}
-              email={email}
-              onEmailChange={setEmail}
-              onSuccess={() => setDrawerOpen(false)}
-              showEmail
-            />
+              <PayButton
+                expert={expert}
+                selectedSlot={selectedSlot}
+                email={email}
+                onEmailChange={setEmail}
+                onSuccess={handlePaySuccess}
+                showEmail
+              />
             </PayDrawer>
           </div>
         </>

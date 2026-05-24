@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -8,7 +8,9 @@ import { BookingSuccessDialog } from '@/components/booking/BookingSuccessDialog'
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { TrustPathPanel } from '@/components/booking/TrustPathPanel';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
+import { dispatchPayTreasuryFeedback } from '@/components/motion/pay-treasury-feedback';
 import { useToast } from '@/components/ui/toast';
+import { useTreasuryPendingTx } from '@/contexts/TreasuryPendingTxContext';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { useTrustEligibleBalance } from '@/hooks/use-trust-eligible-balance';
@@ -66,6 +68,8 @@ export function PayButton({
 }: Props) {
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
+  const { registerPending } = useTreasuryPendingTx();
+  const payButtonRef = useRef<HTMLButtonElement>(null);
   const balance = useCrcBalance(address);
   const sharePercent = clampExpertShare(expert.expert_share_percent ?? 20) as ExpertSharePercent;
   const { expertLegCrc, treasuryLegCrc } = splitLegCrc(expert.price_crc, sharePercent);
@@ -131,6 +135,19 @@ export function PayButton({
       );
       const hashes = await sendTransactions(txs);
       const txHash = hashes[0];
+
+      if (treasuryLegCrc > 0) {
+        const rect = payButtonRef.current?.getBoundingClientRect();
+        registerPending({
+          txHash,
+          nominalCrc: treasuryLegCrc,
+          source: 'pay',
+          spawnRect: rect
+            ? { x: rect.left, y: rect.top, width: rect.width, height: rect.height }
+            : undefined,
+        });
+        dispatchPayTreasuryFeedback(txHash, treasuryLegCrc);
+      }
 
       const bookingRes = await fetch('/api/bookings', {
         method: 'POST',
@@ -259,43 +276,65 @@ export function PayButton({
       ) : success ? null : (
         <div className="flex flex-col gap-3">
           {!compact && (
-            <TrustPathPanel
-              trustEligible={trustEligible}
-              expertLegCrc={expertLegCrc}
-              treasuryLegCrc={treasuryLegCrc}
-              expertName={expert.name}
-              priceCrc={expert.price_crc}
-            />
+            <div className="pay-drawer-section">
+              <TrustPathPanel
+                trustEligible={trustEligible}
+                expertLegCrc={expertLegCrc}
+                treasuryLegCrc={treasuryLegCrc}
+                expertName={expert.name}
+                priceCrc={expert.price_crc}
+              />
+            </div>
           )}
-          <PaymentSummary
-            balance={balance}
-            sharePercent={sharePercent}
-            email={email}
-            onEmailChange={onEmailChange}
-            showEmail={showEmail}
-          />
-          {balance.status === 'not-registered' && (
-            <StatusAlert
-              variant="warning"
-              title="Wallet not registered"
-              description="Your wallet is not a registered Circles avatar. Open the app in the Circles playground to pay with CRC."
+          <div className="pay-drawer-section">
+            <PaymentSummary
+              balance={balance}
+              sharePercent={sharePercent}
+              email={email}
+              onEmailChange={onEmailChange}
+              showEmail={showEmail}
             />
+          </div>
+          {balance.status === 'not-registered' && (
+            <div className="pay-drawer-section">
+              <StatusAlert
+                variant="warning"
+                title="Wallet not registered"
+                description="Your wallet is not a registered Circles avatar. Open the app in the Circles playground to pay with CRC."
+                className="motion-alert-in"
+              />
+            </div>
           )}
           {insufficientBalance && (
-            <p className="text-sm text-destructive">
+            <p className="pay-drawer-section text-sm text-destructive">
               You need at least {expert.price_crc} CRC to book this call.
             </p>
           )}
-          <Button disabled={!canPay} onClick={handlePay} size="lg" className="min-h-11 w-full">
-            {state.kind === 'loading' ? (
-              <>
-                <Spinner className="mr-2" />
-                Processing…
-              </>
-            ) : (
-              `Pay ${expert.price_crc} CRC to book`
-            )}
-          </Button>
+          <div className="pay-drawer-section">
+            <Button
+              ref={payButtonRef}
+              data-treasury-pay-btn
+              disabled={!canPay}
+              onClick={handlePay}
+              size="lg"
+              className="relative min-h-11 w-full overflow-hidden"
+            >
+              <span
+                className={cn(
+                  'inline-flex items-center justify-center transition-opacity duration-[var(--motion-fast)]',
+                  state.kind === 'loading' ? 'opacity-0' : 'opacity-100',
+                )}
+              >
+                {`Pay ${expert.price_crc} CRC to book`}
+              </span>
+              {state.kind === 'loading' ? (
+                <span className="absolute inset-0 inline-flex items-center justify-center gap-2">
+                  <Spinner />
+                  Processing…
+                </span>
+              ) : null}
+            </Button>
+          </div>
           {!selectedSlot && (
             <p className="text-center text-xs text-muted-foreground">
               {UI_COPY.booking.selectSlotFirst}

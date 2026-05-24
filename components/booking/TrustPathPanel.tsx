@@ -1,20 +1,87 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+
 import { AlertTriangle, Check } from 'lucide-react';
 
+import { Skeleton } from '@/components/ui/skeleton';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
-import { Progress } from '@/components/ui/progress';
-import { Spinner } from '@/components/ui/spinner';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { PAY_COPY } from '@/lib/pay-copy';
+import { cn } from '@/lib/utils';
 import type { TrustEligibleBalanceState } from '@/hooks/use-trust-eligible-balance';
+
+function TrustProgressBar({
+  pct,
+  label,
+  fillClass = 'bg-primary',
+}: {
+  pct: number;
+  label: string;
+  fillClass?: string;
+}) {
+  const reducedMotion = usePrefersReducedMotion();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  const scale = mounted ? pct / 100 : 0;
+
+  return (
+    <div
+      className="h-2 w-full overflow-hidden rounded-full bg-muted"
+      role="progressbar"
+      aria-valuenow={Math.round(pct)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={label}
+    >
+      <div
+        className={cn(
+          'motion-progress-fill h-full rounded-full',
+          fillClass,
+          !reducedMotion && 'transition-transform duration-[var(--motion-normal)] ease-out',
+        )}
+        style={{ transform: `scaleX(${scale})` }}
+      />
+    </div>
+  );
+}
+
+function TrustPathSkeleton() {
+  return (
+    <section
+      className="flex flex-col gap-3"
+      aria-busy="true"
+      aria-label={PAY_COPY.trustEstimateLoading}
+    >
+      <Skeleton className="h-4 w-40" />
+      {[0, 1].map((row) => (
+        <div key={row} className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+          <Skeleton className="motion-trust-skeleton h-2 w-full rounded-full" />
+        </div>
+      ))}
+      <Skeleton className="h-3 w-full max-w-sm" />
+    </section>
+  );
+}
 
 type LegRowProps = {
   label: string;
   maxFormatted: string;
   legCrc: number;
+  fillClass?: string;
 };
 
-function LegRow({ label, maxFormatted, legCrc }: LegRowProps) {
+function LegRow({ label, maxFormatted, legCrc, fillClass = 'bg-primary' }: LegRowProps) {
   const maxNum = parseFloat(maxFormatted) || 0;
   const pct = legCrc > 0 ? Math.min(100, (maxNum / legCrc) * 100) : 0;
   const ok = maxNum >= legCrc;
@@ -38,7 +105,7 @@ function LegRow({ label, maxFormatted, legCrc }: LegRowProps) {
           )}
         </span>
       </div>
-      <Progress value={pct} aria-label={`${label}: ${maxFormatted} of ${legCrc} CRC`} />
+      <TrustProgressBar pct={pct} label={`${label}: ${maxFormatted} of ${legCrc} CRC`} fillClass={fillClass} />
     </div>
   );
 }
@@ -51,28 +118,13 @@ type Props = {
   priceCrc: number;
 };
 
-export function TrustPathPanel({
+function TrustPathContent({
   trustEligible,
   expertLegCrc,
   treasuryLegCrc,
   expertName,
   priceCrc,
 }: Props) {
-  if (trustEligible.status === 'loading') {
-    return (
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Spinner className="size-4" />
-        {PAY_COPY.trustEstimateLoading}
-      </div>
-    );
-  }
-
-  if (trustEligible.status === 'error') {
-    return (
-      <p className="text-xs text-muted-foreground">{PAY_COPY.trustEstimateUnavailable}</p>
-    );
-  }
-
   if (trustEligible.status !== 'ready') return null;
 
   const shortfall = trustEligible.limits.bookableCrc < priceCrc;
@@ -94,6 +146,7 @@ export function TrustPathPanel({
           label={PAY_COPY.thpForGood}
           maxFormatted={trustEligible.formatted.foundation}
           legCrc={treasuryLegCrc}
+          fillClass="bg-accent"
         />
       )}
       <p className="text-xs text-muted-foreground">
@@ -104,8 +157,49 @@ export function TrustPathPanel({
           variant="warning"
           title="Trust path shortfall"
           description={PAY_COPY.trustEstimateShortfall}
+          className="motion-alert-in"
         />
       )}
     </section>
+  );
+}
+
+export function TrustPathPanel(props: Props) {
+  const { trustEligible } = props;
+  const reducedMotion = usePrefersReducedMotion();
+
+  if (trustEligible.status === 'error') {
+    return (
+      <p className="text-xs text-muted-foreground">{PAY_COPY.trustEstimateUnavailable}</p>
+    );
+  }
+
+  if (reducedMotion) {
+    if (trustEligible.status === 'loading') return <TrustPathSkeleton />;
+    return <TrustPathContent {...props} />;
+  }
+
+  return (
+    <AnimatePresence mode="wait">
+      {trustEligible.status === 'loading' ? (
+        <motion.div
+          key="loading"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <TrustPathSkeleton />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="ready"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
+          <TrustPathContent {...props} />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

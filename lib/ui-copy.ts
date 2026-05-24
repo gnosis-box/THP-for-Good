@@ -51,7 +51,9 @@ export const UI_COPY = {
   },
   support: {
     reportIssue: 'Report issue',
-    reportIssueAria: 'Report an issue or send feedback on GitHub',
+    reportIssueAria: 'Report an issue on GitHub',
+    giveFeedback: 'Give feedback',
+    giveFeedbackAria: 'Share your thoughts and suggestions on GitHub',
   },
   trustCard: {
     loading: 'Trust…',
