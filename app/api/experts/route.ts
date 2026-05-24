@@ -15,12 +15,23 @@ export function GET(request: NextRequest) {
     return NextResponse.json(expert);
   }
 
-  const skill = searchParams.get('skill') ?? undefined;
-  const callLanguage = searchParams.get('call_language') ?? undefined;
+  const skills = searchParams.getAll('skill').map((s) => s.trim()).filter(Boolean);
+  const languages = [
+    ...new Set(
+      [...searchParams.getAll('lang'), ...searchParams.getAll('call_language')]
+        .map((l) => l.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
+
   const q = searchParams.get('q')?.toLowerCase();
   const all = searchParams.get('all') === '1' && isAdminRequest(request);
 
-  let experts = getAllExperts(skill, all, callLanguage ?? undefined);
+  let experts = getAllExperts({
+    skills: skills.length > 0 ? skills : undefined,
+    callLanguages: languages.length > 0 ? languages : undefined,
+    includeInactive: all,
+  });
 
   if (q) {
     experts = experts.filter(

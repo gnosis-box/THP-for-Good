@@ -87,6 +87,9 @@
   --pill-skill-bg: var(--muted);
   --pill-skill-text: var(--foreground);
   --pill-skill-border: var(--border);
+  --pill-language-bg: color-mix(in oklab, var(--secondary) 14%, var(--muted));
+  --pill-language-text: var(--muted-foreground);
+  --pill-language-border: color-mix(in oklab, var(--secondary) 22%, var(--border));
   --link-trust: var(--trust);
   --chart-1: var(--primary);
   --chart-2: var(--accent);
