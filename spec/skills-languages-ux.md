@@ -1,7 +1,8 @@
 # Skills & languages UX — implementation spec
 
 > **Branch:** `feat/skills-languages-ux` → `dev`  
-> **Status:** Planned — single branch, phased commits  
+> **Status:** In progress — single branch, phased commits  
+> **Tracking:** [IMPL-L4-09 #94](https://github.com/gnosis-box/THP-for-Good/issues/94)  
 > **Related:** [FEAT-L4-07 #64](https://github.com/gnosis-box/THP-for-Good/issues/64) (session languages) · [`solarpunk-theme-decisions.md`](./solarpunk-theme-decisions.md) pill rules · [`motion-design-audit.md`](./motion-design-audit.md) M-P1-10  
 > **Cross-refs:** [`lib/languages.ts`](../lib/languages.ts) · [`ExpertMeta.tsx`](../components/ui-patterns/ExpertMeta.tsx) · [`ExpertBrowser.tsx`](../components/experts/ExpertBrowser.tsx)
 
@@ -41,30 +42,56 @@ Expert **skills** and **languages** are critical discovery signals but the curre
 
 ## 3. Design decisions (locked for this branch)
 
+### 3.1 Product decisions (confirmed 2026-05-24)
+
+| ID | Decision |
+|----|----------|
+| U1 | **Multi-select skills OR** on discover (e.g. Web3 + DeFi). |
+| U2 | **Filter state in URL** — e.g. `?skill=Web3&skill=DeFi&lang=fr` (shareable, reload-safe). |
+| U3 | **SSR homepage** when filters present — `app/page.tsx` reads `searchParams`, calls `getAllExperts(...)` server-side (best long-term; pairs with U2). |
+| U4 | **Expert list card** (`ExpertCard`): **full language labels** on the first meta row (e.g. `English · French`), not ISO codes. |
+| U5 | Skill overflow on cards: **tap to expand** (mobile-first); desktop may expand inline or on tap — no hover-only tooltip. |
+| U6 | Push branch to origin **once** at end of branch (before PR). |
+| U7 | Dedicated GitHub **IMPL** issue; link FEAT #64 as parent/related. |
+
+### 3.2 Technical decisions
+
 | ID | Decision |
 |----|----------|
 | D1 | **Skills** keep neutral sage pills (`--pill-skill-*`). |
-| D2 | **Languages** get distinct treatment: Lucide `Globe` + muted pill OR compact `EN · FR` on cards; full labels on filters/detail. |
-| D3 | Card skills: **max 3 visible** + `+N` overflow (tooltip or expand on card — prefer tooltip to avoid layout shift). |
-| D4 | Public display uses **`call_languages`** (bookable); fallback spoken only when call empty (existing rule), labeled **"Sessions in …"**. |
+| D2 | **Languages** visually distinct from skills: Lucide `Globe` + muted language pill/row — **not** `highlightPillClass('skill')`. |
+| D3 | Card skills: **max 3 visible** + `+N` → **tap expands** remaining skills on that card (collapse on second tap or tap outside). |
+| D4 | Public display uses **`call_languages`** (bookable); fallback spoken when call empty; label **"Sessions in …"** on detail hero. |
 | D5 | Homepage filters: **multi-select OR** for skills **and** languages. |
-| D6 | Mobile: **Filter sheet** (`Sheet` from shadcn) instead of two always-visible scroll rows. Desktop: sheet or inline popover — same component. |
+| D6 | **Filter sheet** (`Sheet`) — replaces two horizontal scroll rows on home. |
 | D7 | Detail page: languages **once** in hero; remove bio-section duplicate. |
-| D8 | No flag emojis — globe icon + text (a11y, consistency). |
-| D9 | Consolidate edit logic into shared module; `RegisterForm` / `ExpertEditForm` become thin wrappers. |
-| D10 | `PromoteSection` gets full `LanguagePicker` (spoken + call). |
+| D8 | No flag emojis — globe icon + text labels. |
+| D9 | Consolidate edit logic into shared module; `RegisterForm` / `ExpertEditForm` thin wrappers. |
+| D10 | `PromoteSection` gets full `LanguagePicker`. |
+
+### 3.3 Card surfaces (terminology — answers “which card?”)
+
+| Surface | Component | Languages on card/list? | Skills cap? |
+|---------|-----------|-------------------------|-------------|
+| **Home discover grid** | `ExpertCard` in `ExpertBrowser` | **Yes — row 1:** globe + full labels (`English · French`) | Yes — 3 + tap expand |
+| **Stats experts grid** | Same `ExpertCard` | Same as home | Same |
+| **Expert detail hero** | `ExpertProfileHero` | Prose line: **Sessions in English, French** (full labels) | No cap (show all) |
+| **Calls / history** | Booking cards | Optional compact line if expert langs loaded — **full labels**, max 2 + expand | `ExpertSkillTags` max 2 + expand |
+| **Admin list** | Text rows | Full labels when shown | Tags component, no strict cap |
+
+Question **U6 / old Q6** referred only to **`ExpertCard`** (home + stats listing), not detail hero or booking cards.
 
 ---
 
 ## 4. Target UI (reference)
 
-### 4.1 Expert card
+### 4.1 Expert card (`ExpertCard` — home & stats)
 
 ```
 ┌────────────────────────────────────────────┐
 │ [Avatar]  Zet                      10 CRC  │
-│           🌐 EN · FR                       │  ← language row (compact)
-│           Web3 · DeFi · Circles    +1      │  ← skills capped
+│           🌐 English · French              │  ← row 1: full labels (U4)
+│           Web3 · DeFi · Circles    +2 ▾    │  ← tap expands hidden skills (U5)
 │           Trusted by 12 · [Trust]          │
 │ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │
 │ 20% expert              80% THP for Good   │
@@ -139,8 +166,8 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 | Create `ExpertFilterSheet` | Sheet + sections for skills (multi) and languages (multi); uses `tagChipClass` / `filterChipClass` |
 | Create `ActiveFilterChips` | Removable chips below search; clears individual or all |
 | Replace `SkillFilter` + `LanguageFilter` in `ExpertBrowser` | Filter button opens sheet; optional: keep quick EN/FR chips on desktop only if sheet feels heavy — default: sheet only |
-| Wire filtering | Prefer URL search params `?skill=Web3&skill=DeFi&lang=fr` for shareable state; sync on Apply |
-| SSR path (recommended) | `app/page.tsx`: read `searchParams`, call `getAllExperts(skills, false, langs)` — reduces client payload long-term |
+| Wire filtering | URL search params `?skill=Web3&skill=DeFi&lang=fr` — **required** (U2); sync on Apply |
+| SSR path | **Required** (U3): `app/page.tsx` reads `searchParams`, calls extended `getAllExperts(...)` |
 | Update `ExpertSearch` | Include language labels in search (optional P1.5): match `languageLabel(code)` |
 
 **Files:** new `components/experts/ExpertFilterSheet.tsx`, `ActiveFilterChips.tsx`, `ExpertBrowser.tsx`, `app/page.tsx`, `lib/ui-copy.ts` (copy keys)
@@ -207,8 +234,8 @@ Work in order on **`feat/skills-languages-ux`**. One PR to `dev` when all phases
 
 ## 7. Acceptance criteria
 
-- [ ] Card: languages visually distinct from skills; compact `EN · FR` on card, full labels in filter sheet
-- [ ] Card: max 3 skills + `+N` with accessible name for overflow
+- [ ] Card: languages visually distinct from skills; **full labels** on row 1 (`ExpertCard`)
+- [ ] Card: max 3 skills + `+N`; **tap to expand** remaining skills (mobile-first)
 - [ ] Homepage: filter sheet; multi skill OR; multi language OR; active chips removable
 - [ ] Detail: languages shown once; no bio-gated duplicate
 - [ ] Register + inline edit + promote: same language picker behaviour
