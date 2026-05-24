@@ -1,29 +1,32 @@
 # Live CRC treasury counter — research & implementation spec
 
-> **Branch:** `docs/l4-live-crc-counter` (from `docs/l4-motion-design`)  
-> **Status:** Research validated (on-chain RPC probes — 2026-05-24)  
+> **Issue:** [IMPL-L4-08 #87](https://github.com/gnosis-box/THP-for-Good/issues/87)  
+> **Status:** Implemented — PR [#91](https://github.com/gnosis-box/THP-for-Good/pull/91) → `dev` (spec merged in [#88](https://github.com/gnosis-box/THP-for-Good/pull/88))  
 > **Treasury org:** `THP For Good DAO` — `0xc02D5aaCA64dE428D571dA42538232C431E0CDeD`  
-> **Live balance (validated):** **15,857.30 CRC** (`v2Balance` / `circlesV2_getTotalBalance`)  
-> **Epic candidate:** `FEAT-L4-XX` → `IMPL-L4-XX` after doc PR merge
+> **Balance probe (2026-05-24):** **15,857.30 CRC** — snapshot at research time; live UI uses `getProfileView` reconcile
 
 Cross-refs: [`useful-links.md`](useful-links.md) § On-chain / Circles ecosystem · [`analytics-strategy.md`](analytics-strategy.md) §2 · [`crc-pay.ts`](../lib/crc-pay.ts)
 
 ---
 
-## 1. Problem statement
+## 1. Problem & shipped behaviour
 
-Treasury CRC balance is fetched **once** on page load today:
+**Before (v0):** treasury balance fetched once on page load (`GET /api/stats`, single `getProfileView` on `/about`).
 
-| Surface | Current behaviour | File |
-|---------|-------------------|------|
-| `/stats` | `GET /api/stats` → `fetchAvatarBalanceCrc(TREASURY_ORG_ADDRESS)` | `app/api/stats/route.ts`, `StatsDashboard.tsx` |
-| `/about` donation panel | Single `getProfileView(FOUNDATION_ADDRESS)` on mount; optimistic `+donationAmount` after local PAY | `DonationSection.tsx` |
+**Now (v1 — PR #91):**
 
-**Goal:** When the on-chain balance changes, the UI should:
+| Surface | Behaviour | Key files |
+|---------|-----------|-----------|
+| `/about` | Live goal % + CRC raised; WSS + local donate coin from button | `DonationSection.tsx`, `LiveTreasuryCounter` |
+| `/stats` | Live treasury hero; WSS only when panel visible (`IntersectionObserver`) | `LiveTreasuryMetricsPanel.tsx`, `StatsDashboard.tsx` |
+| `/expert/[id]` | Post-PAY coin from Pay button + compact treasury leg chip | `PayButton.tsx`, `PayTreasuryFeedback.tsx` |
+| Global | Pending tx dedupe, WSS reconnect, 30 s poll fallback | `TreasuryProviders`, `use-live-treasury-balance.ts` |
 
-1. Detect the change in near real time (WebSocket + reconcile).
-2. Animate a **CRC coin** toward the counter (visual metaphor — see §2).
-3. Bump the displayed total when the coin “lands”, then reconcile with chain.
+When the on-chain balance changes, the UI:
+
+1. Detects via WebSocket `circles_subscribe` (+ polling fallback).
+2. Animates one **CRC coin** per inbound `TransferSummary` (§2).
+3. Bumps the counter on coin impact, then reconciles with `getProfileView.v2Balance`.
 
 ---
 
@@ -153,7 +156,14 @@ Use **`nominalCrc`** on the flying coin (matches “10 CRC” donation presets).
 
 ### 4.5 Demurrage & negative drift
 
-`v2Balance` can **decrease without a visible outbound TransferSummary** (demurrage decay). Mitigation: background reconcile every 60–120 s; **no red coin** for passive decay in v1 — counter quietly adjusts down or snaps on reconcile.
+`v2Balance` can **decrease without a visible outbound TransferSummary** (demurrage decay). **No red coin** for passive decay in v1 — counter adjusts on reconcile.
+
+| Mitigation | Spec target | v1 shipped (#91) |
+|------------|-------------|------------------|
+| Reconcile after each inbound | Yes | Yes (debounced 300 ms) |
+| Reconcile on tab focus | Yes | Yes (`visibilitychange`) |
+| Periodic reconcile 60–120 s | Recommended | **Deferred** — poll 30 s only when WSS disconnected |
+| Backfill on WSS reconnect | §5 #4 | **Deferred** — reconnect only, no `getTransactionHistory` backfill |
 
 ---
 
@@ -164,9 +174,11 @@ Use **`nominalCrc`** on the flying coin (matches “10 CRC” donation presets).
 | **1** | WebSocket `circles_subscribe` on `FOUNDATION_ADDRESS` | Primary — filter `CrcV2_TransferSummary` (§4.3) |
 | **2** | `getProfileView` reconcile | After each trigger + periodic backstop |
 | **3** | Polling `getProfileView` every 30 s (pause if `document.hidden`) | Fallback if WSS blocked in iframe |
-| **4** | `circles_getTransactionHistory` on reconnect | Backfill missed txs since last block |
+| **4** | `circles_getTransactionHistory` on reconnect | Backfill missed txs since last block — **deferred post-v1** |
 
 **Not recommended for v1:** raw Gnosis `eth_subscribe` log filtering — CRC v2 paths span Hub + group token + streams; Circles indexer already normalizes this ([`analytics-strategy.md`](analytics-strategy.md) §4.1).
+
+**v1 note:** polling runs every 30 s when WSS is down (skips when connected and when `document.hidden`).
 
 ---
 
@@ -190,7 +202,7 @@ Optional P2: tooltip with sender name from `getTransactionHistoryEnriched` (“+
 |-------|--------|
 | Flight | Motion portal particles (`motion@^12`) — [`motion-design-audit.md`](motion-design-audit.md) |
 | Counter | Existing [`CountUp`](../components/motion/count-up.tsx) |
-| Cap | Max 3 concurrent coins; merge bursts within 2 s |
+| Cap | Max **3** concurrent coins (`use-coin-burst-queue.ts`); merge bursts within 2 s — **partial** (cap only, no amount merge yet) |
 
 Refs: [Motion layout animations](https://motion.dev/docs/react-layout-animations) · [coin celebration pattern](https://hoainho.info/blog/creating-a-coin-celebration-effect-with-react)
 
@@ -227,22 +239,33 @@ sequenceDiagram
   Hook->>UI: setBalance(reconciled)
 ```
 
-### 7.1 New modules (implementation PR)
+### 7.1 Modules (PR #91)
 
 | Module | Responsibility |
 |--------|----------------|
-| `lib/treasury-events.ts` | Parse `TransferSummary`, dedupe, classify source A/B/C/D |
+| `lib/treasury-events.ts` | Parse `TransferSummary`, filter group hops |
+| `lib/treasury-ws.ts` | WSS client + reconnect backoff |
+| `lib/treasury-coin-events.ts` | Local donate coin dispatch (`thp:treasury-local`) |
+| `lib/treasury-coin-demo.ts` | Dev spawn helpers + demo tx detection |
+| `lib/analytics-rpc.ts` | `fetchTreasuryBalanceCrc()` |
+| `contexts/TreasuryPendingTxContext.tsx` | Same-tab pending tx registry |
 | `hooks/use-live-treasury-balance.ts` | WSS + polling fallback + reconcile |
-| `hooks/use-coin-burst-queue.ts` | Queue, merge, pending local tx dedupe |
+| `hooks/use-coin-burst-queue.ts` | Coin queue (max 3 concurrent) |
 | `components/motion/crc-coin-flight.tsx` | Portal particle layer |
-| `components/motion/live-treasury-counter.tsx` | CountUp + coin layer + ref target |
+| `components/motion/live-treasury-counter.tsx` | CountUp + coin layer (balance / goal modes) |
+| `components/motion/pay-treasury-feedback.tsx` | Post-PAY treasury leg chip |
+| `components/stats/LiveTreasuryMetricsPanel.tsx` | Stats treasury panel + IntersectionObserver |
+| `components/treasury/TreasuryProviders.tsx` | App-wide provider shell |
+| `scripts/probe-treasury-ws.mjs` | Node WSS smoke test |
 
 ### 7.2 Integration points
 
 | Page | Component |
 |------|-----------|
-| `/about` | `DonationSection` |
-| `/stats` | `StatsDashboard` treasury `MetricsHero` |
+| `app/layout.tsx` | `TreasuryProviders` |
+| `/about` | `DonationSection` → `LiveTreasuryCounter` (goal mode) |
+| `/stats` | `StatsDashboard` → `LiveTreasuryMetricsPanel` |
+| `/expert/[id]` | `PayButton` + global `PayTreasuryFeedback` |
 
 ---
 
@@ -256,13 +279,22 @@ sequenceDiagram
 - [x] Seed/demo senders mapped to [`spec/seed.md`](seed.md)
 - [x] Group `0x2b5E…` vs org `0xc02D…` clarified per [`useful-links.md`](useful-links.md)
 
-### 8.1 Spike (implementation)
+### 8.1 Implementation acceptance (#87 / PR #91)
+
+- [x] `/about` — live goal % + raised CRC; local donate coin; WSS external inflow
+- [x] `/stats` — live treasury hero; WSS when panel visible (IntersectionObserver)
+- [x] `/expert/[id]` — post-PAY coin + treasury leg chip
+- [x] 1 tx = 1 labeled coin (`+X CRC`); reduced motion = instant bump
+- [x] WSS reconnect + 30 s polling fallback; same-tab dedupe via pending tx registry
+- [x] `pnpm build` passes
+- [ ] One live donation end-to-end in Circles playground iframe (manual QA before merge)
+
+### 8.2 Research spike (pre-impl)
 
 - [x] Confirm WSS from browser (`wss://rpc.aboutcircles.com/ws/subscribe` → HTTP 101)
 - [x] Prototype single coin flight + reconcile loop
-- [ ] One live donation end-to-end in Circles playground iframe (manual QA)
 
-### 8.2 Manual testing & dev tools (no on-chain tx)
+### 8.3 Manual testing & dev tools (no on-chain tx)
 
 The floating **Treasury coin demo** panel is **disabled by default** (`TREASURY_COIN_DEV_PANEL_ENABLED = false`). In development, [`TreasuryCoinDevController`](../components/treasury/TreasuryCoinDevController.tsx) still mounts (no UI) and handles **URL auto-fire** + **`window.__THP_TREASURY_DEMO__`**. Re-enable the panel only for extended UI tuning.
 
@@ -364,10 +396,10 @@ Logs `CrcV2_TransferSummary` inbound to treasury (Ctrl+C to exit).
 
 ## 11. Branch & PR plan
 
-| Branch | Contents | Target |
-|--------|----------|--------|
-| `docs/l4-live-crc-counter` | This spec | `dev` |
-| `impl/l4-live-crc-counter` | Hooks, motion, pages | `dev` after doc merge |
+| Branch | PR | Status |
+|--------|-----|--------|
+| `docs/l4-live-crc-counter` | [#88](https://github.com/gnosis-box/THP-for-Good/pull/88) | Merged → `dev` |
+| `impl/l4-live-crc-counter` | [#91](https://github.com/gnosis-box/THP-for-Good/pull/91) | Open → `dev` (closes [#87](https://github.com/gnosis-box/THP-for-Good/issues/87)) |
 
 ---
 
@@ -375,5 +407,6 @@ Logs `CrcV2_TransferSummary` inbound to treasury (Ctrl+C to exit).
 
 - **The “coin”** is a UI particle for an inbound **`CrcV2_TransferSummary`** credit — not an on-chain object.
 - **CRC sources:** app **donations**, **booking treasury legs**, **external transfers**, plus historical **seed/demo** wallets (`0x3D0987DB…`, admins).
-- **Treat:** animate on **`TransferSummary`** to `0xc02D…`; ignore **group internal hops** and **flow scaffolding** events; **dedupe** by `transactionHash`; **reconcile** display with **`getProfileView.v2Balance`** (currently **~15,857.30 CRC**).
-- **Live transport:** **`wss://rpc.aboutcircles.com/ws/subscribe`** + `circles_subscribe`; polling fallback.
+- **Treat:** animate on **`TransferSummary`** to `0xc02D…`; ignore **group internal hops** and **flow scaffolding** events; **dedupe** by `transactionHash`; **reconcile** display with **`getProfileView.v2Balance`**.
+- **Live transport:** **`wss://rpc.aboutcircles.com/ws/subscribe`** + `circles_subscribe`; 30 s polling fallback when WSS down.
+- **Deferred post-v1:** periodic demurrage reconcile, WSS reconnect backfill, 2 s burst merge, sender tooltips (P2).
