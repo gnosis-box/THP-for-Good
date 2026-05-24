@@ -30,6 +30,7 @@ export function AdminPanel() {
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editingTagLabel, setEditingTagLabel] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [exitingTagIds, setExitingTagIds] = useState<Set<number>>(() => new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -137,7 +138,14 @@ export function AdminPanel() {
   }
 
   async function deleteTag(id: number) {
+    setExitingTagIds((prev) => new Set(prev).add(id));
+    await new Promise((resolve) => setTimeout(resolve, 200));
     await fetch(`/api/tags/${id}`, { method: 'DELETE', headers: headers() });
+    setExitingTagIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
     load();
   }
 
@@ -221,6 +229,7 @@ export function AdminPanel() {
                 className={cn(
                   'flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm',
                   flashKey === `tag-${tag.id}` && 'motion-row-flash',
+                  exitingTagIds.has(tag.id) && 'motion-tag-exit',
                 )}
               >
                 {tag.label}
@@ -247,7 +256,7 @@ export function AdminPanel() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteTag(tag.id)}
+                  onClick={() => void deleteTag(tag.id)}
                   className="text-muted-foreground hover:text-destructive transition-colors leading-none"
                   aria-label={`Delete ${tag.label}`}
                 >
@@ -382,6 +391,7 @@ export function AdminPanel() {
                 <ExpertEditForm
                   expert={expert}
                   walletAddress={address ?? ''}
+                  expandAll
                   onSaved={() => { setEditingExpertId(null); load(); }}
                   onCancel={() => setEditingExpertId(null)}
                 />

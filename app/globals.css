@@ -356,6 +356,26 @@
     }
   }
 
+  @keyframes motion-tag-exit {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  @keyframes motion-shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
+
   @keyframes motion-success-icon-bounce {
     0%,
     100% {
@@ -412,6 +432,22 @@
 
   .motion-trust-fade-in {
     animation: motion-trust-fade-in var(--motion-normal) ease-out both;
+  }
+
+  .motion-tag-exit {
+    animation: motion-tag-exit 200ms ease-out forwards;
+    pointer-events: none;
+  }
+
+  .motion-trust-skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--secondary) 0%,
+      oklch(0.92 0.01 285 / 60%) 50%,
+      var(--secondary) 100%
+    );
+    background-size: 200% 100%;
+    animation: motion-shimmer 1.2s ease-in-out infinite;
   }
 
   .booking-success-icon.motion-success-icon-bounce {

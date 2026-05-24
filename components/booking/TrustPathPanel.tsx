@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 
 import { AlertTriangle, Check } from 'lucide-react';
 
+import { Skeleton } from '@/components/ui/skeleton';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
-import { Spinner } from '@/components/ui/spinner';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { PAY_COPY } from '@/lib/pay-copy';
 import { cn } from '@/lib/utils';
@@ -39,6 +40,28 @@ function TrustProgressBar({ pct, label }: { pct: number; label: string }) {
         style={{ transform: `scaleX(${scale})` }}
       />
     </div>
+  );
+}
+
+function TrustPathSkeleton() {
+  return (
+    <section
+      className="flex flex-col gap-3"
+      aria-busy="true"
+      aria-label={PAY_COPY.trustEstimateLoading}
+    >
+      <Skeleton className="h-4 w-40" />
+      {[0, 1].map((row) => (
+        <div key={row} className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+          <Skeleton className="motion-trust-skeleton h-2 w-full rounded-full" />
+        </div>
+      ))}
+      <Skeleton className="h-3 w-full max-w-sm" />
+    </section>
   );
 }
 
@@ -85,28 +108,13 @@ type Props = {
   priceCrc: number;
 };
 
-export function TrustPathPanel({
+function TrustPathContent({
   trustEligible,
   expertLegCrc,
   treasuryLegCrc,
   expertName,
   priceCrc,
 }: Props) {
-  if (trustEligible.status === 'loading') {
-    return (
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Spinner className="size-4" />
-        {PAY_COPY.trustEstimateLoading}
-      </div>
-    );
-  }
-
-  if (trustEligible.status === 'error') {
-    return (
-      <p className="text-xs text-muted-foreground">{PAY_COPY.trustEstimateUnavailable}</p>
-    );
-  }
-
   if (trustEligible.status !== 'ready') return null;
 
   const shortfall = trustEligible.limits.bookableCrc < priceCrc;
@@ -142,5 +150,45 @@ export function TrustPathPanel({
         />
       )}
     </section>
+  );
+}
+
+export function TrustPathPanel(props: Props) {
+  const { trustEligible } = props;
+  const reducedMotion = usePrefersReducedMotion();
+
+  if (trustEligible.status === 'error') {
+    return (
+      <p className="text-xs text-muted-foreground">{PAY_COPY.trustEstimateUnavailable}</p>
+    );
+  }
+
+  if (reducedMotion) {
+    if (trustEligible.status === 'loading') return <TrustPathSkeleton />;
+    return <TrustPathContent {...props} />;
+  }
+
+  return (
+    <AnimatePresence mode="wait">
+      {trustEligible.status === 'loading' ? (
+        <motion.div
+          key="loading"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <TrustPathSkeleton />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="ready"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
+          <TrustPathContent {...props} />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

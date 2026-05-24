@@ -77,20 +77,27 @@ Reference: [Web animation best practices gist](https://gist.github.com/w0rd-driv
 | --- | --- | --- |
 | `BookingSuccessDialog` | Backdrop fade + popup zoom/slide + stagger CTAs + `booking-success-pop` | M-P0-06 |
 | `BookingStepper` | Step ring pulse + check morph | M-P0-02 · `components/motion/stepper` |
-| `SlotPicker` | Scale + ring pulse on select | M-P0-01 |
+| `SlotPicker` | Scale + ring pulse on select; skeleton → content crossfade | M-P0-01, M-P1-13 |
 | `StickyPayBar` | Slide-up entrance | M-P0-03 |
 | `PayDrawer` / `PayButton` | Drawer stagger + PAY/spinner crossfade | M-P0-04, M-P0-05 |
-| `TrustPathPanel` | `scaleX` progress fill | M-P1-04 |
+| `TrustPathPanel` | Shimmer skeleton → crossfade; `scaleX` progress fill | M-P0-05, M-P1-04 |
 | `ToastProvider` | Slide up/down enter/exit | M-P0-07 |
 | `TrustButton` | Success green morph + Dialog untrust | M-P0-08, M-P1-07 |
 | `ExpertBrowser` | List stagger on mount/filter; empty fade-in | M-P1-01, M-P1-08 |
-| `ExpertCard` | Hover lift + glow (`@media (hover:hover)`) | M-P1-02 |
+| `ExpertCard` | Hover lift + glow; avatar Circles fade-in | M-P1-02, M-P1-15 |
+| `ExpertSearch` | Floating label on focus/value | M-P2-13 |
 | `ExpertProfileHero` | Mount fade-up | M-P1-03 |
-| `SkillFilter` / `LanguageFilter` | Chip press scale | M-P1-10 |
+| `ExpertDetail` | Edit ↔ booking view crossfade | M-P2-14 |
+| `ExpertEditForm` | Section accordion (`CollapsibleSection`) | M-P2-06 ext |
+| `SkillFilter` / `LanguageFilter` | Chip press scale (`filterChipClass` `active:scale-95`) | M-P1-10 |
 | `CallsView` | Tab panel fade; card stagger; skeleton fade-out | M-P1-05, M-P1-06 |
 | `OpenInCirclesHint` | One-shot border glow | M-P1-09 |
+| `MobileNav` Sheet | Nav link stagger on open | M-P1-14 |
+| `DesktopNav` | Active underline slide (`layoutId`) | M-P2-15 |
+| `PageNav` | Card hover lift | M-P2-08, M-P2-16 |
 | `WalletStatus` | Fade-in on connect | M-P1-11 |
 | `StatusAlert` (pay flow) | Slide-in from top | M-P1-12 |
+| `AdminPanel` tags | Chip exit fade on delete | M-P2-17 |
 | `components/ui/sheet` | Slide + fade (vaul/Base UI) | Mobile nav |
 | `components/ui/drawer` | Bottom sheet slide | PayDrawer shell |
 | `components/ui/tooltip` | Fade + zoom + directional slide | |
@@ -99,13 +106,17 @@ Reference: [Web animation best practices gist](https://gist.github.com/w0rd-driv
 | `components/ui/button` | `active:translate-y-px` | Press feedback |
 | Loading states | `animate-pulse`, `animate-spin` | Widespread |
 
-### 3.2 Remaining gaps (P3+)
+### 3.2 Remaining gaps (P3+ / defer)
 
 | Location | Gap |
 | --- | --- |
-| `SlotPicker` loading → slots | Skeleton crossfade to content |
-| `MobileNav` Sheet | Nav link stagger optional |
-| `ExpertEditForm` (admin inline) | Section accordion — deferred (RegisterForm only) |
+| Route transitions (Next.js template) | P3 — defer |
+| Parallax / Lottie / continuous loops | P3 — defer per §4 |
+| `@formkit/auto-animate` list morph | Optional post-closure upgrade |
+| React Bits installs (§9) | Optional post-closure upgrades |
+| Bundle gate (4G iframe measure) | Ops follow-up — see §7 |
+
+_All P0–P2 audit items shipped in Phase 4 (wave 4)._
 
 ---
 
@@ -290,6 +301,7 @@ Align with project workflow: optional **`DIV-L4-MOTION`** to choose **CSS-only v
 | **Phase 1 — Booking funnel** | M-P0-01 … M-P0-08 | Slot, stepper, sticky bar, pay, success, toast, trust | `docs/l4-motion-design` | ✅ Shipped (`56f89fd`) |
 | **Phase 2 — Discovery & calls** | M-P1-01 … M-P1-12 | Lists, cards, tabs, modal parity, shell polish | `docs/l4-motion-design` | ✅ Shipped (wave 2) |
 | **Phase 3 — Secondary** | P2 | Stats, about, register, admin flashes | `docs/l4-motion-design` | ✅ Shipped (wave 3) |
+| **Phase 4 — Closure** | M-P1-13…15, M-P2-13…17, M-P0-05 | Slot/nav/avatar polish, shell + admin + trust shimmer, spec closure | `docs/l4-motion-design` | ✅ Shipped (wave 4) |
 
 **Bundle gate:** If `motion` package added, measure iframe load on throttled 4G + mid-range Android before Phase 2 list staggers.
 
@@ -297,12 +309,13 @@ Align with project workflow: optional **`DIV-L4-MOTION`** to choose **CSS-only v
 
 ## 7. Testing checklist
 
-- [ ] Playground iframe 390×844 — no jank during pay flow
-- [x] `prefers-reduced-motion: reduce` — all P0/P1 feedback still understandable (instant state change OK)
+- [ ] Playground iframe 390×844 — no jank during pay flow (manual QA)
+- [x] `prefers-reduced-motion: reduce` — all P0/P1/P2 feedback still understandable (instant state change OK)
 - [x] Keyboard focus visible during/after animations (Dialog untrust uses Base UI)
-- [ ] No animation blocks tx signing modal (Circles host overlay)
-- [ ] Lighthouse performance regression < 5 points on `/` and `/expert/[id]`
+- [ ] No animation blocks tx signing modal (Circles host overlay) — manual QA
+- [ ] Lighthouse performance regression < 5 points on `/` and `/expert/[id]` (manual QA)
 - [x] `pnpm build` — no SSR `window` leaks from motion imports (client-only)
+- [x] Wave 4 routes manually spot-checked: `/`, `/expert/[id]`, `/admin`, `/profile`, `/actions` (Sheet stagger, edit crossfade, tag exit, nav underline, search float, trust shimmer)
 
 ---
 
@@ -399,7 +412,7 @@ npx shadcn@latest add https://reactbits.dev/r/Stepper-TS-TW
 | M-P0-02 | ✅ Done | `56f89fd` | `BookingStepper.tsx`, `motion/stepper.tsx` | Motion step indicators |
 | M-P0-03 | ✅ Done | `56f89fd` | `StickyPayBar.tsx` | Slide-up bar |
 | M-P0-04 | ✅ Done | `56f89fd` | `PayDrawer.tsx`, `PayButton.tsx` | Content stagger |
-| M-P0-05 | ⚠️ Partial | `56f89fd` + wave 2 | `PayButton.tsx`, `TrustPathPanel.tsx` | PAY crossfade ✅; trust bars → M-P1-04 |
+| M-P0-05 | ✅ Done | wave 4 | `PayButton.tsx`, `TrustPathPanel.tsx` | PAY crossfade + trust shimmer skeleton → crossfade |
 | M-P0-06 | ✅ Done | `56f89fd` | `BookingSuccessDialog.tsx` | Stagger CTAs |
 | M-P0-07 | ✅ Done | `56f89fd` | `toast.tsx` | Enter/exit + mobile offset |
 | M-P0-08 | ✅ Done | `56f89fd` | `TrustButton.tsx` | Green success morph |
@@ -421,13 +434,21 @@ npx shadcn@latest add https://reactbits.dev/r/Stepper-TS-TW
 | M-P2-03 | ✅ Done | wave 3 | `DonationSection.tsx` | scaleX bar + pct count-up |
 | M-P2-04 | ✅ Done | wave 3 | `AboutSections.tsx`, `motion/scroll-reveal.tsx` | Scroll reveal steps |
 | M-P2-05 | ✅ Done | wave 3 | `AboutSections.tsx`, `globals.css` | Quote border draw-in |
-| M-P2-06 | ✅ Done | wave 3 | `RegisterForm.tsx`, `motion/collapsible-section.tsx` | 4-section accordion |
+| M-P2-06 | ✅ Done | wave 3 + wave 4 | `RegisterForm.tsx`, `ExpertEditForm.tsx`, `motion/collapsible-section.tsx` | 4-section accordion (register + inline edit) |
 | M-P2-07 | ✅ Done | wave 3 | `AdminPanel.tsx`, `PromoteSection.tsx`, `use-row-flash.ts` | Row flash 600ms |
 | M-P2-08 | ✅ Done | wave 3 | `NavCards.tsx` | Card hover lift |
 | M-P2-09 | ✅ Done | wave 3 | `SkillFilter.tsx`, `LanguageFilter.tsx` | Scroll fade masks |
 | M-P2-10 | ✅ Done | wave 3 | `ExpertTrustControl.tsx` | Skeleton → fade |
 | M-P2-11 | N/A | — | `app/history/page.tsx` | Redirects to `/calls` (M-P1 patterns) |
 | M-P2-12 | ✅ Done | wave 3 | `BookingSuccessDialog.tsx` | Bounce + sound sync |
+| M-P1-13 | ✅ Done | wave 4 | `SlotPicker.tsx` | Skeleton → content crossfade |
+| M-P1-14 | ✅ Done | wave 4 | `MobileNav.tsx` | Sheet nav link stagger |
+| M-P1-15 | ✅ Done | wave 4 | `ExpertCard.tsx` | Avatar Circles fade-in |
+| M-P2-13 | ✅ Done | wave 4 | `ExpertSearch.tsx` | Floating label on focus/value |
+| M-P2-14 | ✅ Done | wave 4 | `ExpertDetailBody.tsx` | Edit ↔ view crossfade |
+| M-P2-15 | ✅ Done | wave 4 | `MobileNav.tsx` (`DesktopNav`) | Active underline slide |
+| M-P2-16 | ✅ Done | wave 4 | `PageNav.tsx` | `motion-nav-card-hover` lift |
+| M-P2-17 | ✅ Done | wave 4 | `AdminPanel.tsx`, `globals.css` | Tag chip exit fade |
 
 ---
 
