@@ -1,8 +1,7 @@
 import { ExternalLink } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { MetricsPanel } from '@/components/ui-patterns/metrics-panel';
-import { DaoView } from '@/components/dao/DaoView';
-import { JoinSupporterButton } from '@/components/dao/JoinSupporterButton';
+import { DaoSection } from '@/components/dao/DaoSection';
 import { PageNav } from '@/components/layout/PageNav';
 
 const GROUP_ADDRESS = '0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00';
@@ -37,11 +36,7 @@ export default function DaoPage() {
         </div>
       </MetricsPanel>
 
-      <div className="flex justify-center">
-        <JoinSupporterButton />
-      </div>
-
-      <DaoView />
+      <DaoSection />
 
       <PageNav />
     </main>
