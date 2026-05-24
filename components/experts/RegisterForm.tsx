@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
-import { cn, shortenAddress } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { useCirclesProfile } from '@/hooks/use-circles-profile';
 import type { ExpertRow } from '@/lib/db';
@@ -21,6 +21,8 @@ import { addExpertSkillDraft } from '@/components/experts/SkillTagPicker';
 import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
 import { buildExpertLanguagePayload, initialCallLanguagesFromExpert } from '@/lib/expert-profile';
 import { StopExpertButton } from '@/components/experts/StopExpertButton';
+import { RegisterProfilePreview } from '@/components/experts/RegisterProfilePreview';
+import { RegisterStickyPreview } from '@/components/experts/RegisterStickyPreview';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { CollapsibleSection } from '@/components/motion/collapsible-section';
 import { UI_COPY } from '@/lib/ui-copy';
@@ -216,6 +218,20 @@ export function RegisterForm() {
         ) : null}
       </PageHeader>
 
+      <RegisterStickyPreview>
+        <RegisterProfilePreview
+          name={name}
+          bio={bio}
+          priceCrc={priceCrc}
+          expertShare={expertShare}
+          skills={selectedSkills}
+          callLanguages={callLanguages}
+          imageUrl={profile.status === 'found' ? profile.imageUrl : null}
+          walletAddress={address!}
+          balanceLabel={balance.status === 'ready' ? balance.formatted : undefined}
+        />
+      </RegisterStickyPreview>
+
       {isEditMode && existingExpert?.active === 0 ? (
         <StatusAlert
           variant="info"
@@ -224,47 +240,42 @@ export function RegisterForm() {
         />
       ) : null}
 
+      {profile.status === 'not-registered' ? (
+        <StatusAlert
+          variant="warning"
+          title="Circles profile required"
+          description={
+            <>
+              No Circles profile name found for this wallet. Sign up at{' '}
+              <a
+                href="https://www.aboutcircles.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                aboutcircles.com
+              </a>{' '}
+              first.
+            </>
+          }
+        />
+      ) : null}
+
+      {profile.status === 'error' ? (
+        <StatusAlert variant="error" title="Profile lookup failed" description={profile.message} />
+      ) : null}
+
+      {balance.status === 'not-registered' ? (
+        <StatusAlert
+          variant="warning"
+          title="Wallet not registered"
+          description="This address is not a registered Circles avatar. Open the app in the Circles playground to connect with your avatar."
+        />
+      ) : null}
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <CollapsibleSection title="Profile" defaultOpen>
           <div className="flex flex-col gap-4">
-            <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
-              <p className="font-medium">Connected wallet</p>
-              <p className="mt-1 font-mono text-xs text-muted-foreground">{shortenAddress(address!, 8)}</p>
-              {profile.status === 'found' && (
-                <p className="mt-1 text-muted-foreground">
-                  Circles profile: <strong className="text-foreground">{profile.name}</strong>
-                </p>
-              )}
-              {balance.status === 'ready' && (
-                <p className="mt-1 text-muted-foreground">
-                  CRC balance: <strong className="text-foreground">{balance.formatted}</strong>
-                </p>
-              )}
-              {balance.status === 'not-registered' && (
-                <p className="mt-1 text-sm text-warning">
-                  This address is not a registered Circles avatar. Open the app in the Circles playground to
-                  connect with your avatar.
-                </p>
-              )}
-              {profile.status === 'not-registered' && (
-                <p className="mt-1 text-sm text-warning">
-                  No Circles profile name found for this wallet. Sign up at{' '}
-                  <a
-                    href="https://www.aboutcircles.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                  >
-                    aboutcircles.com
-                  </a>{' '}
-                  first.
-                </p>
-              )}
-              {profile.status === 'error' && (
-                <p className="mt-1 text-destructive">{profile.message}</p>
-              )}
-            </div>
-
             <div className="flex flex-col gap-1.5">
               <Field>
                 <FieldLabel htmlFor="name">
