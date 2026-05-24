@@ -5,7 +5,8 @@ import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/hooks/use-wallet';
 
-const HUB_V2 = '0xc12C1E50ABB450d6205Ea2C3Fa861b3B834d13e8';
+// AffiliateGroupRegistry contract (not Hub V2)
+const AFFILIATE_GROUP_REGISTRY = '0xca8222e780d046707083f51377b5fd85e2866014';
 // setAffiliateGroup(0x2b5E4045936ef12250a8c01e4Cbf71E9bEE69e00)
 const CALLDATA =
   '0xbaa3440f0000000000000000000000002b5e4045936ef12250a8c01e4cbf71e9bee69e00';
@@ -22,7 +23,7 @@ export function JoinSupporterButton() {
     setErrorMsg('');
     try {
       const { sendTransactions } = await import('@aboutcircles/miniapp-sdk');
-      await sendTransactions([{ to: HUB_V2, data: CALLDATA, value: '0x0' }]);
+      await sendTransactions([{ to: AFFILIATE_GROUP_REGISTRY, data: CALLDATA, value: '0x0' }]);
       setStatus('success');
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Transaction failed');

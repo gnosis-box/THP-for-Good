@@ -6,7 +6,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { shortenAddress } from '@/lib/utils';
-import { JoinSupporterButton } from '@/components/dao/JoinSupporterButton';
 import type { DaoMemberDto } from '@/app/api/dao/members/route';
 import type { DaoSupporterDto } from '@/app/api/dao/supporters/route';
 
@@ -146,8 +145,7 @@ export function DaoView() {
         )}
       </TabsContent>
 
-      <TabsContent value="supporters" className="flex flex-col gap-4">
-        <JoinSupporterButton />
+      <TabsContent value="supporters">
         {supportersLoading ? (
           <SkeletonGrid />
         ) : supportersError ? (
