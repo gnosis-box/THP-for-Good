@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
-import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 
 type SlotPickerProps = {
   expertId: number;
@@ -40,57 +42,37 @@ function groupByDay(slots: string[]): DayGroup[] {
   return Array.from(map.entries()).map(([label, s]) => ({ label, slots: s }));
 }
 
-export function SlotPicker({ expertId, selected, onSelect }: SlotPickerProps) {
-  const [slots, setSlots] = useState<string[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSlots(null);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setError(null);
-    fetch(`/api/experts/${expertId}/availability`)
-      .then((r) => r.json())
-      .then((data: unknown) => {
-        if (cancelled) return;
-        if (Array.isArray(data)) setSlots(data as string[]);
-        else setError('Calendar unavailable');
-      })
-      .catch(() => {
-        if (!cancelled) setError('Could not load availability');
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [expertId]);
-
-  if (error) {
-    return <StatusAlert variant="error" title="Availability error" description={error} />;
-  }
-
-  if (slots === null) {
-    return (
-      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-        <Spinner className="size-4" />
-        Loading availability…
+function SlotPickerSkeleton() {
+  return (
+    <div className="flex w-full flex-col items-center gap-4" aria-busy="true" aria-label="Loading availability">
+      <Skeleton className="h-4 w-28" />
+      <div className="flex w-full max-w-md flex-col gap-3">
+        {[0, 1].map((day) => (
+          <Card key={day} size="sm" className="w-full gap-3 py-3">
+            <CardHeader className="items-center px-4 pb-0 text-center">
+              <Skeleton className="h-3 w-24" />
+            </CardHeader>
+            <CardContent className="flex flex-wrap justify-center gap-2 px-4 pt-0">
+              {[0, 1, 2, 3].map((pill) => (
+                <Skeleton key={pill} className="h-11 w-20 shrink-0 rounded-lg" />
+              ))}
+            </CardContent>
+          </Card>
+        ))}
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  if (slots.length === 0) {
-    return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>No slots</EmptyTitle>
-          <EmptyDescription>No available slots in the next 14 days.</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
-  }
-
-  const groups = groupByDay(slots);
-
+function SlotPickerContent({
+  groups,
+  selected,
+  onSelect,
+}: {
+  groups: DayGroup[];
+  selected: string | null;
+  onSelect: (slot: string | null) => void;
+}) {
   return (
     <div className="flex w-full flex-col items-center gap-4">
       <p className="text-sm font-medium text-center">Select a slot</p>
@@ -128,5 +110,78 @@ export function SlotPicker({ expertId, selected, onSelect }: SlotPickerProps) {
         ))}
       </div>
     </div>
+  );
+}
+
+export function SlotPicker({ expertId, selected, onSelect }: SlotPickerProps) {
+  const reducedMotion = usePrefersReducedMotion();
+  const [slots, setSlots] = useState<string[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSlots(null);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setError(null);
+    fetch(`/api/experts/${expertId}/availability`)
+      .then((r) => r.json())
+      .then((data: unknown) => {
+        if (cancelled) return;
+        if (Array.isArray(data)) setSlots(data as string[]);
+        else setError('Calendar unavailable');
+      })
+      .catch(() => {
+        if (!cancelled) setError('Could not load availability');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [expertId]);
+
+  if (error) {
+    return <StatusAlert variant="error" title="Availability error" description={error} />;
+  }
+
+  if (slots !== null && slots.length === 0) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>No slots</EmptyTitle>
+          <EmptyDescription>No available slots in the next 14 days.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  if (reducedMotion) {
+    if (slots === null) return <SlotPickerSkeleton />;
+    return (
+      <SlotPickerContent groups={groupByDay(slots)} selected={selected} onSelect={onSelect} />
+    );
+  }
+
+  return (
+    <AnimatePresence mode="wait">
+      {slots === null ? (
+        <motion.div
+          key="skeleton"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <SlotPickerSkeleton />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="content"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
+          <SlotPickerContent groups={groupByDay(slots)} selected={selected} onSelect={onSelect} />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

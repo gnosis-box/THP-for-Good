@@ -7,6 +7,8 @@ import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/components/ui-patterns/ExpertMeta';
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { UI_COPY } from '@/lib/ui-copy';
+import { motionClass } from '@/lib/motion';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { cn, toHttpImageUrl } from '@/lib/utils';
 import type { ExpertRow } from '@/lib/db';
 
@@ -20,6 +22,7 @@ export function ExpertCard({
   paidSessionCount?: number;
 }) {
   const [circles, setCircles] = useState<CirclesData | null>(null);
+  const reducedMotion = usePrefersReducedMotion();
   const share = expert.expert_share_percent ?? 20;
   const callLanguages =
     expert.call_languages.length > 0 ? expert.call_languages : expert.spoken_languages;
@@ -51,7 +54,11 @@ export function ExpertCard({
       <div className="flex flex-1 items-start gap-3 px-3 py-3 sm:px-4 sm:py-4">
           <Avatar className="size-11 shrink-0 sm:size-12">
             {circles?.imageUrl ? (
-              <AvatarImage src={circles.imageUrl} alt="" />
+              <AvatarImage
+                src={circles.imageUrl}
+                alt=""
+                className={motionClass('', 'motion-trust-fade-in', reducedMotion)}
+              />
             ) : null}
             <AvatarFallback className="text-sm font-semibold">
               {expert.name.charAt(0).toUpperCase()}

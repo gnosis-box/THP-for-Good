@@ -4,6 +4,7 @@ import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { motion } from 'motion/react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,16 +15,21 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { useIsAdmin } from '@/hooks/use-is-admin';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { motionClass, motionStaggerStyle } from '@/lib/motion';
 import { getNavItems, isNavItemActive, type NavItem } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 
 const navLinkClass = (active: boolean, compact = false) =>
   cn(
     'inline-flex min-h-11 items-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-    compact ? 'px-2.5 text-xs' : 'px-3 text-sm',
+    compact ? 'relative px-2.5 pb-1 text-xs' : 'px-3 text-sm',
     active
-      ? 'bg-accent/10 font-semibold text-accent'
+      ? 'font-semibold text-accent'
       : 'text-foreground hover:bg-muted',
+    compact &&
+      active &&
+      'after:absolute after:inset-x-1 after:bottom-0 after:h-0.5 after:rounded-full after:bg-accent',
   );
 
 type NavLinksProps = {
@@ -32,21 +38,59 @@ type NavLinksProps = {
   compact?: boolean;
   onNavigate?: () => void;
   className?: string;
+  stagger?: boolean;
 };
 
-function NavLinks({ items, pathname, compact = false, onNavigate, className }: NavLinksProps) {
+function NavLinks({
+  items,
+  pathname,
+  compact = false,
+  onNavigate,
+  className,
+  stagger = false,
+}: NavLinksProps) {
+  const reducedMotion = usePrefersReducedMotion();
+  const activeHref = items.find((item) => isNavItemActive(pathname, item.href))?.href;
+
   return (
     <>
-      {items.map((item) => {
+      {items.map((item, index) => {
         const active = isNavItemActive(pathname, item.href);
         const label = compact && item.shortLabel ? item.shortLabel : item.label;
+        const linkClass = cn(navLinkClass(active, compact), className);
+
+        if (compact && !reducedMotion && activeHref) {
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onNavigate}
+              aria-current={active ? 'page' : undefined}
+              className={cn(linkClass, 'relative')}
+            >
+              {label}
+              {active ? (
+                <motion.span
+                  layoutId="desktop-nav-underline"
+                  className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-accent"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              ) : null}
+            </Link>
+          );
+        }
+
         return (
           <Link
             key={item.href}
             href={item.href}
             onClick={onNavigate}
             aria-current={active ? 'page' : undefined}
-            className={cn(navLinkClass(active, compact), className)}
+            className={cn(
+              linkClass,
+              stagger && motionClass('', 'motion-list-item-in', reducedMotion),
+            )}
+            style={stagger ? motionStaggerStyle(index, reducedMotion, items.length) : undefined}
           >
             {label}
           </Link>
@@ -104,12 +148,17 @@ export function MobileNav() {
               Main navigation links for THP for Good
             </SheetDescription>
           </SheetHeader>
-          <nav className="flex flex-col gap-1 p-3" aria-label="Main navigation">
+          <nav
+            key={open ? 'nav-open' : 'nav-closed'}
+            className="flex flex-col gap-1 p-3"
+            aria-label="Main navigation"
+          >
             <NavLinks
               items={items}
               pathname={pathname}
               onNavigate={() => setOpen(false)}
               className="w-full"
+              stagger={open}
             />
           </nav>
         </SheetContent>
