@@ -29,7 +29,7 @@ function MemberCard({ address, name, imageUrl, trustsReceivedCount }: DaoMemberD
   );
 }
 
-function SupporterCard({ address, name, imageUrl, balanceCrc }: DaoSupporterDto) {
+function SupporterCard({ address, name, imageUrl }: DaoSupporterDto) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
       <Avatar size="lg" className="shrink-0">
@@ -41,7 +41,6 @@ function SupporterCard({ address, name, imageUrl, balanceCrc }: DaoSupporterDto)
         <span className="truncate font-mono text-xs text-muted-foreground">
           {shortenAddress(address)}
         </span>
-        <span className="text-xs text-muted-foreground">{balanceCrc} CRC held</span>
       </div>
     </div>
   );
