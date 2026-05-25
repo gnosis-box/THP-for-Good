@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toHttpImageUrl } from '@/lib/utils';
 
 export type CirclesProfileState =
   | { status: 'idle' | 'loading' }
-  | { status: 'found'; name: string; bio: string | null }
+  | { status: 'found'; name: string; bio: string | null; imageUrl: string | null }
   | { status: 'not-registered' }
   | { status: 'error'; message: string };
 
@@ -51,7 +52,12 @@ export function useCirclesProfile(address: string | null) {
           return;
         }
 
-        setSnapshot({ address, state: { status: 'found', name, bio } });
+        const raw = view.profile as (typeof view.profile & { picture?: string }) | undefined;
+        const imageUrl =
+          toHttpImageUrl(raw?.picture ?? view.profile?.previewImageUrl ?? view.profile?.imageUrl) ??
+          null;
+
+        setSnapshot({ address, state: { status: 'found', name, bio, imageUrl } });
       } catch (error) {
         if (cancelled) return;
         setSnapshot({

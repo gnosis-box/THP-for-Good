@@ -1,49 +1,120 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+
 import type { ExpertRow, TagRow } from '@/lib/db';
 import { UI_COPY } from '@/lib/ui-copy';
+import {
+  buildExpertFilterSearchParams,
+  countSheetFilters,
+  parseExpertFilterParams,
+  type ExpertFilterState,
+} from '@/lib/expert-filters';
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty';
+import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AnimatedList, AnimatedListItem } from '@/components/motion/animated-list';
 import { FadeContent } from '@/components/motion/fade-content';
 import { MotionEmpty } from '@/components/motion/motion-empty';
 import { ExpertCard } from './ExpertCard';
 import { ExpertSearch } from './ExpertSearch';
-import { SkillFilter } from './SkillFilter';
-import { LanguageFilter } from './LanguageFilter';
+import { ExpertFilterSheet } from './ExpertFilterSheet';
+import { ActiveFilterChips } from './ActiveFilterChips';
 
 type Props = {
   experts: ExpertRow[];
   tags: TagRow[];
 };
 
+function ExpertSearchField({
+  urlQ,
+  urlFilters,
+  onPushFilters,
+}: {
+  urlQ: string;
+  urlFilters: ExpertFilterState;
+  onPushFilters: (next: ExpertFilterState, replace?: boolean) => void;
+}) {
+  const [searchQuery, setSearchQuery] = useState(urlQ);
+
+  useEffect(() => {
+    const nextQ = searchQuery.trim() || undefined;
+    if ((urlFilters.q ?? undefined) === nextQ) return;
+
+    const timeout = window.setTimeout(() => {
+      onPushFilters({ ...urlFilters, q: nextQ }, true);
+    }, 300);
+
+    return () => window.clearTimeout(timeout);
+  }, [searchQuery, urlFilters, onPushFilters]);
+
+  return <ExpertSearch value={searchQuery} onChange={setSearchQuery} />;
+}
+
 export function ExpertBrowser({ experts, tags }: Props) {
-  const [selectedSkill, setSelectedSkill] = useState('');
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlFilters = useMemo(
+    () => parseExpertFilterParams(searchParams),
+    [searchParams],
+  );
+  const urlQ = urlFilters.q ?? '';
 
-  const filtered = experts.filter((m) => {
-    const matchSkill = !selectedSkill || m.skills.includes(selectedSkill);
-    const callLanguages = m.call_languages.length > 0 ? m.call_languages : m.spoken_languages;
-    const matchLanguage =
-      selectedLanguages.length === 0 ||
-      selectedLanguages.some((code) => callLanguages.includes(code));
-    const q = searchQuery.toLowerCase();
-    const matchSearch =
-      !q ||
-      m.name.toLowerCase().includes(q) ||
-      (m.bio ?? '').toLowerCase().includes(q) ||
-      m.skills.some((s) => s.toLowerCase().includes(q));
-    return matchSkill && matchLanguage && matchSearch;
-  });
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  const listKey = `${selectedSkill}|${selectedLanguages.join(',')}|${searchQuery}`;
+  const pushFilters = useCallback(
+    (next: ExpertFilterState, replace = false) => {
+      const qs = buildExpertFilterSearchParams(next).toString();
+      const href = qs ? `/?${qs}` : '/';
+      if (replace) {
+        router.replace(href, { scroll: false });
+      } else {
+        router.push(href);
+      }
+    },
+    [router],
+  );
+
+  const sheetFilterCount = countSheetFilters(urlFilters);
+  const listKey = `${urlFilters.skills?.join(',') ?? ''}|${urlFilters.languages?.join(',') ?? ''}|${urlQ}`;
+
+  function openSheet() {
+    setSheetOpen(true);
+  }
+
+  function applySheetFilters(next: { skills?: string[]; languages?: string[] }) {
+    pushFilters({
+      ...urlFilters,
+      skills: next.skills?.length ? next.skills : undefined,
+      languages: next.languages?.length ? next.languages : undefined,
+    });
+    setSheetOpen(false);
+  }
+
+  function removeSkill(skill: string) {
+    pushFilters({
+      ...urlFilters,
+      skills: urlFilters.skills?.filter((entry) => entry !== skill),
+    });
+  }
+
+  function removeLanguage(code: string) {
+    pushFilters({
+      ...urlFilters,
+      languages: urlFilters.languages?.filter((entry) => entry !== code),
+    });
+  }
+
+  function clearSheetFilters() {
+    pushFilters({ ...urlFilters, skills: undefined, languages: undefined });
+  }
 
   return (
     <div className="flex w-full flex-col gap-8">
@@ -51,14 +122,43 @@ export function ExpertBrowser({ experts, tags }: Props) {
         <PageHeader title={UI_COPY.home.title} subtitle={UI_COPY.home.subtitle} />
       </FadeContent>
 
-      <section className="flex flex-col gap-4">
-        <p className="text-sm font-medium">{UI_COPY.home.filterLabel}</p>
-        <ExpertSearch value={searchQuery} onChange={setSearchQuery} />
-        <SkillFilter tags={tags} selected={selectedSkill} onSelect={setSelectedSkill} />
-        <LanguageFilter selected={selectedLanguages} onChange={setSelectedLanguages} />
+      <section className="flex flex-col gap-3">
+        <ExpertSearchField
+          key={urlQ}
+          urlQ={urlQ}
+          urlFilters={urlFilters}
+          onPushFilters={pushFilters}
+        />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={openSheet}
+            aria-label={UI_COPY.home.filtersButton(sheetFilterCount)}
+          >
+            <SlidersHorizontal className="size-4" aria-hidden />
+            {UI_COPY.home.filtersButton(sheetFilterCount)}
+          </Button>
+        </div>
+        <ActiveFilterChips
+          filters={urlFilters}
+          onRemoveSkill={removeSkill}
+          onRemoveLanguage={removeLanguage}
+          onClearAll={clearSheetFilters}
+        />
       </section>
 
-      {filtered.length === 0 ? (
+      <ExpertFilterSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        tags={tags}
+        value={urlFilters}
+        onApply={applySheetFilters}
+      />
+
+      {experts.length === 0 ? (
         <MotionEmpty>
           <Empty>
             <EmptyHeader>
@@ -70,9 +170,9 @@ export function ExpertBrowser({ experts, tags }: Props) {
       ) : (
         <AnimatedList
           listKey={listKey}
-          className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2"
+          className="flex w-full flex-col gap-4"
         >
-          {filtered.map((expert, index) => (
+          {experts.map((expert, index) => (
             <AnimatedListItem
               key={expert.id}
               index={index}

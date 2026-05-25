@@ -48,6 +48,7 @@ Central index of project, product, and ecosystem URLs.
 | shadcn inventory | [`spec/UI-SHADCN-INVENTORY.md`](UI-SHADCN-INVENTORY.md) |
 | Motion design audit (P0–P2) | [`spec/motion-design-audit.md`](motion-design-audit.md) |
 | Live CRC treasury counter (WSS + coin animation) | [`spec/live-crc-counter.md`](live-crc-counter.md) |
+| Skills & languages UX (discover, cards, filters) | [`spec/skills-languages-ux.md`](skills-languages-ux.md) |
 | cal.diy spike | [`docs/spike-cal-diy.md`](../docs/spike-cal-diy.md) |
 
 ### App routes (target)
@@ -71,6 +72,7 @@ Central index of project, product, and ecosystem URLs.
 | **FEAT-L4-04** | In-app “Report issue” + GitHub templates | [#62](https://github.com/gnosis-box/THP-for-Good/issues/62) |
 | **IMPL-L4-06** | Expert card trust status & two-way trust | [#63](https://github.com/gnosis-box/THP-for-Good/issues/63) |
 | **FEAT-L4-07** | Expert session languages (spoken & call) | [#64](https://github.com/gnosis-box/THP-for-Good/issues/64) |
+| **IMPL-L4-09** | Skills & languages UX (discover, cards, filters) | [#94](https://github.com/gnosis-box/THP-for-Good/issues/94) |
 
 ### Related L4 / spikes (existing)
 

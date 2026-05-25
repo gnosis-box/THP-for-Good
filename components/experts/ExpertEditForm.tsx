@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CalConnect } from '@/components/experts/CalConnect';
 import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
-import { SkillTagPicker, mergeSkillTag } from '@/components/experts/SkillTagPicker';
-import { defaultCallLanguagesFromSpoken, filterCallLanguageCodes } from '@/lib/languages';
-import { LanguagePicker } from '@/components/experts/LanguagePicker';
+import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
+import { buildExpertLanguagePayload, initialCallLanguagesFromExpert } from '@/lib/expert-profile';
 import { StopExpertButton } from '@/components/experts/StopExpertButton';
 import { CollapsibleSection } from '@/components/motion/collapsible-section';
-import type { ExpertRow, TagRow } from '@/lib/db';
+import { useSkillTags } from '@/hooks/use-skill-tags';
+import type { ExpertRow } from '@/lib/db';
 
 type Props = {
   expert: ExpertRow;
@@ -30,37 +30,19 @@ export function ExpertEditForm({
   onDeactivated,
   expandAll = false,
 }: Props) {
-  const [tags, setTags] = useState<TagRow[]>([]);
+  const { tags, setTags } = useSkillTags();
   const [name, setName] = useState(expert.name);
   const [bio, setBio] = useState(expert.bio ?? '');
   const [selectedSkills, setSelectedSkills] = useState<string[]>(expert.skills);
   const [spokenLanguages, setSpokenLanguages] = useState<string[]>(expert.spoken_languages);
   const [callLanguages, setCallLanguages] = useState<string[]>(
-    expert.call_languages.length > 0
-      ? filterCallLanguageCodes(expert.call_languages)
-      : defaultCallLanguagesFromSpoken(expert.spoken_languages),
+    initialCallLanguagesFromExpert(expert.spoken_languages, expert.call_languages),
   );
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(expert.cal_event_type_id);
   const [priceCrc, setPriceCrc] = useState(expert.price_crc);
   const [expertShare, setExpertShare] = useState(clampExpertShare(expert.expert_share_percent ?? 20));
-  const [newSkill, setNewSkill] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch('/api/tags')
-      .then((r) => r.json())
-      .then((data: TagRow[]) => setTags(data))
-      .catch(() => {});
-  }, []);
-
-  function addNewSkill() {
-    const label = newSkill.trim();
-    if (!label) return;
-    setTags((prev) => mergeSkillTag(prev, label, 'approved'));
-    setSelectedSkills((prev) => (prev.includes(label) ? prev : [...prev, label]));
-    setNewSkill('');
-  }
 
   async function handleSave() {
     if (selectedSkills.length === 0) {
@@ -81,11 +63,7 @@ export function ExpertEditForm({
           price_crc: priceCrc,
           expert_share_percent: expertShare,
           skills: selectedSkills,
-          spoken_languages: spokenLanguages,
-          call_languages:
-            callLanguages.length > 0
-              ? filterCallLanguageCodes(callLanguages)
-              : defaultCallLanguagesFromSpoken(spokenLanguages),
+          ...buildExpertLanguagePayload(spokenLanguages, callLanguages),
           active: 1,
         }),
       });
@@ -129,25 +107,17 @@ export function ExpertEditForm({
       </CollapsibleSection>
 
       <CollapsibleSection title="Skills & languages" defaultOpen={expandAll}>
-        <div className="flex flex-col gap-4">
-          <SkillTagPicker
-            tags={tags}
-            selected={selectedSkills}
-            onSelectedChange={setSelectedSkills}
-            size="sm"
-            newSkill={newSkill}
-            onNewSkillChange={setNewSkill}
-            onAddNewSkill={addNewSkill}
-          />
-
-          <LanguagePicker
-            spoken={spokenLanguages}
-            call={callLanguages}
-            onSpokenChange={setSpokenLanguages}
-            onCallChange={setCallLanguages}
-            size="sm"
-          />
-        </div>
+        <ExpertProfileFields
+          tags={tags}
+          setTags={setTags}
+          selectedSkills={selectedSkills}
+          onSelectedSkillsChange={setSelectedSkills}
+          spokenLanguages={spokenLanguages}
+          callLanguages={callLanguages}
+          onSpokenLanguagesChange={setSpokenLanguages}
+          onCallLanguagesChange={setCallLanguages}
+          size="sm"
+        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Cal.com" defaultOpen={expandAll}>

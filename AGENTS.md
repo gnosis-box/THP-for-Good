@@ -27,6 +27,7 @@ This is a starter template for building [Circles](https://aboutcircles.com) mini
 | **Index (liens, décisions verrouillées, anti-doublon)** | [`spec/PRD-MVP.md`](spec/PRD-MVP.md) · [`spec/useful-links.md`](spec/useful-links.md) |
 | **L4 backlog workflow (agents)** | This file § [L4 backlog workflow](#l4-backlog-workflow) · skill `thp-for-good-backlog` |
 | **Live treasury counter (L4)** | [`spec/live-crc-counter.md`](spec/live-crc-counter.md) · this file § [Live treasury counter](#live-treasury-counter-l4) |
+| **Skills & languages UX (L4)** | [`spec/skills-languages-ux.md`](spec/skills-languages-ux.md) · this file § [Skills & languages UX](#skills--languages-ux-l4) |
 
 Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**. Group by **Priority**.
 
@@ -325,6 +326,22 @@ components/treasury/TreasuryProviders.tsx  wraps layout; PayTreasuryFeedback glo
 **Manual / fake coin testing (no on-chain tx):** see spec **§8.3**. Floating panel **off by default**; in dev, `TreasuryCoinDevController` handles URL params + `__THP_TREASURY_DEMO__`. WSS probe: `node scripts/probe-treasury-ws.mjs` (Node 22+).
 
 **Do not** confuse group `0x2b5E…` with treasury org `0xc02D…` when filtering WSS events.
+
+## Skills & languages UX (L4)
+
+Branch **`feat/skills-languages-ux`** · spec [`spec/skills-languages-ux.md`](spec/skills-languages-ux.md) · issue [#94](https://github.com/gnosis-box/THP-for-Good/issues/94) · parent [#64](https://github.com/gnosis-box/THP-for-Good/issues/64).
+
+| Fact | Value |
+| --- | --- |
+| Display helper | [`getDisplayCallLanguages`](lib/languages.ts) — call languages, else spoken ∩ {en, fr} |
+| Filter URL | `/?skill=Web3&skill=DeFi&lang=fr&q=search` — SSR via [`app/page.tsx`](app/page.tsx) |
+| Discover UI | [`ExpertFilterSheet`](components/experts/ExpertFilterSheet.tsx) + [`ActiveFilterChips`](components/experts/ActiveFilterChips.tsx) |
+| Shared forms | [`ExpertProfileFields`](components/experts/ExpertProfileFields.tsx) · [`useSkillTags`](hooks/use-skill-tags.ts) |
+| Pill roles | `skill` / `language` / `price` in [`highlight-pill.ts`](components/ui-patterns/highlight-pill.ts) |
+
+**Card hierarchy:** name → session languages (globe + full labels) → skills (max 3 + tap expand) → trust.
+
+**Do not** reuse skill pill styling for languages on cards. **Do not** duplicate call/spoken fallback inline — always `getDisplayCallLanguages`.
 
 ## Commands
 
