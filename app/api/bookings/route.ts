@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db, { insertBooking, getExpertById, getBookingsByProviderAddress } from '@/lib/db';
+import db, {
+  insertBooking,
+  getExpertById,
+  getBookingsByProviderAddress,
+  getBookingByTxHash,
+} from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
+
+function bookingResponse(row: {
+  id: number;
+  cal_booking_uid?: string | null;
+  calendar_event_url?: string | null;
+}) {
+  return NextResponse.json(
+    {
+      id: row.id,
+      cal_booking_uid: row.cal_booking_uid ?? null,
+      calendar_event_url: row.calendar_event_url ?? null,
+    },
+    { status: 200 },
+  );
+}
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -66,6 +86,17 @@ export async function POST(request: NextRequest) {
     attendee_email?: string;
   };
 
+  if (data.tx_hash?.trim()) {
+    const existing = getBookingByTxHash(data.tx_hash);
+    if (existing) {
+      return bookingResponse({
+        id: existing.id,
+        cal_booking_uid: existing.cal_booking_uid,
+        calendar_event_url: existing.calendar_event_url,
+      });
+    }
+  }
+
   const expert = getExpertById(data.expert_id);
   if (!expert) {
     console.error('[api/bookings POST] unknown expert_id', data.expert_id);
@@ -122,9 +153,24 @@ export async function POST(request: NextRequest) {
     console.error('[api/bookings POST]', { expert_id: data.expert_id, code, err });
     if (code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
       return NextResponse.json(
-        { error: 'Expert not found or database out of sync. Contact support with your tx hash.' },
-        { status: 409 },
+        {
+          error:
+            'Database migration incomplete for this expert. Payment is on-chain — retry shortly or contact support.',
+          code: 'DB_MIGRATION_FK',
+          tx_hash: data.tx_hash ?? null,
+        },
+        { status: 503 },
       );
+    }
+    if (code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      const existing = data.tx_hash ? getBookingByTxHash(data.tx_hash) : undefined;
+      if (existing) {
+        return bookingResponse({
+          id: existing.id,
+          cal_booking_uid: existing.cal_booking_uid,
+          calendar_event_url: existing.calendar_event_url,
+        });
+      }
     }
     return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
   }

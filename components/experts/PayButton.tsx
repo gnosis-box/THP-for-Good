@@ -21,6 +21,7 @@ import {
   type ExpertSharePercent,
 } from '@/lib/crc-pay';
 import { mapPayError } from '@/lib/pay-copy';
+import { postBookingWithRetry } from '@/lib/booking-client';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
 import {
   aboutTreasuryPayPath,
@@ -141,31 +142,14 @@ export function PayButton({
       const hashes = await sendTransactions(txs);
       const txHash = hashes[0];
 
-      const bookingRes = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          expert_id: expert.id,
-          booker_address: address,
-          tx_hash: txHash,
-          slot_time: selectedSlot,
-          attendee_email: email.trim(),
-          attendee_name: bookerName ?? address,
-        }),
+      const booking = await postBookingWithRetry({
+        expert_id: expert.id,
+        booker_address: address,
+        tx_hash: txHash,
+        slot_time: selectedSlot,
+        attendee_email: email.trim(),
+        attendee_name: bookerName ?? address,
       });
-
-      if (!bookingRes.ok) {
-        const detail = (await bookingRes.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(
-          detail?.error ??
-            'Payment succeeded but booking could not be saved. Check My Calls or contact support.',
-        );
-      }
-
-      const booking = (await bookingRes.json()) as {
-        id: number;
-        calendar_event_url?: string | null;
-      };
 
       trackUmamiEvent('pay_success', { expert_id: expert.id });
       onSuccess?.();
