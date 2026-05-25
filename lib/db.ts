@@ -1,7 +1,10 @@
 import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
+import { runDbMigrations, getMigrationHealth, type MigrationHealth } from '@/lib/db-migrate';
 import { parseCallLanguageCodes, parseLanguageCodes, serializeCallLanguageCodes } from '@/lib/languages';
+
+export type { MigrationHealth };
 
 export type TagRow = {
   id: number;
@@ -94,60 +97,8 @@ if (dbPath !== ':memory:') {
 }
 db.pragma('busy_timeout = 5000');
 
-function tableExists(name: string): boolean {
-  const row = db
-    .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?")
-    .get(name) as { name: string } | undefined;
-  return !!row;
-}
-
-function tryExec(sql: string): void {
-  try {
-    db.exec(sql);
-  } catch {
-    /* already applied */
-  }
-}
-
-const schema = fs.readFileSync(path.join(process.cwd(), 'lib', 'schema.sql'), 'utf-8');
-db.exec(schema);
-
-/** Legacy column adds before renaming mentors → experts. */
-if (tableExists('mentors')) {
-  for (const sql of [
-    'ALTER TABLE mentors ADD COLUMN google_calendar_id TEXT',
-    'ALTER TABLE mentors ADD COLUMN cal_event_type_id INTEGER',
-    'ALTER TABLE mentors ADD COLUMN mentor_share_percent INTEGER DEFAULT 20',
-    'ALTER TABLE mentors ADD COLUMN spoken_languages TEXT',
-    'ALTER TABLE mentors ADD COLUMN call_languages TEXT',
-  ]) {
-    tryExec(sql);
-  }
-}
-
-/** One-time rename for databases created before expert naming. */
-if (tableExists('mentors')) {
-  tryExec('ALTER TABLE mentors RENAME TO experts');
-}
-if (tableExists('mentor_skills')) {
-  tryExec('ALTER TABLE mentor_skills RENAME TO expert_skills');
-}
-tryExec('ALTER TABLE expert_skills RENAME COLUMN mentor_id TO expert_id');
-tryExec('ALTER TABLE bookings RENAME COLUMN mentor_id TO expert_id');
-tryExec('ALTER TABLE experts RENAME COLUMN mentor_share_percent TO expert_share_percent');
-
-for (const sql of [
-  'ALTER TABLE experts ADD COLUMN google_calendar_id TEXT',
-  'ALTER TABLE experts ADD COLUMN cal_event_type_id INTEGER',
-  'ALTER TABLE bookings ADD COLUMN slot_time TEXT',
-  'ALTER TABLE bookings ADD COLUMN calendar_event_url TEXT',
-  'ALTER TABLE bookings ADD COLUMN cal_booking_uid TEXT',
-  "ALTER TABLE skill_tags ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'",
-  'ALTER TABLE experts ADD COLUMN expert_share_percent INTEGER DEFAULT 20',
-  'ALTER TABLE experts ADD COLUMN spoken_languages TEXT',
-  'ALTER TABLE experts ADD COLUMN call_languages TEXT',
-]) {
-  tryExec(sql);
+if (dbPath !== ':memory:') {
+  runDbMigrations(db);
 }
 
 export type GetAllExpertsFilters = {
@@ -393,6 +344,14 @@ export function approveSkillTag(id: number): void {
   db.prepare("UPDATE skill_tags SET status = 'approved' WHERE id = ?").run(id);
 }
 
+export function getBookingByTxHash(txHash: string): BookingRow | undefined {
+  const normalized = txHash.trim();
+  if (!normalized) return undefined;
+  return db
+    .prepare('SELECT * FROM bookings WHERE LOWER(tx_hash) = LOWER(?)')
+    .get(normalized) as BookingRow | undefined;
+}
+
 export function insertBooking(data: InsertBookingData): number {
   const stmt = db.prepare(`
     INSERT INTO bookings (expert_id, booker_address, tx_hash, slot_time, calendar_event_url, cal_booking_uid)
@@ -452,6 +411,7 @@ export function getBookingsByProviderAddress(providerAddress: string): BookingWi
 }
 
 export type AdminHealthStats = {
+  db: MigrationHealth;
   bookings: {
     total: number;
     today: number;
@@ -558,6 +518,7 @@ export function getAdminHealthStats(): AdminHealthStats {
     }>;
 
   return {
+    db: getMigrationHealth(db),
     bookings: {
       total: bookingCounts.total ?? 0,
       today: bookingCounts.today ?? 0,

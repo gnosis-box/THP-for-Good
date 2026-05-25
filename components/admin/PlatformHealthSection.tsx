@@ -51,7 +51,7 @@ function fmtWhen(iso: string) {
 }
 
 export function PlatformHealthSection({ stats }: Props) {
-  const { bookings, experts, tags, recentBookings } = stats;
+  const { bookings, experts, tags, recentBookings, db } = stats;
 
   return (
     <section className="flex flex-col gap-4">
@@ -61,6 +61,23 @@ export function PlatformHealthSection({ stats }: Props) {
           Snapshot from SQLite — on-chain CRC volume remains the source of truth for payments.
         </p>
       </div>
+
+      {!db.migrationHealthy ? (
+        <Card size="sm" className="border-warning/40 bg-warning/5">
+          <CardHeader className="pb-0">
+            <CardTitle className="text-sm font-semibold text-warning">
+              Database migration needs repair
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-1 pt-2 text-sm text-muted-foreground">
+            <p>
+              Bookings FK target: <span className="font-mono">{db.bookingsFkTarget}</span>
+              {db.mentorsTableExists ? ' · legacy mentors table still present' : ''}
+            </p>
+            <p>Run <span className="font-mono">pnpm repair-db</span> on the server before new expert bookings.</p>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         <StatCard label="Bookings today" value={bookings.today} />
