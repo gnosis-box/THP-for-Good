@@ -3,6 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/components/ui-patterns/ExpertMeta';
+import { getDisplayCallLanguages } from '@/lib/languages';
 import { UI_COPY } from '@/lib/ui-copy';
 import { cn, shortenAddress } from '@/lib/utils';
 
@@ -12,7 +13,7 @@ type Props = {
   priceCrc: number;
   expertShare: number;
   skills: string[];
-  callLanguages: string[];
+  spokenLanguages: string[];
   imageUrl: string | null;
   walletAddress: string;
   balanceLabel?: string;
@@ -25,14 +26,15 @@ export function RegisterProfilePreview({
   priceCrc,
   expertShare,
   skills,
-  callLanguages,
+  spokenLanguages,
   imageUrl,
   walletAddress,
   balanceLabel,
   className,
 }: Props) {
   const displayName = name.trim() || 'Your name';
-  const hasLanguages = callLanguages.length > 0;
+  const sessionLanguages = getDisplayCallLanguages({ spoken_languages: spokenLanguages, call_languages: [] });
+  const hasLanguages = sessionLanguages.length > 0;
   const bioText = bio.trim();
 
   return (
@@ -58,9 +60,9 @@ export function RegisterProfilePreview({
             <CrcAmount amount={priceCrc} variant="highlight" className="shrink-0 text-xs sm:text-sm" />
           </div>
           {hasLanguages ? (
-            <ExpertLanguageTags languages={callLanguages} variant="card" className="min-w-0" />
+            <ExpertLanguageTags languages={sessionLanguages} variant="card" className="min-w-0" />
           ) : (
-            <p className="text-xs text-muted-foreground sm:text-sm">Add session languages below</p>
+            <p className="text-xs text-muted-foreground sm:text-sm">Add spoken languages below</p>
           )}
         </div>
       </div>

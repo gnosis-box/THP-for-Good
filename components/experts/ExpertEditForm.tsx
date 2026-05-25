@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { CalConnect } from '@/components/experts/CalConnect';
 import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
 import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
-import { buildExpertLanguagePayload, initialCallLanguagesFromExpert } from '@/lib/expert-profile';
+import { buildExpertLanguagePayload } from '@/lib/expert-profile';
 import { StopExpertButton } from '@/components/experts/StopExpertButton';
 import { CollapsibleSection } from '@/components/motion/collapsible-section';
 import { useSkillTags } from '@/hooks/use-skill-tags';
@@ -35,9 +35,6 @@ export function ExpertEditForm({
   const [bio, setBio] = useState(expert.bio ?? '');
   const [selectedSkills, setSelectedSkills] = useState<string[]>(expert.skills);
   const [spokenLanguages, setSpokenLanguages] = useState<string[]>(expert.spoken_languages);
-  const [callLanguages, setCallLanguages] = useState<string[]>(
-    initialCallLanguagesFromExpert(expert.spoken_languages, expert.call_languages),
-  );
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(expert.cal_event_type_id);
   const [priceCrc, setPriceCrc] = useState(expert.price_crc);
   const [expertShare, setExpertShare] = useState(clampExpertShare(expert.expert_share_percent ?? 20));
@@ -63,7 +60,7 @@ export function ExpertEditForm({
           price_crc: priceCrc,
           expert_share_percent: expertShare,
           skills: selectedSkills,
-          ...buildExpertLanguagePayload(spokenLanguages, callLanguages),
+          ...buildExpertLanguagePayload(spokenLanguages),
           active: 1,
         }),
       });
@@ -113,9 +110,7 @@ export function ExpertEditForm({
           selectedSkills={selectedSkills}
           onSelectedSkillsChange={setSelectedSkills}
           spokenLanguages={spokenLanguages}
-          callLanguages={callLanguages}
           onSpokenLanguagesChange={setSpokenLanguages}
-          onCallLanguagesChange={setCallLanguages}
           size="sm"
         />
       </CollapsibleSection>
