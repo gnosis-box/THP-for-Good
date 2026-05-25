@@ -42,9 +42,6 @@ function main() {
   if (dryRun && !before.migrationHealthy) {
     process.exit(1);
   }
-  if (!dryRun && result.repaired) {
-    process.exit(1);
-  }
   process.exit(0);
 }
 

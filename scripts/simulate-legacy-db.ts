@@ -62,7 +62,7 @@ function main() {
 
   const before = getMigrationHealth(db);
   if (before.bookingsFkTarget !== 'mentors') {
-    console.error('simulate-legacy-db: expected bookings FK to mentors before repair, got', before);
+    console.error('simulate-legacy-db: expected bookings expert_id FK to mentors before repair, got', before);
     process.exit(1);
   }
 
