@@ -1,0 +1,1232 @@
+{
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components.json": {
+    "mtime": 1779311744.143279,
+    "ast_hash": "63b2c4fcf776fec9dbc76e94ea0d70c6",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/eslint.config.mjs": {
+    "mtime": 1779580022.4409785,
+    "ast_hash": "dfa1f5f6a7037bf39dc510f30b180002",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/postcss.config.mjs": {
+    "mtime": 1779580022.4479792,
+    "ast_hash": "239f3ebf717465dc636818a1a619398d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/next-env.d.ts": {
+    "mtime": 1779657235.3728988,
+    "ast_hash": "2a74d3909800ca5467fa83b0ab4a4890",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/package.json": {
+    "mtime": 1779671525.610606,
+    "ast_hash": "b8449ba57c3c79135b58821ff4b4bc33",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/tsconfig.json": {
+    "mtime": 1779496045.9699283,
+    "ast_hash": "a8566f2f8d603f62f4a2747eddfb69a4",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/next.config.ts": {
+    "mtime": 1779580833.662435,
+    "ast_hash": "243fbc78798dcae4d4077f6f6f247d49",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/layout.tsx": {
+    "mtime": 1779659799.8219624,
+    "ast_hash": "17dab8a850f06fbe0cbba6b906653351",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/loading.tsx": {
+    "mtime": 1779669438.4884858,
+    "ast_hash": "9f2a44ceb5880119b9466b228c111a6f",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/page.tsx": {
+    "mtime": 1779669438.4884858,
+    "ast_hash": "1805ded69af9d69974f67fcf19bef260",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/actions/page.tsx": {
+    "mtime": 1779580022.3959744,
+    "ast_hash": "1dd40895855cb320399e3c7586afc6b5",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/profile/page.tsx": {
+    "mtime": 1779580022.3959744,
+    "ast_hash": "a09c55c863e4480888fb537c7efb3cfe",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/calls/page.tsx": {
+    "mtime": 1779580022.3969746,
+    "ast_hash": "fcb9f66ae25f5b6ba7fcc44f189fb550",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/calls/loading.tsx": {
+    "mtime": 1779657973.4821494,
+    "ast_hash": "9ef660ed64b9e8a98be3cc4849d53fbe",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/admin/admins/route.ts": {
+    "mtime": 1779580022.3979747,
+    "ast_hash": "154b31e2e04338b47706deb6a7daf841",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/admin/admins/[id]/route.ts": {
+    "mtime": 1779580022.3969746,
+    "ast_hash": "1634686643d2c5d3adb31559d77f5214",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/admin/check/route.ts": {
+    "mtime": 1779580022.3989747,
+    "ast_hash": "db60c03975f697be736afa0b1cf3c1f4",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/admin/members/route.ts": {
+    "mtime": 1779580022.3989747,
+    "ast_hash": "c9539eb45bbcebfe06de3dd5e5aa6198",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/admin/health/route.ts": {
+    "mtime": 1779580022.3999748,
+    "ast_hash": "1f717d28bf5f6b684231baa69125873a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/bookings/route.ts": {
+    "mtime": 1779671525.6076057,
+    "ast_hash": "cc7b41b8356d621a987156ec1ed2ddcc",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/cal/event-types/route.ts": {
+    "mtime": 1779580022.401975,
+    "ast_hash": "1f4a43da6e9322d94506b1b3b5959d54",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/tags/route.ts": {
+    "mtime": 1779580022.402975,
+    "ast_hash": "c446fb00f51cdd9c8d1f33f35cbe2116",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/tags/[id]/route.ts": {
+    "mtime": 1779580022.401975,
+    "ast_hash": "e7880af784cda1d1d9f8bf8bcfe07a73",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/tags/[id]/approve/route.ts": {
+    "mtime": 1779580022.401975,
+    "ast_hash": "7c020d3e095437ab86ab13b6cfe4e36a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/tags/proposals/route.ts": {
+    "mtime": 1779580022.401975,
+    "ast_hash": "5783e3eb81164382628be0a545366bce",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/trust/route.ts": {
+    "mtime": 1779580833.6544344,
+    "ast_hash": "12b9ba0bfba8edee298fbc378137ad29",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/me/stats/route.ts": {
+    "mtime": 1779580833.6534343,
+    "ast_hash": "f5062f6a2b594161e51315b05129a1a1",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/stats/route.ts": {
+    "mtime": 1779669438.4874856,
+    "ast_hash": "3fac18462c97f338766135fe1a59bca0",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/experts/route.ts": {
+    "mtime": 1779669438.4864857,
+    "ast_hash": "e4f8b376b7feb49c6d699ce364aef32e",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/experts/[id]/route.ts": {
+    "mtime": 1779580833.6534343,
+    "ast_hash": "1655022d46266f54276da4bc70544ea0",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/experts/[id]/availability/route.ts": {
+    "mtime": 1779580833.6534343,
+    "ast_hash": "5d9d4e43a62a8831be9f3575f9aefeb2",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/dao/members/route.ts": {
+    "mtime": 1779669438.4864857,
+    "ast_hash": "6b5c01e52a8c377315184ea4feb36872",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/api/dao/supporters/route.ts": {
+    "mtime": 1779669438.4864857,
+    "ast_hash": "17e4e8838eb4b04019ad7180e2554b14",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/about/page.tsx": {
+    "mtime": 1779656573.2215526,
+    "ast_hash": "24c516a3b7210a68be37f11ca3d7682b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/admin/page.tsx": {
+    "mtime": 1779580022.4049752,
+    "ast_hash": "d058e05b24cdfa3163b3ea98aa4696e9",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/history/page.tsx": {
+    "mtime": 1779580022.4059753,
+    "ast_hash": "37415a001aea171babbc39a392b8a9bb",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/stats/page.tsx": {
+    "mtime": 1779580022.4059753,
+    "ast_hash": "136c78cc03d755938d3e2c4d581c1bd9",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/stats/loading.tsx": {
+    "mtime": 1779657973.4831493,
+    "ast_hash": "8953ad74235588ec4cdb8ad84fdcc2c4",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/expert/[id]/page.tsx": {
+    "mtime": 1779580833.6544344,
+    "ast_hash": "f7d11032e1edd3c80046b40f8fa90484",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/expert/[id]/loading.tsx": {
+    "mtime": 1779669438.4874856,
+    "ast_hash": "8c74bf878bfcbb88bb8e86ba659c99f4",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/expert/register/loading.tsx": {
+    "mtime": 1779669438.4874856,
+    "ast_hash": "854c94b3cd284fd4755aa1bc9ebe23c2",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/expert/register/page.tsx": {
+    "mtime": 1779669438.4874856,
+    "ast_hash": "0e98cb0dd4725a375faceebba1eb28b3",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/dao/page.tsx": {
+    "mtime": 1779669438.4874856,
+    "ast_hash": "3583fd134ac25594838bd4113554ed5b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/brand/CirclesLogo.tsx": {
+    "mtime": 1779580022.4069755,
+    "ast_hash": "8c82255410e513d0aa93cea6fcfd46af",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/layout/Sidebar.tsx": {
+    "mtime": 1779580022.4079754,
+    "ast_hash": "5e2a7db0fa5f55320199a8833d3d3eed",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/layout/CurrentPage.tsx": {
+    "mtime": 1779580022.4079754,
+    "ast_hash": "9fa0f3c8a23dfea71d93b5bf6d509b22",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/layout/Header.tsx": {
+    "mtime": 1779580022.4089756,
+    "ast_hash": "6f6755df2b111577dab1738521c7f1ef",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/layout/PageHeader.tsx": {
+    "mtime": 1779580022.4089756,
+    "ast_hash": "ad5944b102b161e021aa44ff4a9bd9f5",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/layout/MobileNav.tsx": {
+    "mtime": 1779656573.2285533,
+    "ast_hash": "bf2f61bf45ed3883388f13d09b14761a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/layout/NavCards.tsx": {
+    "mtime": 1779656573.2295532,
+    "ast_hash": "36e812f0925884dbb1335a4a35c3c9cc",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/layout/PageNav.tsx": {
+    "mtime": 1779656573.2295532,
+    "ast_hash": "6064ac76771cc889aa858cbcb1edf6a2",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/layout/ReportIssueLink.tsx": {
+    "mtime": 1779659799.8229623,
+    "ast_hash": "ad6408514542b37ab5dca4ef1f78f354",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/layout/AppShell.tsx": {
+    "mtime": 1779669438.4934862,
+    "ast_hash": "e4793085defce36d8961363c06625711",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/profile/ExpertStatsPanel.tsx": {
+    "mtime": 1779580833.6594348,
+    "ast_hash": "9f9fa33195c8083e2dc5ed1769ac980d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/profile/ProfileLookup.tsx": {
+    "mtime": 1779656573.2305534,
+    "ast_hash": "cb01a41805596fdb38def54c07f2257a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/separator.tsx": {
+    "mtime": 1779580022.4119759,
+    "ast_hash": "3de2dca3e47ab29c4b1f632671545628",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/sheet.tsx": {
+    "mtime": 1779580022.4119759,
+    "ast_hash": "43ad8bec991f7a28d2aa22d4f374e6b7",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/skeleton.tsx": {
+    "mtime": 1779580022.4119759,
+    "ast_hash": "0e6e825c43d858d98c9903f4da975382",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/alert.tsx": {
+    "mtime": 1779580022.412976,
+    "ast_hash": "739c28799fae98b4fa01132494788e85",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/avatar.tsx": {
+    "mtime": 1779580022.412976,
+    "ast_hash": "8b41492907a73176027427a3f0fd2302",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/label.tsx": {
+    "mtime": 1779580022.412976,
+    "ast_hash": "a70440da86bfc6a07f15197cca48cb08",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/spinner.tsx": {
+    "mtime": 1779580022.412976,
+    "ast_hash": "fd059d59ffd918b682307fc84fcb38e8",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/progress.tsx": {
+    "mtime": 1779580022.4139762,
+    "ast_hash": "aa71e8ceb68b33af5ed5799f42cd873e",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/tabs.tsx": {
+    "mtime": 1779580022.4139762,
+    "ast_hash": "429035bc858475cd3bcedbb08a5ba8da",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/tooltip.tsx": {
+    "mtime": 1779580022.4139762,
+    "ast_hash": "6566a444ce6c0a87d6611903430534fa",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/drawer.tsx": {
+    "mtime": 1779580022.4149761,
+    "ast_hash": "ecce2b5100dd3d8a11f15fcc20fa33dd",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/radio-group.tsx": {
+    "mtime": 1779580022.4149761,
+    "ast_hash": "dab241ed149814052e52d1c9da34e754",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/scroll-area.tsx": {
+    "mtime": 1779580022.4149761,
+    "ast_hash": "ac8fc719d0fd13c77c933474827337da",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/toggle.tsx": {
+    "mtime": 1779580022.4149761,
+    "ast_hash": "775016af4d4f4640e58a91fdd7d4d126",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/button-group.tsx": {
+    "mtime": 1779580022.4159763,
+    "ast_hash": "70b97c8a79dab95a172db08472cf70e1",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/toggle-group.tsx": {
+    "mtime": 1779580022.4169765,
+    "ast_hash": "9a382f5aca3a8a877f6c1d3020f2722c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/card.tsx": {
+    "mtime": 1779580022.4179764,
+    "ast_hash": "14891d5ed6669ac2d473bc3f89738c9c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/input-group.tsx": {
+    "mtime": 1779580022.4179764,
+    "ast_hash": "6fe2b4411e832a467b0470a65e7e6b24",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/input.tsx": {
+    "mtime": 1779580022.4179764,
+    "ast_hash": "5e96c23bfa53bec3bcc815309809438c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/textarea.tsx": {
+    "mtime": 1779580022.4179764,
+    "ast_hash": "060aec2e3e4c211b797f348becb8c815",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/badge.tsx": {
+    "mtime": 1779656573.2315536,
+    "ast_hash": "4676e976a254a7cfa2e7e590d3a436a0",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/button.tsx": {
+    "mtime": 1779656573.2315536,
+    "ast_hash": "a9d8f9f3e520c44cbdf496c0ca73f77a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/empty.tsx": {
+    "mtime": 1779656573.2325535,
+    "ast_hash": "c32749ddb2436a20c07684dadaf86965",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/field.tsx": {
+    "mtime": 1779656573.2325535,
+    "ast_hash": "578a3569e409b810b73ff90cb3c3a465",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/item.tsx": {
+    "mtime": 1779656573.2325535,
+    "ast_hash": "96776f123d5d82e252d5009df0ef5033",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/toast.tsx": {
+    "mtime": 1779656573.2325535,
+    "ast_hash": "0c2fca1779b5fff48433deb2fe69eb1a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui/slider.tsx": {
+    "mtime": 1779669438.4944863,
+    "ast_hash": "a9a94c2238857073f1fb67652f004caa",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/wallet/ConnectionCard.tsx": {
+    "mtime": 1779580022.4189765,
+    "ast_hash": "9b7c6cc3ecfd5577eda99fceed4bd39d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/wallet/WalletProvider.tsx": {
+    "mtime": 1779580022.4189765,
+    "ast_hash": "9ff5775b3d8efc4728c7b3186027bb8c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/wallet/SignInDemo.tsx": {
+    "mtime": 1779580022.4199767,
+    "ast_hash": "48912347d4f00a2725cff70279aef50b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/wallet/OpenInCirclesHint.tsx": {
+    "mtime": 1779656573.2325535,
+    "ast_hash": "d1626a9db4a8d607d3603730e2455e17",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/wallet/WalletStatus.tsx": {
+    "mtime": 1779656573.2325535,
+    "ast_hash": "e43593f4d2a52d75f1c4f1d334b12e05",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/admin/AdminPanel.tsx": {
+    "mtime": 1779669438.4884858,
+    "ast_hash": "218c1b78853d94e59d79b1efe48bb2f6",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/admin/PromoteSection.tsx": {
+    "mtime": 1779671049.6524932,
+    "ast_hash": "b11995d2676111ebb97dacaee0524cb9",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/admin/PlatformHealthSection.tsx": {
+    "mtime": 1779671525.6086059,
+    "ast_hash": "cd44e762224d86a6042ed295d3d2a9da",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/bookings/TrustButton.tsx": {
+    "mtime": 1779656573.225553,
+    "ast_hash": "c3e5404729bc5e5394ff450ce7959f8d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/bookings/BookingHistory.tsx": {
+    "mtime": 1779669438.489486,
+    "ast_hash": "9cb3d0f34b46e355ca7cd017a1fe948a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/bookings/CallsView.tsx": {
+    "mtime": 1779669438.489486,
+    "ast_hash": "0ccd6b53290327116da451698e9d6ecb",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/about/AboutSections.tsx": {
+    "mtime": 1779656573.2235527,
+    "ast_hash": "9ba9c6256ed95985a84bfa07f4187b93",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/about/DonationSection.tsx": {
+    "mtime": 1779671049.6514933,
+    "ast_hash": "b0b23bc20381e3f538fc548a61adc6ef",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/about/TreasuryPayCelebration.tsx": {
+    "mtime": 1779671049.6514933,
+    "ast_hash": "5fd5b4cf69677ffe5b0ef665c49e236a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui-patterns/StatusAlert.tsx": {
+    "mtime": 1779580022.4259772,
+    "ast_hash": "726833c76de500ef5e65edffc42afbb3",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui-patterns/TrustRelationBadge.tsx": {
+    "mtime": 1779580022.4279773,
+    "ast_hash": "c1b5046756e99be7dc60d4b1602cd14c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui-patterns/content-section.tsx": {
+    "mtime": 1779580022.4279773,
+    "ast_hash": "12b61473502864699393a952b2580edb",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui-patterns/metrics-panel.tsx": {
+    "mtime": 1779580022.4289775,
+    "ast_hash": "a67782b25e4ff01c8d67a7b0afa9dc8b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui-patterns/CrcAmount.tsx": {
+    "mtime": 1779656573.2305534,
+    "ast_hash": "4e07edfebb83293ac6057429975f3cc4",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui-patterns/ExpertMeta.tsx": {
+    "mtime": 1779669438.4934862,
+    "ast_hash": "79aea691f52b8bcfc4d22d3488c6c784",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui-patterns/ExpertTrustControl.tsx": {
+    "mtime": 1779669438.4944863,
+    "ast_hash": "62db08b1457864a5f92ac3e719b5c693",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui-patterns/highlight-pill.ts": {
+    "mtime": 1779669438.4944863,
+    "ast_hash": "c0840607a1ef18adc34841177f595c31",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/ui-patterns/multi-select-search.tsx": {
+    "mtime": 1779669438.4944863,
+    "ast_hash": "3753067518a7162a7977a4912043f2b8",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/booking/PaymentSummary.tsx": {
+    "mtime": 1779580022.4309776,
+    "ast_hash": "1e9ac98c13b87ff125dab2b2b500c302",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/booking/BookingSuccessDialog.tsx": {
+    "mtime": 1779656573.2245529,
+    "ast_hash": "f6f98cea834a6324a2de258fe299b80a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/booking/PayDrawer.tsx": {
+    "mtime": 1779656573.2245529,
+    "ast_hash": "6de028acb31aebeb9836d9181ec49448",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/booking/StickyPayBar.tsx": {
+    "mtime": 1779656573.2245529,
+    "ast_hash": "2f517ed79b301df63979ef47ac827cde",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/booking/TrustPathPanel.tsx": {
+    "mtime": 1779656573.225553,
+    "ast_hash": "8ce98589083f7b10687f568e1c0331b6",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/booking/BookingStepper.tsx": {
+    "mtime": 1779669438.489486,
+    "ast_hash": "8622d6bfa8a0289fcae9e43502346233",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/booking/ExpertProfileHero.tsx": {
+    "mtime": 1779669438.489486,
+    "ast_hash": "92ef3669c6689944129ddf4eb0ebce5f",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/analytics/UmamiScript.tsx": {
+    "mtime": 1779580022.432978,
+    "ast_hash": "657fc5a12d08532f186852ad3b3e7cd0",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/stats/WebAnalyticsPanel.tsx": {
+    "mtime": 1779580022.4339778,
+    "ast_hash": "fd441c3f50f48f4c789221ae015f2653",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/stats/LiveTreasuryMetricsPanel.tsx": {
+    "mtime": 1779659799.8239625,
+    "ast_hash": "71acfb210ef51a9ebd3d8a8d8d831589",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/stats/StatsDashboard.tsx": {
+    "mtime": 1779659799.8239625,
+    "ast_hash": "19221cc5c4c96c6362d61d2f14846680",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/StopExpertButton.tsx": {
+    "mtime": 1779580833.6594348,
+    "ast_hash": "12ae4426da7d7fafb251639e78ce965b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/CalConnect.tsx": {
+    "mtime": 1779656573.225553,
+    "ast_hash": "f3a77fea047aee16b1e61bbe96a4eaa2",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertDetail.tsx": {
+    "mtime": 1779664524.34228,
+    "ast_hash": "1dc40ce90f19e2eaed827ee892125a9d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertSearch.tsx": {
+    "mtime": 1779656573.226553,
+    "ast_hash": "c2fd9cdf950cb73cfeb85b08d5c7baba",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/LanguageFilter.tsx": {
+    "mtime": 1779656573.2275531,
+    "ast_hash": "fb62ee1bb419996fbca2157b8cdcf681",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/SkillFilter.tsx": {
+    "mtime": 1779656573.2275531,
+    "ast_hash": "f9e737268a5cad73e3d4ed463b526891",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ActiveFilterChips.tsx": {
+    "mtime": 1779669438.490486,
+    "ast_hash": "75d3473e1786de0a06f0d51c3e9552a6",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertBrowser.tsx": {
+    "mtime": 1779669438.490486,
+    "ast_hash": "86cc529bb40599da0531ceb5011558fa",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertCard.tsx": {
+    "mtime": 1779669438.490486,
+    "ast_hash": "7585f5ebe42f33eb7a0d1d4e6a197b2f",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertDetailBody.tsx": {
+    "mtime": 1779669438.490486,
+    "ast_hash": "4ad93f9634c369593f14708b0190a6d4",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertDetailCardContent.tsx": {
+    "mtime": 1779669438.491486,
+    "ast_hash": "030acab92114f4b1cf9722854cac01f5",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertFilterSheet.tsx": {
+    "mtime": 1779669438.491486,
+    "ast_hash": "65ad7bfc5983022c29a2e8a5c4f3649a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertShareSlider.tsx": {
+    "mtime": 1779669438.491486,
+    "ast_hash": "21fa07decabffb50d1682bc03d2c5cb8",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/RegisterStickyPreview.tsx": {
+    "mtime": 1779669438.4924862,
+    "ast_hash": "8270e58ed50ed319a262726c0d360596",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/SkillTagPicker.tsx": {
+    "mtime": 1779669438.4924862,
+    "ast_hash": "3693609c67fa0bd94c48bfb0456779c0",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/SlotPicker.tsx": {
+    "mtime": 1779669438.4924862,
+    "ast_hash": "26512ff09b3ff98d37db0d730a07b3a0",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertEditForm.tsx": {
+    "mtime": 1779671049.6524932,
+    "ast_hash": "bbed6a1eea052a5ad10534e5f706a96e",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/ExpertProfileFields.tsx": {
+    "mtime": 1779671049.6524932,
+    "ast_hash": "e888eaea2ffd667a364d9f91c5fdc22c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/LanguagePicker.tsx": {
+    "mtime": 1779671049.6524932,
+    "ast_hash": "40f856cb124894d10bdcaaeac4245d69",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/RegisterForm.tsx": {
+    "mtime": 1779671049.6534934,
+    "ast_hash": "f46a94ce7a7a3c6a2aa082f3f7849e8c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/RegisterProfilePreview.tsx": {
+    "mtime": 1779671049.6534934,
+    "ast_hash": "81f64bf45bf7e1d8063ed71649d7a6a7",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/experts/PayButton.tsx": {
+    "mtime": 1779671525.6086059,
+    "ast_hash": "da0ae5d84847069f23106e9695d821ce",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/animated-list.tsx": {
+    "mtime": 1779656573.2295532,
+    "ast_hash": "6544383dd49f5153b9b72ddc19c89378",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/count-up.tsx": {
+    "mtime": 1779656573.2295532,
+    "ast_hash": "21a1f0b22f41d008358aafc7b4e9287f",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/fade-content.tsx": {
+    "mtime": 1779656573.2295532,
+    "ast_hash": "e0832cc84df94a6c2d045db854a663b6",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/motion-empty.tsx": {
+    "mtime": 1779656573.2295532,
+    "ast_hash": "c0d428eb36d74aa9e333f5224e4a3627",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/scroll-reveal.tsx": {
+    "mtime": 1779656573.2305534,
+    "ast_hash": "0f96b9a7d7dacbed00d99643243c7c71",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/crc-coin-flight.tsx": {
+    "mtime": 1779659799.8229623,
+    "ast_hash": "0148e3582093fd1bf80b64d655634240",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/live-treasury-counter.tsx": {
+    "mtime": 1779659799.8239625,
+    "ast_hash": "21ecb8e3cecabbbe382201efcd0b2e99",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/pay-treasury-feedback.tsx": {
+    "mtime": 1779659799.8239625,
+    "ast_hash": "b0af4eadbabf698c2c8309abd9a5f042",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/collapsible-section.tsx": {
+    "mtime": 1779669438.4934862,
+    "ast_hash": "601a2d5970c61c1282445a5e1a0e2dff",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/motion/stepper.tsx": {
+    "mtime": 1779669438.4934862,
+    "ast_hash": "b824fa1e0fb1238ce086ed5ccacfaf79",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/feedback/FeedbackSheet.tsx": {
+    "mtime": 1779659799.8229623,
+    "ast_hash": "e88aa98fe5f6ad43c3895edb2bb654ea",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/treasury/TreasuryCoinDevController.tsx": {
+    "mtime": 1779659799.8239625,
+    "ast_hash": "b9aa6e96c67b225a9b8e1e54782dd90c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/treasury/TreasuryCoinDevPanel.tsx": {
+    "mtime": 1779659799.8239625,
+    "ast_hash": "7f40ff63e5f1f537c227c2b958b1d111",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/treasury/TreasuryProviders.tsx": {
+    "mtime": 1779659799.8239625,
+    "ast_hash": "ddbda6ee82da8ea5249a27f32a4c4be7",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/dao/DaoSection.tsx": {
+    "mtime": 1779669438.489486,
+    "ast_hash": "58889f67f84239e5f903db8496415707",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/dao/DaoView.tsx": {
+    "mtime": 1779669438.490486,
+    "ast_hash": "4c71667f9043430d1e6ea8e241c38bee",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/components/dao/JoinSupporterButton.tsx": {
+    "mtime": 1779669438.490486,
+    "ast_hash": "7e7710faae642f0da24ffc5075b7e76c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-wallet.ts": {
+    "mtime": 1779580022.4409785,
+    "ast_hash": "5eb30fdccc488020d5b957c25a7343f9",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-crc-balance.ts": {
+    "mtime": 1779580022.4409785,
+    "ast_hash": "78645bc5b83b12eaebf98f33a470436f",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-is-admin.ts": {
+    "mtime": 1779580022.4419787,
+    "ast_hash": "861ee9ab0a97a4d46bd3e9a65632f340",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-trust-relation.ts": {
+    "mtime": 1779580022.4419787,
+    "ast_hash": "27d291a7b9e20b842dec67cf1508ddc7",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-trust-eligible-balance.ts": {
+    "mtime": 1779580833.660435,
+    "ast_hash": "f944bd6cd2f504784be59eb132d66573",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-prefers-reduced-motion.ts": {
+    "mtime": 1779656573.2335536,
+    "ast_hash": "20bbeed8112c62258a55c3705c131292",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-row-flash.ts": {
+    "mtime": 1779656573.2335536,
+    "ast_hash": "965cd3060163407dc55ce5c7b84fc680",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-coin-burst-queue.ts": {
+    "mtime": 1779659799.8249626,
+    "ast_hash": "dd1017cd534ba5e12e28065323a79bc9",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-live-treasury-balance.ts": {
+    "mtime": 1779659799.8249626,
+    "ast_hash": "4a63254e302bfe04f7e785e7a9911b2a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-treasury-coin-dev-fire.ts": {
+    "mtime": 1779659799.8249626,
+    "ast_hash": "94a13e8cf614376077f35b27ab259a5f",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-circles-profile.ts": {
+    "mtime": 1779669438.4944863,
+    "ast_hash": "8e1999baa486ac505f6f07a593e83a54",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/hooks/use-skill-tags.ts": {
+    "mtime": 1779669438.4954865,
+    "ast_hash": "8f9576d2705fb98311d268f27c4407af",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/trust-relation.ts": {
+    "mtime": 1779580022.4419787,
+    "ast_hash": "b25a04918cde09c7d443d155ea5b2a0d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/booking-client.ts": {
+    "mtime": 1779671525.6096058,
+    "ast_hash": "1a6ad996ca6c21f32875174d5ed82403",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/booking-success-sound.ts": {
+    "mtime": 1779580022.4429786,
+    "ast_hash": "e385cdbcd49783084bdcfc3658907cff",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/me-stats-api.ts": {
+    "mtime": 1779580833.661435,
+    "ast_hash": "8b8de90a84917cad6500252b8281d13d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/trust-eligible-balance.ts": {
+    "mtime": 1779580833.662435,
+    "ast_hash": "b5a534d1da4fca584b113100e7437628",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/motion.ts": {
+    "mtime": 1779656573.2335536,
+    "ast_hash": "47bedf56376cebb7862dc0e2f4c512c1",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/treasury-coin-events.ts": {
+    "mtime": 1779659799.8249626,
+    "ast_hash": "46699afb3a001f1a1f60fc1a2db6b9e6",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/languages.ts": {
+    "mtime": 1779669438.4954865,
+    "ast_hash": "1d4c500d0305e8813fdefb29f98c503d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/nav.ts": {
+    "mtime": 1779669438.4964864,
+    "ast_hash": "86583161ba41bb1ace8a6ed89bfb8458",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/treasury-pay-celebration.ts": {
+    "mtime": 1779671049.6534934,
+    "ast_hash": "ae2f520cc9947e93f47a932a68125acc",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/db.ts": {
+    "mtime": 1779671525.6096058,
+    "ast_hash": "409f2754dae9fd1277a261557e647bbb",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/admin.ts": {
+    "mtime": 1779580022.444979,
+    "ast_hash": "dd09e0f6104ab26672ad78baf24420f1",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/api-auth.ts": {
+    "mtime": 1779580022.444979,
+    "ast_hash": "5f0ffe5dc08b495471e75910d889f41b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/utils.ts": {
+    "mtime": 1779580022.444979,
+    "ast_hash": "fb9b9e0883a9e60ca90ed034ad60e7ed",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/pay-copy.ts": {
+    "mtime": 1779580022.4459789,
+    "ast_hash": "963ebc6e3eada1678dbd7e2bc05ac583",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/umami-share-client.ts": {
+    "mtime": 1779580022.4459789,
+    "ast_hash": "1d5dd4980832647cc2fc7558590f7d7a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/analytics-umami.ts": {
+    "mtime": 1779580833.660435,
+    "ast_hash": "e4ff1c38be3dedf42848151e3ad18091",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/analytics-rpc.ts": {
+    "mtime": 1779659799.8249626,
+    "ast_hash": "f9a0d25976c51e976518056f4c7f16a3",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/treasury-events.ts": {
+    "mtime": 1779659799.8259625,
+    "ast_hash": "e9581e8a87dde24fef0a587c4df13e5f",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/expert-filters.ts": {
+    "mtime": 1779669438.4954865,
+    "ast_hash": "41b300692fda777564d4e25f7993dc18",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/skill-tags.ts": {
+    "mtime": 1779669438.4964864,
+    "ast_hash": "94fa35255e4b7226f6690a7832b10525",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/db-migrate.ts": {
+    "mtime": 1779733429.1518013,
+    "ast_hash": "447cfccc01e90609dfd9e5e03cb06a59",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/calcom.ts": {
+    "mtime": 1779580022.4459789,
+    "ast_hash": "5e6f02b93165e7fd0a6ad0caf64f98d8",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/schema.sql": {
+    "mtime": 1779671525.610606,
+    "ast_hash": "dbb3b99eceff75b29604682f3f22e90b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/analytics-explorer.ts": {
+    "mtime": 1779580022.446979,
+    "ast_hash": "0bcdf1438c6c2e01f6acd7a3217c9d8b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/csp-umami.ts": {
+    "mtime": 1779580022.4479792,
+    "ast_hash": "bdc96bbc90999154e98805086b7a47a7",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/trust-actions.ts": {
+    "mtime": 1779580022.4479792,
+    "ast_hash": "6b372a2d985ec5ace1e5ab4837a69b16",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/stats-api.ts": {
+    "mtime": 1779580833.661435,
+    "ast_hash": "40681a5d3d834eefdb4b558e69b02dcd",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/treasury-coin-demo.ts": {
+    "mtime": 1779659799.8249626,
+    "ast_hash": "c1767a97681236367af5088c7ce56157",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/treasury-ws.ts": {
+    "mtime": 1779659799.8259625,
+    "ast_hash": "a35fd508744f043f118c574bc728dc1a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/crc-pay.ts": {
+    "mtime": 1779669438.4954865,
+    "ast_hash": "00791606b0d0484a7461900d59aef051",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/expert-profile.ts": {
+    "mtime": 1779671049.6534934,
+    "ast_hash": "1056825fc3156e9a90836e2f1964214d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/lib/ui-copy.ts": {
+    "mtime": 1779671049.6544936,
+    "ast_hash": "8b13edc84807f3b55ef24ae63e7c619b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/contexts/TreasuryPendingTxContext.tsx": {
+    "mtime": 1779659799.8249626,
+    "ast_hash": "30590253f0c553c5111dec126bb50e22",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/types/umami.d.ts": {
+    "mtime": 1779580022.4489791,
+    "ast_hash": "183b139bdb8a9c58a4cb9cc780ecb75d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/scripts/umami-share-smoke.ts": {
+    "mtime": 1779580022.4499793,
+    "ast_hash": "bf342289e3405493db272b1dd31215bf",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/scripts/probe-trust-eligible-balance.mjs": {
+    "mtime": 1779580833.662435,
+    "ast_hash": "a932e9a8c786f1c9807958c9ab69ae5e",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/scripts/seed.ts": {
+    "mtime": 1779580833.662435,
+    "ast_hash": "7769949ab58f9766c657490dd80f28e2",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/scripts/cpdb": {
+    "mtime": 1779659799.8259625,
+    "ast_hash": "f98e44842a4fd9e3999ecf42bb2dc946",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/scripts/probe-treasury-ws.mjs": {
+    "mtime": 1779659799.8259625,
+    "ast_hash": "6df351bf20653039a6856a894fe09948",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/scripts/hotfix-fk-manual.sh": {
+    "mtime": 1779671525.610606,
+    "ast_hash": "734ba1a3d8f181854ef0fb00009f1db7",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/scripts/repair-db-fk.ts": {
+    "mtime": 1779733429.1518013,
+    "ast_hash": "d17489ffe8a6bf229cfeecaf9e1edca2",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/scripts/simulate-legacy-db.ts": {
+    "mtime": 1779733429.1528013,
+    "ast_hash": "330aab2350ee4023a78f2a12300becbf",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/CLAUDE.md": {
+    "mtime": 1779311744.1412787,
+    "ast_hash": "3a18ada9c8245485f7320464a4842b7b",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/README.md": {
+    "mtime": 1779311744.1412787,
+    "ast_hash": "97d66a89020394c229fb246e7b4b5fbb",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/pnpm-workspace.yaml": {
+    "mtime": 1779501486.7347577,
+    "ast_hash": "c5197ec1153ffd3de0842360990bfd75",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/AGENTS.md": {
+    "mtime": 1779669438.4854856,
+    "ast_hash": "f79cd36003e765abefeacaeca5a8e838",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/CONTRIBUTING.md": {
+    "mtime": 1779669438.4864857,
+    "ast_hash": "be7962f9877d7fce61c9eeaf6f4df84d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/docs/spike-split-pay.md": {
+    "mtime": 1779496045.9619274,
+    "ast_hash": "74c4ef49abf3514e1efcc4631e7aba0c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/docs/spike-trust-eligible-balance.md": {
+    "mtime": 1779501486.7317574,
+    "ast_hash": "877f94ed80a30a5ca7812a87f5338d26",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/docs/spike-cal-diy.md": {
+    "mtime": 1779556395.858385,
+    "ast_hash": "515957ee7039bb8171945e5dc8538c91",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/.github/ISSUE_TEMPLATE/bug_report.yml": {
+    "mtime": 1779541154.7871077,
+    "ast_hash": "e41a7754901a6a1e666004c50cd1fd83",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/.github/ISSUE_TEMPLATE/config.yml": {
+    "mtime": 1779541154.7871077,
+    "ast_hash": "fde6d7ddae191a5a330d89ab4d633499",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/.github/ISSUE_TEMPLATE/feature_request.yml": {
+    "mtime": 1779541154.7881076,
+    "ast_hash": "e21dde283dcfc5f64cbe4fc6861437b3",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/.github/ISSUE_TEMPLATE/user_feedback.yml": {
+    "mtime": 1779541154.7881076,
+    "ast_hash": "16a5549d3b4f259728120087bdfa0ad7",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/.github/ISSUE_TEMPLATE/general_feedback.yml": {
+    "mtime": 1779659799.8209622,
+    "ast_hash": "5345cba8034c8e7930abdf2cc4da2843",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/seed.md": {
+    "mtime": 1779496045.9699283,
+    "ast_hash": "c6902a25fe5b919a41f54787e0666d6c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/UI-SHADCN-INVENTORY.md": {
+    "mtime": 1779501367.421074,
+    "ast_hash": "cc72c753ffb77535e39937629f09b52d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/PRD-MVP.md": {
+    "mtime": 1779571413.530677,
+    "ast_hash": "c8e195c545a82fac1b546af2bf7dde6a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/analytics-strategy.md": {
+    "mtime": 1779571413.530677,
+    "ast_hash": "7791417821a00f653e89398eb3125fca",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/UI-REDESIGN.md": {
+    "mtime": 1779656573.2355537,
+    "ast_hash": "9bee3211c11420f17ff2e59bd2233d20",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/motion-design-audit.md": {
+    "mtime": 1779656573.236554,
+    "ast_hash": "47bccdc4ab6ec9f463c0e94aebed1743",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/live-crc-counter.md": {
+    "mtime": 1779659799.8269627,
+    "ast_hash": "faeb7aa4aa70a8f57d7faf024602167d",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/skills-languages-ux.md": {
+    "mtime": 1779669438.4964864,
+    "ast_hash": "87df9a9e532d41e50b7d9d237c2d6d7f",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/solarpunk-theme-decisions.md": {
+    "mtime": 1779669438.4964864,
+    "ast_hash": "d9fa89361800ec9e6285540a9da077f0",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/useful-links.md": {
+    "mtime": 1779669438.4974866,
+    "ast_hash": "0c3834aa23a02ac49498d004b2d143e9",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/deploy.md": {
+    "mtime": 1779671525.6116061,
+    "ast_hash": "7c6385d143a1b8496e8152b935bb40fc",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/archive/PRD-Mestryx.md": {
+    "mtime": 1779496045.966928,
+    "ast_hash": "b0c652a77eaca12f8c5eea821c8d8433",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/archive/PRD.md": {
+    "mtime": 1779496045.967928,
+    "ast_hash": "da947d9d90ed8a9241fe6a34ae2b4648",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/archive/README.md": {
+    "mtime": 1779496045.967928,
+    "ast_hash": "00ba6c98f5a471c8e3f26862a046766f",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/app/icon.png": {
+    "mtime": 1779501486.7307575,
+    "ast_hash": "4213f09dd0d98c5402a60b75f420658a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/public/file.svg": {
+    "mtime": 1779311744.1472793,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/public/globe.svg": {
+    "mtime": 1779311744.1472793,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/public/next.svg": {
+    "mtime": 1779311744.1472793,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/public/vercel.svg": {
+    "mtime": 1779311744.1472793,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/public/window.svg": {
+    "mtime": 1779311744.1472793,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/public/thp-logo.png": {
+    "mtime": 1779501486.7347577,
+    "ast_hash": "4213f09dd0d98c5402a60b75f420658a",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/mockup.png": {
+    "mtime": 1779496045.9699283,
+    "ast_hash": "0c70d7bf03f57084c2ed32e6783fc81c",
+    "semantic_hash": ""
+  },
+  "/home/mestryx/WorkSpace/repositories/THP-for-Good/spec/image.png": {
+    "mtime": 1779501833.303831,
+    "ast_hash": "f7839dcfc4c20213b254daea88f3aabb",
+    "semantic_hash": ""
+  }
+}
