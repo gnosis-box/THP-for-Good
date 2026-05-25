@@ -8,17 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { cn } from '@/lib/utils';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { useCirclesProfile } from '@/hooks/use-circles-profile';
 import type { ExpertRow } from '@/lib/db';
 import { CalConnect } from '@/components/experts/CalConnect';
-import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
+import { clampExpertShare } from '@/lib/crc-pay';
 import { addExpertSkillDraft } from '@/components/experts/SkillTagPicker';
 import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
+import { ExpertShareSlider } from '@/components/experts/ExpertShareSlider';
 import { buildExpertLanguagePayload, initialCallLanguagesFromExpert } from '@/lib/expert-profile';
 import { StopExpertButton } from '@/components/experts/StopExpertButton';
 import { RegisterProfilePreview } from '@/components/experts/RegisterProfilePreview';
@@ -355,20 +354,10 @@ export function RegisterForm() {
               <p className="text-xs text-muted-foreground">
                 Your share — at least 50% always goes to THP for Good.
               </p>
-              <RadioGroup
-                value={String(expertShare)}
-                onValueChange={(v) => setExpertShare(clampExpertShare(parseInt(v, 10)))}
-                className="flex flex-col gap-2"
-              >
-                {EXPERT_SHARE_OPTIONS.map((opt) => (
-                  <div key={opt} className="flex min-h-11 items-center gap-2">
-                    <RadioGroupItem value={String(opt)} id={`share-${opt}`} />
-                    <Label htmlFor={`share-${opt}`} className="cursor-pointer font-normal">
-                      {opt}% me · {100 - opt}% THP for Good
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
+              <ExpertShareSlider
+                value={expertShare}
+                onChange={setExpertShare}
+              />
             </div>
           </div>
         </CollapsibleSection>

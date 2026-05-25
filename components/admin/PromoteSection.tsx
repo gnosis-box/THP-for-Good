@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useRowFlash } from '@/hooks/use-row-flash';
 import { CalConnect } from '@/components/experts/CalConnect';
-import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
+import { EXPERT_SHARE_OPTIONS, clampExpertShare, type ExpertSharePercent } from '@/lib/crc-pay';
 import { addExpertSkillDraft } from '@/components/experts/SkillTagPicker';
 import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
 import { buildExpertLanguagePayload } from '@/lib/expert-profile';
@@ -24,7 +24,7 @@ type PromoteFormState = {
   name: string;
   bio: string;
   calEventTypeId: number | null;
-  expertShare: 0 | 10 | 20 | 30 | 50;
+  expertShare: ExpertSharePercent;
   priceCrc: number;
   selectedSkills: string[];
   spokenLanguages: string[];

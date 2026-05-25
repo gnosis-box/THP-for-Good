@@ -8,13 +8,24 @@ export const FORMATION_GOAL_CRC = 50_000;
 /** User-facing label for the treasury leg (not "foundation"). */
 export const THP_FOR_GOOD_LABEL = 'THP for Good';
 
-export const EXPERT_SHARE_OPTIONS = [0, 10, 20, 30, 50] as const;
+export const EXPERT_SHARE_MIN = 0;
+export const EXPERT_SHARE_MAX = 50;
+export const EXPERT_SHARE_STEP = 5;
+
+export const EXPERT_SHARE_OPTIONS = [
+  0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50,
+] as const;
+
 export type ExpertSharePercent = (typeof EXPERT_SHARE_OPTIONS)[number];
 
 export function clampExpertShare(percent: number): ExpertSharePercent {
-  const allowed = EXPERT_SHARE_OPTIONS as readonly number[];
-  if (allowed.includes(percent)) return percent as ExpertSharePercent;
-  return 20;
+  const rounded =
+    Math.round(percent / EXPERT_SHARE_STEP) * EXPERT_SHARE_STEP;
+  const clamped = Math.max(
+    EXPERT_SHARE_MIN,
+    Math.min(EXPERT_SHARE_MAX, rounded),
+  );
+  return clamped as ExpertSharePercent;
 }
 
 export function splitLegCrc(
