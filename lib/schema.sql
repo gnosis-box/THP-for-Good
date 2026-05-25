@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   created_at          TEXT    DEFAULT (datetime('now'))
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_tx_hash ON bookings(tx_hash) WHERE tx_hash IS NOT NULL;
+
 CREATE TABLE IF NOT EXISTS admins (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   circles_address TEXT    UNIQUE NOT NULL,

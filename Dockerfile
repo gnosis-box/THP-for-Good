@@ -40,4 +40,4 @@ ENV HOSTNAME=0.0.0.0
 HEALTHCHECK --interval=10s --timeout=5s --start-period=40s --retries=5 \
   CMD curl -fsS http://127.0.0.1:3000/ >/dev/null || exit 1
 
-CMD ["sh", "-c", "node node_modules/tsx/dist/cli.mjs scripts/seed.ts && node server.js"]
+CMD ["sh", "-c", "node node_modules/tsx/dist/cli.mjs scripts/repair-db-fk.ts && node node_modules/tsx/dist/cli.mjs scripts/seed.ts && node server.js"]
