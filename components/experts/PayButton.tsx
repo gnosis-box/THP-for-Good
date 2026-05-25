@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { BookingSuccessDialog } from '@/components/booking/BookingSuccessDialog';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { TrustPathPanel } from '@/components/booking/TrustPathPanel';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
-import { dispatchPayTreasuryFeedback } from '@/components/motion/pay-treasury-feedback';
 import { useToast } from '@/components/ui/toast';
 import { useTreasuryPendingTx } from '@/contexts/TreasuryPendingTxContext';
 import { useWallet } from '@/components/wallet/WalletProvider';
@@ -22,6 +22,10 @@ import {
 } from '@/lib/crc-pay';
 import { mapPayError } from '@/lib/pay-copy';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
+import {
+  aboutTreasuryPayPath,
+  storeTreasuryPayCelebration,
+} from '@/lib/treasury-pay-celebration';
 import { UI_COPY } from '@/lib/ui-copy';
 import { cn } from '@/lib/utils';
 import type { ExpertRow } from '@/lib/db';
@@ -66,6 +70,7 @@ export function PayButton({
   showEmail = true,
   compact = false,
 }: Props) {
+  const router = useRouter();
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
   const { registerPending } = useTreasuryPendingTx();
@@ -136,19 +141,6 @@ export function PayButton({
       const hashes = await sendTransactions(txs);
       const txHash = hashes[0];
 
-      if (treasuryLegCrc > 0) {
-        const rect = payButtonRef.current?.getBoundingClientRect();
-        registerPending({
-          txHash,
-          nominalCrc: treasuryLegCrc,
-          source: 'pay',
-          spawnRect: rect
-            ? { x: rect.left, y: rect.top, width: rect.width, height: rect.height }
-            : undefined,
-        });
-        dispatchPayTreasuryFeedback(txHash, treasuryLegCrc);
-      }
-
       const bookingRes = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -175,6 +167,25 @@ export function PayButton({
         calendar_event_url?: string | null;
       };
 
+      trackUmamiEvent('pay_success', { expert_id: expert.id });
+      onSuccess?.();
+
+      if (treasuryLegCrc > 0) {
+        const rect = payButtonRef.current?.getBoundingClientRect();
+        registerPending({
+          txHash,
+          nominalCrc: treasuryLegCrc,
+          source: 'pay',
+          spawnRect: rect
+            ? { x: rect.left, y: rect.top, width: rect.width, height: rect.height }
+            : undefined,
+        });
+        storeTreasuryPayCelebration(txHash, treasuryLegCrc);
+        setState({ kind: 'idle' });
+        router.push(aboutTreasuryPayPath(txHash));
+        return;
+      }
+
       setState({
         kind: 'success',
         hash: txHash,
@@ -182,8 +193,6 @@ export function PayButton({
         calendarEventUrl: booking.calendar_event_url ?? null,
       });
       setSuccessDialogOpen(true);
-      trackUmamiEvent('pay_success', { expert_id: expert.id });
-      onSuccess?.();
     } catch (err) {
       const message = mapPayError(err);
       setState({ kind: 'error' });

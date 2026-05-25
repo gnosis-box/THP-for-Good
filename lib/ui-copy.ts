@@ -43,6 +43,10 @@ export const UI_COPY = {
     successDialogCalManual: 'Use the calendar link below or from My Calls when ready.',
     successDialogViewCalls: 'View in My Calls (Emitted)',
     successDialogStay: 'Stay on this page',
+    successTreasuryRedirect: (treasuryCrc: number) =>
+      treasuryCrc > 0
+        ? `Booking confirmed! ${treasuryCrc} CRC is helping fund the next THP learner.`
+        : 'Booking confirmed!',
     viewMyCalls: 'View my calls',
     openCalBooking: 'Open Cal.com booking',
     openExpertCalendar: 'Open expert calendar',
