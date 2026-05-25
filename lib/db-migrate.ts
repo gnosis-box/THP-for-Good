@@ -39,20 +39,27 @@ function foreignKeyList(db: Database.Database, table: string): FkRow[] {
   return db.prepare(`PRAGMA foreign_key_list(${table})`).all() as FkRow[];
 }
 
-function fkTargetTable(db: Database.Database, table: string): 'experts' | 'mentors' | 'unknown' {
-  const fks = foreignKeyList(db, table);
-  if (fks.length === 0) return 'unknown';
-  const target = fks[0]?.table;
-  if (target === 'experts' || target === 'mentors') return target;
+function fkTargetForColumn(
+  db: Database.Database,
+  table: string,
+  column: string,
+): 'experts' | 'mentors' | 'unknown' {
+  const fk = foreignKeyList(db, table).find((row) => row.from === column);
+  if (!fk) return 'unknown';
+  if (fk.table === 'experts' || fk.table === 'mentors') return fk.table;
   return 'unknown';
+}
+
+function fkReferencesMentors(db: Database.Database, table: string, column: string): boolean {
+  return fkTargetForColumn(db, table, column) === 'mentors';
 }
 
 export function getMigrationHealth(db: Database.Database): MigrationHealth {
   const bookingsFkTarget = tableExists(db, 'bookings')
-    ? fkTargetTable(db, 'bookings')
+    ? fkTargetForColumn(db, 'bookings', 'expert_id')
     : 'unknown';
   const expertSkillsFkTarget = tableExists(db, 'expert_skills')
-    ? fkTargetTable(db, 'expert_skills')
+    ? fkTargetForColumn(db, 'expert_skills', 'expert_id')
     : 'unknown';
   const mentorsTableExists = tableExists(db, 'mentors');
   const mentorSkillsTableExists = tableExists(db, 'mentor_skills');
@@ -68,7 +75,7 @@ export function getMigrationHealth(db: Database.Database): MigrationHealth {
     !mentorsTableExists &&
     !mentorSkillsTableExists &&
     bookingsFkTarget === 'experts' &&
-    (expertSkillsFkTarget === 'experts' || expertSkillsFkTarget === 'unknown');
+    expertSkillsFkTarget === 'experts';
 
   return {
     mentorsTableExists,
@@ -163,7 +170,7 @@ export function mergeLegacyMentorsIntoExperts(db: Database.Database): boolean {
 
 export function repairBookingsForeignKey(db: Database.Database): boolean {
   if (!tableExists(db, 'bookings')) return false;
-  if (fkTargetTable(db, 'bookings') === 'experts') return false;
+  if (!fkReferencesMentors(db, 'bookings', 'expert_id')) return false;
 
   db.exec(`
     CREATE TABLE bookings_new (
@@ -185,7 +192,7 @@ export function repairBookingsForeignKey(db: Database.Database): boolean {
 
 export function repairExpertSkillsForeignKey(db: Database.Database): boolean {
   if (!tableExists(db, 'expert_skills')) return false;
-  if (fkTargetTable(db, 'expert_skills') === 'experts') return false;
+  if (!fkReferencesMentors(db, 'expert_skills', 'expert_id')) return false;
 
   const idCol = (() => {
     const cols = db.prepare('PRAGMA table_info(expert_skills)').all() as { name: string }[];
