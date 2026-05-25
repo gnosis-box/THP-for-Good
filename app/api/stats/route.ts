@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const treasuryLinks = explorerLinksForAddress(TREASURY_ORG_ADDRESS);
 
-  const expertRows = getAllExperts(undefined, false);
+  const expertRows = getAllExperts({ includeInactive: false });
   const paidSessionCounts = getExpertPaidSessionCounts();
 
   const experts = expertRows.map((row) => ({

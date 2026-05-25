@@ -46,7 +46,7 @@
 
 **Chroma tuning:** brand greens/ambers use **lower OKLCH chroma** (~0.09–0.12) than raw Tailwind 500 (~0.17–0.19), mixed toward neutral sage — solarpunk “moss/ochre” not neon. Surfaces use `color-mix` tints (pills @ 10%, ring @ 45%).
 
-**Pill rules:** price = amber surface; skills/languages = neutral muted pill; filters idle = border + gray text; filters selected = primary fill.
+**Pill rules:** price = amber surface (`--pill-price-*`); **skills** = neutral muted pill (`--pill-skill-*`); **languages** = muted secondary tint + globe row on cards (`--pill-language-*`, prose line — not skill pills); **filters** idle = border + gray text; filters selected = primary fill + `active:scale-95` (M-P1-10).
 
 **Link rules:** inline links = `foreground` + underline on hover; on-chain / explorer = `trust`; never `text-primary` except inside primary buttons.
 
@@ -71,6 +71,7 @@
 | 2026-05-24 | Theme refactor | Supersedes DIV-L4-UI violet/orange; full Solarpunk + Poppins/Inter/JetBrains. | Manual iframe QA + Lighthouse on `/` and `/expert/[id]`. |
 | 2026-05-24 | Solarpunk Pro | Green overload fix: neutral foreground/muted; pill roles; chroma budget. | WCAG pairs below verified. |
 | 2026-05-24 | Muted chroma pass | Desaturate primary/accent toward solarpunk moss/ochre (OKLCH); refs: [solarpunk aesthetic](https://aesthetic.fyi/solarpunk/), [OKLCH mixing](https://www.mintlify.com/LuminescentDev/ui/concepts/color-system), [dark mode contrast](https://dev.to/lawebe/how-to-fix-common-wcag-color-contrast-failures-2jln). | Re-verify WCAG on CTA pairs after token change. |
+| 2026-05-24 | Skills/languages UX | Language row distinct from skill pills; card uses globe + full labels; filter sheet chips use M-P1-10 press scale. | See [`skills-languages-ux.md`](./skills-languages-ux.md). |
 | 2026-05-24 | WCAG audit | `#e8efe9`/`#0a1210` ~17.8:1; `#8fa89e`/`#141f1c` ~5.5:1; `#052e16`/`#5a9f76` ~5.8:1; `#451a03`/`#c49a62` ~6.2:1 | Re-check if new surfaces added. |
 
 ---

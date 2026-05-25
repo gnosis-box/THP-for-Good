@@ -150,11 +150,60 @@ for (const sql of [
   tryExec(sql);
 }
 
-export function getAllExperts(
-  skillFilter?: string,
-  includeInactive = false,
-  callLanguageFilter?: string,
-): ExpertRow[] {
+export type GetAllExpertsFilters = {
+  skills?: string[];
+  callLanguages?: string[];
+  includeInactive?: boolean;
+};
+
+function commaSeparatedCodeMatch(column: string): string {
+  return `(
+    ${column} = ?
+    OR ${column} LIKE ?
+    OR ${column} LIKE ?
+    OR ${column} LIKE ?
+  )`;
+}
+
+function pushCodeMatchParams(params: string[], code: string): void {
+  params.push(code, `${code},%`, `%,${code}`, `%,${code},%`);
+}
+
+/** Match experts bookable in `code` (call_languages, or spoken when call is empty). */
+function appendSessionLanguageOrClause(
+  parts: string[],
+  params: string[],
+  codes: string[],
+): void {
+  if (codes.length === 0) return;
+
+  const clauses = codes.map((raw) => {
+    const code = raw.toLowerCase();
+    pushCodeMatchParams(params, code);
+    pushCodeMatchParams(params, code);
+    return `(
+      (
+        e.call_languages IS NOT NULL AND TRIM(e.call_languages) != ''
+        AND ${commaSeparatedCodeMatch('e.call_languages')}
+      )
+      OR (
+        (e.call_languages IS NULL OR TRIM(e.call_languages) = '')
+        AND e.spoken_languages IS NOT NULL AND TRIM(e.spoken_languages) != ''
+        AND ${commaSeparatedCodeMatch('e.spoken_languages')}
+      )
+    )`;
+  });
+
+  parts.push(`AND (${clauses.join(' OR ')})`);
+}
+
+export function getAllExperts(filters: GetAllExpertsFilters = {}): ExpertRow[] {
+  const { skills = [], callLanguages = [], includeInactive = false } = filters;
+  const skillFilters = [...new Set(skills.map((s) => s.trim()).filter(Boolean))];
+  const languageFilters = [
+    ...new Set(callLanguages.map((c) => c.trim().toLowerCase()).filter(Boolean)),
+  ];
+
   let sql = `
     SELECT
       e.*,
@@ -165,32 +214,23 @@ export function getAllExperts(
     WHERE ${includeInactive ? '1=1' : 'e.active = 1'}
   `;
   const params: string[] = [];
+  const whereExtras: string[] = [];
 
-  if (skillFilter) {
-    sql += `
+  if (skillFilters.length > 0) {
+    whereExtras.push(`
       AND e.id IN (
         SELECT es2.expert_id
         FROM expert_skills es2
         JOIN skill_tags st2 ON st2.id = es2.tag_id
-        WHERE st2.label = ?
+        WHERE st2.label IN (${skillFilters.map(() => '?').join(', ')})
       )
-    `;
-    params.push(skillFilter);
+    `);
+    params.push(...skillFilters);
   }
 
-  if (callLanguageFilter) {
-    sql += `
-      AND (
-        e.call_languages LIKE ?
-        OR e.call_languages LIKE ?
-        OR e.call_languages LIKE ?
-        OR e.call_languages = ?
-      )
-    `;
-    const code = callLanguageFilter.toLowerCase();
-    params.push(`${code},%`, `%,${code}`, `%,${code},%`, code);
-  }
+  appendSessionLanguageOrClause(whereExtras, params, languageFilters);
 
+  sql += whereExtras.join('');
   sql += ' GROUP BY e.id';
 
   const rows = db.prepare(sql).all(...params) as ExpertRowRaw[];

@@ -33,7 +33,7 @@ export default function HomeLoading() {
       </section>
 
       {/* Mentor card grid skeleton */}
-      <ul className="flex w-full flex-col gap-4 lg:grid lg:grid-cols-2">
+      <ul className="flex w-full flex-col gap-4">
         {[1, 2, 3, 4].map((i) => (
           <li
             key={i}
@@ -49,29 +49,29 @@ export default function HomeLoading() {
 
 function MentorCardSkeleton() {
   return (
-    <div className="flex w-full items-start gap-3 px-3 py-3 sm:px-4 sm:py-4">
-      {/* Avatar */}
-      <Skeleton className="size-11 shrink-0 rounded-full sm:size-12" />
-      <div className="min-w-0 flex-1 space-y-2">
-        {/* Name + price row */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 items-baseline gap-2">
-            <Skeleton className="h-5 w-28 rounded-md" />
-            <Skeleton className="h-4 w-8 rounded-sm" />
+    <>
+      <div className="flex w-full items-start gap-3 px-3 py-3 sm:px-4 sm:py-4">
+        <Skeleton className="size-11 shrink-0 rounded-full sm:size-12" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <Skeleton className="h-4 w-20 shrink-0 rounded-md" />
+              <Skeleton className="h-6 w-14 shrink-0 rounded-full" />
+            </div>
+            <Skeleton className="h-5 w-14 shrink-0 rounded-md" />
           </div>
-          <Skeleton className="h-4 w-16 shrink-0 rounded-md" />
+          <div className="flex items-center justify-between gap-2">
+            <Skeleton className="h-4 w-28 shrink-0 rounded-sm" />
+            <Skeleton className="h-3 w-16 shrink-0 rounded-sm" />
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-5 w-16 rounded-full" />
+            ))}
+          </div>
         </div>
-        {/* Trusted by */}
-        <Skeleton className="h-3 w-24 rounded-sm" />
-        {/* Skill tags */}
-        <div className="flex flex-wrap gap-1.5">
-          {[1, 2].map((i) => (
-            <Skeleton key={i} className="h-5 w-16 rounded-full" />
-          ))}
-        </div>
-        {/* Split share */}
-        <Skeleton className="h-3 w-32 rounded-sm" />
       </div>
-    </div>
+      <Skeleton className="h-6 w-full rounded-none" />
+    </>
   );
 }

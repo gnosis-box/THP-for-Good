@@ -44,9 +44,12 @@ function groupByDay(slots: string[]): DayGroup[] {
 
 function SlotPickerSkeleton() {
   return (
-    <div className="flex w-full flex-col items-center gap-4" aria-busy="true" aria-label="Loading availability">
-      <Skeleton className="h-4 w-28" />
-      <div className="flex w-full max-w-md flex-col gap-3">
+    <div
+      className="mx-auto flex w-full max-w-md flex-col items-center gap-3"
+      aria-busy="true"
+      aria-label="Loading availability"
+    >
+      <div className="flex w-full flex-col gap-3">
         {[0, 1].map((day) => (
           <Card key={day} size="sm" className="w-full gap-3 py-3">
             <CardHeader className="items-center px-4 pb-0 text-center">
@@ -74,9 +77,8 @@ function SlotPickerContent({
   onSelect: (slot: string | null) => void;
 }) {
   return (
-    <div className="flex w-full flex-col items-center gap-4">
-      <p className="text-sm font-medium text-center">Select a slot</p>
-      <div className="flex w-full max-w-md flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-3">
+      <div className="flex w-full flex-col gap-3">
         {groups.map(({ label, slots: daySlots }) => (
           <Card key={label} size="sm" className="w-full gap-3 py-3">
             <CardHeader className="items-center px-4 pb-0 text-center">

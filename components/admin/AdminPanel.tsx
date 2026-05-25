@@ -9,6 +9,8 @@ import { useRowFlash } from '@/hooks/use-row-flash';
 import { PromoteSection } from './PromoteSection';
 import { PlatformHealthSection } from './PlatformHealthSection';
 import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
+import { ExpertLanguageTags, ExpertSkillTags } from '@/components/ui-patterns/ExpertMeta';
+import { getDisplayCallLanguages } from '@/lib/languages';
 import type { GroupMemberDto } from '@/lib/admin';
 import type { AdminHealthStats, ExpertRow, TagRow, AdminRow } from '@/lib/db';
 
@@ -349,9 +351,11 @@ export function AdminPanel() {
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground font-mono truncate">{expert.circles_address}</p>
-                  {expert.skills.length > 0 && (
-                    <p className="text-xs text-muted-foreground">{expert.skills.join(', ')}</p>
-                  )}
+                  <ExpertLanguageTags
+                    languages={getDisplayCallLanguages(expert)}
+                    variant="card"
+                  />
+                  <ExpertSkillTags skills={expert.skills} />
                   <p className="text-xs text-muted-foreground">
                     {expert.price_crc} CRC · {expert.expert_share_percent ?? 20}% expert / {100 - (expert.expert_share_percent ?? 20)}% foundation
                   </p>
@@ -403,7 +407,6 @@ export function AdminPanel() {
 
       {/* Group members → promote */}
       <PromoteSection
-        tags={tags}
         experts={experts}
         admins={dbAdmins.map((a) => a.circles_address)}
         walletAddress={address ?? ''}
