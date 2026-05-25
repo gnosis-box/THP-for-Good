@@ -6,7 +6,7 @@ import {
   TREASURY_ORG_ADDRESS,
 } from '@/lib/analytics-explorer';
 import { fetchAvatarBalanceCrc } from '@/lib/analytics-rpc';
-import { getAllMentors, getExpertPaidSessionCounts, getStatsEnrichment, getStatsReconcile } from '@/lib/db';
+import { getAllExperts, getExpertPaidSessionCounts, getStatsEnrichment, getStatsReconcile } from '@/lib/db';
 import type { StatsApiResponse } from '@/lib/stats-api';
 import { fetchWebAnalytics } from '@/lib/umami-share-client';
 
@@ -15,12 +15,12 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const treasuryLinks = explorerLinksForAddress(TREASURY_ORG_ADDRESS);
 
-  const mentorRows = getAllMentors(undefined, false);
+  const expertRows = getAllExperts({ includeInactive: false });
   const paidSessionCounts = getExpertPaidSessionCounts();
 
-  const experts = mentorRows.map((m) => ({
-    mentor: m,
-    paidSessionCount: paidSessionCounts.get(m.id) ?? 0,
+  const experts = expertRows.map((row) => ({
+    expert: row,
+    paidSessionCount: paidSessionCounts.get(row.id) ?? 0,
   }));
 
   const [treasuryBalanceCrc, webAnalytics] = await Promise.all([

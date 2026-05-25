@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ExpertLanguageTags, ExpertSkillTags } from '@/components/ui-patterns/ExpertMeta';
 import { TrustButton } from '@/components/bookings/TrustButton';
 import { shortenAddress } from '@/lib/utils';
-import type { BookingRow, MentorRow } from '@/lib/db';
+import { getDisplayCallLanguages } from '@/lib/languages';
+import type { BookingRow, ExpertRow } from '@/lib/db';
 
-type EnrichedBooking = BookingRow & { mentor: MentorRow };
+type EnrichedBooking = BookingRow & { expert: ExpertRow };
 
 export function BookingHistory() {
   const { address, isConnected } = useWallet();
@@ -20,9 +21,9 @@ export function BookingHistory() {
   useEffect(() => {
     if (!address) return;
 
-    // Fetch bookings then enrich each with the mentor's data in parallel.
+    // Fetch bookings then enrich each with the expert's data in parallel.
     // API note: /api/bookings?address= returns BookingRow[].
-    // /api/mentors/:id returns MentorRow.
+    // /api/experts/:id returns ExpertRow.
     const controller = new AbortController();
 
     Promise.resolve()
@@ -40,12 +41,12 @@ export function BookingHistory() {
       .then((rows) =>
         Promise.all(
           rows.map((booking) =>
-            fetch(`/api/mentors/${booking.mentor_id}`, { signal: controller.signal })
+            fetch(`/api/experts/${booking.expert_id}`, { signal: controller.signal })
               .then((r) => {
-                if (!r.ok) throw new Error(`Mentor ${booking.mentor_id} not found`);
-                return r.json() as Promise<MentorRow>;
+                if (!r.ok) throw new Error(`Expert ${booking.expert_id} not found`);
+                return r.json() as Promise<ExpertRow>;
               })
-              .then((mentor) => ({ ...booking, mentor }))
+              .then((expert) => ({ ...booking, expert }))
           )
         )
       )
@@ -88,7 +89,7 @@ export function BookingHistory() {
   return (
     <div className="flex flex-col gap-4">
       {bookings.map((booking) => {
-        const { mentor } = booking;
+        const { expert } = booking;
         const dateLabel = new Date(booking.created_at).toLocaleDateString(undefined, {
           year: 'numeric',
           month: 'long',
@@ -97,17 +98,14 @@ export function BookingHistory() {
 
         return (
           <Card key={booking.id}>
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">{mentor.name}</CardTitle>
-              {mentor.skills.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {mentor.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+            <CardHeader className="gap-2">
+              <CardTitle className="text-base font-semibold">{expert.name}</CardTitle>
+              <ExpertLanguageTags
+                languages={getDisplayCallLanguages(expert)}
+                variant="card"
+                maxVisible={2}
+              />
+              <ExpertSkillTags skills={expert.skills} maxVisible={2} />
             </CardHeader>
 
             <CardContent className="flex flex-col gap-1.5 text-sm text-muted-foreground">
@@ -117,7 +115,7 @@ export function BookingHistory() {
                   href={`https://explorer.aboutcircles.com/tx/${booking.tx_hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs text-primary underline-offset-4 hover:underline"
+                  className="font-mono text-xs text-trust underline-offset-4 hover:underline"
                 >
                   {shortenAddress(booking.tx_hash, 6)}
                 </a>
@@ -126,10 +124,10 @@ export function BookingHistory() {
 
             <CardFooter>
               <TrustButton
-                mentorAddress={mentor.circles_address}
-                mentorName={mentor.name}
-                mentorSkills={mentor.skills}
-                mentorId={mentor.id}
+                expertAddress={expert.circles_address}
+                expertName={expert.name}
+                expertSkills={expert.skills}
+                expertId={expert.id}
                 bookingId={booking.id}
               />
             </CardFooter>

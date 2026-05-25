@@ -1,7 +1,16 @@
-import { Check } from 'lucide-react';
+'use client';
 
-import { cn } from '@/lib/utils';
+import { Fragment } from 'react';
+
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import {
+  MotionStepConnector,
+  MotionStepDisc,
+  stepLabelClass,
+  stepStatusLabel,
+} from '@/components/motion/stepper';
 import { UI_COPY } from '@/lib/ui-copy';
+import { cn } from '@/lib/utils';
 
 const STEPS = [
   UI_COPY.booking.stepTime,
@@ -12,6 +21,7 @@ const STEPS = [
 type Props = {
   hasSlot: boolean;
   hasEmail: boolean;
+  className?: string;
 };
 
 function stepIndex(hasSlot: boolean, hasEmail: boolean): number {
@@ -20,44 +30,64 @@ function stepIndex(hasSlot: boolean, hasEmail: boolean): number {
   return 2;
 }
 
-export function BookingStepper({ hasSlot, hasEmail }: Props) {
+export function BookingStepper({ hasSlot, hasEmail, className }: Props) {
+  const reducedMotion = usePrefersReducedMotion();
   const current = stepIndex(hasSlot, hasEmail);
+  const currentStep = current + 1;
 
   return (
-    <ol className="flex items-center gap-2" aria-label="Booking progress">
-      {STEPS.map((label, i) => {
-        const done = i < current;
-        const active = i === current;
-        const status = done ? 'completed' : active ? 'current' : 'upcoming';
-        return (
-          <li
-            key={label}
-            className="flex flex-1 flex-col items-center gap-1.5"
-            aria-current={active ? 'step' : undefined}
-          >
-            <div
-              className={cn(
-                'flex size-8 min-h-8 min-w-8 items-center justify-center rounded-full border text-xs font-semibold sm:size-9',
-                done && 'border-primary bg-primary text-primary-foreground',
-                active && !done && 'border-primary text-primary',
-                !done && !active && 'border-border text-muted-foreground',
-              )}
-              aria-hidden
-            >
-              {done ? <Check className="size-4" aria-hidden /> : i + 1}
-            </div>
-            <span
-              className={cn(
-                'text-center text-xs font-medium leading-snug',
-                active ? 'text-foreground' : 'text-muted-foreground',
-              )}
-            >
-              {label}
-              <span className="sr-only">{` — ${status}`}</span>
-            </span>
-          </li>
-        );
-      })}
-    </ol>
+    <div
+      className={cn('mx-auto w-full max-w-sm sm:max-w-md', className)}
+      role="list"
+      aria-label="Booking progress"
+    >
+      <div className="flex items-start">
+        {STEPS.map((label, i) => {
+          const stepNumber = i + 1;
+          const isActive = currentStep === stepNumber;
+          const isNotLast = i < STEPS.length - 1;
+
+          return (
+            <Fragment key={label}>
+              <div
+                className="flex min-w-0 flex-1 flex-col items-center gap-1.5"
+                role="listitem"
+                aria-current={isActive ? 'step' : undefined}
+              >
+                <div className="flex w-full items-center">
+                  <div className="flex h-8 flex-1 items-center sm:h-9">
+                    {i > 0 ? (
+                      <MotionStepConnector
+                        isComplete={currentStep > i}
+                        reducedMotion={reducedMotion}
+                        className="w-full"
+                      />
+                    ) : null}
+                  </div>
+                  <MotionStepDisc
+                    step={stepNumber}
+                    currentStep={currentStep}
+                    reducedMotion={reducedMotion}
+                  />
+                  <div className="flex h-8 flex-1 items-center sm:h-9">
+                    {isNotLast ? (
+                      <MotionStepConnector
+                        isComplete={currentStep > stepNumber}
+                        reducedMotion={reducedMotion}
+                        className="w-full"
+                      />
+                    ) : null}
+                  </div>
+                </div>
+                <span className={stepLabelClass(isActive)}>
+                  {label}
+                  <span className="sr-only">{` — ${stepStatusLabel(stepNumber, currentStep)}`}</span>
+                </span>
+              </div>
+            </Fragment>
+          );
+        })}
+      </div>
+    </div>
   );
 }

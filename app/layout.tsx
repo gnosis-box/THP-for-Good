@@ -1,26 +1,37 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono, Poppins } from 'next/font/google';
+import './globals.css';
 
-import { AppShell } from "@/components/layout/AppShell";
-import { UmamiScript } from "@/components/analytics/UmamiScript";
-import { ToastProvider } from "@/components/ui/toast";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { WalletProvider } from "@/components/wallet/WalletProvider";
+import { AppShell } from '@/components/layout/AppShell';
+import { UmamiScript } from '@/components/analytics/UmamiScript';
+import { TreasuryProviders } from '@/components/treasury/TreasuryProviders';
+import { ToastProvider } from '@/components/ui/toast';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { WalletProvider } from '@/components/wallet/WalletProvider';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const inter = Inter({
+  variable: '--font-inter',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const poppins = Poppins({
+  variable: '--font-poppins',
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "THP for Good",
-  description: "Book a session with a THP mentor, pay in CRC",
+  title: 'THP for Good',
+  description: 'Book a session with a THP expert, pay in CRC',
 };
 
 export default function RootLayout({
@@ -31,14 +42,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark ${inter.variable} ${poppins.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <UmamiScript />
         <WalletProvider>
           <TooltipProvider>
             <ToastProvider>
-              <AppShell>{children}</AppShell>
+              <TreasuryProviders>
+                <AppShell>{children}</AppShell>
+              </TreasuryProviders>
             </ToastProvider>
           </TooltipProvider>
         </WalletProvider>

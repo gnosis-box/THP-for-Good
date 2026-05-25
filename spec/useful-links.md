@@ -43,9 +43,12 @@ Central index of project, product, and ecosystem URLs.
 | **Analytics strategy (Umami + `/stats` + Explorer)** | [`spec/analytics-strategy.md`](analytics-strategy.md) |
 | UI redesign decisions | [`spec/UI-REDESIGN.md`](UI-REDESIGN.md) |
 | Design tokens | [`spec/design-tokens.md`](design-tokens.md) |
-| Seed data (admins + mentors) | [`spec/seed.md`](seed.md), [`scripts/seed.ts`](../scripts/seed.ts) |
+| Seed data (admins + experts) | [`spec/seed.md`](seed.md), [`scripts/seed.ts`](../scripts/seed.ts) |
 | UI mockup | [`spec/mockup.png`](mockup.png) |
 | shadcn inventory | [`spec/UI-SHADCN-INVENTORY.md`](UI-SHADCN-INVENTORY.md) |
+| Motion design audit (P0–P2) | [`spec/motion-design-audit.md`](motion-design-audit.md) |
+| Live CRC treasury counter (WSS + coin animation) | [`spec/live-crc-counter.md`](live-crc-counter.md) |
+| Skills & languages UX (discover, cards, filters) | [`spec/skills-languages-ux.md`](skills-languages-ux.md) |
 | cal.diy spike | [`docs/spike-cal-diy.md`](../docs/spike-cal-diy.md) |
 
 ### App routes (target)
@@ -53,8 +56,8 @@ Central index of project, product, and ecosystem URLs.
 | Route | Purpose |
 |-------|---------|
 | `/` | Expert browser (home) |
-| `/mentor/[id]` | Book / PAY flow |
-| `/mentor/register` | Offer expertise (self-register) |
+| `/expert/[id]` | Book / PAY flow |
+| `/expert/register` | Offer expertise (self-register) |
 | `/calls` | Emitted + Received sessions; post-call TRUST |
 | `/admin` | Admin panel (hidden from public nav) |
 | `/about` | Product explainer |
@@ -69,6 +72,7 @@ Central index of project, product, and ecosystem URLs.
 | **FEAT-L4-04** | In-app “Report issue” + GitHub templates | [#62](https://github.com/gnosis-box/THP-for-Good/issues/62) |
 | **IMPL-L4-06** | Expert card trust status & two-way trust | [#63](https://github.com/gnosis-box/THP-for-Good/issues/63) |
 | **FEAT-L4-07** | Expert session languages (spoken & call) | [#64](https://github.com/gnosis-box/THP-for-Good/issues/64) |
+| **IMPL-L4-09** | Skills & languages UX (discover, cards, filters) | [#94](https://github.com/gnosis-box/THP-for-Good/issues/94) |
 
 ### Related L4 / spikes (existing)
 
@@ -214,7 +218,7 @@ pnpm tsx scripts/seed.ts
 | Area | Location |
 |------|----------|
 | Trust button (`/calls`) | [`components/bookings/TrustButton.tsx`](../components/bookings/TrustButton.tsx) |
-| Expert card (trustedBy count) | [`components/mentors/MentorCard.tsx`](../components/mentors/MentorCard.tsx) |
+| Expert card (trustedBy count) | [`components/experts/ExpertCard.tsx`](../components/experts/ExpertCard.tsx) |
 | Trust-eligible CRC panel | [`components/booking/TrustPathPanel.tsx`](../components/booking/TrustPathPanel.tsx) |
 | Admin panel | [`components/admin/AdminPanel.tsx`](../components/admin/AdminPanel.tsx) |
 | DB schema | [`lib/schema.sql`](../lib/schema.sql) |
@@ -231,4 +235,4 @@ pnpm tsx scripts/seed.ts
 
 ---
 
-*Last updated: 2026-05-21 — Circles ecosystem links curated; group vs org addresses clarified.*
+*Last updated: 2026-05-24 — live CRC counter spec; Circles ecosystem links; group vs org addresses clarified.*

@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+# cpdb — copy the THP for Good SQLite DB between Coolify environments
+#
+# Install on the server:
+#   cp scripts/cpdb /usr/local/bin/cpdb && chmod +x /usr/local/bin/cpdb
+#
+# Usage: cpdb
+#   Prompts for source (default: prod) and target(s) (default: dev + PR previews).
+#   Always snapshots prod to /root/thp-db-snapshots/ and reports the last snapshot age.
+
+set -euo pipefail
+
+# ── config ───────────────────────────────────────────────────────────────────
+readonly SNAPSHOT_DIR="/root/thp-db-snapshots"
+readonly DB_PATH="/app/data/thp.db"
+readonly PROJECT_LABEL="thp-for-good"
+readonly KEEP_SNAPSHOTS=10
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Colors
+R='\033[0;31m' G='\033[0;32m' Y='\033[1;33m' C='\033[0;36m' B='\033[1m' N='\033[0m'
+
+die() { echo -e "${R}Error:${N} $*" >&2; exit 1; }
+
+mkdir -p "$SNAPSHOT_DIR"
+
+# ── discover THP containers ──────────────────────────────────────────────────
+# Arrays: parallel indexed lists of discovered envs
+CNAMES=(); FQDNS=(); ENVS=(); PRIDS=()
+
+while IFS='|' read -r cname fqdn env prid; do
+  docker exec "$cname" test -f "$DB_PATH" 2>/dev/null || continue
+  CNAMES+=("$cname"); FQDNS+=("$fqdn"); ENVS+=("$env"); PRIDS+=("$prid")
+done < <(
+  docker ps --format '{{.Names}}' | while read -r name; do
+    read -r proj fqdn env prid < <(docker inspect "$name" --format \
+      '{{index .Config.Labels "coolify.projectName"}} {{index .Config.Labels "caddy_0"}} {{index .Config.Labels "coolify.environmentName"}} {{index .Config.Labels "coolify.pullRequestId"}}' \
+      2>/dev/null || echo "")
+    [[ "$proj" == "$PROJECT_LABEL" ]] || continue
+    echo "$name|${fqdn#https://}|$env|$prid"
+  done | sort -t'|' -k3r -k4n
+  # sort: production before dev (reverse alpha), then by PR ID numerically
+)
+
+[[ ${#CNAMES[@]} -gt 0 ]] || die "No THP for Good containers with $DB_PATH found."
+
+# ── helpers ──────────────────────────────────────────────────────────────────
+label() {
+  local i=$1 env="${ENVS[$1]}" prid="${PRIDS[$1]}" fqdn="${FQDNS[$1]}"
+  if   [[ "$env" == "production" && "$prid" == "0" ]]; then echo "prod          · $fqdn"
+  elif [[ "$env" == "production" ]];                    then echo "prod PR #$prid · $fqdn"
+  elif [[ "$prid" == "0" ]];                            then echo "dev           · $fqdn"
+  else                                                       echo "PR #$prid     · $fqdn"
+  fi
+}
+
+is_prod_main() { [[ "${ENVS[$1]}" == "production" && "${PRIDS[$1]}" == "0" ]]; }
+
+snapshot_from_container() {
+  local cname=$1 dest=$2 tmp="/tmp/thp_cpdb_$$.db"
+  docker cp "$cname:$DB_PATH" "$tmp"
+  # Copy WAL + SHM so sqlite3 can merge them into the backup
+  docker cp "$cname:${DB_PATH}-wal" "${tmp}-wal" 2>/dev/null || true
+  docker cp "$cname:${DB_PATH}-shm" "${tmp}-shm" 2>/dev/null || true
+  sqlite3 "$tmp" ".backup $dest"
+  rm -f "$tmp" "${tmp}-wal" "${tmp}-shm"
+}
+
+# ── header ───────────────────────────────────────────────────────────────────
+echo ""
+echo -e "${B}┌──────────────────────────────────────────┐${N}"
+echo -e "${B}│   THP for Good  ·  cpdb                  │${N}"
+echo -e "${B}└──────────────────────────────────────────┘${N}"
+
+# ── prod snapshot (always, regardless of source/target choice) ───────────────
+PROD_IDX=-1
+for i in "${!CNAMES[@]}"; do is_prod_main $i && PROD_IDX=$i && break; done
+
+if [[ $PROD_IDX -ge 0 ]]; then
+  # Show last snapshot age
+  LAST_SNAP=$(ls -t "$SNAPSHOT_DIR"/prod_*.db 2>/dev/null | head -1 || true)
+  if [[ -n "$LAST_SNAP" ]]; then
+    AGE_S=$(( $(date +%s) - $(stat -c %Y "$LAST_SNAP") ))
+    if   (( AGE_S < 60 ));   then AGE_STR="${AGE_S}s ago"
+    elif (( AGE_S < 3600 )); then AGE_STR="$(( AGE_S / 60 ))m ago"
+    else                          AGE_STR="$(( AGE_S / 3600 ))h $(( (AGE_S % 3600) / 60 ))m ago"
+    fi
+    echo -e "\n${C}Last prod snapshot:${N} $(basename "$LAST_SNAP")  (${AGE_STR})"
+  else
+    echo -e "\n${C}No previous prod snapshot found.${N}"
+  fi
+
+  SNAP_FILE="$SNAPSHOT_DIR/prod_$(date +%Y%m%d_%H%M%S).db"
+  echo -ne "${C}Snapshotting prod...${N} "
+  snapshot_from_container "${CNAMES[$PROD_IDX]}" "$SNAP_FILE"
+  SNAP_ROWS=$(sqlite3 "$SNAP_FILE" "SELECT count(*) FROM bookings;" 2>/dev/null || echo "?")
+  echo -e "${G}✓${N}  $(basename "$SNAP_FILE")  (${SNAP_ROWS} bookings)"
+
+  # Prune old snapshots
+  mapfile -t OLD_SNAPS < <(ls -t "$SNAPSHOT_DIR"/prod_*.db 2>/dev/null | tail -n +$(( KEEP_SNAPSHOTS + 1 )))
+  (( ${#OLD_SNAPS[@]} > 0 )) && rm -f "${OLD_SNAPS[@]}"
+fi
+
+# ── pick SOURCE ───────────────────────────────────────────────────────────────
+echo ""
+echo -e "${B}Source — copy FROM:${N}"
+for i in "${!CNAMES[@]}"; do
+  is_prod_main $i && mark="${G}*${N}" || mark=" "
+  printf "  %s %d) %s\n" "$(echo -e "$mark")" "$((i+1))" "$(label $i)"
+done
+echo ""
+read -rp "  [default 1 = prod] › " SRC_IN
+SRC_IN="${SRC_IN:-1}"
+[[ "$SRC_IN" =~ ^[0-9]+$ ]] || die "Expected a number."
+SRC_IDX=$(( SRC_IN - 1 ))
+(( SRC_IDX >= 0 && SRC_IDX < ${#CNAMES[@]} )) || die "Out of range."
+
+# ── pick TARGET(S) ────────────────────────────────────────────────────────────
+echo ""
+echo -e "${B}Target(s) — copy TO  (space-separated, e.g. 2 3):${N}"
+
+# Default: every non-prod-main container that isn't the source
+DEF_TARGETS=()
+for i in "${!CNAMES[@]}"; do
+  [[ $i -eq $SRC_IDX ]] && continue
+  is_prod_main $i && continue
+  DEF_TARGETS+=("$(( i + 1 ))")
+done
+DEF_STR="${DEF_TARGETS[*]:-}"
+
+for i in "${!CNAMES[@]}"; do
+  [[ $i -eq $SRC_IDX ]] && continue
+  in_def=0
+  for d in "${DEF_TARGETS[@]:-}"; do [[ "$d" == "$(( i+1 ))" ]] && in_def=1; done
+  (( in_def )) && mark="${Y}*${N}" || mark=" "
+  printf "  %s %d) %s\n" "$(echo -e "$mark")" "$((i+1))" "$(label $i)"
+done
+
+echo ""
+[[ -n "$DEF_STR" ]] && prompt="[default: $DEF_STR]" || prompt="[no default — enter numbers]"
+read -rp "  $prompt › " TGT_IN
+TGT_IN="${TGT_IN:-$DEF_STR}"
+[[ -n "$TGT_IN" ]] || die "No targets selected."
+
+# ── validate targets ──────────────────────────────────────────────────────────
+TGT_INDICES=()
+for t in $TGT_IN; do
+  [[ "$t" =~ ^[0-9]+$ ]] || die "Expected numbers."
+  idx=$(( t - 1 ))
+  (( idx >= 0 && idx < ${#CNAMES[@]} )) || die "Out of range: $t"
+  [[ $idx -eq $SRC_IDX ]] && { echo -e "${Y}Skipping source (${t}).${N}"; continue; }
+  TGT_INDICES+=("$idx")
+done
+(( ${#TGT_INDICES[@]} > 0 )) || die "No valid targets."
+
+# ── read source DB ────────────────────────────────────────────────────────────
+echo ""
+echo -e "${C}Reading DB from:${N} $(label $SRC_IDX)"
+TMP_CLEAN="/tmp/thp_cpdb_clean_$$.db"
+
+# Re-use today's prod snapshot if source is prod (already taken above)
+if is_prod_main $SRC_IDX && [[ -f "${SNAP_FILE:-}" ]]; then
+  cp "$SNAP_FILE" "$TMP_CLEAN"
+else
+  snapshot_from_container "${CNAMES[$SRC_IDX]}" "$TMP_CLEAN"
+fi
+
+SRC_ROWS=$(sqlite3 "$TMP_CLEAN" "SELECT count(*) FROM bookings;" 2>/dev/null || echo "?")
+echo -e "${G}✓${N}  Clean snapshot ready  (${SRC_ROWS} bookings)"
+
+# ── copy to each target ───────────────────────────────────────────────────────
+echo ""
+for idx in "${TGT_INDICES[@]}"; do
+  printf "  Copying to %-40s " "$(label $idx) ..."
+  docker cp "$TMP_CLEAN" "${CNAMES[$idx]}:$DB_PATH"
+  docker exec "${CNAMES[$idx]}" rm -f "${DB_PATH}-shm" "${DB_PATH}-wal" 2>/dev/null || true
+  echo -e "${G}✓${N}"
+done
+
+rm -f "$TMP_CLEAN"
+echo ""
+echo -e "${G}${B}Done.${N}"
+echo ""

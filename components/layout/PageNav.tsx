@@ -54,7 +54,7 @@ function PageNavLink({
     <Link
       href={href}
       className={cn(
-        'group flex flex-col rounded-lg border p-4 transition-colors hover:bg-accent/40',
+        'motion-nav-card-hover group flex flex-col rounded-lg border p-4 transition-colors hover:bg-accent/40',
         isNext ? 'sm:text-right sm:col-start-2' : '',
       )}
     >

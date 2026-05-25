@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db, { insertBooking, getMentorById, getBookingsByProviderAddress } from '@/lib/db';
+import db, {
+  insertBooking,
+  getExpertById,
+  getBookingsByProviderAddress,
+  getBookingByTxHash,
+} from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
+
+function bookingResponse(row: {
+  id: number;
+  cal_booking_uid?: string | null;
+  calendar_event_url?: string | null;
+}) {
+  return NextResponse.json(
+    {
+      id: row.id,
+      cal_booking_uid: row.cal_booking_uid ?? null,
+      calendar_event_url: row.calendar_event_url ?? null,
+    },
+    { status: 200 },
+  );
+}
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -15,9 +35,9 @@ export function GET(request: NextRequest) {
   if (address) {
     const bookings = db
       .prepare(
-        `SELECT b.*, m.name AS mentor_name
+        `SELECT b.*, m.name AS expert_name
          FROM bookings b
-         JOIN mentors m ON m.id = b.mentor_id
+         JOIN experts m ON m.id = b.expert_id
          WHERE b.booker_address = ?
          ORDER BY b.created_at DESC`,
       )
@@ -31,9 +51,9 @@ export function GET(request: NextRequest) {
 
   const bookings = db
     .prepare(
-      `SELECT b.*, m.name AS mentor_name
+      `SELECT b.*, m.name AS expert_name
        FROM bookings b
-       JOIN mentors m ON m.id = b.mentor_id
+       JOIN experts m ON m.id = b.expert_id
        ORDER BY b.created_at DESC`,
     )
     .all();
@@ -51,14 +71,14 @@ export async function POST(request: NextRequest) {
   if (
     typeof body !== 'object' ||
     body === null ||
-    typeof (body as Record<string, unknown>).mentor_id !== 'number' ||
+    typeof (body as Record<string, unknown>).expert_id !== 'number' ||
     typeof (body as Record<string, unknown>).booker_address !== 'string'
   ) {
-    return NextResponse.json({ error: 'mentor_id and booker_address are required' }, { status: 400 });
+    return NextResponse.json({ error: 'expert_id and booker_address are required' }, { status: 400 });
   }
 
   const data = body as {
-    mentor_id: number;
+    expert_id: number;
     booker_address: string;
     tx_hash?: string;
     slot_time?: string;
@@ -66,9 +86,20 @@ export async function POST(request: NextRequest) {
     attendee_email?: string;
   };
 
-  const mentor = getMentorById(data.mentor_id);
-  if (!mentor) {
-    console.error('[api/bookings POST] unknown mentor_id', data.mentor_id);
+  if (data.tx_hash?.trim()) {
+    const existing = getBookingByTxHash(data.tx_hash);
+    if (existing) {
+      return bookingResponse({
+        id: existing.id,
+        cal_booking_uid: existing.cal_booking_uid,
+        calendar_event_url: existing.calendar_event_url,
+      });
+    }
+  }
+
+  const expert = getExpertById(data.expert_id);
+  if (!expert) {
+    console.error('[api/bookings POST] unknown expert_id', data.expert_id);
     return NextResponse.json({ error: 'Expert not found' }, { status: 404 });
   }
 
@@ -76,15 +107,15 @@ export async function POST(request: NextRequest) {
   let calendarEventUrl: string | undefined;
 
   if (data.slot_time && data.attendee_email) {
-    if (mentor.cal_event_type_id) {
+    if (expert.cal_event_type_id) {
       try {
         const { createCalBooking, getAvailableSlots } = await import('@/lib/calcom');
-        const openSlots = await getAvailableSlots(mentor.cal_event_type_id);
+        const openSlots = await getAvailableSlots(expert.cal_event_type_id);
         if (!openSlots.includes(data.slot_time)) {
           console.warn('[api/bookings] slot no longer available in Cal.com', data.slot_time);
         } else {
           const result = await createCalBooking({
-            eventTypeId: mentor.cal_event_type_id,
+            eventTypeId: expert.cal_event_type_id,
             slotTime: data.slot_time,
             attendeeName: data.attendee_name ?? data.booker_address,
             attendeeEmail: data.attendee_email,
@@ -101,7 +132,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const id = insertBooking({
-      mentor_id: data.mentor_id,
+      expert_id: data.expert_id,
       booker_address: data.booker_address,
       tx_hash: data.tx_hash,
       slot_time: data.slot_time,
@@ -119,12 +150,27 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     const code =
       err instanceof Error && 'code' in err ? String((err as { code: string }).code) : '';
-    console.error('[api/bookings POST]', { mentor_id: data.mentor_id, code, err });
+    console.error('[api/bookings POST]', { expert_id: data.expert_id, code, err });
     if (code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
       return NextResponse.json(
-        { error: 'Expert not found or database out of sync. Contact support with your tx hash.' },
-        { status: 409 },
+        {
+          error:
+            'Database migration incomplete for this expert. Payment is on-chain — retry shortly or contact support.',
+          code: 'DB_MIGRATION_FK',
+          tx_hash: data.tx_hash ?? null,
+        },
+        { status: 503 },
       );
+    }
+    if (code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      const existing = data.tx_hash ? getBookingByTxHash(data.tx_hash) : undefined;
+      if (existing) {
+        return bookingResponse({
+          id: existing.id,
+          cal_booking_uid: existing.cal_booking_uid,
+          calendar_event_url: existing.calendar_event_url,
+        });
+      }
     }
     return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
   }

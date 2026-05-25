@@ -1,46 +1,45 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useToast } from '@/components/ui/toast';
+import { CountUp } from '@/components/motion/count-up';
+import {
+  formatGoalCrc,
+  LiveTreasuryCounter,
+} from '@/components/motion/live-treasury-counter';
 import {
   MetricsPanel,
   MetricsPanelMono,
   MetricsPanelTitle,
 } from '@/components/ui-patterns/metrics-panel';
+import { useTreasuryPendingTx } from '@/contexts/TreasuryPendingTxContext';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { FOUNDATION_ADDRESS, FORMATION_GOAL_CRC, buildDonationTransactions } from '@/lib/crc-pay';
+import { dispatchLocalTreasuryCoin } from '@/lib/treasury-coin-events';
+import { TreasuryPayCelebration } from '@/components/about/TreasuryPayCelebration';
+import { cn } from '@/lib/utils';
 
 const PRESET_AMOUNTS = [10, 25, 50, 100];
-
-function fmt(n: number) {
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(n);
-}
 
 export function DonationSection() {
   const { address, isConnected } = useWallet();
   const { showToast } = useToast();
-  const [balance, setBalance] = useState<number | null>(null);
+  const { registerPending } = useTreasuryPendingTx();
+  const reducedMotion = usePrefersReducedMotion();
+  const donateButtonRef = useRef<HTMLButtonElement>(null);
+  const impactTargetRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<number>(25);
   const [custom, setCustom] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pulseKey, setPulseKey] = useState(0);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { Sdk } = await import('@aboutcircles/sdk');
-        const sdk = new Sdk();
-        const view = await sdk.rpc.profile.getProfileView(FOUNDATION_ADDRESS);
-        if (view?.v2Balance) setBalance(parseFloat(view.v2Balance as string));
-      } catch {
-        /* silent */
-      }
-    })();
-  }, []);
-
-  const raised = balance ?? 0;
-  const pct = Math.min(100, Math.round((raised / FORMATION_GOAL_CRC) * 100));
   const donationAmount = custom ? parseInt(custom, 10) : selected;
+
+  const handleCoinImpact = useCallback(() => {
+    setPulseKey((k) => k + 1);
+  }, []);
 
   async function handleDonate() {
     if (!address || !donationAmount || donationAmount <= 0) return;
@@ -48,9 +47,29 @@ export function DonationSection() {
     try {
       const { sendTransactions } = await import('@aboutcircles/miniapp-sdk');
       const txs = await buildDonationTransactions(address as `0x${string}`, donationAmount);
-      await sendTransactions(txs);
+      const hashes = await sendTransactions(txs);
+      const txHash = hashes[0];
+      const rect = donateButtonRef.current?.getBoundingClientRect();
+      registerPending({
+        txHash,
+        nominalCrc: donationAmount,
+        source: 'donation',
+        spawnRect: rect
+          ? { x: rect.left, y: rect.top, width: rect.width, height: rect.height }
+          : undefined,
+      });
+      impactTargetRef.current?.scrollIntoView({
+        behavior: reducedMotion ? 'auto' : 'smooth',
+        block: 'center',
+      });
+      dispatchLocalTreasuryCoin({
+        txHash,
+        nominalCrc: donationAmount,
+        spawnRect: rect
+          ? { x: rect.left, y: rect.top, width: rect.width, height: rect.height }
+          : undefined,
+      });
       showToast(`Thank you! ${donationAmount} CRC donated.`);
-      setBalance((b) => (b ?? 0) + donationAmount);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Donation failed', 'error');
     } finally {
@@ -60,6 +79,7 @@ export function DonationSection() {
 
   return (
     <MetricsPanel muted className="gap-6 px-5 py-6">
+      <TreasuryPayCelebration impactTargetRef={impactTargetRef} />
       <div className="flex flex-col gap-1">
         <MetricsPanelTitle>THP For Good DAO Treasury</MetricsPanelTitle>
         <MetricsPanelMono>
@@ -67,23 +87,54 @@ export function DonationSection() {
         </MetricsPanelMono>
       </div>
 
-      <div className="flex flex-col items-center gap-2 text-center">
-        <span className="text-5xl font-extrabold leading-none tracking-tight">
-          {balance === null ? '—' : `${pct}%`}
-        </span>
-        <span className="text-sm text-muted-foreground">goal: {fmt(FORMATION_GOAL_CRC)} CRC</span>
-        <div className="h-3 w-full max-w-md rounded-full bg-muted overflow-hidden">
+      <LiveTreasuryCounter
+        mode="goal"
+        impactTargetRef={impactTargetRef}
+        onCoinImpact={handleCoinImpact}
+      >
+        {({ balance, raised, pct, counterRef }) => (
           <div
-            className="h-full rounded-full bg-primary transition-all duration-700"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {balance === null
-            ? 'Loading balance…'
-            : `${fmt(raised)} CRC raised — funds one free THP formation at ${pct >= 100 ? '🎉 goal reached!' : `${pct}%`}`}
-        </p>
-      </div>
+            ref={impactTargetRef}
+            className="flex flex-col items-center gap-2 text-center"
+          >
+            <span
+              ref={counterRef as React.RefObject<HTMLSpanElement>}
+              className="text-5xl font-extrabold leading-none tracking-tight"
+            >
+              {balance === null ? '—' : <CountUp key={Math.round(pct)} value={pct} suffix="%" />}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              goal: {formatGoalCrc(FORMATION_GOAL_CRC)} CRC
+            </span>
+            <div
+              key={pulseKey}
+              className={cn(
+                'h-3 w-full max-w-md overflow-hidden rounded-full bg-muted',
+                pulseKey > 0 && 'motion-treasury-bar-pulse',
+              )}
+            >
+              <div
+                className="motion-progress-fill h-full w-full rounded-full bg-accent"
+                style={{
+                  transform: `scaleX(${pct / 100})`,
+                  transformOrigin: 'left center',
+                  transition: reducedMotion ? undefined : 'transform var(--motion-slow) ease-out',
+                }}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {balance === null ? (
+                'Loading balance…'
+              ) : (
+                <>
+                  <CountUp value={raised} format={formatGoalCrc} /> CRC raised — funds one free
+                  THP formation at {pct >= 100 ? '🎉 goal reached!' : `${pct}%`}
+                </>
+              )}
+            </p>
+          </div>
+        )}
+      </LiveTreasuryCounter>
 
       <div className="flex flex-col items-center gap-3">
         <p className="text-sm font-medium">Donate CRC to fund a learner</p>
@@ -98,8 +149,8 @@ export function DonationSection() {
               }}
               className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                 !custom && selected === amt
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border text-foreground hover:border-primary'
+                  ? 'border-accent bg-accent text-accent-foreground'
+                  : 'border-border text-foreground hover:border-accent/60'
               }`}
             >
               {amt} CRC
@@ -115,6 +166,8 @@ export function DonationSection() {
           />
         </div>
         <Button
+          ref={donateButtonRef}
+          data-treasury-donate-btn
           onClick={handleDonate}
           disabled={loading || !isConnected || !donationAmount || donationAmount <= 0}
           className="w-full max-w-xs"

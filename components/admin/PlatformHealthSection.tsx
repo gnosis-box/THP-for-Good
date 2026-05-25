@@ -51,7 +51,7 @@ function fmtWhen(iso: string) {
 }
 
 export function PlatformHealthSection({ stats }: Props) {
-  const { bookings, mentors, tags, recentBookings } = stats;
+  const { bookings, experts, tags, recentBookings, db } = stats;
 
   return (
     <section className="flex flex-col gap-4">
@@ -61,6 +61,23 @@ export function PlatformHealthSection({ stats }: Props) {
           Snapshot from SQLite — on-chain CRC volume remains the source of truth for payments.
         </p>
       </div>
+
+      {!db.migrationHealthy ? (
+        <Card size="sm" className="border-warning/40 bg-warning/5">
+          <CardHeader className="pb-0">
+            <CardTitle className="text-sm font-semibold text-warning">
+              Database migration needs repair
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-1 pt-2 text-sm text-muted-foreground">
+            <p>
+              Bookings FK target: <span className="font-mono">{db.bookingsFkTarget}</span>
+              {db.mentorsTableExists ? ' · legacy mentors table still present' : ''}
+            </p>
+            <p>Run <span className="font-mono">pnpm repair-db</span> on the server before new expert bookings.</p>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         <StatCard label="Bookings today" value={bookings.today} />
@@ -83,14 +100,14 @@ export function PlatformHealthSection({ stats }: Props) {
           variant={bookings.withoutTrust > 0 ? 'warning' : 'default'}
           hint="Paid bookings without attestation"
         />
-        <StatCard label="Active experts" value={mentors.active} />
+        <StatCard label="Active experts" value={experts.active} />
         <StatCard
           label="No Cal.com"
-          value={mentors.activeWithoutCal}
-          variant={mentors.activeWithoutCal > 0 ? 'warning' : 'default'}
+          value={experts.activeWithoutCal}
+          variant={experts.activeWithoutCal > 0 ? 'warning' : 'default'}
           hint="Active but not bookable in-app"
         />
-        <StatCard label="Inactive experts" value={mentors.inactive} />
+        <StatCard label="Inactive experts" value={experts.inactive} />
         <StatCard
           label="Pending tags"
           value={tags.pending}
@@ -114,7 +131,7 @@ export function PlatformHealthSection({ stats }: Props) {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium">
-                      {booking.mentor_name}{' '}
+                      {booking.expert_name}{' '}
                       <span className="font-normal text-muted-foreground">
                         ← {shortenAddress(booking.booker_address, 4)}
                       </span>
@@ -154,7 +171,7 @@ export function PlatformHealthSection({ stats }: Props) {
             </ul>
           )}
           <p className="mt-3 text-xs text-muted-foreground">
-            Participant view: <Link href="/calls" className="text-primary underline underline-offset-2">/calls</Link>
+            Participant view: <Link href="/calls" className="text-foreground underline underline-offset-2">/calls</Link>
           </p>
         </CardContent>
       </Card>

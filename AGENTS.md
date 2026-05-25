@@ -26,6 +26,8 @@ This is a starter template for building [Circles](https://aboutcircles.com) mini
 | **Centre de vérité (statut, priorité, exécution)** | [GitHub Project #1](https://github.com/orgs/gnosis-box/projects/1/views/1) |
 | **Index (liens, décisions verrouillées, anti-doublon)** | [`spec/PRD-MVP.md`](spec/PRD-MVP.md) · [`spec/useful-links.md`](spec/useful-links.md) |
 | **L4 backlog workflow (agents)** | This file § [L4 backlog workflow](#l4-backlog-workflow) · skill `thp-for-good-backlog` |
+| **Live treasury counter (L4)** | [`spec/live-crc-counter.md`](spec/live-crc-counter.md) · this file § [Live treasury counter](#live-treasury-counter-l4) |
+| **Skills & languages UX (L4)** | [`spec/skills-languages-ux.md`](spec/skills-languages-ux.md) · this file § [Skills & languages UX](#skills--languages-ux-l4) |
 
 Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**. Group by **Priority**.
 
@@ -87,13 +89,13 @@ Use when adding post-MVP features, external link curation, or multi-phase specs 
 | --- | --- | --- |
 | **DIV-L0-01** | **A — SQLite + API** | `better-sqlite3`, `lib/db.ts`, `lib/schema.sql`, `app/api/*`. No `mentors.json` / no client `localStorage` for bookings or trust. |
 | **DIV-L0-02** | **A — Coolify + Docker + volume** | Deploy on Coolify (not Vercel MVP). Add/maintain `Dockerfile`, `output: 'standalone'` in `next.config.ts`, persistent volume for `data/` SQLite. Set `NEXT_PUBLIC_FRAME_ANCESTOR_ORIGIN` at build. |
-| **DIV-L0-03** | **A′ — PRD routes + `/calls`** | **Target:** `/`, `/mentor/[id]`, `/mentor/register`, **`/calls`**, `/admin` (not `/mentors/*`). **Repo may still use `/history` until an `implementation` task is done.** |
-| **DIV-L1-01** | **A — Per-mentor price** | `price_crc` per mentor in DB; shown on card and PAY button. |
-| **DIV-L1-02** | **D — Split payment** | Admin: **min 50%** to foundation (`0x2b5E…`). Mentor picks **10 / 20 / 30 / 50%** to self; remainder to foundation. Not 100% treasury-only. |
-| **DIV-L1-03** | **C — Tags workflow** | Admin canonical catalogue; mentor **proposes** tag from mentor page; admin **approves/edits** tags. |
+| **DIV-L0-03** | **A′ — PRD routes + `/calls`** | **Target:** `/`, `/expert/[id]`, `/expert/register`, **`/calls`**, `/admin`. Legacy `/mentor/*` redirects to `/expert/*`. |
+| **DIV-L1-01** | **A — Per-expert price** | `price_crc` per expert in DB; shown on card and PAY button. |
+| **DIV-L1-02** | **D — Split payment** | Admin: **min 50%** to foundation (`0x2b5E…`). Expert picks **10 / 20 / 30 / 50%** to self; remainder to foundation. Not 100% treasury-only. |
+| **DIV-L1-03** | **C — Tags workflow** | Admin canonical catalogue; expert **proposes** tag from expert page; admin **approves/edits** tags. |
 | **DIV-L1-04** | **A — TRUST expert (MVP)** | Post-call on `/calls` Emitted: one `trust.add(expert)` per booking. **Per-domain trust-back / reputation** → L4 feature (see PRD § FEAT Trust-back), not MVP. |
 | **DIV-L1-05** | **A — Slots UI only** | Static `SlotPicker`; after PAY open `calendar_link`. Optional `slot_label` in DB later. No Google Calendar API in MVP. |
-| **DIV-L1-06** | **A′ — Dual onboarding** | Self-register at `/mentor/register` → public if `active=1`. Admin can promote members and activate/deactivate listings. Not admin-only seed. |
+| **DIV-L1-06** | **A′ — Dual onboarding** | Self-register at `/expert/register` → public if `active=1`. Admin can promote members and activate/deactivate listings. Not admin-only seed. |
 | **DIV-L1-07** | **A — Admin hidden from nav** | No Admin item in `NAV`; access `/admin` by URL only. |
 | **DIV-L1-08** | **D — Unified `/calls`** | One page: **Emitted** (booker) + **Received** (expert profile). No `/my-slots`. Prefer UI terms *participant / expert* over student/mentor. |
 | **DIV-L1-09** | **B — Balance error on click** | Do not pre-disable PAY for low CRC; on failed tx show **toast** (e.g. “Not enough CRC”). Not A (pre-disable) or C (both). |
@@ -144,6 +146,14 @@ components/
     SignInDemo.tsx              signMessage() demo
   profile/
     ProfileLookup.tsx           Profile lookup via getProfileView + getProfileByCid
+  treasury/
+    TreasuryProviders.tsx       Layout wrapper: pending-tx context + PayTreasuryFeedback
+    TreasuryCoinDevController.tsx  Dev-only URL/console triggers (no UI)
+    TreasuryCoinDevPanel.tsx    Optional floating dev UI (disabled by default)
+  motion/
+    crc-coin-flight.tsx         Portal coin animation
+    live-treasury-counter.tsx   WSS balance + CountUp + coin layer
+    pay-treasury-feedback.tsx   Post-PAY treasury leg chip
   ui/                           shadcn primitives — DO NOT hand-edit; regenerate via the CLI
 hooks/
   use-wallet.ts                 Re-export of useWallet
@@ -286,6 +296,52 @@ Components land in `components/ui/`. They use Base UI primitives, not Radix.
    curl -s -X POST https://rpc.aboutcircles.com/ -H "Content-Type: application/json" \
      -d '{"jsonrpc":"2.0","id":1,"method":"circles_<method>","params":[…]}'
    ```
+
+## Live treasury counter (L4)
+
+Implemented on **`impl/l4-live-crc-counter`** · spec [`spec/live-crc-counter.md`](spec/live-crc-counter.md) · issue [#87](https://github.com/gnosis-box/THP-for-Good/issues/87).
+
+| Fact | Value |
+| --- | --- |
+| Treasury org | `0xc02D5aaCA64dE428D571dA42538232C431E0CDeD` (`FOUNDATION_ADDRESS` in [`lib/crc-pay.ts`](lib/crc-pay.ts)) |
+| Balance source | `getProfileView(address).v2Balance` via [`fetchTreasuryBalanceCrc`](lib/analytics-rpc.ts) |
+| Live events | WSS `wss://rpc.aboutcircles.com/ws/subscribe` + `circles_subscribe`; polling fallback 30s |
+| Inbound filter | `CrcV2_TransferSummary` with `to === treasury`, `from !==` group `0x2b5E…` |
+
+**UI surfaces:** `/about` (cagnote + donate coin), `/stats` (treasury hero; WSS when visible), `/expert/[id]` (post-PAY treasury leg chip). **1 transaction = 1 coin** particle (`+X CRC` label).
+
+**Key modules:**
+
+```
+lib/treasury-events.ts       parse TransferSummary, dedupe
+lib/treasury-ws.ts           WSS client + reconnect
+hooks/use-live-treasury-balance.ts
+hooks/use-coin-burst-queue.ts
+components/motion/crc-coin-flight.tsx
+components/motion/live-treasury-counter.tsx
+contexts/TreasuryPendingTxContext.tsx   same-tab dedupe (donate + pay)
+components/treasury/TreasuryProviders.tsx  wraps layout; PayTreasuryFeedback global
+```
+
+**Manual / fake coin testing (no on-chain tx):** see spec **§8.3**. Floating panel **off by default**; in dev, `TreasuryCoinDevController` handles URL params + `__THP_TREASURY_DEMO__`. WSS probe: `node scripts/probe-treasury-ws.mjs` (Node 22+).
+
+**Do not** confuse group `0x2b5E…` with treasury org `0xc02D…` when filtering WSS events.
+
+## Skills & languages UX (L4)
+
+Branch **`feat/skills-languages-ux`** · spec [`spec/skills-languages-ux.md`](spec/skills-languages-ux.md) · issue [#94](https://github.com/gnosis-box/THP-for-Good/issues/94) · parent [#64](https://github.com/gnosis-box/THP-for-Good/issues/64).
+
+| Fact | Value |
+| --- | --- |
+| Display helper | [`getDisplayCallLanguages`](lib/languages.ts) — call languages, else spoken ∩ {en, fr} |
+| Filter URL | `/?skill=Web3&skill=DeFi&lang=fr&q=search` — SSR via [`app/page.tsx`](app/page.tsx) |
+| Discover UI | [`ExpertFilterSheet`](components/experts/ExpertFilterSheet.tsx) + [`ActiveFilterChips`](components/experts/ActiveFilterChips.tsx) |
+| Shared forms | [`ExpertProfileFields`](components/experts/ExpertProfileFields.tsx) · [`useSkillTags`](hooks/use-skill-tags.ts) |
+| Pill roles | `skill` / `language` / `price` in [`highlight-pill.ts`](components/ui-patterns/highlight-pill.ts) |
+
+**Card hierarchy:** name → session languages (globe + full labels) → skills (max 3 + tap expand) → trust.
+
+**Do not** reuse skill pill styling for languages on cards. **Do not** duplicate call/spoken fallback inline — always `getDisplayCallLanguages`.
 
 ## Commands
 

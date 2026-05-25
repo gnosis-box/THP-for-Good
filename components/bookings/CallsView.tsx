@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ExpertLanguageTags, ExpertSkillTags } from '@/components/ui-patterns/ExpertMeta';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Empty,
@@ -15,13 +15,17 @@ import {
 } from '@/components/ui/empty';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TrustButton } from '@/components/bookings/TrustButton';
+import { MotionEmpty } from '@/components/motion/motion-empty';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
-import { shortenAddress } from '@/lib/utils';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { motionClass, motionStaggerStyle } from '@/lib/motion';
+import { cn, shortenAddress } from '@/lib/utils';
 import { UI_COPY } from '@/lib/ui-copy';
-import type { BookingRow, MentorRow } from '@/lib/db';
+import { getDisplayCallLanguages } from '@/lib/languages';
+import type { BookingRow, ExpertRow } from '@/lib/db';
 
-type EnrichedBooking = BookingRow & { mentor: MentorRow };
-type ReceivedBooking = BookingRow & { mentor_name: string };
+type EnrichedBooking = BookingRow & { expert: ExpertRow };
+type ReceivedBooking = BookingRow & { expert_name: string };
 type EnrichedReceivedBooking = ReceivedBooking & { booker_name: string | null; booker_avatar: string | null };
 
 function fmtDate(iso: string) {
@@ -41,6 +45,18 @@ export function CallsView() {
   const [received, setReceived] = useState<EnrichedReceivedBooking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [skeletonVisible, setSkeletonVisible] = useState(true);
+  const reducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    if (loading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSkeletonVisible(true);
+      return;
+    }
+    const t = window.setTimeout(() => setSkeletonVisible(false), 180);
+    return () => window.clearTimeout(t);
+  }, [loading]);
 
   useEffect(() => {
     if (!address) return;
@@ -58,15 +74,15 @@ export function CallsView() {
       .then(async ([emittedRes, receivedRes]) => {
         if (!emittedRes.ok) throw new Error('Failed to fetch emitted calls');
         if (!receivedRes.ok) throw new Error('Failed to fetch received calls');
-        const emittedRows = (await emittedRes.json()) as (BookingRow & { mentor_name?: string })[];
+        const emittedRows = (await emittedRes.json()) as (BookingRow & { expert_name?: string })[];
         const receivedRows = (await receivedRes.json()) as ReceivedBooking[];
 
         const enriched = await Promise.all(
           emittedRows.map(async (booking) => {
-            const r = await fetch(`/api/mentors/${booking.mentor_id}`, { signal: controller.signal });
-            if (!r.ok) throw new Error(`Mentor ${booking.mentor_id} not found`);
-            const mentor = (await r.json()) as MentorRow;
-            return { ...booking, mentor };
+            const r = await fetch(`/api/experts/${booking.expert_id}`, { signal: controller.signal });
+            if (!r.ok) throw new Error(`Expert ${booking.expert_id} not found`);
+            const expert = (await r.json()) as ExpertRow;
+            return { ...booking, expert };
           }),
         );
 
@@ -128,8 +144,13 @@ export function CallsView() {
           </TabsTrigger>
         </TabsList>
 
-        {loading && (
-          <div className="mt-4 flex flex-col gap-4">
+        {(loading || skeletonVisible) && (
+          <div
+            className={cn(
+              'mt-4 flex flex-col gap-4 transition-opacity duration-200',
+              !loading && 'pointer-events-none opacity-0',
+            )}
+          >
             {[1, 2].map((n) => (
               <Skeleton key={n} className="h-32 w-full rounded-xl" />
             ))}
@@ -144,10 +165,16 @@ export function CallsView() {
 
         {!loading && !error && (
           <>
-            <TabsContent value="emitted" className="mt-4">
+            <TabsContent
+              value="emitted"
+              className={cn('mt-4', motionClass('', 'motion-tab-panel-in', reducedMotion))}
+            >
               <CallsEmittedList bookings={emitted} />
             </TabsContent>
-            <TabsContent value="received" className="mt-4">
+            <TabsContent
+              value="received"
+              className={cn('mt-4', motionClass('', 'motion-tab-panel-in', reducedMotion))}
+            >
               <CallsReceivedList bookings={received} />
             </TabsContent>
           </>
@@ -158,34 +185,39 @@ export function CallsView() {
 }
 
 function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
+  const reducedMotion = usePrefersReducedMotion();
+
   if (bookings.length === 0) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>No calls yet</EmptyTitle>
-          <EmptyDescription>{UI_COPY.calls.emptyEmitted}</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <MotionEmpty>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>No calls yet</EmptyTitle>
+            <EmptyDescription>{UI_COPY.calls.emptyEmitted}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </MotionEmpty>
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
-      {bookings.map((booking) => {
-        const { mentor } = booking;
+      {bookings.map((booking, index) => {
+        const { expert } = booking;
         return (
-          <Card key={booking.id}>
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">{mentor.name}</CardTitle>
-              {mentor.skills.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {mentor.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+          <Card
+            key={booking.id}
+            className={motionClass('', 'motion-list-item-in', reducedMotion)}
+            style={motionStaggerStyle(index, reducedMotion, 8)}
+          >
+            <CardHeader className="gap-2">
+              <CardTitle className="text-base font-semibold">{expert.name}</CardTitle>
+              <ExpertLanguageTags
+                languages={getDisplayCallLanguages(expert)}
+                variant="card"
+                maxVisible={2}
+              />
+              <ExpertSkillTags skills={expert.skills} maxVisible={2} />
             </CardHeader>
             <CardContent className="flex flex-col gap-1.5 text-sm text-muted-foreground">
               <span>{fmtDate(booking.created_at)}</span>
@@ -208,12 +240,12 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
                   {shortenAddress(booking.tx_hash, 6)}
                 </a>
               )}
-              {mentor.calendar_link && (
+              {expert.calendar_link && (
                 <a
-                  href={mentor.calendar_link}
+                  href={expert.calendar_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary underline-offset-4 hover:underline"
+                  className="text-xs text-foreground underline-offset-4 hover:underline"
                 >
                   Open calendar link
                 </a>
@@ -221,10 +253,10 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
             </CardContent>
             <CardFooter>
               <TrustButton
-                mentorAddress={mentor.circles_address}
-                mentorName={mentor.name}
-                mentorSkills={mentor.skills}
-                mentorId={mentor.id}
+                expertAddress={expert.circles_address}
+                expertName={expert.name}
+                expertSkills={expert.skills}
+                expertId={expert.id}
                 bookingId={booking.id}
               />
             </CardFooter>
@@ -236,21 +268,29 @@ function CallsEmittedList({ bookings }: { bookings: EnrichedBooking[] }) {
 }
 
 function CallsReceivedList({ bookings }: { bookings: EnrichedReceivedBooking[] }) {
+  const reducedMotion = usePrefersReducedMotion();
+
   if (bookings.length === 0) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>No incoming bookings</EmptyTitle>
-          <EmptyDescription>{UI_COPY.calls.emptyReceived}</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <MotionEmpty>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>No incoming bookings</EmptyTitle>
+            <EmptyDescription>{UI_COPY.calls.emptyReceived}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </MotionEmpty>
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
-      {bookings.map((booking) => (
-        <Card key={booking.id}>
+      {bookings.map((booking, index) => (
+        <Card
+          key={booking.id}
+          className={motionClass('', 'motion-list-item-in', reducedMotion)}
+          style={motionStaggerStyle(index, reducedMotion, 8)}
+        >
           <CardHeader>
             <div className="flex items-center gap-3">
               <Avatar className="size-10 shrink-0">

@@ -6,14 +6,16 @@ import { Dialog } from '@base-ui/react/dialog';
 import { CheckCircle2, XIcon } from 'lucide-react';
 
 import { Button, buttonVariants } from '@/components/ui/button';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { playBookingSuccessSound } from '@/lib/booking-success-sound';
+import { motionClass } from '@/lib/motion';
 import { UI_COPY } from '@/lib/ui-copy';
 import { cn } from '@/lib/utils';
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  mentorName: string;
+  expertName: string;
   slotLabel: string;
   txHash: string;
   calendarEventUrl: string | null;
@@ -24,7 +26,7 @@ type Props = {
 export function BookingSuccessDialog({
   open,
   onOpenChange,
-  mentorName,
+  expertName,
   slotLabel,
   txHash,
   calendarEventUrl,
@@ -32,10 +34,16 @@ export function BookingSuccessDialog({
   calInviteSent,
 }: Props) {
   const copy = UI_COPY.booking;
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    if (open) playBookingSuccessSound();
-  }, [open]);
+    if (!open || reducedMotion) {
+      if (open && reducedMotion) playBookingSuccessSound();
+      return;
+    }
+    const timer = window.setTimeout(() => playBookingSuccessSound(), 50);
+    return () => window.clearTimeout(timer);
+  }, [open, reducedMotion]);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -69,22 +77,47 @@ export function BookingSuccessDialog({
           </Dialog.Close>
 
           <div className="flex flex-col items-center gap-4 pt-2 text-center">
-            <div className="booking-success-icon flex size-16 items-center justify-center rounded-full bg-success/15">
+            <div
+              className={cn(
+                'flex size-16 items-center justify-center rounded-full bg-success/15',
+                motionClass('booking-success-icon', 'motion-success-icon-bounce', reducedMotion),
+              )}
+            >
               <CheckCircle2 className="size-10 text-success" strokeWidth={2} />
             </div>
 
-            <div className="flex flex-col gap-1">
+            <div
+              className={motionClass(
+                'flex flex-col gap-1',
+                'motion-fade-up motion-success-stagger-0',
+                reducedMotion,
+              )}
+            >
               <Dialog.Title className="text-lg font-semibold tracking-tight">
                 {copy.successDialogTitle}
               </Dialog.Title>
               <Dialog.Description className="text-sm text-muted-foreground">
-                {copy.successDialogSubtitle(mentorName)}
+                {copy.successDialogSubtitle(expertName)}
               </Dialog.Description>
             </div>
 
-            <p className="text-sm font-medium text-foreground">{slotLabel}</p>
+            <p
+              className={motionClass(
+                'text-sm font-medium text-foreground',
+                'motion-fade-up motion-success-stagger-1',
+                reducedMotion,
+              )}
+            >
+              {slotLabel}
+            </p>
 
-            <p className="text-xs text-muted-foreground">
+            <p
+              className={motionClass(
+                'text-xs text-muted-foreground',
+                'motion-fade-up motion-success-stagger-2',
+                reducedMotion,
+              )}
+            >
               {calInviteSent ? copy.successDialogCalEmail : copy.successDialogCalManual}
             </p>
 
@@ -92,12 +125,20 @@ export function BookingSuccessDialog({
               href={`https://explorer.aboutcircles.com/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="break-all font-mono text-xs text-trust underline underline-offset-2"
+              className={cn(
+                'break-all font-mono text-xs text-trust underline underline-offset-2',
+                motionClass('', 'motion-fade-up motion-success-stagger-2', reducedMotion),
+              )}
             >
               {txHash.slice(0, 10)}…{txHash.slice(-8)}
             </a>
 
-            <div className="flex w-full flex-col gap-2 pt-1">
+            <div
+              className={cn(
+                'flex w-full flex-col gap-2 pt-1',
+                motionClass('', 'motion-fade-up motion-success-stagger-3', reducedMotion),
+              )}
+            >
               <Link
                 href="/calls?tab=emitted"
                 className={cn(buttonVariants({ variant: 'default', size: 'lg' }), 'min-h-11 w-full')}

@@ -52,7 +52,7 @@ export function serializeCallLanguageCodes(codes: string[]): string | null {
   return unique.length > 0 ? unique.join(',') : null;
 }
 
-export function normalizeMentorLanguages(
+export function normalizeExpertLanguages(
   spokenInput: unknown,
   callInput?: unknown,
 ): { spoken_languages: string[]; call_languages: string[] } | { error: string } {
@@ -99,4 +99,30 @@ export function formatLanguageBadges(codes: string[]): string {
 /** Readable list: "English, French" */
 export function formatLanguageList(codes: string[]): string {
   return codes.map(languageLabel).join(', ');
+}
+
+export type ExpertLanguageFields = {
+  call_languages: string[];
+  spoken_languages: string[];
+};
+
+/** Bookable session languages: call_languages, else spoken ∩ {en, fr}. */
+export function getDisplayCallLanguages(expert: ExpertLanguageFields): string[] {
+  if (expert.call_languages.length > 0) {
+    return expert.call_languages;
+  }
+  return filterCallLanguageCodes(expert.spoken_languages);
+}
+
+export type SessionLanguageFormat = 'compact' | 'full' | 'card';
+
+/** Display helper — compact: "EN · FR"; full: "English, French"; card: "English · French". */
+export function formatSessionLanguages(
+  codes: string[],
+  variant: SessionLanguageFormat = 'full',
+): string {
+  if (codes.length === 0) return '';
+  if (variant === 'compact') return formatLanguageBadges(codes);
+  if (variant === 'card') return codes.map(languageLabel).join(' · ');
+  return formatLanguageList(codes);
 }

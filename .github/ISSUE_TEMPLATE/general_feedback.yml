@@ -1,0 +1,55 @@
+name: General feedback (from app)
+description: Share your impressions, suggestions, or anything on your mind — positive or constructive.
+title: "[Feedback]: "
+labels:
+  - feedback
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to share your thoughts. This goes directly to the THP for Good team.
+
+  - type: dropdown
+    id: overall
+    attributes:
+      label: Overall impression
+      options:
+        - Loved it
+        - Pretty good
+        - It's okay
+        - Needs work
+    validations:
+      required: true
+
+  - type: textarea
+    id: liked
+    attributes:
+      label: What worked well?
+      placeholder: A feature, a flow, a design detail you appreciated…
+
+  - type: textarea
+    id: improve
+    attributes:
+      label: What could be better?
+      placeholder: Friction points, missing features, confusing copy…
+
+  - type: textarea
+    id: other
+    attributes:
+      label: Anything else?
+      placeholder: Free-form — ideas, links, comparisons, screenshots…
+
+  - type: input
+    id: wallet
+    attributes:
+      label: Wallet address (optional)
+      description: Helps us correlate with on-chain activity if relevant.
+      placeholder: "0x…"
+
+  - type: checkboxes
+    id: host
+    attributes:
+      label: Context
+      options:
+        - label: I was inside the Circles playground / miniapp host
+        - label: I was browsing the site standalone (outside Circles)

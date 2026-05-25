@@ -10,10 +10,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "tsx scripts/seed.ts && node server.js",
+    "start": "tsx scripts/repair-db-fk.ts && tsx scripts/seed.ts && node server.js",
     "start:next-dev-server": "next start",
     "lint": "eslint",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "repair-db": "tsx scripts/repair-db-fk.ts",
+    "repair-db:dry-run": "tsx scripts/repair-db-fk.ts --dry-run",
+    "simulate-legacy-db": "tsx scripts/simulate-legacy-db.ts"
   },
   "dependencies": {
     "@aboutcircles/miniapp-sdk": "^0.1.30",
@@ -25,6 +28,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.16.0",
+    "motion": "^12.40.0",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",

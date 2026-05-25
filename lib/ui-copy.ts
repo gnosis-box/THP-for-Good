@@ -2,14 +2,21 @@
 
 export const UI_COPY = {
   home: {
-    title: 'Find a mentor',
+    title: 'Find an EXPERT to help you',
     subtitle: 'Book a 1:1 session. Pay in CRC. Fund the next student.',
     filterLabel: 'Which domain do you want help with?',
-    emptySearch: 'No mentors found for this search.',
-    searchPlaceholder: 'Search by name, skill or bio…',
+    emptySearch: 'No experts found for this search.',
+    searchPlaceholder: 'Search by name, skill, language or bio…',
     filterAll: 'All',
     languageFilterLabel: 'Session language',
     languageFilterAll: 'Any language',
+    languageFilterHelper: 'Experts who offer sessions in…',
+    filtersTitle: 'Filters',
+    filtersDescription: 'Find experts by skills and session languages.',
+    filtersButton: (count: number) => (count > 0 ? `Filters (${count})` : 'Filters'),
+    activeFiltersLabel: 'Active:',
+    clearAllFilters: 'Clear all',
+    applyFilters: 'Apply',
   },
   circlesHint: {
     title: 'Open in Circles to pay with CRC',
@@ -23,6 +30,7 @@ export const UI_COPY = {
     back: '← Back',
     editProfile: 'Edit my profile',
     availability: 'Availability',
+    selectAvailabilitySlot: 'Select an availability slot',
     bookSession: 'Book session',
     reviewAndPay: 'Review & pay',
     selectSlotFirst: 'Select a slot above first.',
@@ -35,13 +43,18 @@ export const UI_COPY = {
     successDialogCalManual: 'Use the calendar link below or from My Calls when ready.',
     successDialogViewCalls: 'View in My Calls (Emitted)',
     successDialogStay: 'Stay on this page',
+    successTreasuryRedirect: (treasuryCrc: number) =>
+      treasuryCrc > 0
+        ? `Booking confirmed! ${treasuryCrc} CRC is helping fund the next THP learner.`
+        : 'Booking confirmed!',
     viewMyCalls: 'View my calls',
     openCalBooking: 'Open Cal.com booking',
     openExpertCalendar: 'Open expert calendar',
     noCalSelf:
       'No availability configured yet. Click "Edit my profile" to connect your Cal.com.',
-    noCalVisitor: 'Availability not configured for this mentor yet.',
+    noCalVisitor: 'Availability not configured for this expert yet.',
     about: 'About',
+    skills: 'Skills',
   },
   calls: {
     emitted: 'Emitted',
@@ -51,7 +64,9 @@ export const UI_COPY = {
   },
   support: {
     reportIssue: 'Report issue',
-    reportIssueAria: 'Report an issue or send feedback on GitHub',
+    reportIssueAria: 'Report an issue on GitHub',
+    giveFeedback: 'Give feedback',
+    giveFeedbackAria: 'Share your thoughts and suggestions on GitHub',
   },
   trustCard: {
     loading: 'Trust…',
@@ -81,6 +96,15 @@ export const UI_COPY = {
     stopExpertLoading: 'Updating…',
     stopExpertConfirm:
       'Remove your expert profile from the directory? You can register again later.',
+    previewUnpin: 'Let preview scroll',
+    previewPin: 'Keep preview visible',
+    sessionPriceLabel: 'CRC session price',
+    sessionPriceInvalid: 'Enter a CRC price of at least 1.',
+    nameRequired: 'Connect a Circles wallet with a registered profile name.',
+    circlesProfileRequired:
+      'A Circles profile is required. Sign up at aboutcircles.com first.',
+    skillsRequired: 'Please select at least one skill.',
+    calRequired: 'Select a Cal.com event type for your availability.',
   },
   stats: {
     title: 'Stats',

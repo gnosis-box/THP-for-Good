@@ -1,10 +1,10 @@
 /** UX analytics only — no wallets, emails, CRC amounts, or tx hashes (see spec/analytics-strategy.md §6). */
 
 export type UmamiEventPayload = {
-  mentor_id?: number;
+  expert_id?: number;
 };
 
-const ALLOWED_KEYS = new Set(['mentor_id']);
+const ALLOWED_KEYS = new Set(['expert_id']);
 
 function sanitizePayload(data?: UmamiEventPayload): Record<string, number> | undefined {
   if (!data) return undefined;

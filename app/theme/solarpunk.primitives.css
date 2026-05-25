@@ -1,0 +1,28 @@
+/**
+ * THP Solarpunk — primitive palette (reference only).
+ * Components consume semantic tokens from solarpunk.tokens.css / globals.css.
+ */
+:root,
+:root[data-theme="solarpunk"],
+.dark {
+  --neutral-950: #0a1210;
+  --neutral-900: #121a17;
+  --neutral-850: #141f1c;
+  --neutral-800: #1a2521;
+  --neutral-600: #6b7f78;
+  --neutral-400: #8fa89e;
+  --neutral-100: #e8efe9;
+
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-leaf: #4caf50;
+  --green-moss: #5a9f76;
+  --teal-500: #14b8a6;
+  --teal-400: #2dd4bf;
+  --teal-muted: #58ada3;
+  --amber-500: #f59e0b;
+  --amber-sunflower: #e8b84a;
+  --amber-ochre: #c49a62;
+  --lime-500: #84cc16;
+  --red-400: #f87171;
+}
