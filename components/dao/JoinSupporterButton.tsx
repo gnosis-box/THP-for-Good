@@ -77,8 +77,6 @@ export function JoinSupporterButton({ onSuccess, isAlreadySupporter = false }: P
   const [errorMsg, setErrorMsg] = useState('');
 
   if (!isConnected || !isMiniappHost) return null;
-  // Hide entirely once we know they're a supporter (unless mid-flow showing success)
-  if (isAlreadySupporter && status !== 'success') return null;
 
   async function handleJoin() {
     setStatus('pending');
@@ -99,10 +97,10 @@ export function JoinSupporterButton({ onSuccess, isAlreadySupporter = false }: P
     }
   }
 
-  if (status === 'success') {
+  if (status === 'success' || isAlreadySupporter) {
     return (
       <div className="relative flex flex-col items-center gap-1">
-        {burst && <StarBurst />}
+        {burst && status === 'success' && <StarBurst />}
         <Button variant="outline" size="default" disabled className="btn-success-content gap-2">
           <Check className="size-4 text-orange-400" />
           <span className="text-orange-400">Thank you — you&apos;re a supporter!</span>
