@@ -17,7 +17,7 @@ import { CalConnect } from '@/components/experts/CalConnect';
 import { clampExpertShare } from '@/lib/crc-pay';
 import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
 import { ExpertShareSlider } from '@/components/experts/ExpertShareSlider';
-import { buildExpertLanguagePayload, initialCallLanguagesFromExpert } from '@/lib/expert-profile';
+import { buildExpertLanguagePayload } from '@/lib/expert-profile';
 import { StopExpertButton } from '@/components/experts/StopExpertButton';
 import { RegisterProfilePreview } from '@/components/experts/RegisterProfilePreview';
 import { RegisterStickyPreview } from '@/components/experts/RegisterStickyPreview';
@@ -73,7 +73,6 @@ export function RegisterForm() {
   const [expertShare, setExpertShare] = useState(clampExpertShare(20));
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [spokenLanguages, setSpokenLanguages] = useState<string[]>([]);
-  const [callLanguages, setCallLanguages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationAttempted, setValidationAttempted] = useState(false);
@@ -118,9 +117,6 @@ export function RegisterForm() {
         setExpertShare(clampExpertShare(expert.expert_share_percent ?? 20));
         setSelectedSkills(expert.skills);
         setSpokenLanguages(expert.spoken_languages);
-        setCallLanguages(
-          initialCallLanguagesFromExpert(expert.spoken_languages, expert.call_languages),
-        );
       })
       .catch(() => {
         if (!cancelled) setExistingExpert(null);
@@ -203,7 +199,7 @@ export function RegisterForm() {
         price_crc: sessionPriceCrc,
         expert_share_percent: expertShare,
         skills: selectedSkills,
-        ...buildExpertLanguagePayload(spokenLanguages, callLanguages),
+        ...buildExpertLanguagePayload(spokenLanguages),
       };
 
       if (isEditMode && existingExpert) {
@@ -291,7 +287,7 @@ export function RegisterForm() {
           priceCrc={previewPriceCrc}
           expertShare={expertShare}
           skills={selectedSkills}
-          callLanguages={callLanguages}
+          spokenLanguages={spokenLanguages}
           imageUrl={profile.status === 'found' ? profile.imageUrl : null}
           walletAddress={address!}
           balanceLabel={balance.status === 'ready' ? balance.formatted : undefined}
@@ -388,9 +384,7 @@ export function RegisterForm() {
             selectedSkills={selectedSkills}
             onSelectedSkillsChange={setSelectedSkills}
             spokenLanguages={spokenLanguages}
-            callLanguages={callLanguages}
             onSpokenLanguagesChange={setSpokenLanguages}
-            onCallLanguagesChange={setCallLanguages}
             skillsRequired
           />
         </CollapsibleSection>

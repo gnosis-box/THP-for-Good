@@ -11,9 +11,7 @@ type Props = {
   selectedSkills: string[];
   onSelectedSkillsChange: (skills: string[]) => void;
   spokenLanguages: string[];
-  callLanguages: string[];
   onSpokenLanguagesChange: (codes: string[]) => void;
-  onCallLanguagesChange: (codes: string[]) => void;
   size?: 'sm' | 'md';
   skillsRequired?: boolean;
   skillsHelperText?: string;
@@ -28,9 +26,7 @@ export function ExpertProfileFields({
   selectedSkills,
   onSelectedSkillsChange,
   spokenLanguages,
-  callLanguages,
   onSpokenLanguagesChange,
-  onCallLanguagesChange,
   size = 'md',
   skillsRequired = false,
   skillsHelperText,
@@ -51,9 +47,7 @@ export function ExpertProfileFields({
       />
       <LanguagePicker
         spoken={spokenLanguages}
-        call={callLanguages}
         onSpokenChange={onSpokenLanguagesChange}
-        onCallChange={onCallLanguagesChange}
         size={size}
       />
     </div>

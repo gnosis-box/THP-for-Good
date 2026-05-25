@@ -18,6 +18,7 @@ import { useTreasuryPendingTx } from '@/contexts/TreasuryPendingTxContext';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { FOUNDATION_ADDRESS, FORMATION_GOAL_CRC, buildDonationTransactions } from '@/lib/crc-pay';
 import { dispatchLocalTreasuryCoin } from '@/lib/treasury-coin-events';
+import { TreasuryPayCelebration } from '@/components/about/TreasuryPayCelebration';
 import { cn } from '@/lib/utils';
 
 const PRESET_AMOUNTS = [10, 25, 50, 100];
@@ -78,6 +79,7 @@ export function DonationSection() {
 
   return (
     <MetricsPanel muted className="gap-6 px-5 py-6">
+      <TreasuryPayCelebration impactTargetRef={impactTargetRef} />
       <div className="flex flex-col gap-1">
         <MetricsPanelTitle>THP For Good DAO Treasury</MetricsPanelTitle>
         <MetricsPanelMono>

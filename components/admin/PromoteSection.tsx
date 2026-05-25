@@ -27,7 +27,6 @@ type PromoteFormState = {
   priceCrc: number;
   selectedSkills: string[];
   spokenLanguages: string[];
-  callLanguages: string[];
   submitting: boolean;
   error: string | null;
 };
@@ -41,7 +40,6 @@ function defaultForm(name: string): PromoteFormState {
     priceCrc: 100,
     selectedSkills: [],
     spokenLanguages: [],
-    callLanguages: [],
     submitting: false,
     error: null,
   };
@@ -141,7 +139,7 @@ export function PromoteSection({
           expert_share_percent: form.expertShare,
           price_crc: form.priceCrc,
           skills: form.selectedSkills,
-          ...buildExpertLanguagePayload(form.spokenLanguages, form.callLanguages),
+          ...buildExpertLanguagePayload(form.spokenLanguages),
         }),
       });
 
@@ -318,12 +316,8 @@ export function PromoteSection({
                         setForm((prev) => prev && { ...prev, selectedSkills: skills })
                       }
                       spokenLanguages={form.spokenLanguages}
-                      callLanguages={form.callLanguages}
                       onSpokenLanguagesChange={(spokenLanguages) =>
                         setForm((prev) => prev && { ...prev, spokenLanguages })
-                      }
-                      onCallLanguagesChange={(callLanguages) =>
-                        setForm((prev) => prev && { ...prev, callLanguages })
                       }
                       size="sm"
                       skillsHelperText="Select at least one skill for this expert."
