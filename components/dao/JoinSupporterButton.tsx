@@ -77,7 +77,8 @@ export function JoinSupporterButton({ onSuccess, isAlreadySupporter = false }: P
   const [errorMsg, setErrorMsg] = useState('');
 
   if (!isConnected || !isMiniappHost) return null;
-  if (isAlreadySupporter && status === 'idle') return null;
+  // Hide entirely once we know they're a supporter (unless mid-flow showing success)
+  if (isAlreadySupporter && status !== 'success') return null;
 
   async function handleJoin() {
     setStatus('pending');

@@ -9,12 +9,12 @@ import type { DaoSupporterDto } from '@/app/api/dao/supporters/route';
 export function DaoSection() {
   const { address } = useWallet();
   const [refreshKey, setRefreshKey] = useState(0);
-  const [isSupporter, setIsSupporter] = useState(false);
+  const [supporters, setSupporters] = useState<DaoSupporterDto[]>([]);
 
-  function handleSupportersLoaded(supporters: DaoSupporterDto[]) {
-    if (!address) return;
-    setIsSupporter(supporters.some((s) => s.address.toLowerCase() === address.toLowerCase()));
-  }
+  // Derived reactively — recomputes whenever address or supporters change
+  const isSupporter = Boolean(
+    address && supporters.some((s) => s.address.toLowerCase() === address.toLowerCase()),
+  );
 
   return (
     <>
@@ -24,7 +24,7 @@ export function DaoSection() {
           onSuccess={() => setRefreshKey((k) => k + 1)}
         />
       </div>
-      <DaoView refreshKey={refreshKey} onSupportersLoaded={handleSupportersLoaded} />
+      <DaoView refreshKey={refreshKey} onSupportersLoaded={setSupporters} />
     </>
   );
 }
