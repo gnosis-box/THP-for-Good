@@ -94,6 +94,13 @@ export const UI_COPY = {
       'Remove your expert profile from the directory? You can register again later.',
     previewUnpin: 'Let preview scroll',
     previewPin: 'Keep preview visible',
+    sessionPriceLabel: 'CRC session price',
+    sessionPriceInvalid: 'Enter a CRC price of at least 1.',
+    nameRequired: 'Connect a Circles wallet with a registered profile name.',
+    circlesProfileRequired:
+      'A Circles profile is required. Sign up at aboutcircles.com first.',
+    skillsRequired: 'Please select at least one skill.',
+    calRequired: 'Select a Cal.com event type for your availability.',
   },
   stats: {
     title: 'Stats',

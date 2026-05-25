@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,36 @@ import { CollapsibleSection } from '@/components/motion/collapsible-section';
 import { UI_COPY } from '@/lib/ui-copy';
 import { useSkillTags } from '@/hooks/use-skill-tags';
 
+function parseSessionPriceInput(raw: string): number | null {
+  if (raw.trim() === '') return null;
+  const value = Number.parseInt(raw, 10);
+  if (!Number.isFinite(value)) return null;
+  return value;
+}
+
+type ValidationIssue = {
+  sectionRef: React.RefObject<HTMLDetailsElement | null>;
+  fieldId?: string;
+  message: string;
+};
+
+function openSectionAndFocus(
+  sectionRef: React.RefObject<HTMLDetailsElement | null>,
+  fieldId?: string,
+) {
+  const section = sectionRef.current;
+  if (!section) return;
+
+  section.open = true;
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  if (fieldId) {
+    window.setTimeout(() => {
+      document.getElementById(fieldId)?.focus({ preventScroll: true });
+    }, 150);
+  }
+}
+
 export function RegisterForm() {
   const { address, isConnected } = useWallet();
   const router = useRouter();
@@ -41,13 +71,23 @@ export function RegisterForm() {
   const [nameFromWallet, setNameFromWallet] = useState(false);
   const [bio, setBio] = useState('');
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(null);
-  const [priceCrc, setPriceCrc] = useState(100);
+  const [priceInput, setPriceInput] = useState('100');
   const [expertShare, setExpertShare] = useState(clampExpertShare(20));
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [spokenLanguages, setSpokenLanguages] = useState<string[]>([]);
   const [callLanguages, setCallLanguages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationAttempted, setValidationAttempted] = useState(false);
+
+  const profileSectionRef = useRef<HTMLDetailsElement>(null);
+  const skillsSectionRef = useRef<HTMLDetailsElement>(null);
+  const availabilitySectionRef = useRef<HTMLDetailsElement>(null);
+  const pricingSectionRef = useRef<HTMLDetailsElement>(null);
+
+  const sessionPriceCrc = parseSessionPriceInput(priceInput);
+  const hasValidSessionPrice = sessionPriceCrc !== null && sessionPriceCrc >= 1;
+  const previewPriceCrc = hasValidSessionPrice ? sessionPriceCrc : 0;
 
   const isEditMode = existingExpert !== null;
 
@@ -76,7 +116,7 @@ export function RegisterForm() {
         setNameFromWallet(false);
         setBio(expert.bio ?? '');
         setCalEventTypeId(expert.cal_event_type_id);
-        setPriceCrc(expert.price_crc);
+        setPriceInput(String(expert.price_crc));
         setExpertShare(clampExpertShare(expert.expert_share_percent ?? 20));
         setSelectedSkills(expert.skills);
         setSpokenLanguages(expert.spoken_languages);
@@ -109,23 +149,58 @@ export function RegisterForm() {
     }
   }
 
+  function getFirstValidationIssue(): ValidationIssue | null {
+    if (profile.status !== 'found') {
+      return {
+        sectionRef: profileSectionRef,
+        message: UI_COPY.register.circlesProfileRequired,
+      };
+    }
+    if (!name.trim()) {
+      return {
+        sectionRef: profileSectionRef,
+        fieldId: 'name',
+        message: UI_COPY.register.nameRequired,
+      };
+    }
+    if (selectedSkills.length === 0) {
+      return {
+        sectionRef: skillsSectionRef,
+        message: UI_COPY.register.skillsRequired,
+      };
+    }
+    if (!calEventTypeId) {
+      return {
+        sectionRef: availabilitySectionRef,
+        message: UI_COPY.register.calRequired,
+      };
+    }
+    if (!hasValidSessionPrice) {
+      return {
+        sectionRef: pricingSectionRef,
+        fieldId: 'price',
+        message: UI_COPY.register.sessionPriceInvalid,
+      };
+    }
+    return null;
+  }
+
+  function revealFirstValidationIssue(): boolean {
+    setValidationAttempted(true);
+    const issue = getFirstValidationIssue();
+    if (!issue) return true;
+
+    setError(issue.message);
+    openSectionAndFocus(issue.sectionRef, issue.fieldId);
+    return false;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
     if (!address) return;
-    if (!name.trim()) {
-      setError('Connect a Circles wallet with a registered profile name.');
-      return;
-    }
-    if (selectedSkills.length === 0) {
-      setError('Please select at least one skill.');
-      return;
-    }
-    if (!calEventTypeId) {
-      setError('Select a Cal.com event type for your availability.');
-      return;
-    }
+    if (!revealFirstValidationIssue()) return;
 
     setSubmitting(true);
     try {
@@ -133,7 +208,7 @@ export function RegisterForm() {
         name: name.trim(),
         bio: bio.trim() || null,
         cal_event_type_id: calEventTypeId,
-        price_crc: priceCrc,
+        price_crc: sessionPriceCrc,
         expert_share_percent: expertShare,
         skills: selectedSkills,
         ...buildExpertLanguagePayload(spokenLanguages, callLanguages),
@@ -221,7 +296,7 @@ export function RegisterForm() {
         <RegisterProfilePreview
           name={name}
           bio={bio}
-          priceCrc={priceCrc}
+          priceCrc={previewPriceCrc}
           expertShare={expertShare}
           skills={selectedSkills}
           callLanguages={callLanguages}
@@ -273,7 +348,7 @@ export function RegisterForm() {
       ) : null}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <CollapsibleSection title="Profile" defaultOpen>
+        <CollapsibleSection ref={profileSectionRef} title="Profile" defaultOpen>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Field>
@@ -283,12 +358,12 @@ export function RegisterForm() {
                 <Input
                   id="name"
                   type="text"
-                  required
                   readOnly={nameFromWallet}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your Circles profile name"
                   className={cn(nameFromWallet && 'cursor-default bg-muted/60')}
+                  aria-invalid={validationAttempted && !name.trim()}
                 />
               </Field>
               {nameFromWallet && (
@@ -309,7 +384,11 @@ export function RegisterForm() {
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Skills & languages" defaultOpen={isEditMode}>
+        <CollapsibleSection
+          ref={skillsSectionRef}
+          title="Skills & languages"
+          defaultOpen={isEditMode}
+        >
           <ExpertProfileFields
             tags={tags}
             tagsLoading={tagsLoading}
@@ -326,7 +405,11 @@ export function RegisterForm() {
           />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Availability (Cal.com)" defaultOpen={isEditMode}>
+        <CollapsibleSection
+          ref={availabilitySectionRef}
+          title="Availability (Cal.com)"
+          defaultOpen={isEditMode}
+        >
           <div className="flex flex-col gap-1.5">
             <CalConnect onConnect={setCalEventTypeId} />
             {calEventTypeId && (
@@ -335,17 +418,34 @@ export function RegisterForm() {
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Pricing & payment split" defaultOpen={isEditMode}>
+        <CollapsibleSection
+          ref={pricingSectionRef}
+          title="Pricing & payment split"
+          defaultOpen={isEditMode}
+        >
           <div className="flex flex-col gap-4">
-            <Field>
-              <FieldLabel htmlFor="price">CRC price per session</FieldLabel>
+            <Field
+              orientation="horizontal"
+              className="w-fit items-center gap-3"
+              data-invalid={!hasValidSessionPrice || undefined}
+            >
+              <FieldLabel htmlFor="price" className="shrink-0 font-medium">
+                {UI_COPY.register.sessionPriceLabel}
+              </FieldLabel>
               <Input
                 id="price"
-                type="number"
-                min={1}
-                value={priceCrc}
-                onChange={(e) => setPriceCrc(parseInt(e.target.value, 10) || 1)}
-                className="w-32"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                value={priceInput}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  if (next === '' || /^\d+$/.test(next)) {
+                    setPriceInput(next);
+                  }
+                }}
+                className="w-24 tabular-nums"
+                aria-invalid={!hasValidSessionPrice}
               />
             </Field>
 
@@ -364,17 +464,7 @@ export function RegisterForm() {
 
         {error && <StatusAlert variant="error" title="Registration failed" description={error} />}
 
-        <Button
-          type="submit"
-          disabled={
-            submitting ||
-            profile.status !== 'found' ||
-            !name.trim() ||
-            !calEventTypeId ||
-            selectedSkills.length === 0
-          }
-          className="w-fit"
-        >
+        <Button type="submit" disabled={submitting} className="w-fit">
           {submitting
             ? isEditMode
               ? UI_COPY.register.saving
