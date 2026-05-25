@@ -88,9 +88,10 @@ function SkeletonGrid({ count = 6 }: { count?: number }) {
 
 interface Props {
   refreshKey?: number;
+  onSupportersLoaded?: (supporters: DaoSupporterDto[]) => void;
 }
 
-export function DaoView({ refreshKey = 0 }: Props) {
+export function DaoView({ refreshKey = 0, onSupportersLoaded }: Props) {
   const [members, setMembers] = useState<DaoMemberDto[]>([]);
   const [supporters, setSupporters] = useState<DaoSupporterDto[]>([]);
   const [membersLoading, setMembersLoading] = useState(true);
@@ -127,6 +128,7 @@ export function DaoView({ refreshKey = 0 }: Props) {
           return;
         }
         const list = data.supporters ?? [];
+        onSupportersLoaded?.(list);
         // Find addresses that weren't there before
         const fresh = new Set(
           list.map((s) => s.address).filter((a) => !knownAddresses.current.has(a)),

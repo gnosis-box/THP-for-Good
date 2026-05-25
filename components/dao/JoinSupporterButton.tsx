@@ -67,15 +67,17 @@ function StarBurst() {
 
 interface Props {
   onSuccess?: () => void;
+  isAlreadySupporter?: boolean;
 }
 
-export function JoinSupporterButton({ onSuccess }: Props) {
+export function JoinSupporterButton({ onSuccess, isAlreadySupporter = false }: Props) {
   const { isConnected, isMiniappHost } = useWallet();
   const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
   const [burst, setBurst] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   if (!isConnected || !isMiniappHost) return null;
+  if (isAlreadySupporter && status === 'idle') return null;
 
   async function handleJoin() {
     setStatus('pending');
@@ -101,8 +103,8 @@ export function JoinSupporterButton({ onSuccess }: Props) {
       <div className="relative flex flex-col items-center gap-1">
         {burst && <StarBurst />}
         <Button variant="outline" size="default" disabled className="btn-success-content gap-2">
-          <Check className="size-4 text-emerald-400" />
-          <span className="text-emerald-400">You&apos;re a supporter!</span>
+          <Check className="size-4 text-orange-400" />
+          <span className="text-orange-400">Thank you — you&apos;re a supporter!</span>
         </Button>
       </div>
     );
