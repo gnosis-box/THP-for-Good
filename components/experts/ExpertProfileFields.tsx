@@ -6,6 +6,7 @@ import type { TagRow } from '@/lib/db';
 
 type Props = {
   tags: TagRow[];
+  setTags: React.Dispatch<React.SetStateAction<TagRow[]>>;
   tagsLoading?: boolean;
   selectedSkills: string[];
   onSelectedSkillsChange: (skills: string[]) => void;
@@ -13,17 +14,16 @@ type Props = {
   callLanguages: string[];
   onSpokenLanguagesChange: (codes: string[]) => void;
   onCallLanguagesChange: (codes: string[]) => void;
-  newSkill: string;
-  onNewSkillChange: (value: string) => void;
-  onAddNewSkill: () => void;
   size?: 'sm' | 'md';
   skillsRequired?: boolean;
   skillsHelperText?: string;
+  newTagStatus?: TagRow['status'];
 };
 
 /** Shared skills + session languages block for register, edit, and promote flows. */
 export function ExpertProfileFields({
   tags,
+  setTags,
   tagsLoading = false,
   selectedSkills,
   onSelectedSkillsChange,
@@ -31,26 +31,23 @@ export function ExpertProfileFields({
   callLanguages,
   onSpokenLanguagesChange,
   onCallLanguagesChange,
-  newSkill,
-  onNewSkillChange,
-  onAddNewSkill,
   size = 'md',
   skillsRequired = false,
   skillsHelperText,
+  newTagStatus = 'approved',
 }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <SkillTagPicker
         tags={tags}
+        setTags={setTags}
         selected={selectedSkills}
         onSelectedChange={onSelectedSkillsChange}
         loading={tagsLoading}
         required={skillsRequired}
         helperText={skillsHelperText}
         size={size}
-        newSkill={newSkill}
-        onNewSkillChange={onNewSkillChange}
-        onAddNewSkill={onAddNewSkill}
+        newTagStatus={newTagStatus}
       />
       <LanguagePicker
         spoken={spokenLanguages}

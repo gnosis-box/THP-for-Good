@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CalConnect } from '@/components/experts/CalConnect';
 import { EXPERT_SHARE_OPTIONS, clampExpertShare } from '@/lib/crc-pay';
-import { addExpertSkillDraft } from '@/components/experts/SkillTagPicker';
 import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
 import { buildExpertLanguagePayload, initialCallLanguagesFromExpert } from '@/lib/expert-profile';
 import { StopExpertButton } from '@/components/experts/StopExpertButton';
@@ -42,15 +41,8 @@ export function ExpertEditForm({
   const [calEventTypeId, setCalEventTypeId] = useState<number | null>(expert.cal_event_type_id);
   const [priceCrc, setPriceCrc] = useState(expert.price_crc);
   const [expertShare, setExpertShare] = useState(clampExpertShare(expert.expert_share_percent ?? 20));
-  const [newSkill, setNewSkill] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  function addNewSkill() {
-    if (addExpertSkillDraft(setTags, selectedSkills, setSelectedSkills, newSkill, 'approved')) {
-      setNewSkill('');
-    }
-  }
 
   async function handleSave() {
     if (selectedSkills.length === 0) {
@@ -117,15 +109,13 @@ export function ExpertEditForm({
       <CollapsibleSection title="Skills & languages" defaultOpen={expandAll}>
         <ExpertProfileFields
           tags={tags}
+          setTags={setTags}
           selectedSkills={selectedSkills}
           onSelectedSkillsChange={setSelectedSkills}
           spokenLanguages={spokenLanguages}
           callLanguages={callLanguages}
           onSpokenLanguagesChange={setSpokenLanguages}
           onCallLanguagesChange={setCallLanguages}
-          newSkill={newSkill}
-          onNewSkillChange={setNewSkill}
-          onAddNewSkill={addNewSkill}
           size="sm"
         />
       </CollapsibleSection>

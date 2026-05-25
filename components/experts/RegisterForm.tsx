@@ -15,7 +15,6 @@ import { useCirclesProfile } from '@/hooks/use-circles-profile';
 import type { ExpertRow } from '@/lib/db';
 import { CalConnect } from '@/components/experts/CalConnect';
 import { clampExpertShare } from '@/lib/crc-pay';
-import { addExpertSkillDraft } from '@/components/experts/SkillTagPicker';
 import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
 import { ExpertShareSlider } from '@/components/experts/ExpertShareSlider';
 import { buildExpertLanguagePayload, initialCallLanguagesFromExpert } from '@/lib/expert-profile';
@@ -66,7 +65,6 @@ export function RegisterForm() {
   const { tags, loading: tagsLoading, setTags } = useSkillTags();
   const [loadingExpert, setLoadingExpert] = useState(false);
   const [existingExpert, setExistingExpert] = useState<ExpertRow | null>(null);
-  const [newSkill, setNewSkill] = useState('');
   const [name, setName] = useState('');
   const [nameFromWallet, setNameFromWallet] = useState(false);
   const [bio, setBio] = useState('');
@@ -142,12 +140,6 @@ export function RegisterForm() {
     setNameFromWallet(true);
     setBio((prev) => prev.trim() || profile.bio || '');
   }, [profile, isEditMode]);
-
-  function addNewSkill() {
-    if (addExpertSkillDraft(setTags, selectedSkills, setSelectedSkills, newSkill, 'approved')) {
-      setNewSkill('');
-    }
-  }
 
   function getFirstValidationIssue(): ValidationIssue | null {
     if (profile.status !== 'found') {
@@ -391,6 +383,7 @@ export function RegisterForm() {
         >
           <ExpertProfileFields
             tags={tags}
+            setTags={setTags}
             tagsLoading={tagsLoading}
             selectedSkills={selectedSkills}
             onSelectedSkillsChange={setSelectedSkills}
@@ -398,9 +391,6 @@ export function RegisterForm() {
             callLanguages={callLanguages}
             onSpokenLanguagesChange={setSpokenLanguages}
             onCallLanguagesChange={setCallLanguages}
-            newSkill={newSkill}
-            onNewSkillChange={setNewSkill}
-            onAddNewSkill={addNewSkill}
             skillsRequired
           />
         </CollapsibleSection>

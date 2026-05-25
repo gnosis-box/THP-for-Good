@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 import { useRowFlash } from '@/hooks/use-row-flash';
 import { CalConnect } from '@/components/experts/CalConnect';
 import { EXPERT_SHARE_OPTIONS, clampExpertShare, type ExpertSharePercent } from '@/lib/crc-pay';
-import { addExpertSkillDraft } from '@/components/experts/SkillTagPicker';
 import { ExpertProfileFields } from '@/components/experts/ExpertProfileFields';
 import { buildExpertLanguagePayload } from '@/lib/expert-profile';
 import { useSkillTags } from '@/hooks/use-skill-tags';
@@ -84,7 +83,6 @@ export function PromoteSection({
   const isLoading = initialGroupAddress ? membersLoading : loadingMembers;
   const [promotingAddress, setPromotingAddress] = useState<string | null>(null);
   const [form, setForm] = useState<PromoteFormState | null>(null);
-  const [newSkill, setNewSkill] = useState('');
 
   useEffect(() => {
     if (initialGroupAddress) setGroupAddress(initialGroupAddress);
@@ -116,27 +114,11 @@ export function PromoteSection({
   function startPromote(member: MemberEntry) {
     setPromotingAddress(member.address);
     setForm(defaultForm(member.name));
-    setNewSkill('');
   }
 
   function cancelPromote() {
     setPromotingAddress(null);
     setForm(null);
-  }
-
-  function addNewSkill() {
-    if (!form) return;
-    if (
-      addExpertSkillDraft(
-        setTags,
-        form.selectedSkills,
-        (skills) => setForm((prev) => prev && { ...prev, selectedSkills: skills }),
-        newSkill,
-        'pending',
-      )
-    ) {
-      setNewSkill('');
-    }
   }
 
   async function submitPromote() {
@@ -330,6 +312,7 @@ export function PromoteSection({
 
                     <ExpertProfileFields
                       tags={tags}
+                      setTags={setTags}
                       selectedSkills={form.selectedSkills}
                       onSelectedSkillsChange={(skills) =>
                         setForm((prev) => prev && { ...prev, selectedSkills: skills })
@@ -342,11 +325,9 @@ export function PromoteSection({
                       onCallLanguagesChange={(callLanguages) =>
                         setForm((prev) => prev && { ...prev, callLanguages })
                       }
-                      newSkill={newSkill}
-                      onNewSkillChange={setNewSkill}
-                      onAddNewSkill={addNewSkill}
                       size="sm"
                       skillsHelperText="Select at least one skill for this expert."
+                      newTagStatus="pending"
                     />
 
                     <div className="flex flex-col gap-1">

@@ -1,8 +1,16 @@
 'use client';
 
-import { tagChipClass } from '@/components/ui-patterns/highlight-pill';
+import {
+  MultiSelectSearch,
+  type MultiSelectOption,
+} from '@/components/ui-patterns/multi-select-search';
 import { cn } from '@/lib/utils';
-import { CALL_LANGUAGES, SESSION_LANGUAGES, filterCallLanguageCodes } from '@/lib/languages';
+import {
+  CALL_LANGUAGES,
+  SESSION_LANGUAGES,
+  filterCallLanguageCodes,
+  languageLabel,
+} from '@/lib/languages';
 
 type Props = {
   spoken: string[];
@@ -13,8 +21,8 @@ type Props = {
 };
 
 const sizeClasses = {
-  sm: 'min-h-8 rounded-full px-2.5 py-0.5 text-xs',
-  md: 'min-h-11 rounded-full px-4 text-sm',
+  sm: { input: 'h-8 text-xs' },
+  md: { input: 'h-11 text-sm' },
 } as const;
 
 export function LanguagePicker({
@@ -24,25 +32,22 @@ export function LanguagePicker({
   onCallChange,
   size = 'md',
 }: Props) {
-  const pill = sizeClasses[size];
+  const styles = sizeClasses[size];
 
-  function toggleSpoken(code: string) {
-    if (spoken.includes(code)) {
-      const nextSpoken = spoken.filter((c) => c !== code);
-      onSpokenChange(nextSpoken);
-      onCallChange(filterCallLanguageCodes(call.filter((c) => nextSpoken.includes(c))));
-      return;
-    }
-    onSpokenChange([...spoken, code]);
-  }
+  const spokenOptions: MultiSelectOption[] = SESSION_LANGUAGES.map(({ code, label }) => ({
+    value: code,
+    label,
+  }));
 
-  const callOptions = filterCallLanguageCodes(spoken);
+  const callOptions: MultiSelectOption[] = filterCallLanguageCodes(spoken).map((code) => ({
+    value: code,
+    label: CALL_LANGUAGES.find((lang) => lang.code === code)?.label ?? languageLabel(code),
+  }));
 
-  function toggleCall(code: string) {
-    if (!callOptions.includes(code)) return;
-    onCallChange(
-      call.includes(code) ? call.filter((c) => c !== code) : [...call, code],
-    );
+  function handleSpokenChange(nextSpoken: string[]) {
+    const normalized = nextSpoken.map((code) => code.toLowerCase());
+    onSpokenChange(normalized);
+    onCallChange(filterCallLanguageCodes(call.filter((code) => normalized.includes(code))));
   }
 
   return (
@@ -54,25 +59,18 @@ export function LanguagePicker({
         <p className="text-xs text-muted-foreground">
           Languages you can communicate in during a session.
         </p>
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Spoken languages">
-          {SESSION_LANGUAGES.map(({ code, label }) => {
-            const active = spoken.includes(code);
-            return (
-              <button
-                key={code}
-                type="button"
-                aria-pressed={active}
-                onClick={() => toggleSpoken(code)}
-                className={cn(pill, tagChipClass(active))}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+        <MultiSelectSearch
+          options={spokenOptions}
+          selectedValues={spoken}
+          onSelectedChange={handleSpokenChange}
+          placeholder="Search spoken languages…"
+          ariaLabel="Spoken languages"
+          emptyListMessage="All spoken languages are selected."
+          inputClassName={styles.input}
+        />
       </div>
 
-      {spoken.length > 0 && (
+      {spoken.length > 0 ? (
         <div className="flex flex-col gap-1.5">
           <span className={cn('font-medium', size === 'sm' ? 'text-xs' : 'text-sm')}>
             Languages for calls
@@ -86,32 +84,20 @@ export function LanguagePicker({
               Add English or French under spoken languages to configure call languages.
             </p>
           ) : (
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Call languages">
-              {callOptions.map((code) => {
-                const label =
-                  CALL_LANGUAGES.find((l) => l.code === code)?.label ?? code.toUpperCase();
-                const active = call.includes(code);
-                return (
-                  <button
-                    key={code}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => toggleCall(code)}
-                    className={cn(
-                      pill,
-                      active
-                        ? 'bg-accent text-accent-foreground'
-                        : tagChipClass(false),
-                    )}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
+            <MultiSelectSearch
+              options={callOptions}
+              selectedValues={call}
+              onSelectedChange={(codes) =>
+                onCallChange(filterCallLanguageCodes(codes.map((code) => code.toLowerCase())))
+              }
+              placeholder="Search call languages…"
+              ariaLabel="Call languages"
+              emptyListMessage="All call languages are selected."
+              inputClassName={styles.input}
+            />
           )}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
