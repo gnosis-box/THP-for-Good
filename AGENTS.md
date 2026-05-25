@@ -28,6 +28,7 @@ This is a starter template for building [Circles](https://aboutcircles.com) mini
 | **L4 backlog workflow (agents)** | This file § [L4 backlog workflow](#l4-backlog-workflow) · skill `thp-for-good-backlog` |
 | **Live treasury counter (L4)** | [`spec/live-crc-counter.md`](spec/live-crc-counter.md) · this file § [Live treasury counter](#live-treasury-counter-l4) |
 | **Skills & languages UX (L4)** | [`spec/skills-languages-ux.md`](spec/skills-languages-ux.md) · this file § [Skills & languages UX](#skills--languages-ux-l4) |
+| **Graphify (agent knowledge graph)** | `graphify-out/` · this file § [Graphify](#graphify-agent-knowledge-graph) · [`.cursor/rules/graphify.mdc`](.cursor/rules/graphify.mdc) |
 
 Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**. Group by **Priority**.
 
@@ -342,6 +343,47 @@ Branch **`feat/skills-languages-ux`** · spec [`spec/skills-languages-ux.md`](sp
 **Card hierarchy:** name → session languages (globe + full labels) → skills (max 3 + tap expand) → trust.
 
 **Do not** reuse skill pill styling for languages on cards. **Do not** duplicate call/spoken fallback inline — always `getDisplayCallLanguages`.
+
+## Graphify (agent knowledge graph)
+
+On **`dev`** · outputs in [`graphify-out/`](graphify-out/) · Cursor rule [`.cursor/rules/graphify.mdc`](.cursor/rules/graphify.mdc).
+
+| Fact | Value |
+| --- | --- |
+| CLI | `graphify` (Python package `graphifyy`) |
+| Graph data | [`graphify-out/graph.json`](graphify-out/graph.json) — AST extraction + community clusters |
+| Audit report | [`graphify-out/GRAPH_REPORT.md`](graphify-out/GRAPH_REPORT.md) — god nodes, surprising connections |
+| Interactive viz | [`graphify-out/graph.html`](graphify-out/graph.html) — open in browser, no server |
+| Gitignored | `graphify-out/cache/`, `graphify-out/.graphify_*` |
+| Freshness | Report header lists build commit; compare with `git rev-parse HEAD` |
+
+**Current snapshot (2026-05-25):** 1528 nodes · 3170 edges · 73 communities · AST-only (0 LLM tokens). Top god nodes: `cn()`, `usePrefersReducedMotion()`, `useWallet()`, `motionClass()`, `UI_COPY`.
+
+**Agent workflow:**
+
+1. For architecture or codebase questions, when `graphify-out/graph.json` exists, prefer scoped CLI queries over raw grep or full-repo reads:
+   ```bash
+   graphify query "<question>"
+   graphify path "<concept A>" "<concept B>"
+   graphify explain "<concept>"
+   ```
+2. Read [`GRAPH_REPORT.md`](graphify-out/GRAPH_REPORT.md) only for broad architecture review or when query/path/explain do not surface enough context.
+3. If `graphify-out/wiki/index.md` exists, navigate the wiki instead of reading raw files.
+4. After modifying **code** files in a session, refresh the graph (AST-only, no API cost):
+   ```bash
+   graphify update .
+   ```
+
+**Setup (once per machine):**
+
+```bash
+pip install graphifyy          # or: graphify install
+graphify install --platform cursor
+```
+
+Full semantic rebuild (docs + LLM extraction): `/graphify .` in Cursor, or follow the `graphify` skill.
+
+**Do not** commit `graphify-out/cache/` or local interpreter state (`.graphify_python`). **Do not** treat the graph as product spec — locked decisions remain in this file and [`spec/PRD-MVP.md`](spec/PRD-MVP.md).
 
 ## Commands
 
