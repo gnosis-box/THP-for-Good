@@ -15,7 +15,7 @@ type MemberEntry = {
   address: `0x${string}`;
   name: string;
   imageUrl: string | undefined;
-  trustsReceivedCount: number;
+  trustedByCount: number;
   score: number | null;
 };
 
@@ -249,7 +249,7 @@ export function PromoteSection({
                       <span className="font-medium truncate">{member.name}</span>
                       <span className="text-xs text-muted-foreground font-mono truncate">{member.address}</span>
                       <span className="text-xs text-muted-foreground">
-                        {member.score !== null ? `Score: ${member.score}/100` : `${member.trustsReceivedCount} trusted by`}
+                        {member.score !== null ? `Score: ${member.score}/100` : `${member.trustedByCount} trusted by`}
                       </span>
                     </div>
                   </div>

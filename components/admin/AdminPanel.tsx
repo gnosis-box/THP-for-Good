@@ -27,7 +27,7 @@ export function AdminPanel() {
   const [health, setHealth] = useState<AdminHealthStats | null>(null);
   const [groupMembers, setGroupMembers] = useState<GroupMemberDto[]>([]);
   const [membersError, setMembersError] = useState<string | null>(null);
-  type AdminProfile = { name: string; imageUrl?: string; trustsReceivedCount: number; score: number | null };
+  type AdminProfile = { name: string; imageUrl?: string; trustedByCount: number; score: number | null };
   const [adminProfiles, setAdminProfiles] = useState<Record<string, AdminProfile>>({});
   const [editingExpertId, setEditingExpertId] = useState<number | null>(null);
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
@@ -117,7 +117,7 @@ export function AdminPanel() {
           return [a.circles_address, {
             name: raw?.name ?? '',
             imageUrl: getProfileImageUrl(view),
-            trustsReceivedCount: getTrustedByCount(view),
+            trustedByCount: getTrustedByCount(view),
             score,
           }] as const;
         }),
@@ -309,7 +309,7 @@ export function AdminPanel() {
                   <p className="text-xs text-muted-foreground font-mono truncate">{admin.circles_address}</p>
                   {p && (
                     <span className="text-xs text-muted-foreground">
-                      {p.score !== null ? `Score: ${p.score}/100` : `${p.trustsReceivedCount} trusted by`}
+                      {p.score !== null ? `Score: ${p.score}/100` : `${p.trustedByCount} trusted by`}
                     </span>
                   )}
                 </div>

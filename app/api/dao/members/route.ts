@@ -5,7 +5,7 @@ export type DaoMemberDto = {
   address: `0x${string}`;
   name: string;
   imageUrl?: string;
-  trustsReceivedCount: number;
+  trustedByCount: number;
 };
 
 const GROUP_ADDRESS = (
@@ -26,7 +26,7 @@ export async function GET() {
           address: row.member as `0x${string}`,
           name: raw?.name ?? `${row.member.slice(0, 8)}…`,
           imageUrl: getProfileImageUrl(view),
-          trustsReceivedCount: getTrustedByCount(view),
+          trustedByCount: getTrustedByCount(view),
         };
       }),
     );

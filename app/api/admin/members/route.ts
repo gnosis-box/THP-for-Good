@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
           address: row.member as `0x${string}`,
           name: raw?.name ?? `${row.member.slice(0, 8)}…`,
           imageUrl: getProfileImageUrl(view),
-          trustsReceivedCount: getTrustedByCount(view),
+          trustedByCount: getTrustedByCount(view),
           score,
         } satisfies GroupMemberDto;
       }),
