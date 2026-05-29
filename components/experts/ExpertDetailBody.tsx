@@ -1,13 +1,14 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { BookingStepper } from '@/components/booking/BookingStepper';
+import { StickyBookingStepper } from '@/components/booking/StickyBookingStepper';
 import { ExpertProfileHero } from '@/components/booking/ExpertProfileHero';
 import { PayButton } from '@/components/experts/PayButton';
 import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
 import { SlotPicker } from '@/components/experts/SlotPicker';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { ExpertRow } from '@/lib/db';
 import type { CrcBalanceState } from '@/hooks/use-crc-balance';
@@ -21,6 +22,10 @@ type Props = {
   onSelectSlot: (slot: string | null) => void;
   email: string;
   onEmailChange: (email: string) => void;
+  callDomain: string;
+  onCallDomainChange: (value: string) => void;
+  callContext: string;
+  onCallContextChange: (value: string) => void;
   balance: CrcBalanceState;
   onSaved: () => void;
   onCancelEdit: () => void;
@@ -37,6 +42,10 @@ export function ExpertDetailBody({
   onSelectSlot,
   email,
   onEmailChange,
+  callDomain,
+  onCallDomainChange,
+  callContext,
+  onCallContextChange,
   balance,
   onSaved,
   onCancelEdit,
@@ -46,6 +55,9 @@ export function ExpertDetailBody({
   const reducedMotion = usePrefersReducedMotion();
   const hasSlot = !!selectedSlot;
   const hasEmail = !!email.trim();
+  const hasContext =
+    isValidBookingDomain(normalizeBookingText(callDomain)) &&
+    isValidBookingContext(normalizeBookingText(callContext));
 
   if (reducedMotion) {
     if (editing) {
@@ -67,8 +79,13 @@ export function ExpertDetailBody({
         onSelectSlot={onSelectSlot}
         hasSlot={hasSlot}
         hasEmail={hasEmail}
+        hasContext={hasContext}
         email={email}
         onEmailChange={onEmailChange}
+        callDomain={callDomain}
+        onCallDomainChange={onCallDomainChange}
+        callContext={callContext}
+        onCallContextChange={onCallContextChange}
         balance={balance}
         onPaySuccess={onPaySuccess}
       />
@@ -80,9 +97,9 @@ export function ExpertDetailBody({
       {editing ? (
         <motion.div
           key="edit"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
           <ExpertEditForm
@@ -96,9 +113,9 @@ export function ExpertDetailBody({
       ) : (
         <motion.div
           key="view"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
           <BookingView
@@ -108,8 +125,13 @@ export function ExpertDetailBody({
             onSelectSlot={onSelectSlot}
             hasSlot={hasSlot}
             hasEmail={hasEmail}
+            hasContext={hasContext}
             email={email}
             onEmailChange={onEmailChange}
+            callDomain={callDomain}
+            onCallDomainChange={onCallDomainChange}
+            callContext={callContext}
+            onCallContextChange={onCallContextChange}
             balance={balance}
             onPaySuccess={onPaySuccess}
           />
@@ -126,8 +148,13 @@ function BookingView({
   onSelectSlot,
   hasSlot,
   hasEmail,
+  hasContext,
   email,
   onEmailChange,
+  callDomain,
+  onCallDomainChange,
+  callContext,
+  onCallContextChange,
   balance,
   onPaySuccess,
 }: {
@@ -137,14 +164,19 @@ function BookingView({
   onSelectSlot: (slot: string | null) => void;
   hasSlot: boolean;
   hasEmail: boolean;
+  hasContext: boolean;
   email: string;
   onEmailChange: (email: string) => void;
+  callDomain: string;
+  onCallDomainChange: (value: string) => void;
+  callContext: string;
+  onCallContextChange: (value: string) => void;
   balance: CrcBalanceState;
   onPaySuccess: () => void;
 }) {
   return (
     <>
-      <BookingStepper hasSlot={hasSlot} hasEmail={hasEmail} className="w-full" />
+      <StickyBookingStepper hasSlot={hasSlot} hasEmail={hasEmail} hasContext={hasContext} />
       <ExpertProfileHero expert={expert} />
 
       <section className="flex w-full flex-col gap-3">
@@ -170,6 +202,10 @@ function BookingView({
             selectedSlot={selectedSlot}
             email={email}
             onEmailChange={onEmailChange}
+            callDomain={callDomain}
+            onCallDomainChange={onCallDomainChange}
+            callContext={callContext}
+            onCallContextChange={onCallContextChange}
             onSuccess={onPaySuccess}
           />
         </section>
@@ -183,6 +219,10 @@ function BookingView({
             sharePercent={expert.expert_share_percent ?? 20}
             email={email}
             onEmailChange={onEmailChange}
+            callDomain={callDomain}
+            onCallDomainChange={onCallDomainChange}
+            callContext={callContext}
+            onCallContextChange={onCallContextChange}
           />
         </section>
       )}

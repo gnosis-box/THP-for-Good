@@ -22,6 +22,7 @@ import {
 } from '@/lib/crc-pay';
 import { mapPayError } from '@/lib/pay-copy';
 import { postBookingWithRetry } from '@/lib/booking-client';
+import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
 import {
   aboutTreasuryPayPath,
@@ -57,6 +58,10 @@ type Props = {
   selectedSlot: string | null;
   email: string;
   onEmailChange: (v: string) => void;
+  callDomain: string;
+  onCallDomainChange: (v: string) => void;
+  callContext: string;
+  onCallContextChange: (v: string) => void;
   onSuccess?: () => void;
   showEmail?: boolean;
   compact?: boolean;
@@ -67,6 +72,10 @@ export function PayButton({
   selectedSlot,
   email,
   onEmailChange,
+  callDomain,
+  onCallDomainChange,
+  callContext,
+  onCallContextChange,
   onSuccess,
   showEmail = true,
   compact = false,
@@ -88,6 +97,7 @@ export function PayButton({
   const [bookerName, setBookerName] = useState<string | null>(null);
   const [state, setState] = useState<PayState>({ kind: 'idle' });
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   useEffect(() => {
     if (!address) return;
@@ -110,10 +120,16 @@ export function PayButton({
   const insufficientBalance =
     balance.status === 'ready' && balance.balance < expert.price_crc;
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const normalizedDomain = normalizeBookingText(callDomain);
+  const normalizedContext = normalizeBookingText(callContext);
+  const hasValidDomain = isValidBookingDomain(normalizedDomain);
+  const hasValidContext = isValidBookingContext(normalizedContext);
   const canPay =
     isConnected &&
     !!selectedSlot &&
     isValidEmail &&
+    hasValidDomain &&
+    hasValidContext &&
     !isSelf &&
     state.kind !== 'loading' &&
     balance.status === 'ready' &&
@@ -121,6 +137,11 @@ export function PayButton({
 
   async function handlePay() {
     if (!selectedSlot || !address) return;
+    if (!isValidEmail || !hasValidDomain || !hasValidContext) {
+      setShowValidationErrors(true);
+      return;
+    }
+    setShowValidationErrors(false);
     setState({ kind: 'loading' });
 
     try {
@@ -147,6 +168,8 @@ export function PayButton({
         booker_address: address,
         tx_hash: txHash,
         slot_time: selectedSlot,
+        call_domain: normalizedDomain,
+        call_context: normalizedContext,
         attendee_email: email.trim(),
         attendee_name: bookerName ?? address,
       });
@@ -285,6 +308,11 @@ export function PayButton({
               sharePercent={sharePercent}
               email={email}
               onEmailChange={onEmailChange}
+              callDomain={callDomain}
+              onCallDomainChange={onCallDomainChange}
+              callContext={callContext}
+              onCallContextChange={onCallContextChange}
+              showValidation={showValidationErrors}
               showEmail={showEmail}
             />
           </div>
@@ -331,6 +359,11 @@ export function PayButton({
           {!selectedSlot && (
             <p className="text-center text-xs text-muted-foreground">
               {UI_COPY.booking.selectSlotFirst}
+            </p>
+          )}
+          {selectedSlot && (!hasValidDomain || !hasValidContext) && (
+            <p className="text-center text-xs text-muted-foreground">
+              {UI_COPY.booking.completeDetailsFirst}
             </p>
           )}
           {isSelf && (

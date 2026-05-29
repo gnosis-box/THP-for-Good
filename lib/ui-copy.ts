@@ -34,6 +34,18 @@ export const UI_COPY = {
     bookSession: 'Book session',
     reviewAndPay: 'Review & pay',
     selectSlotFirst: 'Select a slot above first.',
+    completeDetailsFirst: 'Complete your details to review payment.',
+    callDomainLabel: 'Call domain',
+    callDomainPlaceholder: 'e.g. Frontend, smart contracts, career advice',
+    callDomainHelper: 'Add a short topic title (2-80 characters).',
+    callDomainRequired: 'Call domain is required.',
+    callDomainInvalid: 'Call domain must be between 2 and 80 characters.',
+    callContextLabel: 'Call context',
+    callContextPlaceholder:
+      'Share your current situation, objective, and what kind of help you expect from this session.',
+    callContextHelper: 'Provide enough detail so the expert can prepare (20-1200 characters).',
+    callContextRequired: 'Call context is required.',
+    callContextInvalid: 'Call context must be between 20 and 1200 characters.',
     successTrustReminder: (expertName: string) =>
       `After your call, trust ${expertName} on My Calls to strengthen the Circles network.`,
     successDialogTitle: 'Booking confirmed!',
@@ -61,6 +73,9 @@ export const UI_COPY = {
     received: 'Received',
     emptyEmitted: 'No bookings yet. Book a session with an expert.',
     emptyReceived: 'No incoming bookings yet.',
+    callDomainLabel: 'Domain',
+    callContextLabel: 'Context',
+    callNotProvided: 'Not provided (legacy booking)',
   },
   support: {
     reportIssue: 'Report issue',

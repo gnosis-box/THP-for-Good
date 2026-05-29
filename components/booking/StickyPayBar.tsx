@@ -9,10 +9,11 @@ import { UI_COPY } from '@/lib/ui-copy';
 type Props = {
   priceCrc: number;
   hasSlot: boolean;
+  hasDetails: boolean;
   onReview: () => void;
 };
 
-export function StickyPayBar({ priceCrc, hasSlot, onReview }: Props) {
+export function StickyPayBar({ priceCrc, hasSlot, hasDetails, onReview }: Props) {
   const reducedMotion = usePrefersReducedMotion();
 
   if (!hasSlot) return null;
@@ -33,10 +34,11 @@ export function StickyPayBar({ priceCrc, hasSlot, onReview }: Props) {
         <Button
           type="button"
           size="lg"
+          disabled={!hasDetails}
           onClick={onReview}
           className="min-h-11 max-w-[55%] shrink px-3 text-sm sm:max-w-none sm:px-4 sm:text-base"
         >
-          {UI_COPY.booking.reviewAndPay}
+          {hasDetails ? UI_COPY.booking.reviewAndPay : UI_COPY.booking.completeDetailsFirst}
         </Button>
       </div>
     </div>

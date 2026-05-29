@@ -10,6 +10,7 @@ import { PayButton } from '@/components/experts/PayButton';
 import { ExpertDetailBody } from '@/components/experts/ExpertDetailBody';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
+import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
 import { UI_COPY } from '@/lib/ui-copy';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,8 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   const [editing, setEditing] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [email, setEmail] = useState('');
+  const [callDomain, setCallDomain] = useState('');
+  const [callContext, setCallContext] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const expertViewTracked = useRef(false);
 
@@ -33,6 +36,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   }, [expert.id]);
 
   function handleDrawerOpenChange(open: boolean) {
+    if (open && (!hasSlot || !hasDetails)) return;
     setDrawerOpen(open);
     if (open) {
       trackUmamiEvent('pay_drawer_open', { expert_id: expert.id });
@@ -41,6 +45,10 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
 
   const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
   const hasSlot = !!selectedSlot;
+  const hasDetails =
+    !!email.trim() &&
+    isValidBookingDomain(normalizeBookingText(callDomain)) &&
+    isValidBookingContext(normalizeBookingText(callContext));
 
   async function reloadExpert() {
     const res = await fetch(`/api/experts/${expert.id}`);
@@ -86,6 +94,10 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           onSelectSlot={setSelectedSlot}
           email={email}
           onEmailChange={setEmail}
+          callDomain={callDomain}
+          onCallDomainChange={setCallDomain}
+          callContext={callContext}
+          onCallContextChange={setCallContext}
           balance={balance}
           onSaved={reloadExpert}
           onCancelEdit={() => setEditing(false)}
@@ -99,6 +111,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           <StickyPayBar
             priceCrc={expert.price_crc}
             hasSlot={hasSlot}
+            hasDetails={hasDetails}
             onReview={() => handleDrawerOpenChange(true)}
           />
           <div className="md:hidden">
@@ -108,6 +121,10 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
                 selectedSlot={selectedSlot}
                 email={email}
                 onEmailChange={setEmail}
+                callDomain={callDomain}
+                onCallDomainChange={setCallDomain}
+                callContext={callContext}
+                onCallContextChange={setCallContext}
                 onSuccess={handlePaySuccess}
                 showEmail
               />

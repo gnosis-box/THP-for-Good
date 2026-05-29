@@ -123,6 +123,8 @@ function applyColumnMigrations(db: Database.Database): void {
     'ALTER TABLE experts ADD COLUMN google_calendar_id TEXT',
     'ALTER TABLE experts ADD COLUMN cal_event_type_id INTEGER',
     'ALTER TABLE bookings ADD COLUMN slot_time TEXT',
+    'ALTER TABLE bookings ADD COLUMN call_domain TEXT',
+    'ALTER TABLE bookings ADD COLUMN call_context TEXT',
     'ALTER TABLE bookings ADD COLUMN calendar_event_url TEXT',
     'ALTER TABLE bookings ADD COLUMN cal_booking_uid TEXT',
     "ALTER TABLE skill_tags ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'",
@@ -179,11 +181,20 @@ export function repairBookingsForeignKey(db: Database.Database): boolean {
       booker_address      TEXT    NOT NULL,
       tx_hash             TEXT,
       slot_time           TEXT,
+      call_domain         TEXT,
+      call_context        TEXT,
       calendar_event_url  TEXT,
       cal_booking_uid     TEXT,
       created_at          TEXT    DEFAULT (datetime('now'))
     );
-    INSERT INTO bookings_new SELECT * FROM bookings;
+    INSERT INTO bookings_new (
+      id, expert_id, booker_address, tx_hash, slot_time, call_domain, call_context,
+      calendar_event_url, cal_booking_uid, created_at
+    )
+    SELECT
+      id, expert_id, booker_address, tx_hash, slot_time, call_domain, call_context,
+      calendar_event_url, cal_booking_uid, created_at
+    FROM bookings;
     DROP TABLE bookings;
     ALTER TABLE bookings_new RENAME TO bookings;
   `);
