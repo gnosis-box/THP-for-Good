@@ -156,6 +156,8 @@ export async function POST(request: NextRequest) {
             attendeeName: data.attendee_name ?? data.booker_address,
             attendeeEmail: data.attendee_email,
             txHash: data.tx_hash,
+            callDomain,
+            callContext,
           });
           calBookingUid = result?.uid;
           calendarEventUrl = result?.meetingUrl;

@@ -37,13 +37,14 @@ export const UI_COPY = {
     completeDetailsFirst: 'Complete your details to review payment.',
     callDomainLabel: 'Call domain',
     callDomainPlaceholder: 'e.g. Frontend, smart contracts, career advice',
-    callDomainHelper: 'Add a short topic title (2-80 characters).',
+    callDomainHelper: 'Add a short topic title (2-80 characters). This is shared in the calendar invite.',
     callDomainRequired: 'Call domain is required.',
     callDomainInvalid: 'Call domain must be between 2 and 80 characters.',
     callContextLabel: 'Call context',
     callContextPlaceholder:
       'Share your current situation, objective, and what kind of help you expect from this session.',
-    callContextHelper: 'Provide enough detail so the expert can prepare (20-1200 characters).',
+    callContextHelper:
+      'Provide enough detail so the expert can prepare (20-1200 characters). This is included in the booking invite notes.',
     callContextRequired: 'Call context is required.',
     callContextInvalid: 'Call context must be between 20 and 1200 characters.',
     successTrustReminder: (expertName: string) =>
