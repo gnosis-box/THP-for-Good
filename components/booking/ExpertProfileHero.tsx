@@ -8,7 +8,7 @@ import {
 } from '@/components/experts/ExpertDetailCardContent';
 import { FadeContent } from '@/components/motion/fade-content';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
-import { toHttpImageUrl } from '@/lib/utils';
+import { getProfileImageUrl, getTrustedByCount } from '@/lib/circles-profile';
 import type { ExpertRow } from '@/lib/db';
 
 type Props = { expert: ExpertRow };
@@ -22,12 +22,10 @@ export function ExpertProfileHero({ expert }: Props) {
       const { Sdk } = await import('@aboutcircles/sdk');
       const sdk = new Sdk();
       const view = await sdk.rpc.profile.getProfileView(expert.circles_address as `0x${string}`);
-      const stats = view.trustStats as { trustedByCount?: number } | undefined;
-      const raw = view.profile as (typeof view.profile & { trustsReceivedCount?: number; picture?: string });
-      const trustedBy = stats?.trustedByCount ?? raw?.trustsReceivedCount ?? null;
+      const raw = view.profile as (typeof view.profile & { picture?: string }) | undefined;
       setCircles({
-        imageUrl: toHttpImageUrl(raw?.picture ?? view.profile?.previewImageUrl ?? view.profile?.imageUrl),
-        trustedByCount: typeof trustedBy === 'number' ? trustedBy : null,
+        imageUrl: getProfileImageUrl(raw),
+        trustedByCount: getTrustedByCount(view.trustStats),
       });
     })();
   }, [expert.circles_address]);

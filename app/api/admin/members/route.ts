@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminRequest, type GroupMemberDto } from '@/lib/admin';
-import { fetchCirclesScore, toHttpImageUrl } from '@/lib/utils';
+import { getProfileImageUrl, getProfileName, getTrustedByCount } from '@/lib/circles-profile';
+import { fetchCirclesScore } from '@/lib/utils';
 
 export async function GET(request: NextRequest) {
   if (!isAdminRequest(request)) {
@@ -27,15 +28,12 @@ export async function GET(request: NextRequest) {
           sdk.rpc.profile.getProfileView(row.member),
           fetchCirclesScore(row.member),
         ]);
-        const raw = view.profile as (typeof view.profile & {
-          trustsReceivedCount?: number;
-          picture?: string;
-        });
+        const raw = view.profile as (typeof view.profile & { picture?: string }) | undefined;
         return {
           address: row.member as `0x${string}`,
-          name: raw?.name ?? `${row.member.slice(0, 8)}…`,
-          imageUrl: toHttpImageUrl(raw?.picture ?? raw?.previewImageUrl ?? raw?.imageUrl),
-          trustsReceivedCount: raw?.trustsReceivedCount ?? 0,
+          name: getProfileName(raw, row.member),
+          imageUrl: getProfileImageUrl(raw),
+          trustedByCount: getTrustedByCount(view.trustStats) ?? 0,
           score,
         } satisfies GroupMemberDto;
       }),

@@ -2,7 +2,7 @@ export type GroupMemberDto = {
   address: `0x${string}`;
   name: string;
   imageUrl: string | undefined;
-  trustsReceivedCount: number;
+  trustedByCount: number;
   score: number | null;
 };
 

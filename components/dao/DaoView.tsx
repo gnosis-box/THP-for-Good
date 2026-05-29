@@ -12,7 +12,7 @@ import type { DaoSupporterDto } from '@/app/api/dao/supporters/route';
 
 const GNOSIS_APP_BASE = 'https://app.gnosis.io';
 
-function MemberCard({ address, name, imageUrl, trustsReceivedCount }: DaoMemberDto) {
+function MemberCard({ address, name, imageUrl, trustedByCount }: DaoMemberDto) {
   return (
     <a
       href={`${GNOSIS_APP_BASE}/${address}`}
@@ -29,8 +29,8 @@ function MemberCard({ address, name, imageUrl, trustsReceivedCount }: DaoMemberD
         <span className="truncate font-mono text-xs text-muted-foreground">
           {shortenAddress(address)}
         </span>
-        {trustsReceivedCount > 0 && (
-          <span className="text-xs text-muted-foreground">Trusted by {trustsReceivedCount}</span>
+        {trustedByCount > 0 && (
+          <span className="text-xs text-muted-foreground">Trusted by {trustedByCount}</span>
         )}
       </div>
       <ExpertTrustControl expertAddress={address} expertName={name} compact className="shrink-0" />
