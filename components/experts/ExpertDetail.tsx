@@ -11,6 +11,7 @@ import { ExpertDetailBody } from '@/components/experts/ExpertDetailBody';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
+import { isValidBookingEmail } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,19 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
     trackUmamiEvent('expert_view', { expert_id: expert.id });
   }, [expert.id]);
 
+  const isValidEmail = isValidBookingEmail(email);
+  const hasContext =
+    isValidBookingDomain(normalizeBookingText(callDomain)) &&
+    isValidBookingContext(normalizeBookingText(callContext));
+  const hasDetails = isValidEmail && hasContext;
+  const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
+  const hasSlot = !!selectedSlot;
+
+  function handleSelectSlot(slot: string | null) {
+    setSelectedSlot(slot);
+    if (!slot) setDrawerOpen(false);
+  }
+
   function handleDrawerOpenChange(open: boolean) {
     if (open && (!hasSlot || !hasDetails)) return;
     setDrawerOpen(open);
@@ -43,12 +57,30 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
     }
   }
 
-  const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
-  const hasSlot = !!selectedSlot;
-  const hasDetails =
-    !!email.trim() &&
-    isValidBookingDomain(normalizeBookingText(callDomain)) &&
-    isValidBookingContext(normalizeBookingText(callContext));
+  function focusMissingDetail() {
+    const targetId = !isValidEmail
+      ? 'booker-email'
+      : !isValidBookingDomain(normalizeBookingText(callDomain))
+        ? 'call-domain'
+        : 'call-context';
+    const el = document.getElementById(targetId);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+      el.focus({ preventScroll: true });
+    }
+  }
+
+  function handleStickyContinue() {
+    focusMissingDetail();
+  }
+
+  function handleStickyReview() {
+    if (!hasDetails) {
+      focusMissingDetail();
+      return;
+    }
+    handleDrawerOpenChange(true);
+  }
 
   async function reloadExpert() {
     const res = await fetch(`/api/experts/${expert.id}`);
@@ -91,7 +123,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           isSelf={isSelf}
           walletAddress={address}
           selectedSlot={selectedSlot}
-          onSelectSlot={setSelectedSlot}
+          onSelectSlot={handleSelectSlot}
           email={email}
           onEmailChange={setEmail}
           callDomain={callDomain}
@@ -111,11 +143,23 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           <StickyPayBar
             priceCrc={expert.price_crc}
             hasSlot={hasSlot}
-            hasDetails={hasDetails}
-            onReview={() => handleDrawerOpenChange(true)}
+            isValidEmail={isValidEmail}
+            hasContext={hasContext}
+            onContinue={handleStickyContinue}
+            onReview={handleStickyReview}
           />
           <div className="md:hidden">
-            <PayDrawer open={drawerOpen} onOpenChange={handleDrawerOpenChange}>
+            <PayDrawer
+              open={drawerOpen}
+              onOpenChange={handleDrawerOpenChange}
+              gateMessage={
+                drawerOpen && !hasDetails
+                  ? !isValidEmail
+                    ? UI_COPY.booking.enterEmailFirst
+                    : UI_COPY.booking.completeDetailsFirst
+                  : null
+              }
+            >
               <PayButton
                 expert={expert}
                 selectedSlot={selectedSlot}

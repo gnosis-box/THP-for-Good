@@ -8,7 +8,7 @@ const HEADER_OFFSET_PX = 56; // h-14 in Header
 
 type Props = {
   hasSlot: boolean;
-  hasEmail: boolean;
+  isValidEmail: boolean;
   hasContext: boolean;
   className?: string;
 };
@@ -27,7 +27,7 @@ function collectScrollRoots(node: HTMLElement | null): EventTarget[] {
   return roots;
 }
 
-export function StickyBookingStepper({ hasSlot, hasEmail, hasContext, className }: Props) {
+export function StickyBookingStepper({ hasSlot, isValidEmail, hasContext, className }: Props) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [pinned, setPinned] = useState(false);
@@ -82,7 +82,12 @@ export function StickyBookingStepper({ hasSlot, hasEmail, hasContext, className 
           }
         >
           <div className="px-4 md:px-6">
-            <BookingStepper hasSlot={hasSlot} hasEmail={hasEmail} hasContext={hasContext} className="w-full" />
+            <BookingStepper
+              hasSlot={hasSlot}
+              isValidEmail={isValidEmail}
+              hasContext={hasContext}
+              className="w-full"
+            />
           </div>
         </div>
       </div>

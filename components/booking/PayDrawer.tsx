@@ -15,9 +15,11 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
+  /** Shown when the drawer is open but prerequisites (e.g. valid email) are not met. */
+  gateMessage?: string | null;
 };
 
-export function PayDrawer({ open, onOpenChange, children }: Props) {
+export function PayDrawer({ open, onOpenChange, children, gateMessage }: Props) {
   const reducedMotion = usePrefersReducedMotion();
 
   return (
@@ -34,7 +36,11 @@ export function PayDrawer({ open, onOpenChange, children }: Props) {
             reducedMotion,
           )}
         >
-          {children}
+          {gateMessage ? (
+            <p className="py-4 text-center text-sm text-muted-foreground">{gateMessage}</p>
+          ) : (
+            children
+          )}
         </div>
       </DrawerContent>
     </Drawer>

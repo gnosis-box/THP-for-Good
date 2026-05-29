@@ -9,6 +9,7 @@ import { SlotPicker } from '@/components/experts/SlotPicker';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
+import { isValidBookingEmail } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { ExpertRow } from '@/lib/db';
 import type { CrcBalanceState } from '@/hooks/use-crc-balance';
@@ -54,7 +55,7 @@ export function ExpertDetailBody({
 }: Props) {
   const reducedMotion = usePrefersReducedMotion();
   const hasSlot = !!selectedSlot;
-  const hasEmail = !!email.trim();
+  const isValidEmail = isValidBookingEmail(email);
   const hasContext =
     isValidBookingDomain(normalizeBookingText(callDomain)) &&
     isValidBookingContext(normalizeBookingText(callContext));
@@ -78,7 +79,7 @@ export function ExpertDetailBody({
         selectedSlot={selectedSlot}
         onSelectSlot={onSelectSlot}
         hasSlot={hasSlot}
-        hasEmail={hasEmail}
+        isValidEmail={isValidEmail}
         hasContext={hasContext}
         email={email}
         onEmailChange={onEmailChange}
@@ -124,7 +125,7 @@ export function ExpertDetailBody({
             selectedSlot={selectedSlot}
             onSelectSlot={onSelectSlot}
             hasSlot={hasSlot}
-            hasEmail={hasEmail}
+            isValidEmail={isValidEmail}
             hasContext={hasContext}
             email={email}
             onEmailChange={onEmailChange}
@@ -147,7 +148,7 @@ function BookingView({
   selectedSlot,
   onSelectSlot,
   hasSlot,
-  hasEmail,
+  isValidEmail,
   hasContext,
   email,
   onEmailChange,
@@ -163,7 +164,7 @@ function BookingView({
   selectedSlot: string | null;
   onSelectSlot: (slot: string | null) => void;
   hasSlot: boolean;
-  hasEmail: boolean;
+  isValidEmail: boolean;
   hasContext: boolean;
   email: string;
   onEmailChange: (email: string) => void;
@@ -174,9 +175,12 @@ function BookingView({
   balance: CrcBalanceState;
   onPaySuccess: () => void;
 }) {
+  const sharePercent = expert.expert_share_percent ?? 20;
+  const detailsComplete = isValidEmail && hasContext;
+
   return (
     <>
-      <StickyBookingStepper hasSlot={hasSlot} hasEmail={hasEmail} hasContext={hasContext} />
+      <StickyBookingStepper hasSlot={hasSlot} isValidEmail={isValidEmail} hasContext={hasContext} />
       <ExpertProfileHero expert={expert} />
 
       <section className="flex w-full flex-col gap-3">
@@ -194,7 +198,23 @@ function BookingView({
         )}
       </section>
 
-      {hasSlot && (
+      {hasSlot && !detailsComplete && (
+        <section className="hidden w-full flex-col gap-3 md:flex">
+          <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
+          <PaymentSummary
+            balance={balance}
+            sharePercent={sharePercent}
+            email={email}
+            onEmailChange={onEmailChange}
+            callDomain={callDomain}
+            onCallDomainChange={onCallDomainChange}
+            callContext={callContext}
+            onCallContextChange={onCallContextChange}
+          />
+        </section>
+      )}
+
+      {hasSlot && detailsComplete && (
         <section className="hidden w-full flex-col gap-3 md:flex">
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.bookSession}</h2>
           <PayButton
@@ -216,7 +236,7 @@ function BookingView({
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
           <PaymentSummary
             balance={balance}
-            sharePercent={expert.expert_share_percent ?? 20}
+            sharePercent={sharePercent}
             email={email}
             onEmailChange={onEmailChange}
             callDomain={callDomain}
