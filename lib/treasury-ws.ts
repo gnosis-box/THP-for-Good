@@ -91,7 +91,14 @@ export function createTreasuryWsClient(callbacks: TreasuryWsCallbacks): Treasury
   function connect() {
     if (destroyed || typeof WebSocket === 'undefined') return;
     callbacks.onStatus?.('connecting');
-    ws = new WebSocket(WSS_URL);
+    try {
+      ws = new WebSocket(WSS_URL);
+    } catch {
+      callbacks.onStatus?.('error');
+      ws = null;
+      scheduleReconnect();
+      return;
+    }
 
     ws.onopen = () => {
       backoffMs = INITIAL_BACKOFF_MS;
