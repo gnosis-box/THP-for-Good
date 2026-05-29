@@ -33,6 +33,8 @@ export const UI_COPY = {
     selectAvailabilitySlot: 'Select an availability slot',
     bookSession: 'Book session',
     reviewAndPay: 'Review & pay',
+    continueToDetails: 'Continue',
+    enterEmailFirst: 'Enter a valid email address to continue to payment.',
     selectSlotFirst: 'Select a slot above first.',
     successTrustReminder: (expertName: string) =>
       `After your call, trust ${expertName} on My Calls to strengthen the Circles network.`,

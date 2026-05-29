@@ -27,6 +27,7 @@ import {
   aboutTreasuryPayPath,
   storeTreasuryPayCelebration,
 } from '@/lib/treasury-pay-celebration';
+import { isValidBookingEmail } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
 import { cn } from '@/lib/utils';
 import type { ExpertRow } from '@/lib/db';
@@ -109,7 +110,7 @@ export function PayButton({
   const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
   const insufficientBalance =
     balance.status === 'ready' && balance.balance < expert.price_crc;
-  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const isValidEmail = isValidBookingEmail(email);
   const canPay =
     isConnected &&
     !!selectedSlot &&
