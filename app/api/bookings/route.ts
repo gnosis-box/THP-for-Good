@@ -6,6 +6,13 @@ import db, {
   getBookingByTxHash,
 } from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
+import {
+  BOOKING_CONTEXT_MAX_LENGTH,
+  BOOKING_CONTEXT_MIN_LENGTH,
+  BOOKING_DOMAIN_MAX_LENGTH,
+  BOOKING_DOMAIN_MIN_LENGTH,
+  normalizeBookingText,
+} from '@/lib/booking-context';
 
 function bookingResponse(row: {
   id: number;
@@ -72,19 +79,48 @@ export async function POST(request: NextRequest) {
     typeof body !== 'object' ||
     body === null ||
     typeof (body as Record<string, unknown>).expert_id !== 'number' ||
-    typeof (body as Record<string, unknown>).booker_address !== 'string'
+    typeof (body as Record<string, unknown>).booker_address !== 'string' ||
+    typeof (body as Record<string, unknown>).call_domain !== 'string' ||
+    typeof (body as Record<string, unknown>).call_context !== 'string'
   ) {
-    return NextResponse.json({ error: 'expert_id and booker_address are required' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'expert_id, booker_address, call_domain and call_context are required' },
+      { status: 400 },
+    );
   }
 
   const data = body as {
     expert_id: number;
     booker_address: string;
+    call_domain: string;
+    call_context: string;
     tx_hash?: string;
     slot_time?: string;
     attendee_name?: string;
     attendee_email?: string;
   };
+  const callDomain = normalizeBookingText(data.call_domain);
+  const callContext = normalizeBookingText(data.call_context);
+
+  if (callDomain.length < BOOKING_DOMAIN_MIN_LENGTH || callDomain.length > BOOKING_DOMAIN_MAX_LENGTH) {
+    return NextResponse.json(
+      {
+        error: `call_domain must be between ${BOOKING_DOMAIN_MIN_LENGTH} and ${BOOKING_DOMAIN_MAX_LENGTH} characters`,
+      },
+      { status: 400 },
+    );
+  }
+  if (
+    callContext.length < BOOKING_CONTEXT_MIN_LENGTH ||
+    callContext.length > BOOKING_CONTEXT_MAX_LENGTH
+  ) {
+    return NextResponse.json(
+      {
+        error: `call_context must be between ${BOOKING_CONTEXT_MIN_LENGTH} and ${BOOKING_CONTEXT_MAX_LENGTH} characters`,
+      },
+      { status: 400 },
+    );
+  }
 
   if (data.tx_hash?.trim()) {
     const existing = getBookingByTxHash(data.tx_hash);
@@ -120,6 +156,8 @@ export async function POST(request: NextRequest) {
             attendeeName: data.attendee_name ?? data.booker_address,
             attendeeEmail: data.attendee_email,
             txHash: data.tx_hash,
+            callDomain,
+            callContext,
           });
           calBookingUid = result?.uid;
           calendarEventUrl = result?.meetingUrl;
@@ -136,6 +174,8 @@ export async function POST(request: NextRequest) {
       booker_address: data.booker_address,
       tx_hash: data.tx_hash,
       slot_time: data.slot_time,
+      call_domain: callDomain,
+      call_context: callContext,
       calendar_event_url: calendarEventUrl,
       cal_booking_uid: calBookingUid,
     });

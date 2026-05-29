@@ -15,6 +15,23 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Spec files may stay bilingual or French where already established (`spec/PRD-MVP.md`, decisions). **Never open GitHub issues or write implementation comments in French** unless the user explicitly requests French for a named deliverable.
 
+### GitHub comment formatting (mandatory)
+
+When posting multi-line comments on GitHub issues/PRs with `gh`:
+
+- Use real Markdown paragraphs/lists (no escaped `\\n` in plain strings).
+- Pass the body via HEREDOC to preserve line breaks exactly.
+- Example pattern:
+
+```bash
+gh pr comment <number> --body "$(cat <<'EOF'
+Line 1
+
+Line 2
+EOF
+)"
+```
+
 ---
 
 This is a starter template for building [Circles](https://aboutcircles.com) miniapps. A miniapp is a web app that loads inside the Circles host (https://circles.gnosis.io/playground) via an iframe; the host injects a wallet and your app drives interactions through the SDK. The boilerplate ships with the minimum plumbing — wallet provider, sign-in demo, profile lookup, layout — so a developer can clone it and start writing business logic immediately.

@@ -10,6 +10,7 @@ import { PayButton } from '@/components/experts/PayButton';
 import { ExpertDetailBody } from '@/components/experts/ExpertDetailBody';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
+import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
 import { isValidBookingEmail } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
@@ -24,6 +25,8 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   const [editing, setEditing] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [email, setEmail] = useState('');
+  const [callDomain, setCallDomain] = useState('');
+  const [callContext, setCallContext] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const expertViewTracked = useRef(false);
 
@@ -33,9 +36,13 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
     trackUmamiEvent('expert_view', { expert_id: expert.id });
   }, [expert.id]);
 
+  const isValidEmail = isValidBookingEmail(email);
+  const hasContext =
+    isValidBookingDomain(normalizeBookingText(callDomain)) &&
+    isValidBookingContext(normalizeBookingText(callContext));
+  const hasDetails = isValidEmail && hasContext;
   const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
   const hasSlot = !!selectedSlot;
-  const isValidEmail = isValidBookingEmail(email);
 
   function handleSelectSlot(slot: string | null) {
     setSelectedSlot(slot);
@@ -43,28 +50,33 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   }
 
   function handleDrawerOpenChange(open: boolean) {
-    if (open && !isValidEmail) return;
+    if (open && (!hasSlot || !hasDetails)) return;
     setDrawerOpen(open);
     if (open) {
       trackUmamiEvent('pay_drawer_open', { expert_id: expert.id });
     }
   }
 
-  function focusBookingEmail() {
-    const el = document.getElementById('booker-email');
+  function focusMissingDetail() {
+    const targetId = !isValidEmail
+      ? 'booker-email'
+      : !isValidBookingDomain(normalizeBookingText(callDomain))
+        ? 'call-domain'
+        : 'call-context';
+    const el = document.getElementById(targetId);
     el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    if (el instanceof HTMLInputElement) {
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
       el.focus({ preventScroll: true });
     }
   }
 
   function handleStickyContinue() {
-    focusBookingEmail();
+    focusMissingDetail();
   }
 
   function handleStickyReview() {
-    if (!isValidEmail) {
-      focusBookingEmail();
+    if (!hasDetails) {
+      focusMissingDetail();
       return;
     }
     handleDrawerOpenChange(true);
@@ -114,6 +126,10 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           onSelectSlot={handleSelectSlot}
           email={email}
           onEmailChange={setEmail}
+          callDomain={callDomain}
+          onCallDomainChange={setCallDomain}
+          callContext={callContext}
+          onCallContextChange={setCallContext}
           balance={balance}
           onSaved={reloadExpert}
           onCancelEdit={() => setEditing(false)}
@@ -128,6 +144,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
             priceCrc={expert.price_crc}
             hasSlot={hasSlot}
             isValidEmail={isValidEmail}
+            hasContext={hasContext}
             onContinue={handleStickyContinue}
             onReview={handleStickyReview}
           />
@@ -135,13 +152,23 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
             <PayDrawer
               open={drawerOpen}
               onOpenChange={handleDrawerOpenChange}
-              gateMessage={drawerOpen && !isValidEmail ? UI_COPY.booking.enterEmailFirst : null}
+              gateMessage={
+                drawerOpen && !hasDetails
+                  ? !isValidEmail
+                    ? UI_COPY.booking.enterEmailFirst
+                    : UI_COPY.booking.completeDetailsFirst
+                  : null
+              }
             >
               <PayButton
                 expert={expert}
                 selectedSlot={selectedSlot}
                 email={email}
                 onEmailChange={setEmail}
+                callDomain={callDomain}
+                onCallDomainChange={setCallDomain}
+                callContext={callContext}
+                onCallContextChange={setCallContext}
                 onSuccess={handlePaySuccess}
                 showEmail
               />

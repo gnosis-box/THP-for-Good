@@ -47,7 +47,18 @@ export async function createCalBooking(params: {
   attendeeName: string;
   attendeeEmail: string;
   txHash?: string;
+  callDomain?: string;
+  callContext?: string;
 }): Promise<{ uid: string; meetingUrl?: string } | null> {
+  const notesParts: string[] = [];
+  if (params.callDomain?.trim()) notesParts.push(`Call domain: ${params.callDomain.trim()}`);
+  if (params.callContext?.trim()) notesParts.push(`Call context:\n${params.callContext.trim()}`);
+  notesParts.push(
+    params.txHash
+      ? `CRC payment tx: https://explorer.aboutcircles.com/tx/${params.txHash}/social-graph`
+      : 'CRC payment tx: pending',
+  );
+
   const res = await fetch(`${CAL_API}/bookings`, {
     method: 'POST',
     headers: authHeaders(CAL_BOOKING_VERSION),
@@ -59,11 +70,12 @@ export async function createCalBooking(params: {
       responses: {
         name: params.attendeeName,
         email: params.attendeeEmail,
-        notes: params.txHash
-          ? `CRC payment tx: https://explorer.aboutcircles.com/tx/${params.txHash}/social-graph`
-          : 'CRC payment tx: pending',
+        notes: notesParts.join('\n\n'),
       },
-      metadata: {},
+      metadata: {
+        call_domain: params.callDomain?.trim() || undefined,
+        call_context: params.callContext?.trim() || undefined,
+      },
     }),
   });
 

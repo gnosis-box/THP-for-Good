@@ -36,6 +36,19 @@ export const UI_COPY = {
     continueToDetails: 'Continue',
     enterEmailFirst: 'Enter a valid email address to continue to payment.',
     selectSlotFirst: 'Select a slot above first.',
+    completeDetailsFirst: 'Complete your details to review payment.',
+    callDomainLabel: 'Call domain',
+    callDomainPlaceholder: 'e.g. Frontend, smart contracts, career advice',
+    callDomainHelper: 'Add a short topic title (2-80 characters). This is shared in the calendar invite.',
+    callDomainRequired: 'Call domain is required.',
+    callDomainInvalid: 'Call domain must be between 2 and 80 characters.',
+    callContextLabel: 'Call context',
+    callContextPlaceholder:
+      'Share your current situation, objective, and what kind of help you expect from this session.',
+    callContextHelper:
+      'Provide enough detail so the expert can prepare (20-1200 characters). This is included in the booking invite notes.',
+    callContextRequired: 'Call context is required.',
+    callContextInvalid: 'Call context must be between 20 and 1200 characters.',
     successTrustReminder: (expertName: string) =>
       `After your call, trust ${expertName} on My Calls to strengthen the Circles network.`,
     successDialogTitle: 'Booking confirmed!',
@@ -63,6 +76,9 @@ export const UI_COPY = {
     received: 'Received',
     emptyEmitted: 'No bookings yet. Book a session with an expert.',
     emptyReceived: 'No incoming bookings yet.',
+    callDomainLabel: 'Domain',
+    callContextLabel: 'Context',
+    callNotProvided: 'Not provided (legacy booking)',
   },
   support: {
     reportIssue: 'Report issue',

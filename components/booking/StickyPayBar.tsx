@@ -10,6 +10,7 @@ type Props = {
   priceCrc: number;
   hasSlot: boolean;
   isValidEmail: boolean;
+  hasContext: boolean;
   onContinue: () => void;
   onReview: () => void;
 };
@@ -18,6 +19,7 @@ export function StickyPayBar({
   priceCrc,
   hasSlot,
   isValidEmail,
+  hasContext,
   onContinue,
   onReview,
 }: Props) {
@@ -41,10 +43,10 @@ export function StickyPayBar({
         <Button
           type="button"
           size="lg"
-          onClick={isValidEmail ? onReview : onContinue}
+          onClick={isValidEmail && hasContext ? onReview : onContinue}
           className="min-h-11 max-w-[55%] shrink px-3 text-sm sm:max-w-none sm:px-4 sm:text-base"
         >
-          {isValidEmail ? UI_COPY.booking.reviewAndPay : UI_COPY.booking.continueToDetails}
+          {isValidEmail && hasContext ? UI_COPY.booking.reviewAndPay : UI_COPY.booking.continueToDetails}
         </Button>
       </div>
     </div>

@@ -35,6 +35,8 @@ export type BookingRow = {
   booker_address: string;
   tx_hash: string | null;
   slot_time: string | null;
+  call_domain: string | null;
+  call_context: string | null;
   calendar_event_url: string | null;
   cal_booking_uid: string | null;
   created_at: string;
@@ -59,6 +61,8 @@ export type InsertBookingData = {
   booker_address: string;
   tx_hash?: string;
   slot_time?: string;
+  call_domain?: string;
+  call_context?: string;
   calendar_event_url?: string;
   cal_booking_uid?: string;
 };
@@ -354,14 +358,22 @@ export function getBookingByTxHash(txHash: string): BookingRow | undefined {
 
 export function insertBooking(data: InsertBookingData): number {
   const stmt = db.prepare(`
-    INSERT INTO bookings (expert_id, booker_address, tx_hash, slot_time, calendar_event_url, cal_booking_uid)
-    VALUES (@expert_id, @booker_address, @tx_hash, @slot_time, @calendar_event_url, @cal_booking_uid)
+    INSERT INTO bookings (
+      expert_id, booker_address, tx_hash, slot_time, call_domain, call_context,
+      calendar_event_url, cal_booking_uid
+    )
+    VALUES (
+      @expert_id, @booker_address, @tx_hash, @slot_time, @call_domain, @call_context,
+      @calendar_event_url, @cal_booking_uid
+    )
   `);
   const result = stmt.run({
     expert_id: data.expert_id,
     booker_address: data.booker_address,
     tx_hash: data.tx_hash ?? null,
     slot_time: data.slot_time ?? null,
+    call_domain: data.call_domain ?? null,
+    call_context: data.call_context ?? null,
     calendar_event_url: data.calendar_event_url ?? null,
     cal_booking_uid: data.cal_booking_uid ?? null,
   });

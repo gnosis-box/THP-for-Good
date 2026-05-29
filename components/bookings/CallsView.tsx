@@ -315,6 +315,18 @@ function CallsReceivedList({ bookings }: { bookings: EnrichedReceivedBooking[] }
                 }).format(new Date(booking.slot_time))}
               </span>
             )}
+            <span>
+              {UI_COPY.calls.callDomainLabel}:{' '}
+              <span className="text-foreground">
+                {booking.call_domain?.trim() || UI_COPY.calls.callNotProvided}
+              </span>
+            </span>
+            <span>
+              {UI_COPY.calls.callContextLabel}:{' '}
+              <span className="text-foreground whitespace-pre-wrap">
+                {booking.call_context?.trim() || UI_COPY.calls.callNotProvided}
+              </span>
+            </span>
             {booking.tx_hash && (
               <a
                 href={`https://explorer.aboutcircles.com/tx/${booking.tx_hash}`}

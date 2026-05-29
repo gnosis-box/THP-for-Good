@@ -1,6 +1,8 @@
 export type BookingPostPayload = {
   expert_id: number;
   booker_address: string;
+  call_domain: string;
+  call_context: string;
   tx_hash?: string;
   slot_time?: string;
   attendee_email?: string;

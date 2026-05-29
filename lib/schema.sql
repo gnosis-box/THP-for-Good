@@ -32,6 +32,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   booker_address      TEXT    NOT NULL,
   tx_hash             TEXT,
   slot_time           TEXT,
+  call_domain         TEXT,
+  call_context        TEXT,
   calendar_event_url  TEXT,
   cal_booking_uid     TEXT,
   created_at          TEXT    DEFAULT (datetime('now'))
