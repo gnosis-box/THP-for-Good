@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Button } from '@/components/ui/button';
-import { toHttpImageUrl, fetchCirclesScore, cn } from '@/lib/utils';
+import { getProfileImageUrl, getTrustedByCount } from '@/lib/expert-trust-stats';
+import { fetchCirclesScore, cn } from '@/lib/utils';
 import { useRowFlash } from '@/hooks/use-row-flash';
 import { PromoteSection } from './PromoteSection';
 import { PlatformHealthSection } from './PlatformHealthSection';
@@ -112,11 +113,11 @@ export function AdminPanel() {
             sdk.rpc.profile.getProfileView(a.circles_address as `0x${string}`),
             fetchCirclesScore(a.circles_address),
           ]);
-          const raw = view.profile as (typeof view.profile & { trustsReceivedCount?: number; picture?: string });
+          const raw = view.profile as (typeof view.profile & { name?: string }) | undefined;
           return [a.circles_address, {
             name: raw?.name ?? '',
-            imageUrl: toHttpImageUrl(raw?.picture ?? raw?.previewImageUrl ?? raw?.imageUrl),
-            trustsReceivedCount: raw?.trustsReceivedCount ?? 0,
+            imageUrl: getProfileImageUrl(view),
+            trustsReceivedCount: getTrustedByCount(view),
             score,
           }] as const;
         }),

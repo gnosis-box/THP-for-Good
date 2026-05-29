@@ -1,19 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/components/ui-patterns/ExpertMeta';
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
+import { TrustedByCount } from '@/components/ui-patterns/TrustedByCount';
 import { UI_COPY } from '@/lib/ui-copy';
 import { getDisplayCallLanguages } from '@/lib/languages';
 import { motionClass } from '@/lib/motion';
+import { useExpertTrustStats } from '@/hooks/use-expert-trust-stats';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
-import { cn, toHttpImageUrl } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { ExpertRow } from '@/lib/db';
-
-type CirclesData = { imageUrl?: string; trustedByCount: number | null };
 
 export function ExpertCard({
   expert,
@@ -22,27 +21,13 @@ export function ExpertCard({
   expert: ExpertRow;
   paidSessionCount?: number;
 }) {
-  const [circles, setCircles] = useState<CirclesData | null>(null);
+  const trustStats = useExpertTrustStats(expert.circles_address);
   const reducedMotion = usePrefersReducedMotion();
   const share = expert.expert_share_percent ?? 20;
   const sessionLanguages = getDisplayCallLanguages(expert);
   const hasLanguages = sessionLanguages.length > 0;
-  const showTrustedBy = circles !== null && circles.trustedByCount !== null;
-
-  useEffect(() => {
-    (async () => {
-      const { Sdk } = await import('@aboutcircles/sdk');
-      const sdk = new Sdk();
-      const view = await sdk.rpc.profile.getProfileView(expert.circles_address as `0x${string}`);
-      const stats = view.trustStats as { trustedByCount?: number } | undefined;
-      const raw = view.profile as (typeof view.profile & { trustsReceivedCount?: number; picture?: string });
-      const trustedBy = stats?.trustedByCount ?? raw?.trustsReceivedCount ?? null;
-      setCircles({
-        imageUrl: toHttpImageUrl(raw?.picture ?? view.profile?.previewImageUrl ?? view.profile?.imageUrl),
-        trustedByCount: typeof trustedBy === 'number' ? trustedBy : null,
-      });
-    })();
-  }, [expert.circles_address]);
+  const imageUrl = trustStats.status === 'ready' ? trustStats.imageUrl : undefined;
+  const showTrustedBy = trustStats.status !== 'error';
 
   return (
     <Link
@@ -54,9 +39,9 @@ export function ExpertCard({
     >
       <div className="flex flex-1 items-start gap-3 px-3 py-3 sm:px-4 sm:py-4">
         <Avatar className="size-11 shrink-0 sm:size-12">
-          {circles?.imageUrl ? (
+          {imageUrl ? (
             <AvatarImage
-              src={circles.imageUrl}
+              src={imageUrl}
               alt=""
               className={motionClass('', 'motion-trust-fade-in', reducedMotion)}
             />
@@ -102,11 +87,7 @@ export function ExpertCard({
                   className="min-w-0 flex-1"
                 />
               ) : null}
-              {showTrustedBy && (
-                <span className="shrink-0 whitespace-nowrap text-right text-[10px] text-subtle-foreground sm:text-xs">
-                  Trusted by {circles.trustedByCount}
-                </span>
-              )}
+              {showTrustedBy ? <TrustedByCount trustStats={trustStats} /> : null}
             </div>
           )}
           <ExpertSkillTags skills={expert.skills} maxVisible={3} />
