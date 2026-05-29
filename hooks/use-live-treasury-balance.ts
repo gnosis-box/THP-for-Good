@@ -110,14 +110,22 @@ export function useLiveTreasuryBalance({
   useEffect(() => {
     if (!enabled || !subscribeWs || typeof WebSocket === 'undefined') return;
 
-    const client = createTreasuryWsClient({
-      onInbound: handleInbound,
-      onStatus: (s) => {
-        wsConnectedRef.current = s === 'open';
-      },
-    });
+    let client: ReturnType<typeof createTreasuryWsClient> | null = null;
+    try {
+      client = createTreasuryWsClient({
+        onInbound: handleInbound,
+        onStatus: (s) => {
+          wsConnectedRef.current = s === 'open';
+        },
+      });
+    } catch {
+      wsConnectedRef.current = false;
+    }
 
-    return () => client.destroy();
+    return () => {
+      wsConnectedRef.current = false;
+      client?.destroy();
+    };
   }, [enabled, subscribeWs, handleInbound]);
 
   useEffect(() => {
@@ -125,13 +133,13 @@ export function useLiveTreasuryBalance({
 
     function tick() {
       if (document.hidden) return;
-      if (wsConnectedRef.current) return;
+      if (subscribeWs && wsConnectedRef.current) return;
       void reconcile();
     }
 
     const id = setInterval(tick, POLL_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [enabled, reconcile]);
+  }, [enabled, subscribeWs, reconcile]);
 
   useEffect(() => {
     if (!enabled) return;

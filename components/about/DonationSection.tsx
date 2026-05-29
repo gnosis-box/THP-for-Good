@@ -87,8 +87,10 @@ export function DonationSection() {
         </MetricsPanelMono>
       </div>
 
+      {/* Polling-only — iOS Safari can freeze when WSS opens in the Circles iframe (#109). */}
       <LiveTreasuryCounter
         mode="goal"
+        subscribeWs={false}
         impactTargetRef={impactTargetRef}
         onCoinImpact={handleCoinImpact}
       >
