@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
     slot_time?: string;
     attendee_name?: string;
     attendee_email?: string;
+    message?: string;
   };
 
   if (data.tx_hash?.trim()) {
@@ -120,6 +121,7 @@ export async function POST(request: NextRequest) {
             attendeeName: data.attendee_name ?? data.booker_address,
             attendeeEmail: data.attendee_email,
             txHash: data.tx_hash,
+            message: data.message,
           });
           calBookingUid = result?.uid;
           calendarEventUrl = result?.meetingUrl;

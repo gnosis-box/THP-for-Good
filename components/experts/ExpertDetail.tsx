@@ -23,6 +23,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   const [editing, setEditing] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const expertViewTracked = useRef(false);
 
@@ -86,6 +87,8 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           onSelectSlot={setSelectedSlot}
           email={email}
           onEmailChange={setEmail}
+          message={message}
+          onMessageChange={setMessage}
           balance={balance}
           onSaved={reloadExpert}
           onCancelEdit={() => setEditing(false)}
@@ -108,6 +111,8 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
                 selectedSlot={selectedSlot}
                 email={email}
                 onEmailChange={setEmail}
+                message={message}
+                onMessageChange={setMessage}
                 onSuccess={handlePaySuccess}
                 showEmail
               />

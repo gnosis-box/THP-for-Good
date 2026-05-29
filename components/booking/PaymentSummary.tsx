@@ -2,6 +2,7 @@
 
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { PAY_COPY } from '@/lib/pay-copy';
 import type { CrcBalanceState } from '@/hooks/use-crc-balance';
@@ -11,6 +12,8 @@ type Props = {
   sharePercent: number;
   email: string;
   onEmailChange: (v: string) => void;
+  message?: string;
+  onMessageChange?: (v: string) => void;
   showEmail?: boolean;
 };
 
@@ -19,6 +22,8 @@ export function PaymentSummary({
   sharePercent,
   email,
   onEmailChange,
+  message = '',
+  onMessageChange,
   showEmail = true,
 }: Props) {
   return (
@@ -44,6 +49,16 @@ export function PaymentSummary({
               placeholder="you@example.com"
               autoComplete="email"
               className="min-h-11"
+            />
+          </Field>
+          <Field className="mt-2">
+            <FieldLabel htmlFor="booker-message">Message for the expert (optional)</FieldLabel>
+            <Textarea
+              id="booker-message"
+              value={message}
+              onChange={(e) => onMessageChange?.(e.target.value)}
+              placeholder="e.g. Topics you'd like to cover..."
+              className="min-h-20 resize-none"
             />
           </Field>
         </>

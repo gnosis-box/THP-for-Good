@@ -21,6 +21,8 @@ type Props = {
   onSelectSlot: (slot: string | null) => void;
   email: string;
   onEmailChange: (email: string) => void;
+  message?: string;
+  onMessageChange?: (message: string) => void;
   balance: CrcBalanceState;
   onSaved: () => void;
   onCancelEdit: () => void;
@@ -37,6 +39,8 @@ export function ExpertDetailBody({
   onSelectSlot,
   email,
   onEmailChange,
+  message = '',
+  onMessageChange,
   balance,
   onSaved,
   onCancelEdit,
@@ -170,6 +174,8 @@ function BookingView({
             selectedSlot={selectedSlot}
             email={email}
             onEmailChange={onEmailChange}
+            message={message}
+            onMessageChange={onMessageChange}
             onSuccess={onPaySuccess}
           />
         </section>
@@ -183,6 +189,8 @@ function BookingView({
             sharePercent={expert.expert_share_percent ?? 20}
             email={email}
             onEmailChange={onEmailChange}
+            message={message}
+            onMessageChange={onMessageChange}
           />
         </section>
       )}

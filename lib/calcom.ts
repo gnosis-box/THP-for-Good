@@ -47,6 +47,7 @@ export async function createCalBooking(params: {
   attendeeName: string;
   attendeeEmail: string;
   txHash?: string;
+  message?: string;
 }): Promise<{ uid: string; meetingUrl?: string } | null> {
   const res = await fetch(`${CAL_API}/bookings`, {
     method: 'POST',
@@ -59,9 +60,7 @@ export async function createCalBooking(params: {
       responses: {
         name: params.attendeeName,
         email: params.attendeeEmail,
-        notes: params.txHash
-          ? `CRC payment tx: https://explorer.aboutcircles.com/tx/${params.txHash}/social-graph`
-          : 'CRC payment tx: pending',
+        notes: `${params.message ? `Message: ${params.message}\n\n` : ''}CRC payment tx: ${params.txHash ? `https://explorer.aboutcircles.com/tx/${params.txHash}/social-graph` : 'pending'}`,
       },
       metadata: {},
     }),

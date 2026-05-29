@@ -5,6 +5,7 @@ export type BookingPostPayload = {
   slot_time?: string;
   attendee_email?: string;
   attendee_name?: string;
+  message?: string;
 };
 
 export type BookingPostResult = {

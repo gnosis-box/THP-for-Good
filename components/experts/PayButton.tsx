@@ -57,6 +57,8 @@ type Props = {
   selectedSlot: string | null;
   email: string;
   onEmailChange: (v: string) => void;
+  message?: string;
+  onMessageChange?: (v: string) => void;
   onSuccess?: () => void;
   showEmail?: boolean;
   compact?: boolean;
@@ -67,6 +69,8 @@ export function PayButton({
   selectedSlot,
   email,
   onEmailChange,
+  message = '',
+  onMessageChange,
   onSuccess,
   showEmail = true,
   compact = false,
@@ -149,6 +153,7 @@ export function PayButton({
         slot_time: selectedSlot,
         attendee_email: email.trim(),
         attendee_name: bookerName ?? address,
+        message: message.trim() || undefined,
       });
 
       trackUmamiEvent('pay_success', { expert_id: expert.id });
@@ -285,6 +290,8 @@ export function PayButton({
               sharePercent={sharePercent}
               email={email}
               onEmailChange={onEmailChange}
+              message={message}
+              onMessageChange={onMessageChange}
               showEmail={showEmail}
             />
           </div>
