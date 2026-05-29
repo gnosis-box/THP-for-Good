@@ -7,6 +7,7 @@ import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/compone
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { TrustedByCount } from '@/components/ui-patterns/TrustedByCount';
 import { UI_COPY } from '@/lib/ui-copy';
+import { truncateBio } from '@/lib/expert-profile';
 import { getDisplayCallLanguages } from '@/lib/languages';
 import { motionClass } from '@/lib/motion';
 import { useExpertTrustStats } from '@/hooks/use-expert-trust-stats';
@@ -25,6 +26,7 @@ export function ExpertCard({
   const reducedMotion = usePrefersReducedMotion();
   const share = expert.expert_share_percent ?? 20;
   const sessionLanguages = getDisplayCallLanguages(expert);
+  const bioExcerpt = truncateBio(expert.bio);
   const hasLanguages = sessionLanguages.length > 0;
   const imageUrl = trustStats.status === 'ready' ? trustStats.imageUrl : undefined;
   const showTrustedBy = trustStats.status !== 'error';
@@ -73,6 +75,9 @@ export function ExpertCard({
               )}
             </div>
           </div>
+          {bioExcerpt ? (
+            <p className="text-xs text-muted-foreground line-clamp-2">{bioExcerpt}</p>
+          ) : null}
           {(hasLanguages || showTrustedBy) && (
             <div
               className={cn(
