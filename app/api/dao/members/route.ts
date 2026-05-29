@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { toHttpImageUrl } from '@/lib/utils';
+import { getProfileImageUrl, getTrustedByCount } from '@/lib/expert-trust-stats';
 
 export type DaoMemberDto = {
   address: `0x${string}`;
   name: string;
   imageUrl?: string;
-  trustsReceivedCount: number;
+  trustedByCount: number;
 };
 
 const GROUP_ADDRESS = (
@@ -21,15 +21,12 @@ export async function GET() {
     const settled = await Promise.allSettled<DaoMemberDto>(
       result.results.map(async (row) => {
         const view = await sdk.rpc.profile.getProfileView(row.member);
-        const raw = view.profile as typeof view.profile & {
-          trustsReceivedCount?: number;
-          picture?: string;
-        };
+        const raw = view.profile as (typeof view.profile & { name?: string }) | undefined;
         return {
           address: row.member as `0x${string}`,
           name: raw?.name ?? `${row.member.slice(0, 8)}…`,
-          imageUrl: toHttpImageUrl(raw?.picture ?? raw?.previewImageUrl ?? raw?.imageUrl),
-          trustsReceivedCount: raw?.trustsReceivedCount ?? 0,
+          imageUrl: getProfileImageUrl(view),
+          trustedByCount: getTrustedByCount(view),
         };
       }),
     );

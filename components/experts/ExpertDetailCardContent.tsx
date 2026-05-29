@@ -4,34 +4,35 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/components/ui-patterns/ExpertMeta';
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
+import { TrustedByCount } from '@/components/ui-patterns/TrustedByCount';
 import { UI_COPY } from '@/lib/ui-copy';
 import { getDisplayCallLanguages } from '@/lib/languages';
 import { motionClass } from '@/lib/motion';
 import { cn } from '@/lib/utils';
+import type { ExpertTrustStatsState } from '@/hooks/use-expert-trust-stats';
 import type { ExpertRow } from '@/lib/db';
-
-export type ExpertCirclesData = { imageUrl?: string; trustedByCount: number | null };
 
 type Props = {
   expert: ExpertRow;
-  circles: ExpertCirclesData | null;
+  trustStats: ExpertTrustStatsState;
   reducedMotion: boolean;
 };
 
 /** Expert detail page card — sections Skills / About; not used on home list. */
-export function ExpertDetailCardContent({ expert, circles, reducedMotion }: Props) {
+export function ExpertDetailCardContent({ expert, trustStats, reducedMotion }: Props) {
   const share = expert.expert_share_percent ?? 20;
   const sessionLanguages = getDisplayCallLanguages(expert);
   const hasLanguages = sessionLanguages.length > 0;
-  const showTrustedBy = circles !== null && circles.trustedByCount !== null;
+  const imageUrl = trustStats.status === 'ready' ? trustStats.imageUrl : undefined;
+  const showTrustedBy = trustStats.status !== 'error';
 
   return (
     <>
       <div className="flex flex-1 items-start gap-3 px-3 py-3 sm:px-4 sm:py-4">
         <Avatar className="size-11 shrink-0 sm:size-12">
-          {circles?.imageUrl ? (
+          {imageUrl ? (
             <AvatarImage
-              src={circles.imageUrl}
+              src={imageUrl}
               alt={expert.name}
               className={motionClass('', 'motion-trust-fade-in', reducedMotion)}
             />
@@ -69,11 +70,7 @@ export function ExpertDetailCardContent({ expert, circles, reducedMotion }: Prop
                   className="min-w-0 flex-1"
                 />
               ) : null}
-              {showTrustedBy && (
-                <span className="shrink-0 whitespace-nowrap text-right text-[10px] text-subtle-foreground sm:text-xs">
-                  Trusted by {circles.trustedByCount}
-                </span>
-              )}
+              {showTrustedBy ? <TrustedByCount trustStats={trustStats} /> : null}
             </div>
           )}
         </div>
