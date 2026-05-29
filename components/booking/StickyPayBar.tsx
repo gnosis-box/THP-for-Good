@@ -9,10 +9,18 @@ import { UI_COPY } from '@/lib/ui-copy';
 type Props = {
   priceCrc: number;
   hasSlot: boolean;
+  isValidEmail: boolean;
+  onContinue: () => void;
   onReview: () => void;
 };
 
-export function StickyPayBar({ priceCrc, hasSlot, onReview }: Props) {
+export function StickyPayBar({
+  priceCrc,
+  hasSlot,
+  isValidEmail,
+  onContinue,
+  onReview,
+}: Props) {
   const reducedMotion = usePrefersReducedMotion();
 
   if (!hasSlot) return null;
@@ -33,10 +41,10 @@ export function StickyPayBar({ priceCrc, hasSlot, onReview }: Props) {
         <Button
           type="button"
           size="lg"
-          onClick={onReview}
+          onClick={isValidEmail ? onReview : onContinue}
           className="min-h-11 max-w-[55%] shrink px-3 text-sm sm:max-w-none sm:px-4 sm:text-base"
         >
-          {UI_COPY.booking.reviewAndPay}
+          {isValidEmail ? UI_COPY.booking.reviewAndPay : UI_COPY.booking.continueToDetails}
         </Button>
       </div>
     </div>

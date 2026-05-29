@@ -8,6 +8,7 @@ import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
 import { SlotPicker } from '@/components/experts/SlotPicker';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { isValidBookingEmail } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { ExpertRow } from '@/lib/db';
 import type { CrcBalanceState } from '@/hooks/use-crc-balance';
@@ -45,7 +46,7 @@ export function ExpertDetailBody({
 }: Props) {
   const reducedMotion = usePrefersReducedMotion();
   const hasSlot = !!selectedSlot;
-  const hasEmail = !!email.trim();
+  const isValidEmail = isValidBookingEmail(email);
 
   if (reducedMotion) {
     if (editing) {
@@ -66,7 +67,7 @@ export function ExpertDetailBody({
         selectedSlot={selectedSlot}
         onSelectSlot={onSelectSlot}
         hasSlot={hasSlot}
-        hasEmail={hasEmail}
+        isValidEmail={isValidEmail}
         email={email}
         onEmailChange={onEmailChange}
         balance={balance}
@@ -107,7 +108,7 @@ export function ExpertDetailBody({
             selectedSlot={selectedSlot}
             onSelectSlot={onSelectSlot}
             hasSlot={hasSlot}
-            hasEmail={hasEmail}
+            isValidEmail={isValidEmail}
             email={email}
             onEmailChange={onEmailChange}
             balance={balance}
@@ -125,7 +126,7 @@ function BookingView({
   selectedSlot,
   onSelectSlot,
   hasSlot,
-  hasEmail,
+  isValidEmail,
   email,
   onEmailChange,
   balance,
@@ -136,15 +137,17 @@ function BookingView({
   selectedSlot: string | null;
   onSelectSlot: (slot: string | null) => void;
   hasSlot: boolean;
-  hasEmail: boolean;
+  isValidEmail: boolean;
   email: string;
   onEmailChange: (email: string) => void;
   balance: CrcBalanceState;
   onPaySuccess: () => void;
 }) {
+  const sharePercent = expert.expert_share_percent ?? 20;
+
   return (
     <>
-      <BookingStepper hasSlot={hasSlot} hasEmail={hasEmail} className="w-full" />
+      <BookingStepper hasSlot={hasSlot} isValidEmail={isValidEmail} className="w-full" />
       <ExpertProfileHero expert={expert} />
 
       <section className="flex w-full flex-col gap-3">
@@ -162,7 +165,19 @@ function BookingView({
         )}
       </section>
 
-      {hasSlot && (
+      {hasSlot && !isValidEmail && (
+        <section className="hidden w-full flex-col gap-3 md:flex">
+          <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
+          <PaymentSummary
+            balance={balance}
+            sharePercent={sharePercent}
+            email={email}
+            onEmailChange={onEmailChange}
+          />
+        </section>
+      )}
+
+      {hasSlot && isValidEmail && (
         <section className="hidden w-full flex-col gap-3 md:flex">
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.bookSession}</h2>
           <PayButton
@@ -180,7 +195,7 @@ function BookingView({
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
           <PaymentSummary
             balance={balance}
-            sharePercent={expert.expert_share_percent ?? 20}
+            sharePercent={sharePercent}
             email={email}
             onEmailChange={onEmailChange}
           />

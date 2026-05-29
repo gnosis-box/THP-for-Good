@@ -20,19 +20,19 @@ const STEPS = [
 
 type Props = {
   hasSlot: boolean;
-  hasEmail: boolean;
+  isValidEmail: boolean;
   className?: string;
 };
 
-function stepIndex(hasSlot: boolean, hasEmail: boolean): number {
+function stepIndex(hasSlot: boolean, isValidEmail: boolean): number {
   if (!hasSlot) return 0;
-  if (!hasEmail) return 1;
+  if (!isValidEmail) return 1;
   return 2;
 }
 
-export function BookingStepper({ hasSlot, hasEmail, className }: Props) {
+export function BookingStepper({ hasSlot, isValidEmail, className }: Props) {
   const reducedMotion = usePrefersReducedMotion();
-  const current = stepIndex(hasSlot, hasEmail);
+  const current = stepIndex(hasSlot, isValidEmail);
   const currentStep = current + 1;
 
   return (
