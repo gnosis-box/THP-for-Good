@@ -8,6 +8,12 @@ export const PAY_COPY = {
     'Trust path estimate is temporarily unavailable. Your wallet balance above is still accurate.',
   trustEstimateShortfall:
     'Your trust network may not route enough CRC for both payment legs. You can still pay — the transaction may fail.',
+  donateCta: 'Donate to fund a learner',
+  donateHint:
+    'Contributions to the THP treasury help fund the next learner and strengthen the Circles network.',
+  insufficientBalanceTitle: 'Not enough CRC',
+  insufficientBalanceDescription: (priceCrc: number) =>
+    `You need at least ${priceCrc} CRC to book this call. Donate on About to support the treasury and grow your CRC.`,
   paymentSplit: (expertPercent: number, treasuryPercent: number) =>
     `Payment split: ${expertPercent}% to expert, ${treasuryPercent}% to ${PAY_COPY.thpForGood}.`,
   trustLegLine: (maxCrc: string, legCrc: number, recipient: string) =>
