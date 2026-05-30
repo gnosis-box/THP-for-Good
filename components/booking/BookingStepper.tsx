@@ -9,6 +9,7 @@ import {
   stepLabelClass,
   stepStatusLabel,
 } from '@/components/motion/stepper';
+import type { BookingStep } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
 import { cn } from '@/lib/utils';
 
@@ -19,22 +20,13 @@ const STEPS = [
 ] as const;
 
 type Props = {
-  hasSlot: boolean;
-  isValidEmail: boolean;
-  hasContext: boolean;
+  step: BookingStep;
   className?: string;
 };
 
-function stepIndex(hasSlot: boolean, isValidEmail: boolean, hasContext: boolean): number {
-  if (!hasSlot) return 0;
-  if (!isValidEmail || !hasContext) return 1;
-  return 2;
-}
-
-export function BookingStepper({ hasSlot, isValidEmail, hasContext, className }: Props) {
+export function BookingStepper({ step, className }: Props) {
   const reducedMotion = usePrefersReducedMotion();
-  const current = stepIndex(hasSlot, isValidEmail, hasContext);
-  const currentStep = current + 1;
+  const currentStep = step + 1;
 
   return (
     <div

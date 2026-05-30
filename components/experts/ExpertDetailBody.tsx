@@ -1,6 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
+import { Button } from '@/components/ui/button';
 import { StickyBookingStepper } from '@/components/booking/StickyBookingStepper';
 import { ExpertProfileHero } from '@/components/booking/ExpertProfileHero';
 import { PayButton } from '@/components/experts/PayButton';
@@ -9,7 +10,7 @@ import { SlotPicker } from '@/components/experts/SlotPicker';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
-import { isValidBookingEmail } from '@/lib/booking-validation';
+import { getBookingStep, isValidBookingEmail } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
 import type { ExpertRow } from '@/lib/db';
 import type { CrcBalanceState } from '@/hooks/use-crc-balance';
@@ -142,6 +143,16 @@ export function ExpertDetailBody({
   );
 }
 
+function fmtSelectedSlot(iso: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(iso));
+}
+
 function BookingView({
   expert,
   isSelf,
@@ -176,30 +187,47 @@ function BookingView({
   onPaySuccess: () => void;
 }) {
   const sharePercent = expert.expert_share_percent ?? 20;
-  const detailsComplete = isValidEmail && hasContext;
+  const step = getBookingStep(hasSlot, isValidEmail, hasContext);
+  const hasCal = !!expert.cal_event_type_id;
 
   return (
     <>
-      <StickyBookingStepper hasSlot={hasSlot} isValidEmail={isValidEmail} hasContext={hasContext} />
+      <StickyBookingStepper step={step} />
       <ExpertProfileHero expert={expert} />
 
-      <section className="flex w-full flex-col gap-3">
-        {expert.cal_event_type_id ? (
-          <>
-            <h2 className="text-center text-sm font-semibold">
-              {UI_COPY.booking.selectAvailabilitySlot}
-            </h2>
-            <SlotPicker expertId={expert.id} selected={selectedSlot} onSelect={onSelectSlot} />
-          </>
-        ) : (
-          <p className="text-center text-sm text-muted-foreground">
-            {isSelf ? UI_COPY.booking.noCalSelf : UI_COPY.booking.noCalVisitor}
-          </p>
-        )}
-      </section>
+      {step >= 1 && selectedSlot ? (
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="min-h-11 text-muted-foreground"
+            onClick={() => onSelectSlot(null)}
+          >
+            {fmtSelectedSlot(selectedSlot)} · {UI_COPY.booking.changeSlot}
+          </Button>
+        </div>
+      ) : null}
 
-      {hasSlot && !detailsComplete && (
-        <section className="hidden w-full flex-col gap-3 md:flex">
+      {step === 0 && (
+        <section className="flex w-full flex-col gap-3">
+          {hasCal ? (
+            <>
+              <h2 className="text-center text-sm font-semibold">
+                {UI_COPY.booking.selectAvailabilitySlot}
+              </h2>
+              <SlotPicker expertId={expert.id} selected={selectedSlot} onSelect={onSelectSlot} />
+            </>
+          ) : (
+            <p className="text-center text-sm text-muted-foreground">
+              {isSelf ? UI_COPY.booking.noCalSelf : UI_COPY.booking.noCalVisitor}
+            </p>
+          )}
+        </section>
+      )}
+
+      {step === 1 && (
+        <section className="flex w-full flex-col gap-3">
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
           <PaymentSummary
             balance={balance}
@@ -214,7 +242,7 @@ function BookingView({
         </section>
       )}
 
-      {hasSlot && detailsComplete && (
+      {step === 2 && (
         <section className="hidden w-full flex-col gap-3 md:flex">
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.bookSession}</h2>
           <PayButton
@@ -231,19 +259,9 @@ function BookingView({
         </section>
       )}
 
-      {hasSlot && (
+      {step === 2 && (
         <section className="flex w-full flex-col gap-3 md:hidden">
-          <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
-          <PaymentSummary
-            balance={balance}
-            sharePercent={sharePercent}
-            email={email}
-            onEmailChange={onEmailChange}
-            callDomain={callDomain}
-            onCallDomainChange={onCallDomainChange}
-            callContext={callContext}
-            onCallContextChange={onCallContextChange}
-          />
+          <p className="text-center text-sm text-muted-foreground">{UI_COPY.booking.readyToPay}</p>
         </section>
       )}
     </>

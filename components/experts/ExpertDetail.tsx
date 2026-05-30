@@ -11,7 +11,7 @@ import { ExpertDetailBody } from '@/components/experts/ExpertDetailBody';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
 import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
-import { isValidBookingEmail } from '@/lib/booking-validation';
+import { isValidBookingEmail, getBookingStep, isBookingDetailsComplete } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
 import { cn } from '@/lib/utils';
@@ -40,9 +40,14 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   const hasContext =
     isValidBookingDomain(normalizeBookingText(callDomain)) &&
     isValidBookingContext(normalizeBookingText(callContext));
-  const hasDetails = isValidEmail && hasContext;
-  const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
   const hasSlot = !!selectedSlot;
+  const hasDetails = isBookingDetailsComplete(isValidEmail, hasContext);
+  const bookingStep = getBookingStep(hasSlot, isValidEmail, hasContext);
+  const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
+
+  useEffect(() => {
+    if (bookingStep < 2) setDrawerOpen(false);
+  }, [bookingStep]);
 
   function handleSelectSlot(slot: string | null) {
     setSelectedSlot(slot);
@@ -50,7 +55,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   }
 
   function handleDrawerOpenChange(open: boolean) {
-    if (open && (!hasSlot || !hasDetails)) return;
+    if (open && bookingStep !== 2) return;
     setDrawerOpen(open);
     if (open) {
       trackUmamiEvent('pay_drawer_open', { expert_id: expert.id });
@@ -138,7 +143,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
         />
       </div>
 
-      {!editing && hasSlot && (
+      {!editing && bookingStep >= 1 && (
         <>
           <StickyPayBar
             priceCrc={expert.price_crc}
@@ -148,32 +153,28 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
             onContinue={handleStickyContinue}
             onReview={handleStickyReview}
           />
-          <div className="md:hidden">
-            <PayDrawer
-              open={drawerOpen}
-              onOpenChange={handleDrawerOpenChange}
-              gateMessage={
-                drawerOpen && !hasDetails
-                  ? !isValidEmail
-                    ? UI_COPY.booking.enterEmailFirst
-                    : UI_COPY.booking.completeDetailsFirst
-                  : null
-              }
-            >
-              <PayButton
-                expert={expert}
-                selectedSlot={selectedSlot}
-                email={email}
-                onEmailChange={setEmail}
-                callDomain={callDomain}
-                onCallDomainChange={setCallDomain}
-                callContext={callContext}
-                onCallContextChange={setCallContext}
-                onSuccess={handlePaySuccess}
-                showEmail
-              />
-            </PayDrawer>
-          </div>
+          {bookingStep === 2 && (
+            <div className="md:hidden">
+              <PayDrawer
+                open={drawerOpen}
+                onOpenChange={handleDrawerOpenChange}
+                gateMessage={null}
+              >
+                <PayButton
+                  expert={expert}
+                  selectedSlot={selectedSlot}
+                  email={email}
+                  onEmailChange={setEmail}
+                  callDomain={callDomain}
+                  onCallDomainChange={setCallDomain}
+                  callContext={callContext}
+                  onCallContextChange={setCallContext}
+                  onSuccess={handlePaySuccess}
+                  showEmail
+                />
+              </PayDrawer>
+            </div>
+          )}
         </>
       )}
     </>
