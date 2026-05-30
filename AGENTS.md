@@ -45,6 +45,7 @@ This is a starter template for building [Circles](https://aboutcircles.com) mini
 | **L4 backlog workflow (agents)** | This file § [L4 backlog workflow](#l4-backlog-workflow) · skill `thp-for-good-backlog` |
 | **Live treasury counter (L4)** | [`spec/live-crc-counter.md`](spec/live-crc-counter.md) · this file § [Live treasury counter](#live-treasury-counter-l4) |
 | **Skills & languages UX (L4)** | [`spec/skills-languages-ux.md`](spec/skills-languages-ux.md) · this file § [Skills & languages UX](#skills--languages-ux-l4) |
+| **Invitation links pool (Alpha)** | [`spec/invitation-links-ux.md`](spec/invitation-links-ux.md) · this file § [Invitation links pool](#invitation-links-pool-alpha) |
 | **Graphify (agent knowledge graph)** | `graphify-out/` · this file § [Graphify](#graphify-agent-knowledge-graph) · [`.cursor/rules/graphify.mdc`](.cursor/rules/graphify.mdc) |
 
 Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**. Group by **Priority**.
@@ -360,6 +361,20 @@ Branch **`feat/skills-languages-ux`** · spec [`spec/skills-languages-ux.md`](sp
 **Card hierarchy:** name → session languages (globe + full labels) → skills (max 3 + tap expand) → trust.
 
 **Do not** reuse skill pill styling for languages on cards. **Do not** duplicate call/spoken fallback inline — always `getDisplayCallLanguages`.
+
+## Invitation links pool (Alpha)
+
+Branch **`feat/a-04-invitation-links-ux`** (spec) · **`impl/a-invitation-links`** (code) · spec [`spec/invitation-links-ux.md`](spec/invitation-links-ux.md) · [FEAT-A-04 #128](https://github.com/gnosis-box/THP-for-Good/issues/128) · [IMPL-A-05 #129](https://github.com/gnosis-box/THP-for-Good/issues/129) · decision [DIV-A-01 #111](https://github.com/gnosis-box/THP-for-Good/issues/111).
+
+| Fact | Value |
+| --- | --- |
+| Allocation | FIFO — oldest `available` link; consumed on **Get invite link** click |
+| Admin | All admins manage shared pool; `added_by` traceability |
+| Empty pool | Fallback to `aboutcircles.com` + Metri THP join ([`useful-links.md`](spec/useful-links.md)) |
+| Booking UI | `OnboardingInvitePanel` replaces passive `not-registered` alert in `PayButton` |
+| Admin UI | `InvitationLinksSection` on `/admin` (after platform health) |
+
+**Do not** implement backend/API in the FEAT spec PR — that is **IMPL-A-05 #129**.
 
 ## Graphify (agent knowledge graph)
 

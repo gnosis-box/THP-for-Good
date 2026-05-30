@@ -557,6 +557,19 @@ Quand une issue est créée, remplacer *à créer* par le lien `#NN` et ne plus 
 
 ---
 
+## Alpha — post-MVP product (backlog)
+
+| Feature | Description | Liens |
+|---------|-------------|--------|
+| **Invitation links pool** | THP-native invite URL pool (multi-admin, FIFO, booking onboarding CTA) | [DIV-A-01 #111](https://github.com/gnosis-box/THP-for-Good/issues/111) (decision ✅) · [FEAT-A-04 #128](https://github.com/gnosis-box/THP-for-Good/issues/128) · [IMPL-A-05 #129](https://github.com/gnosis-box/THP-for-Good/issues/129) · [`spec/invitation-links-ux.md`](invitation-links-ux.md) |
+| **Donate CTA (low CRC)** | In-drawer link to `/about#donate` when balance too low | [DIV-A-02 #112](https://github.com/gnosis-box/THP-for-Good/issues/112) · [IMPL-A-01 #113](https://github.com/gnosis-box/THP-for-Good/issues/113) |
+| **Booking step gating** | One booking step visible at a time on expert detail | [IMPL-A-03 #119](https://github.com/gnosis-box/THP-for-Good/issues/119) |
+| **Landing hero** | Compact hero above expert grid or `/welcome` | [FEAT-A-02 #114](https://github.com/gnosis-box/THP-for-Good/issues/114) |
+| **Marketing discoverability** | OG metadata, expert share button | [FEAT-A-03 #117](https://github.com/gnosis-box/THP-for-Good/issues/117) |
+| **Split tier review** | Revisit expert/foundation % after treasury metrics | [DIV-A-03 #118](https://github.com/gnosis-box/THP-for-Good/issues/118) |
+
+---
+
 ## L4 — Post-MVP (backlog)
 
 | Feature | Description | Liens |
