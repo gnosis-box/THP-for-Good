@@ -46,6 +46,7 @@ This is a starter template for building [Circles](https://aboutcircles.com) mini
 | **Live treasury counter (L4)** | [`spec/live-crc-counter.md`](spec/live-crc-counter.md) · this file § [Live treasury counter](#live-treasury-counter-l4) |
 | **Skills & languages UX (L4)** | [`spec/skills-languages-ux.md`](spec/skills-languages-ux.md) · this file § [Skills & languages UX](#skills--languages-ux-l4) |
 | **Invitation links pool (Alpha)** | [`spec/invitation-links-ux.md`](spec/invitation-links-ux.md) · this file § [Invitation links pool](#invitation-links-pool-alpha) |
+| **Landing & marketing (Alpha P3)** | [`spec/landing-marketing-ux.md`](spec/landing-marketing-ux.md) · this file § [Landing & marketing](#landing--marketing-alpha-p3) |
 | **Graphify (agent knowledge graph)** | `graphify-out/` · this file § [Graphify](#graphify-agent-knowledge-graph) · [`.cursor/rules/graphify.mdc`](.cursor/rules/graphify.mdc) |
 
 Kanban columns: **Triage → Ready → Running → Review → Blocked → Done**. Group by **Priority**.
@@ -375,6 +376,18 @@ Branch **`feat/a-04-invitation-links-ux`** (spec) · **`impl/a-invitation-links`
 | Admin UI | `InvitationLinksSection` on `/admin` (after platform health) |
 
 **Do not** implement backend/API in the FEAT spec PR — that is **IMPL-A-05 #129**.
+
+## Landing & marketing (Alpha P3)
+
+Spec [`spec/landing-marketing-ux.md`](spec/landing-marketing-ux.md) · epics [FEAT-A-02 #114](https://github.com/gnosis-box/THP-for-Good/issues/114) · [FEAT-A-03 #117](https://github.com/gnosis-box/THP-for-Good/issues/117). **Run after alpha core** (#113, #119, #129).
+
+| IMPL | Issue | Branch |
+| --- | --- | --- |
+| **IMPL-A-06** | [#134](https://github.com/gnosis-box/THP-for-Good/issues/134) — hero on `/` above `ExpertBrowser` | `impl/a-06-home-landing-hero` |
+| **IMPL-A-07** | [#135](https://github.com/gnosis-box/THP-for-Good/issues/135) — `generateMetadata` + OG for `/` and `/expert/[id]` | `impl/a-07-og-metadata` |
+| **IMPL-A-08** | [#136](https://github.com/gnosis-box/THP-for-Good/issues/136) — expert Share (Web Share API + clipboard) | `impl/a-08-expert-share` |
+
+**Do not** open duplicate IMPLs for hero/OG/share — FEAT issues stay open until children close.
 
 ## Graphify (agent knowledge graph)
 
