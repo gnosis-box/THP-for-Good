@@ -13,7 +13,7 @@ import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
 import { ExpertLanguageTags, ExpertSkillTags } from '@/components/ui-patterns/ExpertMeta';
 import { getDisplayCallLanguages } from '@/lib/languages';
 import type { GroupMemberDto } from '@/lib/admin';
-import type { AdminHealthStats, ExpertRow, TagRow, AdminRow } from '@/lib/db';
+import type { AdminHealthStats, ExpertRow, TagRow, AdminRow, InvitationLinkRow } from '@/lib/db';
 
 export function AdminPanel() {
   const { address, isConnected } = useWallet();
@@ -25,6 +25,7 @@ export function AdminPanel() {
   const [tags, setTags] = useState<TagRow[]>([]);
   const [dbAdmins, setDbAdmins] = useState<AdminRow[]>([]);
   const [health, setHealth] = useState<AdminHealthStats | null>(null);
+  const [invitationLinks, setInvitationLinks] = useState<InvitationLinkRow[]>([]);
   const [groupMembers, setGroupMembers] = useState<GroupMemberDto[]>([]);
   const [membersError, setMembersError] = useState<string | null>(null);
   type AdminProfile = { name: string; imageUrl?: string; trustedByCount: number; score: number | null };
@@ -33,6 +34,9 @@ export function AdminPanel() {
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editingTagLabel, setEditingTagLabel] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [newInvitationLinks, setNewInvitationLinks] = useState('');
+  const [invitationBusy, setInvitationBusy] = useState(false);
+  const [invitationError, setInvitationError] = useState<string | null>(null);
   const [exitingTagIds, setExitingTagIds] = useState<Set<number>>(() => new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,11 +66,12 @@ export function AdminPanel() {
 
       if (!admin) return;
 
-      const [mRes, tRes, aRes, hRes, memRes] = await Promise.all([
+      const [mRes, tRes, aRes, hRes, lRes, memRes] = await Promise.all([
         fetch('/api/experts?all=1', { headers: hdrs }),
         fetch('/api/tags', { headers: hdrs }),
         fetch('/api/admin/admins', { headers: hdrs }),
         fetch('/api/admin/health', { headers: hdrs }),
+        fetch('/api/admin/invitation-links', { headers: hdrs }),
         ga
           ? fetch(`/api/admin/members?group=${encodeURIComponent(ga)}`, { headers: hdrs })
           : Promise.resolve(null),
@@ -76,6 +81,12 @@ export function AdminPanel() {
       setExperts(Array.isArray(expertsJson) ? expertsJson : []);
       setTags(await tRes.json());
       setDbAdmins(await aRes.json());
+      if (lRes.ok) {
+        const linksJson = (await lRes.json()) as { links?: InvitationLinkRow[] };
+        setInvitationLinks(Array.isArray(linksJson.links) ? linksJson.links : []);
+      } else {
+        setInvitationLinks([]);
+      }
       if (hRes.ok) {
         setHealth((await hRes.json()) as AdminHealthStats);
       } else {
@@ -100,6 +111,7 @@ export function AdminPanel() {
     }
   }, [address, headers]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
@@ -178,6 +190,52 @@ export function AdminPanel() {
     });
     setNewTag('');
     load();
+  }
+
+  async function addInvitationLinksBatch() {
+    if (!newInvitationLinks.trim()) return;
+    setInvitationBusy(true);
+    setInvitationError(null);
+    try {
+      const res = await fetch('/api/admin/invitation-links', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ links_text: newInvitationLinks }),
+      });
+      const payload = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setInvitationError(payload.error ?? 'Failed to add invitation links');
+        return;
+      }
+      setNewInvitationLinks('');
+      await load();
+    } catch {
+      setInvitationError('Failed to add invitation links');
+    } finally {
+      setInvitationBusy(false);
+    }
+  }
+
+  async function updateInvitationStatus(id: number, status: 'available' | 'invalid' | 'used') {
+    setInvitationBusy(true);
+    setInvitationError(null);
+    try {
+      const res = await fetch('/api/admin/invitation-links', {
+        method: 'PATCH',
+        headers: headers(),
+        body: JSON.stringify({ id, status }),
+      });
+      const payload = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setInvitationError(payload.error ?? 'Failed to update invitation link');
+        return;
+      }
+      await load();
+    } catch {
+      setInvitationError('Failed to update invitation link');
+    } finally {
+      setInvitationBusy(false);
+    }
   }
 
   if (!isConnected) {
@@ -327,6 +385,89 @@ export function AdminPanel() {
           );
           })}
 
+        </div>
+      </section>
+
+      {/* Invitation links */}
+      <section className="flex flex-col gap-4">
+        <h2 className="text-base font-semibold">Invitation links pool</h2>
+        <p className="text-sm text-muted-foreground">
+          Add one invitation URL per line. Links are claimed in FIFO order.
+        </p>
+        <div className="flex flex-col gap-2">
+          <textarea
+            value={newInvitationLinks}
+            onChange={(e) => setNewInvitationLinks(e.target.value)}
+            placeholder="https://example.com/invite/abc123"
+            className="min-h-28 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none ring-0 transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={invitationBusy || !newInvitationLinks.trim()}
+              onClick={addInvitationLinksBatch}
+            >
+              Add links
+            </Button>
+            {invitationBusy ? <span className="text-xs text-muted-foreground">Saving…</span> : null}
+          </div>
+          {invitationError ? <p className="text-xs text-destructive">{invitationError}</p> : null}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {invitationLinks.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No invitation links yet.</p>
+          ) : (
+            invitationLinks.map((link) => (
+              <div
+                key={link.id}
+                className="flex flex-col gap-3 rounded-xl border border-border p-4 md:flex-row md:items-center md:justify-between"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{link.url}</p>
+                  <p className="text-xs text-muted-foreground">
+                    added by {link.added_by} · created {link.created_at}
+                    {link.consumed_at ? ` · consumed ${link.consumed_at}` : ''}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      'rounded-full px-2 py-0.5 text-xs font-medium',
+                      link.status === 'available' && 'bg-success/15 text-success',
+                      link.status === 'used' && 'bg-muted text-muted-foreground',
+                      link.status === 'invalid' && 'bg-destructive/15 text-destructive',
+                    )}
+                  >
+                    {link.status}
+                  </span>
+                  {link.status !== 'invalid' ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={invitationBusy}
+                      onClick={() => updateInvitationStatus(link.id, 'invalid')}
+                    >
+                      Mark invalid
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={invitationBusy}
+                      onClick={() => updateInvitationStatus(link.id, 'available')}
+                    >
+                      Reactivate
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 

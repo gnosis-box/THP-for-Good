@@ -42,6 +42,18 @@ export type BookingRow = {
   created_at: string;
 };
 
+export type InvitationLinkStatus = 'available' | 'used' | 'invalid';
+
+export type InvitationLinkRow = {
+  id: number;
+  url: string;
+  status: InvitationLinkStatus;
+  added_by: string;
+  created_at: string;
+  consumed_at: string | null;
+  consumed_by: string | null;
+};
+
 export type InsertExpertData = {
   circles_address: string;
   name: string;
@@ -381,6 +393,112 @@ export function insertBooking(data: InsertBookingData): number {
 }
 
 export type AdminRow = { id: number; circles_address: string; created_at: string };
+
+export function listInvitationLinks(): InvitationLinkRow[] {
+  return db
+    .prepare(
+      `SELECT id, url, status, added_by, created_at, consumed_at, consumed_by
+       FROM invitation_links
+       ORDER BY created_at DESC, id DESC`,
+    )
+    .all() as InvitationLinkRow[];
+}
+
+export function addInvitationLinks(urls: string[], addedBy: string): { added: number; skipped: number } {
+  const normalizedUrls = [...new Set(urls.map((url) => url.trim()).filter(Boolean))];
+  if (normalizedUrls.length === 0) return { added: 0, skipped: 0 };
+
+  const insertStmt = db.prepare(
+    `INSERT OR IGNORE INTO invitation_links (url, status, added_by)
+     VALUES (?, 'available', ?)`,
+  );
+
+  const run = db.transaction(() => {
+    let added = 0;
+    let skipped = 0;
+    for (const url of normalizedUrls) {
+      const result = insertStmt.run(url, addedBy.toLowerCase());
+      if (result.changes > 0) {
+        added += 1;
+      } else {
+        skipped += 1;
+      }
+    }
+    return { added, skipped };
+  });
+
+  return run();
+}
+
+export function updateInvitationLinkStatus(
+  id: number,
+  status: InvitationLinkStatus,
+): InvitationLinkRow | undefined {
+  const setConsumed = status === 'used';
+  const clearConsumed = status === 'available';
+
+  db.prepare(
+    `UPDATE invitation_links
+     SET status = ?,
+         consumed_at = CASE
+           WHEN ? THEN datetime('now')
+           WHEN ? THEN NULL
+           ELSE consumed_at
+         END,
+         consumed_by = CASE
+           WHEN ? THEN 'admin'
+           WHEN ? THEN NULL
+           ELSE consumed_by
+         END
+     WHERE id = ?`,
+  ).run(status, setConsumed ? 1 : 0, clearConsumed ? 1 : 0, setConsumed ? 1 : 0, clearConsumed ? 1 : 0, id);
+
+  return db
+    .prepare(
+      `SELECT id, url, status, added_by, created_at, consumed_at, consumed_by
+       FROM invitation_links
+       WHERE id = ?`,
+    )
+    .get(id) as InvitationLinkRow | undefined;
+}
+
+export function claimNextInvitationLink(consumedBy: string): InvitationLinkRow | null {
+  const run = db.transaction((consumer: string) => {
+    const next = db
+      .prepare(
+        `SELECT id, url, status, added_by, created_at, consumed_at, consumed_by
+         FROM invitation_links
+         WHERE status = 'available'
+         ORDER BY created_at ASC, id ASC
+         LIMIT 1`,
+      )
+      .get() as InvitationLinkRow | undefined;
+
+    if (!next) return null;
+
+    const updateResult = db
+      .prepare(
+        `UPDATE invitation_links
+         SET status = 'used',
+             consumed_at = datetime('now'),
+             consumed_by = ?
+         WHERE id = ? AND status = 'available'`,
+      )
+      .run(consumer.toLowerCase(), next.id);
+
+    if (updateResult.changes === 0) return null;
+
+    return db
+      .prepare(
+        `SELECT id, url, status, added_by, created_at, consumed_at, consumed_by
+         FROM invitation_links
+         WHERE id = ?`,
+      )
+      .get(next.id) as InvitationLinkRow | undefined;
+  });
+
+  return run(consumedBy) ?? null;
+}
 
 export function getDbAdmins(): AdminRow[] {
   return db.prepare('SELECT * FROM admins ORDER BY created_at DESC').all() as AdminRow[];

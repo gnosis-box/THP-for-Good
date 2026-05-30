@@ -11,6 +11,8 @@ import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
 import { isValidBookingEmail } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
+import { Button } from '@/components/ui/button';
+import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import type { ExpertRow } from '@/lib/db';
 import type { CrcBalanceState } from '@/hooks/use-crc-balance';
 
@@ -28,6 +30,13 @@ type Props = {
   callContext: string;
   onCallContextChange: (value: string) => void;
   balance: CrcBalanceState;
+  requiresOnboarding: boolean;
+  onboardingHandled: boolean;
+  onboardingInviteUrl: string | null;
+  onboardingError: string | null;
+  onboardingHint: string | null;
+  claimingInvitation: boolean;
+  onClaimInvitation: () => void;
   onSaved: () => void;
   onCancelEdit: () => void;
   onDeactivated: () => void;
@@ -48,6 +57,13 @@ export function ExpertDetailBody({
   callContext,
   onCallContextChange,
   balance,
+  requiresOnboarding,
+  onboardingHandled,
+  onboardingInviteUrl,
+  onboardingError,
+  onboardingHint,
+  claimingInvitation,
+  onClaimInvitation,
   onSaved,
   onCancelEdit,
   onDeactivated,
@@ -88,6 +104,13 @@ export function ExpertDetailBody({
         callContext={callContext}
         onCallContextChange={onCallContextChange}
         balance={balance}
+        requiresOnboarding={requiresOnboarding}
+        onboardingHandled={onboardingHandled}
+        onboardingInviteUrl={onboardingInviteUrl}
+        onboardingError={onboardingError}
+        onboardingHint={onboardingHint}
+        claimingInvitation={claimingInvitation}
+        onClaimInvitation={onClaimInvitation}
         onPaySuccess={onPaySuccess}
       />
     );
@@ -134,6 +157,13 @@ export function ExpertDetailBody({
             callContext={callContext}
             onCallContextChange={onCallContextChange}
             balance={balance}
+            requiresOnboarding={requiresOnboarding}
+            onboardingHandled={onboardingHandled}
+            onboardingInviteUrl={onboardingInviteUrl}
+            onboardingError={onboardingError}
+            onboardingHint={onboardingHint}
+            claimingInvitation={claimingInvitation}
+            onClaimInvitation={onClaimInvitation}
             onPaySuccess={onPaySuccess}
           />
         </motion.div>
@@ -157,6 +187,13 @@ function BookingView({
   callContext,
   onCallContextChange,
   balance,
+  requiresOnboarding,
+  onboardingHandled,
+  onboardingInviteUrl,
+  onboardingError,
+  onboardingHint,
+  claimingInvitation,
+  onClaimInvitation,
   onPaySuccess,
 }: {
   expert: ExpertRow;
@@ -173,14 +210,26 @@ function BookingView({
   callContext: string;
   onCallContextChange: (value: string) => void;
   balance: CrcBalanceState;
+  requiresOnboarding: boolean;
+  onboardingHandled: boolean;
+  onboardingInviteUrl: string | null;
+  onboardingError: string | null;
+  onboardingHint: string | null;
+  claimingInvitation: boolean;
+  onClaimInvitation: () => void;
   onPaySuccess: () => void;
 }) {
   const sharePercent = expert.expert_share_percent ?? 20;
   const detailsComplete = isValidEmail && hasContext;
+  const needsOnboardingClaim = requiresOnboarding && !onboardingHandled;
 
   return (
     <>
-      <StickyBookingStepper hasSlot={hasSlot} isValidEmail={isValidEmail} hasContext={hasContext} />
+      <StickyBookingStepper
+        hasSlot={hasSlot}
+        isValidEmail={isValidEmail}
+        hasContext={hasContext && !needsOnboardingClaim}
+      />
       <ExpertProfileHero expert={expert} />
 
       <section className="flex w-full flex-col gap-3">
@@ -198,7 +247,45 @@ function BookingView({
         )}
       </section>
 
-      {hasSlot && !detailsComplete && (
+      {requiresOnboarding && (
+        <section id="booking-onboarding-claim" className="flex w-full flex-col gap-3">
+          <StatusAlert
+            variant="warning"
+            title={UI_COPY.booking.onboardingRequiredTitle}
+            description={
+              <div className="flex flex-col gap-2">
+                <p>{UI_COPY.booking.onboardingRequiredDescription}</p>
+                {onboardingInviteUrl ? (
+                  <p className="text-xs text-muted-foreground">
+                    {UI_COPY.booking.onboardingOpenInvite}: {onboardingInviteUrl}
+                  </p>
+                ) : null}
+                {onboardingError ? <p className="text-xs text-destructive">{onboardingError}</p> : null}
+                {onboardingHint ? (
+                  <p className="text-xs text-muted-foreground">{onboardingHint}</p>
+                ) : null}
+                {!onboardingHandled ? (
+                  <div className="pt-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={claimingInvitation}
+                      onClick={onClaimInvitation}
+                    >
+                      {claimingInvitation
+                        ? `${UI_COPY.booking.onboardingGetInvite}…`
+                        : UI_COPY.booking.onboardingGetInvite}
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            }
+          />
+        </section>
+      )}
+
+      {hasSlot && (!detailsComplete || needsOnboardingClaim) && (
         <section className="hidden w-full flex-col gap-3 md:flex">
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
           <PaymentSummary
@@ -214,7 +301,7 @@ function BookingView({
         </section>
       )}
 
-      {hasSlot && detailsComplete && (
+      {hasSlot && detailsComplete && !needsOnboardingClaim && (
         <section className="hidden w-full flex-col gap-3 md:flex">
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.bookSession}</h2>
           <PayButton
@@ -226,6 +313,7 @@ function BookingView({
             onCallDomainChange={onCallDomainChange}
             callContext={callContext}
             onCallContextChange={onCallContextChange}
+            onboardingReady={!needsOnboardingClaim}
             onSuccess={onPaySuccess}
           />
         </section>

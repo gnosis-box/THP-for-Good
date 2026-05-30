@@ -10,6 +10,7 @@ import { PayButton } from '@/components/experts/PayButton';
 import { ExpertDetailBody } from '@/components/experts/ExpertDetailBody';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { useCrcBalance } from '@/hooks/use-crc-balance';
+import { claimInvitationLink } from '@/lib/invitation-links-client';
 import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
 import { isValidBookingEmail } from '@/lib/booking-validation';
 import { UI_COPY } from '@/lib/ui-copy';
@@ -27,6 +28,10 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   const [email, setEmail] = useState('');
   const [callDomain, setCallDomain] = useState('');
   const [callContext, setCallContext] = useState('');
+  const [claimingInvitation, setClaimingInvitation] = useState(false);
+  const [onboardingError, setOnboardingError] = useState<string | null>(null);
+  const [onboardingHint, setOnboardingHint] = useState<string | null>(null);
+  const [onboardingInviteUrl, setOnboardingInviteUrl] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const expertViewTracked = useRef(false);
 
@@ -40,7 +45,10 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   const hasContext =
     isValidBookingDomain(normalizeBookingText(callDomain)) &&
     isValidBookingContext(normalizeBookingText(callContext));
-  const hasDetails = isValidEmail && hasContext;
+  const requiresOnboarding = balance.status === 'not-registered';
+  const onboardingHandled = !requiresOnboarding || onboardingInviteUrl !== null;
+  const onboardingReady = !requiresOnboarding || onboardingHandled;
+  const hasDetails = isValidEmail && hasContext && onboardingReady;
   const isSelf = !!address && address.toLowerCase() === expert.circles_address.toLowerCase();
   const hasSlot = !!selectedSlot;
 
@@ -62,7 +70,11 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
       ? 'booker-email'
       : !isValidBookingDomain(normalizeBookingText(callDomain))
         ? 'call-domain'
-        : 'call-context';
+        : !isValidBookingContext(normalizeBookingText(callContext))
+          ? 'call-context'
+          : !onboardingReady
+            ? 'booking-onboarding-claim'
+            : 'call-context';
     const el = document.getElementById(targetId);
     el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
@@ -93,6 +105,25 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
 
   function handlePaySuccess() {
     setDrawerOpen(false);
+  }
+
+  async function handleClaimInvitation() {
+    if (!address) return;
+    setClaimingInvitation(true);
+    setOnboardingError(null);
+    setOnboardingHint(null);
+    try {
+      const result = await claimInvitationLink(address);
+      setOnboardingInviteUrl(result.invitation_url);
+      if (result.source === 'fallback') {
+        setOnboardingHint(UI_COPY.booking.onboardingFallbackNotice);
+      }
+      window.open(result.invitation_url, '_blank', 'noopener,noreferrer');
+    } catch {
+      setOnboardingError(UI_COPY.booking.onboardingClaimError);
+    } finally {
+      setClaimingInvitation(false);
+    }
   }
 
   return (
@@ -131,6 +162,13 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           callContext={callContext}
           onCallContextChange={setCallContext}
           balance={balance}
+          requiresOnboarding={requiresOnboarding}
+          onboardingHandled={onboardingHandled}
+          onboardingInviteUrl={onboardingInviteUrl}
+          onboardingError={onboardingError}
+          onboardingHint={onboardingHint}
+          claimingInvitation={claimingInvitation}
+          onClaimInvitation={handleClaimInvitation}
           onSaved={reloadExpert}
           onCancelEdit={() => setEditing(false)}
           onDeactivated={() => router.push('/')}
@@ -144,7 +182,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
             priceCrc={expert.price_crc}
             hasSlot={hasSlot}
             isValidEmail={isValidEmail}
-            hasContext={hasContext}
+            hasContext={hasContext && onboardingReady}
             onContinue={handleStickyContinue}
             onReview={handleStickyReview}
           />
@@ -156,7 +194,9 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
                 drawerOpen && !hasDetails
                   ? !isValidEmail
                     ? UI_COPY.booking.enterEmailFirst
-                    : UI_COPY.booking.completeDetailsFirst
+                    : !hasContext
+                      ? UI_COPY.booking.completeDetailsFirst
+                      : UI_COPY.booking.completeOnboardingFirst
                   : null
               }
             >
@@ -169,6 +209,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
                 onCallDomainChange={setCallDomain}
                 callContext={callContext}
                 onCallContextChange={setCallContext}
+                onboardingReady={onboardingReady}
                 onSuccess={handlePaySuccess}
                 showEmail
               />

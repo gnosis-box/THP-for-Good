@@ -53,3 +53,17 @@ CREATE TABLE IF NOT EXISTS trust_attestations (
   trust_tx_hash TEXT,
   attested_at   TEXT    DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS invitation_links (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  url         TEXT    UNIQUE NOT NULL,
+  status      TEXT    NOT NULL DEFAULT 'available',
+  added_by    TEXT    NOT NULL,
+  created_at  TEXT    DEFAULT (datetime('now')),
+  consumed_at TEXT,
+  consumed_by TEXT,
+  CHECK (status IN ('available', 'used', 'invalid'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_invitation_links_status_created
+  ON invitation_links(status, created_at, id);

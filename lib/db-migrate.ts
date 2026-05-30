@@ -132,6 +132,8 @@ function applyColumnMigrations(db: Database.Database): void {
     'ALTER TABLE experts ADD COLUMN spoken_languages TEXT',
     'ALTER TABLE experts ADD COLUMN call_languages TEXT',
     'CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_tx_hash ON bookings(tx_hash) WHERE tx_hash IS NOT NULL',
+    "CREATE TABLE IF NOT EXISTS invitation_links (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT UNIQUE NOT NULL, status TEXT NOT NULL DEFAULT 'available', added_by TEXT NOT NULL, created_at TEXT DEFAULT (datetime('now')), consumed_at TEXT, consumed_by TEXT, CHECK (status IN ('available', 'used', 'invalid')))",
+    'CREATE INDEX IF NOT EXISTS idx_invitation_links_status_created ON invitation_links(status, created_at, id)',
   ]) {
     tryExec(db, sql);
   }

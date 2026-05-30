@@ -49,6 +49,15 @@ export const UI_COPY = {
       'Provide enough detail so the expert can prepare (20-1200 characters). This is included in the booking invite notes.',
     callContextRequired: 'Call context is required.',
     callContextInvalid: 'Call context must be between 20 and 1200 characters.',
+    onboardingRequiredTitle: 'Circles onboarding required',
+    onboardingRequiredDescription:
+      'This wallet is not registered in Circles yet. Get an invitation link before completing payment.',
+    onboardingGetInvite: 'Get invitation link',
+    onboardingOpenInvite: 'Open invitation link',
+    onboardingFallbackNotice:
+      'No invitation links are available right now. We will open the default Gnosis onboarding.',
+    onboardingClaimError: 'Unable to get an invitation link right now. Try again in a moment.',
+    completeOnboardingFirst: 'Complete onboarding first to review and pay.',
     successTrustReminder: (expertName: string) =>
       `After your call, trust ${expertName} on My Calls to strengthen the Circles network.`,
     successDialogTitle: 'Booking confirmed!',

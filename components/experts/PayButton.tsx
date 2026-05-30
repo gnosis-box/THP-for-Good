@@ -63,6 +63,7 @@ type Props = {
   onCallDomainChange: (v: string) => void;
   callContext: string;
   onCallContextChange: (v: string) => void;
+  onboardingReady?: boolean;
   onSuccess?: () => void;
   showEmail?: boolean;
   compact?: boolean;
@@ -77,6 +78,7 @@ export function PayButton({
   onCallDomainChange,
   callContext,
   onCallContextChange,
+  onboardingReady = true,
   onSuccess,
   showEmail = true,
   compact = false,
@@ -131,6 +133,7 @@ export function PayButton({
     isValidEmail &&
     hasValidDomain &&
     hasValidContext &&
+    onboardingReady &&
     !isSelf &&
     state.kind !== 'loading' &&
     balance.status === 'ready' &&
@@ -138,7 +141,7 @@ export function PayButton({
 
   async function handlePay() {
     if (!selectedSlot || !address) return;
-    if (!isValidEmail || !hasValidDomain || !hasValidContext) {
+    if (!isValidEmail || !hasValidDomain || !hasValidContext || !onboardingReady) {
       setShowValidationErrors(true);
       return;
     }
@@ -365,6 +368,11 @@ export function PayButton({
           {selectedSlot && (!hasValidDomain || !hasValidContext) && (
             <p className="text-center text-xs text-muted-foreground">
               {UI_COPY.booking.completeDetailsFirst}
+            </p>
+          )}
+          {selectedSlot && hasValidDomain && hasValidContext && !onboardingReady && (
+            <p className="text-center text-xs text-muted-foreground">
+              {UI_COPY.booking.completeOnboardingFirst}
             </p>
           )}
           {isSelf && (
