@@ -7,6 +7,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { BookingSuccessDialog } from '@/components/booking/BookingSuccessDialog';
 import { DonateFundLearnerLink } from '@/components/booking/DonateFundLearnerLink';
+import { OnboardingInvitePanel } from '@/components/booking/OnboardingInvitePanel';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { TrustPathPanel } from '@/components/booking/TrustPathPanel';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
@@ -318,16 +319,9 @@ export function PayButton({
               showEmail={showEmail}
             />
           </div>
-          {balance.status === 'not-registered' && (
-            <div className="pay-drawer-section">
-              <StatusAlert
-                variant="warning"
-                title="Wallet not registered"
-                description="Your wallet is not a registered Circles avatar. Open the app in the Circles playground to pay with CRC."
-                className="motion-alert-in"
-              />
-            </div>
-          )}
+          {balance.status === 'not-registered' && address ? (
+            <OnboardingInvitePanel walletAddress={address} />
+          ) : null}
           {insufficientBalance && (
             <StatusAlert
               variant="warning"

@@ -49,6 +49,7 @@ Central index of project, product, and ecosystem URLs.
 | Motion design audit (P0–P2) | [`spec/motion-design-audit.md`](motion-design-audit.md) |
 | Live CRC treasury counter (WSS + coin animation) | [`spec/live-crc-counter.md`](live-crc-counter.md) |
 | Skills & languages UX (discover, cards, filters) | [`spec/skills-languages-ux.md`](skills-languages-ux.md) |
+| Invitation links pool UX (admin + booking onboarding) | [`spec/invitation-links-ux.md`](invitation-links-ux.md) |
 | cal.diy spike | [`docs/spike-cal-diy.md`](../docs/spike-cal-diy.md) |
 
 ### App routes (target)
@@ -73,6 +74,20 @@ Central index of project, product, and ecosystem URLs.
 | **IMPL-L4-06** | Expert card trust status & two-way trust | [#63](https://github.com/gnosis-box/THP-for-Good/issues/63) |
 | **FEAT-L4-07** | Expert session languages (spoken & call) | [#64](https://github.com/gnosis-box/THP-for-Good/issues/64) |
 | **IMPL-L4-09** | Skills & languages UX (discover, cards, filters) | [#94](https://github.com/gnosis-box/THP-for-Good/issues/94) |
+
+## Alpha backlog — issues (2026-05-31)
+
+| ID | Title | Issue | Spec |
+|----|-------|-------|------|
+| **DIV-A-01** | Gnosis/Circles onboarding decision (invite pool) | [#111](https://github.com/gnosis-box/THP-for-Good/issues/111) | Done — see [`invitation-links-ux.md`](invitation-links-ux.md) |
+| **FEAT-A-04** | Admin invitation links pool UX | [#128](https://github.com/gnosis-box/THP-for-Good/issues/128) | [`invitation-links-ux.md`](invitation-links-ux.md) |
+| **IMPL-A-05** | FIFO invitation link backend + booking integration | [#129](https://github.com/gnosis-box/THP-for-Good/issues/129) | [`invitation-links-ux.md`](invitation-links-ux.md) §10 |
+| **IMPL-A-03** | Booking step gating | [#119](https://github.com/gnosis-box/THP-for-Good/issues/119) | — |
+| **IMPL-A-01** | Donate CTA (low CRC) | [#113](https://github.com/gnosis-box/THP-for-Good/issues/113) | — |
+| **DIV-A-02** | Low-CRC redirect vs toast | [#112](https://github.com/gnosis-box/THP-for-Good/issues/112) | — |
+| **FEAT-A-02** | Landing hero | [#114](https://github.com/gnosis-box/THP-for-Good/issues/114) | — |
+| **FEAT-A-03** | Marketing OG / share | [#117](https://github.com/gnosis-box/THP-for-Good/issues/117) | — |
+| **DIV-A-03** | Review split tiers | [#118](https://github.com/gnosis-box/THP-for-Good/issues/118) | — |
 
 ### Related L4 / spikes (existing)
 
