@@ -9,6 +9,7 @@ import { fetchCirclesScore, cn } from '@/lib/utils';
 import { useRowFlash } from '@/hooks/use-row-flash';
 import { PromoteSection } from './PromoteSection';
 import { PlatformHealthSection } from './PlatformHealthSection';
+import { InvitationLinksSection } from './InvitationLinksSection';
 import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
 import { ExpertLanguageTags, ExpertSkillTags } from '@/components/ui-patterns/ExpertMeta';
 import { getDisplayCallLanguages } from '@/lib/languages';
@@ -199,6 +200,8 @@ export function AdminPanel() {
   return (
     <div className="flex flex-col gap-10">
       {health ? <PlatformHealthSection stats={health} /> : null}
+
+      <InvitationLinksSection walletAddress={address ?? ''} />
 
       <p className="text-sm">
         <Link href="/stats" className="text-foreground underline underline-offset-2">

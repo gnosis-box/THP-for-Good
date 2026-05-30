@@ -53,3 +53,13 @@ CREATE TABLE IF NOT EXISTS trust_attestations (
   trust_tx_hash TEXT,
   attested_at   TEXT    DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS invitation_links (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  url          TEXT    NOT NULL,
+  status       TEXT    NOT NULL DEFAULT 'available',
+  added_by     TEXT    NOT NULL,
+  created_at   TEXT    DEFAULT (datetime('now')),
+  consumed_at  TEXT,
+  consumed_by  TEXT
+);
