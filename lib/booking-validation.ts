@@ -1,4 +1,4 @@
-/** Booking flow: slot → valid email → pay. */
+/** Booking flow: slot → details (email + context) → pay. */
 
 export type BookingStep = 0 | 1 | 2;
 
@@ -8,8 +8,16 @@ export function isValidBookingEmail(email: string): boolean {
   return BOOKING_EMAIL_RE.test(email.trim());
 }
 
-export function getBookingStep(hasSlot: boolean, isValidEmail: boolean): BookingStep {
+export function isBookingDetailsComplete(isValidEmail: boolean, hasContext: boolean): boolean {
+  return isValidEmail && hasContext;
+}
+
+export function getBookingStep(
+  hasSlot: boolean,
+  isValidEmail: boolean,
+  hasContext: boolean,
+): BookingStep {
   if (!hasSlot) return 0;
-  if (!isValidEmail) return 1;
+  if (!isBookingDetailsComplete(isValidEmail, hasContext)) return 1;
   return 2;
 }

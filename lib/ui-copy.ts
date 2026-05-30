@@ -34,6 +34,8 @@ export const UI_COPY = {
     bookSession: 'Book session',
     reviewAndPay: 'Review & pay',
     continueToDetails: 'Continue',
+    changeSlot: 'Change time',
+    readyToPay: 'Your details are complete. Tap Review & pay below to confirm.',
     enterEmailFirst: 'Enter a valid email address to continue to payment.',
     selectSlotFirst: 'Select a slot above first.',
     completeDetailsFirst: 'Complete your details to review payment.',

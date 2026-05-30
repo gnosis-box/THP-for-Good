@@ -2,14 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { BookingStepper } from '@/components/booking/BookingStepper';
+import type { BookingStep } from '@/lib/booking-validation';
 import { cn } from '@/lib/utils';
 
 const HEADER_OFFSET_PX = 56; // h-14 in Header
 
 type Props = {
-  hasSlot: boolean;
-  isValidEmail: boolean;
-  hasContext: boolean;
+  step: BookingStep;
   className?: string;
 };
 
@@ -27,7 +26,7 @@ function collectScrollRoots(node: HTMLElement | null): EventTarget[] {
   return roots;
 }
 
-export function StickyBookingStepper({ hasSlot, isValidEmail, hasContext, className }: Props) {
+export function StickyBookingStepper({ step, className }: Props) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [pinned, setPinned] = useState(false);
@@ -82,12 +81,7 @@ export function StickyBookingStepper({ hasSlot, isValidEmail, hasContext, classN
           }
         >
           <div className="px-4 md:px-6">
-            <BookingStepper
-              hasSlot={hasSlot}
-              isValidEmail={isValidEmail}
-              hasContext={hasContext}
-              className="w-full"
-            />
+            <BookingStepper step={step} className="w-full" />
           </div>
         </div>
       </div>
