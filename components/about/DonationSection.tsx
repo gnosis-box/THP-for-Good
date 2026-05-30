@@ -138,7 +138,7 @@ export function DonationSection() {
         )}
       </LiveTreasuryCounter>
 
-      <div className="flex flex-col items-center gap-3">
+      <div id="donate" className="flex scroll-mt-24 flex-col items-center gap-3">
         <p className="text-sm font-medium">Donate CRC to fund a learner</p>
         <div className="flex flex-wrap justify-center gap-2">
           {PRESET_AMOUNTS.map((amt) => (

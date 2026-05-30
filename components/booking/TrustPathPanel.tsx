@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'motion/react';
 
 import { AlertTriangle, Check } from 'lucide-react';
 
+import { DonateFundLearnerLink } from '@/components/booking/DonateFundLearnerLink';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
@@ -156,7 +157,13 @@ function TrustPathContent({
         <StatusAlert
           variant="warning"
           title="Trust path shortfall"
-          description={PAY_COPY.trustEstimateShortfall}
+          description={
+            <div className="flex flex-col gap-3">
+              <p>{PAY_COPY.trustEstimateShortfall}</p>
+              <p className="text-xs text-muted-foreground">{PAY_COPY.donateHint}</p>
+              <DonateFundLearnerLink />
+            </div>
+          }
           className="motion-alert-in"
         />
       )}

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { BookingSuccessDialog } from '@/components/booking/BookingSuccessDialog';
+import { DonateFundLearnerLink } from '@/components/booking/DonateFundLearnerLink';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { TrustPathPanel } from '@/components/booking/TrustPathPanel';
 import { StatusAlert } from '@/components/ui-patterns/StatusAlert';
@@ -20,7 +21,7 @@ import {
   splitLegCrc,
   type ExpertSharePercent,
 } from '@/lib/crc-pay';
-import { mapPayError } from '@/lib/pay-copy';
+import { mapPayError, PAY_COPY } from '@/lib/pay-copy';
 import { postBookingWithRetry } from '@/lib/booking-client';
 import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
@@ -328,9 +329,17 @@ export function PayButton({
             </div>
           )}
           {insufficientBalance && (
-            <p className="pay-drawer-section text-sm text-destructive">
-              You need at least {expert.price_crc} CRC to book this call.
-            </p>
+            <StatusAlert
+              variant="warning"
+              title={PAY_COPY.insufficientBalanceTitle}
+              description={
+                <div className="flex flex-col gap-3">
+                  <p>{PAY_COPY.insufficientBalanceDescription(expert.price_crc)}</p>
+                  <DonateFundLearnerLink />
+                </div>
+              }
+              className="pay-drawer-section motion-alert-in"
+            />
           )}
           <div className="pay-drawer-section">
             <Button
