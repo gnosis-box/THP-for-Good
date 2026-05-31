@@ -6,6 +6,7 @@ import { ExpertProfileHero } from '@/components/booking/ExpertProfileHero';
 import { PayButton } from '@/components/experts/PayButton';
 import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
 import { SlotPicker } from '@/components/experts/SlotPicker';
+import { OpenInCirclesHint } from '@/components/wallet/OpenInCirclesHint';
 import { PaymentSummary } from '@/components/booking/PaymentSummary';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { isValidBookingContext, isValidBookingDomain, normalizeBookingText } from '@/lib/booking-context';
@@ -20,6 +21,7 @@ type Props = {
   editing: boolean;
   expert: ExpertRow;
   isSelf: boolean;
+  isConnected: boolean;
   walletAddress: string | null;
   selectedSlot: string | null;
   onSelectSlot: (slot: string | null) => void;
@@ -47,6 +49,7 @@ export function ExpertDetailBody({
   editing,
   expert,
   isSelf,
+  isConnected,
   walletAddress,
   selectedSlot,
   onSelectSlot,
@@ -92,6 +95,7 @@ export function ExpertDetailBody({
       <BookingView
         expert={expert}
         isSelf={isSelf}
+        isConnected={isConnected}
         selectedSlot={selectedSlot}
         onSelectSlot={onSelectSlot}
         hasSlot={hasSlot}
@@ -145,6 +149,7 @@ export function ExpertDetailBody({
           <BookingView
             expert={expert}
             isSelf={isSelf}
+            isConnected={isConnected}
             selectedSlot={selectedSlot}
             onSelectSlot={onSelectSlot}
             hasSlot={hasSlot}
@@ -175,6 +180,7 @@ export function ExpertDetailBody({
 function BookingView({
   expert,
   isSelf,
+  isConnected,
   selectedSlot,
   onSelectSlot,
   hasSlot,
@@ -198,6 +204,7 @@ function BookingView({
 }: {
   expert: ExpertRow;
   isSelf: boolean;
+  isConnected: boolean;
   selectedSlot: string | null;
   onSelectSlot: (slot: string | null) => void;
   hasSlot: boolean;
@@ -222,49 +229,47 @@ function BookingView({
   const sharePercent = expert.expert_share_percent ?? 20;
   const detailsComplete = isValidEmail && hasContext;
   const needsOnboardingClaim = requiresOnboarding && !onboardingHandled;
+  const canAccessSlots = isConnected && !needsOnboardingClaim;
+  const hasActiveSlot = hasSlot && canAccessSlots;
 
   return (
     <>
       <StickyBookingStepper
-        hasSlot={hasSlot}
+        hasSlot={hasActiveSlot}
         isValidEmail={isValidEmail}
         hasContext={hasContext && !needsOnboardingClaim}
       />
       <ExpertProfileHero expert={expert} />
 
       <section className="flex w-full flex-col gap-3">
-        {expert.cal_event_type_id ? (
-          <>
-            <h2 className="text-center text-sm font-semibold">
-              {UI_COPY.booking.selectAvailabilitySlot}
-            </h2>
-            <SlotPicker expertId={expert.id} selected={selectedSlot} onSelect={onSelectSlot} />
-          </>
-        ) : (
-          <p className="text-center text-sm text-muted-foreground">
-            {isSelf ? UI_COPY.booking.noCalSelf : UI_COPY.booking.noCalVisitor}
-          </p>
-        )}
-      </section>
-
-      {requiresOnboarding && (
-        <section id="booking-onboarding-claim" className="flex w-full flex-col gap-3">
+        {!isConnected ? (
           <StatusAlert
-            variant="warning"
-            title={UI_COPY.booking.onboardingRequiredTitle}
+            variant="info"
+            title="Connect wallet to view availability"
             description={
-              <div className="flex flex-col gap-2">
-                <p>{UI_COPY.booking.onboardingRequiredDescription}</p>
-                {onboardingInviteUrl ? (
-                  <p className="text-xs text-muted-foreground">
-                    {UI_COPY.booking.onboardingOpenInvite}: {onboardingInviteUrl}
-                  </p>
-                ) : null}
-                {onboardingError ? <p className="text-xs text-destructive">{onboardingError}</p> : null}
-                {onboardingHint ? (
-                  <p className="text-xs text-muted-foreground">{onboardingHint}</p>
-                ) : null}
-                {!onboardingHandled ? (
+              <div className="flex flex-col gap-3">
+                <p>Open the app in Circles and connect your wallet before selecting a time slot.</p>
+                <OpenInCirclesHint />
+              </div>
+            }
+          />
+        ) : needsOnboardingClaim ? (
+          <div id="booking-onboarding-claim">
+            <StatusAlert
+              variant="warning"
+              title={UI_COPY.booking.onboardingRequiredTitle}
+              description={
+                <div className="flex flex-col gap-2">
+                  <p>{UI_COPY.booking.onboardingRequiredDescription}</p>
+                  {onboardingInviteUrl ? (
+                    <p className="text-xs text-muted-foreground">
+                      {UI_COPY.booking.onboardingOpenInvite}: {onboardingInviteUrl}
+                    </p>
+                  ) : null}
+                  {onboardingError ? <p className="text-xs text-destructive">{onboardingError}</p> : null}
+                  {onboardingHint ? (
+                    <p className="text-xs text-muted-foreground">{onboardingHint}</p>
+                  ) : null}
                   <div className="pt-1">
                     <Button
                       type="button"
@@ -278,14 +283,25 @@ function BookingView({
                         : UI_COPY.booking.onboardingGetInvite}
                     </Button>
                   </div>
-                ) : null}
-              </div>
-            }
-          />
-        </section>
-      )}
+                </div>
+              }
+            />
+          </div>
+        ) : expert.cal_event_type_id ? (
+          <>
+            <h2 className="text-center text-sm font-semibold">
+              {UI_COPY.booking.selectAvailabilitySlot}
+            </h2>
+            <SlotPicker expertId={expert.id} selected={selectedSlot} onSelect={onSelectSlot} />
+          </>
+        ) : (
+          <p className="text-center text-sm text-muted-foreground">
+            {isSelf ? UI_COPY.booking.noCalSelf : UI_COPY.booking.noCalVisitor}
+          </p>
+        )}
+      </section>
 
-      {hasSlot && (!detailsComplete || needsOnboardingClaim) && (
+      {hasActiveSlot && (!detailsComplete || needsOnboardingClaim) && (
         <section className="hidden w-full flex-col gap-3 md:flex">
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
           <PaymentSummary
@@ -301,7 +317,7 @@ function BookingView({
         </section>
       )}
 
-      {hasSlot && detailsComplete && !needsOnboardingClaim && (
+      {hasActiveSlot && detailsComplete && !needsOnboardingClaim && (
         <section className="hidden w-full flex-col gap-3 md:flex">
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.bookSession}</h2>
           <PayButton
@@ -319,7 +335,7 @@ function BookingView({
         </section>
       )}
 
-      {hasSlot && (
+      {hasActiveSlot && (
         <section className="flex w-full flex-col gap-3 md:hidden">
           <h2 className="text-title text-center text-sm font-semibold">{UI_COPY.booking.stepDetails}</h2>
           <PaymentSummary

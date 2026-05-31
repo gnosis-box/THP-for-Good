@@ -20,7 +20,7 @@ import type { ExpertRow } from '@/lib/db';
 
 export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
   const router = useRouter();
-  const { address } = useWallet();
+  const { address, isConnected } = useWallet();
   const balance = useCrcBalance(address);
   const [expert, setExpert] = useState(initialExpert);
   const [editing, setEditing] = useState(false);
@@ -152,6 +152,7 @@ export function ExpertDetail({ expert: initialExpert }: { expert: ExpertRow }) {
           editing={editing}
           expert={expert}
           isSelf={isSelf}
+          isConnected={isConnected}
           walletAddress={address}
           selectedSlot={selectedSlot}
           onSelectSlot={handleSelectSlot}
