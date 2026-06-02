@@ -1,45 +1,48 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * Home page loading skeleton — mirrors MentorBrowser layout:
- * PageHeader + filter section + mentor card grid
+ * Home page loading skeleton — mirrors HomeHero + ExpertBrowser layout.
  */
 export default function HomeLoading() {
   return (
     <div className="flex w-full flex-col gap-8">
-      {/* PageHeader skeleton */}
-      <header className="flex flex-col items-center gap-2 text-center">
-        <Skeleton className="h-8 w-48 rounded-lg" />
-        <Skeleton className="h-4 w-72 rounded-md" />
-      </header>
+      {/* Home hero skeleton */}
+      <section className="flex flex-col gap-4 rounded-xl border border-border bg-muted/30 p-4 sm:p-5">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <Skeleton className="h-8 w-80 max-w-full rounded-lg" />
+          <Skeleton className="h-4 w-96 max-w-full rounded-md" />
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+          <Skeleton className="h-11 w-full rounded-lg sm:w-36" />
+          <Skeleton className="h-11 w-full rounded-lg sm:w-40" />
+          <Skeleton className="h-11 w-full rounded-lg sm:w-32" />
+        </div>
+        <div className="flex flex-wrap justify-center gap-2">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-9 w-36 rounded-md" />
+          ))}
+        </div>
+      </section>
 
       {/* Filter section skeleton */}
       <section className="flex flex-col gap-4">
-        <Skeleton className="h-4 w-24 rounded-md" />
         {/* Search bar */}
         <Skeleton className="h-10 w-full rounded-lg" />
-        {/* Skill filter chips */}
         <div className="flex flex-wrap gap-2">
           {[1, 2, 3, 4, 5].map((i) => (
             <Skeleton key={i} className="h-8 w-20 rounded-full" />
           ))}
         </div>
-        {/* Language filter chips */}
-        <div className="flex flex-wrap gap-2">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-8 w-16 rounded-full" />
-          ))}
-        </div>
       </section>
 
-      {/* Mentor card grid skeleton */}
+      {/* Expert card list skeleton */}
       <ul className="flex w-full flex-col gap-4">
         {[1, 2, 3, 4].map((i) => (
           <li
             key={i}
             className="w-full min-w-0 overflow-hidden rounded-xl border border-border bg-card"
           >
-            <MentorCardSkeleton />
+            <ExpertCardSkeleton />
           </li>
         ))}
       </ul>
@@ -47,7 +50,7 @@ export default function HomeLoading() {
   );
 }
 
-function MentorCardSkeleton() {
+function ExpertCardSkeleton() {
   return (
     <>
       <div className="flex w-full items-start gap-3 px-3 py-3 sm:px-4 sm:py-4">
