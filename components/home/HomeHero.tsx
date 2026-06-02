@@ -73,9 +73,7 @@ export function HomeHero({ paidSessions, treasuryBalanceCrc }: HomeHeroProps) {
 
         {treasuryBalanceCrc === null ? (
           <p className="text-center text-xs text-muted-foreground">{homeHero.proofFallback}</p>
-        ) : (
-          <p className="text-center text-xs text-muted-foreground">{homeHero.walletNote}</p>
-        )}
+        ) : null}
       </div>
     </MetricsPanel>
   );
