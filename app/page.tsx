@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { getAllExperts, getAllTags, getStatsEnrichment } from '@/lib/db';
@@ -9,9 +10,37 @@ import {
   recordToURLSearchParams,
 } from '@/lib/expert-filters';
 import { fetchTreasuryBalanceCrc } from '@/lib/analytics-rpc';
+import {
+  buildDefaultOpenGraph,
+  buildDefaultTwitter,
+  DEFAULT_OG_IMAGE_PATH,
+} from '@/lib/site-metadata';
+import { UI_COPY } from '@/lib/ui-copy';
 import { HomeHero } from '@/components/home/HomeHero';
 import { ExpertBrowser } from '@/components/experts/ExpertBrowser';
 import { Skeleton } from '@/components/ui/skeleton';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const hero = UI_COPY.home.hero;
+  const title = hero.title;
+  const description = hero.subtitle;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: '/' },
+    openGraph: buildDefaultOpenGraph({
+      url: '/',
+      title,
+      description,
+      images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: title }],
+    }),
+    twitter: buildDefaultTwitter({
+      title,
+      description,
+    }),
+  };
+}
 
 async function getFastTreasurySnapshot(timeoutMs = 1200): Promise<number | null> {
   try {
