@@ -12,7 +12,6 @@ export const UI_COPY = {
       ctaOfferExpertise: 'Offer your expertise',
       ctaAboutDonate: 'About & donate',
       steps: ['Choose an expert', 'Book & pay in CRC', 'Fund future learners'] as const,
-      walletNote: 'Wallet actions happen inside the Circles host.',
       proofCrcRaised: (value: string) => `${value} CRC raised`,
       proofPaidSessions: (count: number) => (count === 1 ? '1 paid session' : `${count} paid sessions`),
       proofFallback: 'Live impact metrics are available on the transparency dashboard.',
