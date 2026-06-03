@@ -1,6 +1,12 @@
 'use client';
 
-import type { ReactElement, ReactNode } from 'react';
+import {
+  cloneElement,
+  isValidElement,
+  useSyncExternalStore,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -16,6 +22,14 @@ type Props = {
   closeOnClick?: boolean;
 };
 
+function subscribe() {
+  return () => {};
+}
+
+function renderTriggerOnly(render: ReactElement, children?: ReactNode) {
+  return isValidElement(render) ? cloneElement(render, {}, children) : render;
+}
+
 /** Hover tooltip for icon-only or compact controls (desktop affordance; keep aria-label on trigger). */
 export function IconTooltip({
   content,
@@ -26,6 +40,13 @@ export function IconTooltip({
   delay = 0,
   closeOnClick = false,
 }: Props) {
+  const isClient = useSyncExternalStore(subscribe, () => true, () => false);
+
+  // Base UI TooltipTrigger + render prop mismatches SSR markup (data-slot, ids).
+  if (!isClient) {
+    return renderTriggerOnly(render, children);
+  }
+
   return (
     <Tooltip>
       <TooltipTrigger delay={delay} closeOnClick={closeOnClick} render={render}>
