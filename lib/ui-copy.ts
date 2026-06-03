@@ -86,6 +86,13 @@ export const UI_COPY = {
     about: 'About',
     skills: 'Skills',
   },
+  expertShare: {
+    label: 'Share expert profile',
+    shareTitle: (name: string) => `${name} — THP for Good expert`,
+    shareText: (name: string) => `Book a 1:1 session with ${name} on THP for Good.`,
+    copiedLink: 'Profile link copied',
+    shareFailed: 'Could not share link. Try again.',
+  },
   calls: {
     emitted: 'Emitted',
     received: 'Received',
