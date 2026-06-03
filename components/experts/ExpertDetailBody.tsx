@@ -99,7 +99,7 @@ export function ExpertDetailBody({
       {editing ? (
         <motion.div
           key="edit"
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
@@ -115,7 +115,7 @@ export function ExpertDetailBody({
       ) : (
         <motion.div
           key="view"
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}

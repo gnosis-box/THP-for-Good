@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
+import { ExpertShareButton } from '@/components/experts/ExpertShareButton';
 import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/components/ui-patterns/ExpertMeta';
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { TrustedByCount } from '@/components/ui-patterns/TrustedByCount';
@@ -54,7 +55,14 @@ export function ExpertDetailCardContent({ expert, trustStats, reducedMotion }: P
                 className="shrink-0"
               />
             </div>
-            <CrcAmount amount={expert.price_crc} variant="highlight" className="shrink-0 text-xs sm:text-sm" />
+            <div className="flex shrink-0 items-center gap-0.5">
+              <ExpertShareButton
+                expertId={expert.id}
+                expertName={expert.name}
+                className="size-9 shrink-0"
+              />
+              <CrcAmount amount={expert.price_crc} variant="highlight" className="text-xs sm:text-sm" />
+            </div>
           </div>
           {(hasLanguages || showTrustedBy) && (
             <div
