@@ -88,6 +88,7 @@ export const UI_COPY = {
   },
   expertShare: {
     label: 'Share expert profile',
+    tooltip: 'Share profile link',
     shareTitle: (name: string) => `${name} — THP for Good expert`,
     shareText: (name: string) => `Book a 1:1 session with ${name} on THP for Good.`,
     copiedLink: 'Profile link copied',

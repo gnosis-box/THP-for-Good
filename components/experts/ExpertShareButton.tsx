@@ -3,6 +3,7 @@
 import { Share2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/toast';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
 import { UI_COPY } from '@/lib/ui-copy';
@@ -55,16 +56,26 @@ export function ExpertShareButton({ expertId, expertName, className }: Props) {
   }
 
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      className={className}
-      onClick={() => void handleShare()}
-      aria-label={copy.label}
-      title={copy.label}
-    >
-      <Share2 className="size-4" aria-hidden />
-    </Button>
+    <Tooltip>
+      <TooltipTrigger
+        delay={0}
+        closeOnClick={false}
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={className}
+            onClick={() => void handleShare()}
+            aria-label={copy.label}
+          />
+        }
+      >
+        <Share2 className="size-4" aria-hidden />
+      </TooltipTrigger>
+      <TooltipContent side="bottom" sideOffset={6}>
+        {copy.tooltip}
+      </TooltipContent>
+    </Tooltip>
   );
 }
