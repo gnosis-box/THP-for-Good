@@ -33,7 +33,7 @@ export function ExpertCard({
 
   return (
     <Link
-      href={`/expert/${expert.id}`}
+      href={`/expert/${expert.public_slug}`}
       aria-label={`Book ${expert.name}, ${expert.price_crc} CRC per session`}
       className={cn(
         'motion-card-hover group/split flex h-full min-h-0 w-full flex-col transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',

@@ -1,5 +1,6 @@
 export type MeStatsResponse = {
   expertId: number;
+  expertPublicSlug: string;
   expertName: string;
   address: string;
   balanceCrc: number | null;

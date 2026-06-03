@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllExperts, getExpertByCirclesAddress, insertExpert } from '@/lib/db';
+import { getAllExperts, getExpertByCirclesAddress, getExpertById, insertExpert } from '@/lib/db';
 import { isAdminRequest } from '@/lib/api-auth';
 import { clampExpertShare } from '@/lib/crc-pay';
 import { normalizeExpertLanguages } from '@/lib/languages';
@@ -109,7 +109,11 @@ export async function POST(request: NextRequest) {
       spoken_languages: languages.spoken_languages,
       call_languages: languages.call_languages,
     });
-    return NextResponse.json({ id }, { status: 201 });
+    const expert = getExpertById(id);
+    if (!expert) {
+      return NextResponse.json({ error: 'Failed to load new expert' }, { status: 500 });
+    }
+    return NextResponse.json({ id, public_slug: expert.public_slug }, { status: 201 });
   } catch (err) {
     console.error('[api/experts POST]', err);
     return NextResponse.json({ error: 'Failed to register expert' }, { status: 500 });

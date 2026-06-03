@@ -2,6 +2,8 @@ import type Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 
+import { generatePublicSlug } from '@/lib/expert-public-slug';
+
 export type MigrationHealth = {
   mentorsTableExists: boolean;
   mentorSkillsTableExists: boolean;
@@ -141,9 +143,44 @@ function applyColumnMigrations(db: Database.Database): void {
       consumed_at  TEXT,
       consumed_by  TEXT
     )`,
+    'ALTER TABLE experts ADD COLUMN public_slug TEXT',
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_experts_public_slug ON experts(public_slug) WHERE public_slug IS NOT NULL',
   ]) {
     tryExec(db, sql);
   }
+}
+
+function allocateUniquePublicSlug(db: Database.Database): string {
+  for (let attempt = 0; attempt < 32; attempt++) {
+    const slug = generatePublicSlug();
+    const taken = db
+      .prepare('SELECT 1 AS x FROM experts WHERE public_slug = ?')
+      .get(slug) as { x: number } | undefined;
+    if (!taken) return slug;
+  }
+  throw new Error('Failed to allocate unique expert public_slug');
+}
+
+export function backfillExpertPublicSlugs(db: Database.Database): number {
+  if (!tableExists(db, 'experts')) return 0;
+
+  const cols = db.prepare('PRAGMA table_info(experts)').all() as { name: string }[];
+  if (!cols.some((c) => c.name === 'public_slug')) return 0;
+
+  const rows = db
+    .prepare(
+      `SELECT id FROM experts
+       WHERE public_slug IS NULL OR TRIM(public_slug) = ''`,
+    )
+    .all() as { id: number }[];
+
+  let updated = 0;
+  for (const { id } of rows) {
+    const slug = allocateUniquePublicSlug(db);
+    db.prepare('UPDATE experts SET public_slug = ? WHERE id = ?').run(slug, id);
+    updated += 1;
+  }
+  return updated;
 }
 
 export function mergeLegacyMentorsIntoExperts(db: Database.Database): boolean {
@@ -274,6 +311,9 @@ export function runDbMigrations(
   if (repairBookingsForeignKey(db)) actions.push('rebuilt bookings FK → experts');
   if (repairExpertSkillsForeignKey(db)) actions.push('rebuilt expert_skills FK → experts');
   if (dropLegacyMentorTables(db)) actions.push('dropped legacy mentor tables');
+
+  const slugBackfill = backfillExpertPublicSlugs(db);
+  if (slugBackfill > 0) actions.push(`backfilled ${slugBackfill} expert public_slug values`);
 
   db.pragma('foreign_keys = ON');
 

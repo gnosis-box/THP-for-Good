@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
 
   const body: MeStatsResponse = {
     expertId: expert.id,
+    expertPublicSlug: expert.public_slug,
     expertName: expert.name,
     address: links.address,
     balanceCrc,

@@ -2,6 +2,7 @@ import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 import { runDbMigrations, getMigrationHealth, type MigrationHealth } from '@/lib/db-migrate';
+import { generatePublicSlug } from '@/lib/expert-public-slug';
 import { parseCallLanguageCodes, parseLanguageCodes, serializeCallLanguageCodes } from '@/lib/languages';
 
 export type { MigrationHealth };
@@ -14,6 +15,7 @@ export type TagRow = {
 
 export type ExpertRow = {
   id: number;
+  public_slug: string;
   circles_address: string;
   name: string;
   bio: string | null;
@@ -67,15 +69,51 @@ export type InsertBookingData = {
   cal_booking_uid?: string;
 };
 
-type ExpertRowRaw = Omit<ExpertRow, 'skills' | 'spoken_languages' | 'call_languages'> & {
+type ExpertRowRaw = Omit<
+  ExpertRow,
+  'skills' | 'spoken_languages' | 'call_languages' | 'public_slug'
+> & {
+  public_slug: string | null;
   skills: string;
   spoken_languages: string | null;
   call_languages: string | null;
 };
 
+function allocateUniquePublicSlug(): string {
+  for (let attempt = 0; attempt < 32; attempt++) {
+    const slug = generatePublicSlug();
+    const taken = db
+      .prepare('SELECT 1 AS x FROM experts WHERE public_slug = ?')
+      .get(slug) as { x: number } | undefined;
+    if (!taken) return slug;
+  }
+  throw new Error('Failed to allocate unique expert public_slug');
+}
+
+function ensureExpertHasPublicSlug(expertId: number): void {
+  const row = db
+    .prepare('SELECT public_slug FROM experts WHERE id = ?')
+    .get(expertId) as { public_slug: string | null } | undefined;
+  if (!row) return;
+  if (row.public_slug && row.public_slug.trim() !== '') return;
+  db.prepare('UPDATE experts SET public_slug = ? WHERE id = ?').run(
+    allocateUniquePublicSlug(),
+    expertId,
+  );
+}
+
 function mapExpertRow(row: ExpertRowRaw): ExpertRow {
+  const publicSlug = row.public_slug?.trim() ?? '';
+  if (!publicSlug) {
+    ensureExpertHasPublicSlug(row.id);
+    const refreshed = db
+      .prepare('SELECT public_slug FROM experts WHERE id = ?')
+      .get(row.id) as { public_slug: string };
+    row.public_slug = refreshed.public_slug;
+  }
   return {
     ...row,
+    public_slug: row.public_slug!.trim(),
     skills: row.skills ? row.skills.split(',') : [],
     spoken_languages: parseLanguageCodes(row.spoken_languages),
     call_languages: parseCallLanguageCodes(row.call_languages),
@@ -208,6 +246,22 @@ export function getExpertById(id: number): ExpertRow | undefined {
   return mapExpertRow(row);
 }
 
+export function getExpertByPublicSlug(slug: string): ExpertRow | undefined {
+  const sql = `
+    SELECT
+      e.*,
+      GROUP_CONCAT(st.label) AS skills
+    FROM experts e
+    LEFT JOIN expert_skills es ON es.expert_id = e.id
+    LEFT JOIN skill_tags st ON st.id = es.tag_id
+    WHERE e.public_slug = ?
+    GROUP BY e.id
+  `;
+  const row = db.prepare(sql).get(slug.trim()) as ExpertRowRaw | undefined;
+  if (!row) return undefined;
+  return mapExpertRow(row);
+}
+
 export function getExpertByCirclesAddress(address: string): ExpertRow | undefined {
   const sql = `
     SELECT
@@ -227,11 +281,11 @@ export function getExpertByCirclesAddress(address: string): ExpertRow | undefine
 export function insertExpert(data: InsertExpertData): number {
   const insertExpertStmt = db.prepare(`
     INSERT OR IGNORE INTO experts (
-      circles_address, name, bio, calendar_link, google_calendar_id, cal_event_type_id,
+      public_slug, circles_address, name, bio, calendar_link, google_calendar_id, cal_event_type_id,
       price_crc, expert_share_percent, spoken_languages, call_languages
     )
     VALUES (
-      @circles_address, @name, @bio, @calendar_link, @google_calendar_id, @cal_event_type_id,
+      @public_slug, @circles_address, @name, @bio, @calendar_link, @google_calendar_id, @cal_event_type_id,
       @price_crc, @expert_share_percent, @spoken_languages, @call_languages
     )
   `);
@@ -265,7 +319,10 @@ export function insertExpert(data: InsertExpertData): number {
         ? serializeCallLanguageCodes(data.call_languages)
         : serializeCallLanguageCodes(data.spoken_languages ?? []);
 
+    const publicSlug = allocateUniquePublicSlug();
+
     insertExpertStmt.run({
+      public_slug: publicSlug,
       circles_address: data.circles_address,
       name: data.name,
       bio: data.bio ?? null,
@@ -280,6 +337,7 @@ export function insertExpert(data: InsertExpertData): number {
 
     const row = getExpertIdStmt.get(data.circles_address) as { id: number };
     const expertId = row.id;
+    ensureExpertHasPublicSlug(expertId);
 
     if (spokenSerialized !== null) {
       updateLanguagesStmt.run({
