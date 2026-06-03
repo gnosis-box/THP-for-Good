@@ -4,6 +4,19 @@ export const UI_COPY = {
   home: {
     title: 'Find an EXPERT to help you',
     subtitle: 'Book a 1:1 session. Pay in CRC. Fund the next student.',
+    hero: {
+      title: 'Find a trusted expert. Pay in CRC. Fund the next learner.',
+      subtitle:
+        'Book practical 1:1 support, strengthen trust in Circles, and help finance future THP learners.',
+      ctaFindExpert: 'Find an expert',
+      ctaOfferExpertise: 'Offer your expertise',
+      ctaAboutDonate: 'About & donate',
+      steps: ['Choose an expert', 'Book & pay in CRC', 'Fund future learners'] as const,
+      proofCrcRaised: (value: string) => `${value} CRC raised`,
+      proofPaidSessions: (count: number) => (count === 1 ? '1 paid session' : `${count} paid sessions`),
+      proofFallback: 'Live impact metrics are available on the transparency dashboard.',
+      proofViewStats: 'View transparency dashboard',
+    },
     filterLabel: 'Which domain do you want help with?',
     emptySearch: 'No experts found for this search.',
     searchPlaceholder: 'Search by name, skill, language or bio…',

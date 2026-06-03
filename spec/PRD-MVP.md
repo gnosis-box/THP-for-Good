@@ -565,7 +565,7 @@ Quand une issue est créée, remplacer *à créer* par le lien `#NN` et ne plus 
 | **Donate CTA (low CRC)** | In-drawer link to `/about#donate` when balance too low | [DIV-A-02 #112](https://github.com/gnosis-box/THP-for-Good/issues/112) · [IMPL-A-01 #113](https://github.com/gnosis-box/THP-for-Good/issues/113) |
 | **Booking step gating** | One booking step visible at a time on expert detail | [IMPL-A-03 #119](https://github.com/gnosis-box/THP-for-Good/issues/119) |
 | **Landing hero** | Compact hero above expert grid on `/` | [FEAT-A-02 #114](https://github.com/gnosis-box/THP-for-Good/issues/114) · [IMPL-A-06 #134](https://github.com/gnosis-box/THP-for-Good/issues/134) · [`spec/landing-marketing-ux.md`](landing-marketing-ux.md) |
-| **Marketing discoverability** | OG metadata, expert share button | [FEAT-A-03 #117](https://github.com/gnosis-box/THP-for-Good/issues/117) · [IMPL-A-07 #135](https://github.com/gnosis-box/THP-for-Good/issues/135) · [IMPL-A-08 #136](https://github.com/gnosis-box/THP-for-Good/issues/136) · [`spec/landing-marketing-ux.md`](landing-marketing-ux.md) |
+| **Marketing discoverability** | OG metadata, expert share, AI/agent metadata | [FEAT-A-03 #117](https://github.com/gnosis-box/THP-for-Good/issues/117) · [IMPL-A-07 #135](https://github.com/gnosis-box/THP-for-Good/issues/135) · [IMPL-A-08 #136](https://github.com/gnosis-box/THP-for-Good/issues/136) · [IMPL-A-09 #140](https://github.com/gnosis-box/THP-for-Good/issues/140) · [`spec/landing-marketing-ux.md`](landing-marketing-ux.md) |
 | **Split tier review** | Revisit expert/foundation % after treasury metrics | [DIV-A-03 #118](https://github.com/gnosis-box/THP-for-Good/issues/118) |
 
 ---

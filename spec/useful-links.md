@@ -90,6 +90,7 @@ Central index of project, product, and ecosystem URLs.
 | **FEAT-A-03** | Marketing discoverability (epic) | [#117](https://github.com/gnosis-box/THP-for-Good/issues/117) | [`landing-marketing-ux.md`](landing-marketing-ux.md) §2–3 |
 | **IMPL-A-07** | Open Graph metadata (home + expert) | [#135](https://github.com/gnosis-box/THP-for-Good/issues/135) | [`landing-marketing-ux.md`](landing-marketing-ux.md) §2 |
 | **IMPL-A-08** | Expert profile share button | [#136](https://github.com/gnosis-box/THP-for-Good/issues/136) | [`landing-marketing-ux.md`](landing-marketing-ux.md) §3 |
+| **IMPL-A-09** | AI/agent discoverability (`llms.txt`, sitemap, JSON-LD) | [#140](https://github.com/gnosis-box/THP-for-Good/issues/140) | [`a09-ai-agent-metadata-plan.md`](a09-ai-agent-metadata-plan.md) |
 | **DIV-A-03** | Review split tiers | [#118](https://github.com/gnosis-box/THP-for-Good/issues/118) | — |
 
 ### Related L4 / spikes (existing)

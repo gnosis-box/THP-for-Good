@@ -1,6 +1,7 @@
-import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono, Poppins } from 'next/font/google';
 import './globals.css';
+
+import { rootSiteMetadata } from '@/lib/site-metadata';
 
 import { AppShell } from '@/components/layout/AppShell';
 import { UmamiScript } from '@/components/analytics/UmamiScript';
@@ -29,10 +30,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: 'THP for Good',
-  description: 'Book a session with a THP expert, pay in CRC',
-};
+export const metadata = rootSiteMetadata;
 
 export default function RootLayout({
   children,

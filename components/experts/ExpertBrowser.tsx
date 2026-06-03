@@ -19,9 +19,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { Button } from '@/components/ui/button';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { AnimatedList, AnimatedListItem } from '@/components/motion/animated-list';
-import { FadeContent } from '@/components/motion/fade-content';
 import { MotionEmpty } from '@/components/motion/motion-empty';
 import { ExpertCard } from './ExpertCard';
 import { ExpertSearch } from './ExpertSearch';
@@ -117,11 +115,7 @@ export function ExpertBrowser({ experts, tags }: Props) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-8">
-      <FadeContent>
-        <PageHeader title={UI_COPY.home.title} subtitle={UI_COPY.home.subtitle} />
-      </FadeContent>
-
+    <div id="experts" className="flex w-full scroll-mt-24 flex-col gap-8">
       <section className="flex flex-col gap-3">
         <ExpertSearchField
           key={urlQ}

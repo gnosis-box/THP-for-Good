@@ -386,8 +386,9 @@ Spec [`spec/landing-marketing-ux.md`](spec/landing-marketing-ux.md) · epics [FE
 | **IMPL-A-06** | [#134](https://github.com/gnosis-box/THP-for-Good/issues/134) — hero on `/` above `ExpertBrowser` | `impl/a-06-home-landing-hero` |
 | **IMPL-A-07** | [#135](https://github.com/gnosis-box/THP-for-Good/issues/135) — `generateMetadata` + OG for `/` and `/expert/[id]` | `impl/a-07-og-metadata` |
 | **IMPL-A-08** | [#136](https://github.com/gnosis-box/THP-for-Good/issues/136) — expert Share (Web Share API + clipboard) | `impl/a-08-expert-share` |
+| **IMPL-A-09** | [#140](https://github.com/gnosis-box/THP-for-Good/issues/140) — `llms.txt`, robots/sitemap, JSON-LD (AI crawlers allowed) | `impl/a-09-ai-agent-metadata` |
 
-**Do not** open duplicate IMPLs for hero/OG/share — FEAT issues stay open until children close.
+**Do not** open duplicate IMPLs for hero/OG/share/AI metadata — FEAT issues stay open until children close.
 
 ## Graphify (agent knowledge graph)
 
