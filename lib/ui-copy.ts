@@ -118,8 +118,28 @@ export const UI_COPY = {
     youTrust: 'You trust',
     mutual: 'Mutual trust',
     trustFailed: 'Trust failed. Please try again.',
+    tooltipTrust: 'Trust this expert on Circles to strengthen the network',
+    tooltipTrustBack: 'Trust back to complete mutual trust',
+    tooltipTrustsYou: 'This expert already trusts you on Circles',
+    tooltipYouTrust: 'You already trust this expert on Circles',
+    tooltipMutual: 'You and this expert trust each other on Circles',
+  },
+  languages: {
+    tooltipMore: (count: number) =>
+      `Show ${count} more session language${count === 1 ? '' : 's'}`,
+    tooltipCollapse: 'Show fewer languages',
+  },
+  wallet: {
+    tooltipDisconnected: 'Connect your wallet in Circles to book and pay in CRC',
+    tooltipConnected: (address: string) => `Wallet connected: ${address}`,
+  },
+  admin: {
+    tooltipRenameTag: (label: string) => `Rename skill “${label}”`,
+    tooltipDeleteTag: (label: string) => `Delete skill “${label}”`,
   },
   register: {
+    tooltipExpertShareSplit: (expertPercent: number, thpPercent: number) =>
+      `${expertPercent}% to you · ${thpPercent}% to THP for Good. At least 50% always goes to THP.`,
     title: 'Offer your expertise',
     editTitle: 'Edit your expert profile',
     editSubtitle: 'Update your skills, availability, and session details.',

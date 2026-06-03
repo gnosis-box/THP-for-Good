@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
+import { IconTooltip } from '@/components/ui-patterns/IconTooltip';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { motionClass } from '@/lib/motion';
+import { UI_COPY } from '@/lib/ui-copy';
 import { cn, shortenAddress } from '@/lib/utils';
 
 const badgeClassName =
@@ -36,42 +38,45 @@ export function WalletStatus() {
     }
   }, [isConnected, address]);
 
-  if (!mounted) {
-    return (
-      <Badge
-        variant="outline"
-        className={cn(badgeClassName, idleBadgeClassName)}
-        aria-label="Wallet status"
-      >
-        <span
-          className="mr-1.5 inline-block size-2 shrink-0 rounded-full bg-subtle-foreground/80"
-          aria-hidden
-        />
-        <span className="truncate">…</span>
-      </Badge>
-    );
-  }
+  const tooltipContent =
+    mounted && isConnected && address
+      ? UI_COPY.wallet.tooltipConnected(address)
+      : UI_COPY.wallet.tooltipDisconnected;
 
-  return (
+  const badge = (
     <Badge
-      variant={isConnected ? 'default' : 'outline'}
+      variant={mounted && isConnected ? 'default' : 'outline'}
       className={cn(
         badgeClassName,
-        !isConnected && idleBadgeClassName,
+        mounted && !isConnected && idleBadgeClassName,
         showConnectFade && motionClass('', 'motion-wallet-in', reducedMotion),
       )}
-      aria-label={isConnected ? `Wallet connected: ${address}` : 'Wallet not connected'}
+      aria-label={
+        mounted
+          ? isConnected && address
+            ? `Wallet connected: ${address}`
+            : 'Wallet not connected'
+          : 'Wallet status'
+      }
     >
       <span
         className={
           'mr-1.5 inline-block size-2 shrink-0 rounded-full ' +
-          (isConnected ? 'bg-success' : 'bg-subtle-foreground/80')
+          (mounted && isConnected ? 'bg-success' : 'bg-subtle-foreground/80')
         }
         aria-hidden
       />
       <span className="truncate">
-        {address ? shortenAddress(address, 4) : 'Not connected'}
+        {mounted ? (address ? shortenAddress(address, 4) : 'Not connected') : '…'}
       </span>
     </Badge>
   );
+
+  if (!mounted) {
+    return (
+      <IconTooltip content={UI_COPY.wallet.tooltipDisconnected} render={badge} />
+    );
+  }
+
+  return <IconTooltip content={tooltipContent} render={badge} />;
 }

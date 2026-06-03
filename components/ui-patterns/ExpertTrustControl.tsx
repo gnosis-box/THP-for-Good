@@ -8,6 +8,7 @@ import { addTrust } from '@/lib/trust-actions';
 import { motionClass } from '@/lib/motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { IconTooltip } from '@/components/ui-patterns/IconTooltip';
 import { cn } from '@/lib/utils';
 import { UI_COPY } from '@/lib/ui-copy';
 
@@ -85,55 +86,92 @@ export function ExpertTrustControl({
       onPointerDown={stopBubble}
     >
       {relation.status === 'none' && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className={cn('shrink-0', pillSize)}
-          onClick={handleTrust}
-          disabled={actionLoading || !address}
+        <IconTooltip
+          content={UI_COPY.trustCard.tooltipTrust}
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className={cn('shrink-0', pillSize)}
+              onClick={handleTrust}
+              disabled={actionLoading || !address}
+            />
+          }
         >
           {actionLoading ? UI_COPY.trustCard.trusting : UI_COPY.trustCard.trust}
-        </Button>
+        </IconTooltip>
       )}
 
       {relation.status === 'incoming' && (
         <div className={incomingLayout}>
-          <Badge
-            variant="secondary"
-            className={cn('border-trust/20 bg-muted text-muted-foreground font-medium', pillSize)}
-          >
-            {UI_COPY.trustCard.trustsYou}
-          </Badge>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className={cn('shrink-0', pillSize)}
-            onClick={handleTrust}
-            disabled={actionLoading || !address}
+          <IconTooltip
+            content={UI_COPY.trustCard.tooltipTrustsYou}
+            render={
+              <span className="inline-flex">
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    'border-trust/20 bg-muted text-muted-foreground font-medium',
+                    pillSize,
+                  )}
+                >
+                  {UI_COPY.trustCard.trustsYou}
+                </Badge>
+              </span>
+            }
+          />
+          <IconTooltip
+            content={UI_COPY.trustCard.tooltipTrustBack}
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={cn('shrink-0', pillSize)}
+                onClick={handleTrust}
+                disabled={actionLoading || !address}
+              />
+            }
           >
             {actionLoading ? UI_COPY.trustCard.trusting : UI_COPY.trustCard.trustBack}
-          </Button>
+          </IconTooltip>
         </div>
       )}
 
       {relation.status === 'outgoing' && (
-        <Badge
-          variant="secondary"
-          className={cn('border-trust/20 bg-muted text-muted-foreground font-medium', pillSize)}
-        >
-          {UI_COPY.trustCard.youTrust}
-        </Badge>
+        <IconTooltip
+          content={UI_COPY.trustCard.tooltipYouTrust}
+          render={
+            <span className="inline-flex">
+              <Badge
+                variant="secondary"
+                className={cn(
+                  'border-trust/20 bg-muted text-muted-foreground font-medium',
+                  pillSize,
+                )}
+              >
+                {UI_COPY.trustCard.youTrust}
+              </Badge>
+            </span>
+          }
+        />
       )}
 
       {relation.status === 'mutual' && (
-        <Badge
-          variant="secondary"
-          className={cn('border-trust/30 bg-trust/10 text-trust font-medium', pillSize)}
-        >
-          {UI_COPY.trustCard.mutual}
-        </Badge>
+        <IconTooltip
+          content={UI_COPY.trustCard.tooltipMutual}
+          render={
+            <span className="inline-flex">
+              <Badge
+                variant="secondary"
+                className={cn('border-trust/30 bg-trust/10 text-trust font-medium', pillSize)}
+              >
+                {UI_COPY.trustCard.mutual}
+              </Badge>
+            </span>
+          }
+        />
       )}
 
       {actionError ? (

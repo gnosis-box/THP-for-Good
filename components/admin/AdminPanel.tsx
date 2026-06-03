@@ -12,6 +12,8 @@ import { PlatformHealthSection } from './PlatformHealthSection';
 import { InvitationLinksSection } from './InvitationLinksSection';
 import { ExpertEditForm } from '@/components/experts/ExpertEditForm';
 import { ExpertLanguageTags, ExpertSkillTags } from '@/components/ui-patterns/ExpertMeta';
+import { IconTooltip } from '@/components/ui-patterns/IconTooltip';
+import { UI_COPY } from '@/lib/ui-copy';
 import { getDisplayCallLanguages } from '@/lib/languages';
 import type { GroupMemberDto } from '@/lib/admin';
 import type { AdminHealthStats, ExpertRow, TagRow, AdminRow } from '@/lib/db';
@@ -252,22 +254,35 @@ export function AdminPanel() {
                     Approve
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => { setEditingTagId(tag.id); setEditingTagLabel(tag.label); }}
-                  className="text-muted-foreground hover:text-foreground transition-colors leading-none text-xs"
-                  aria-label={`Rename ${tag.label}`}
+                <IconTooltip
+                  content={UI_COPY.admin.tooltipRenameTag(tag.label)}
+                  render={
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingTagId(tag.id);
+                        setEditingTagLabel(tag.label);
+                      }}
+                      className="text-muted-foreground hover:text-foreground transition-colors leading-none text-xs"
+                      aria-label={`Rename ${tag.label}`}
+                    />
+                  }
                 >
                   ✎
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void deleteTag(tag.id)}
-                  className="text-muted-foreground hover:text-destructive transition-colors leading-none"
-                  aria-label={`Delete ${tag.label}`}
+                </IconTooltip>
+                <IconTooltip
+                  content={UI_COPY.admin.tooltipDeleteTag(tag.label)}
+                  render={
+                    <button
+                      type="button"
+                      onClick={() => void deleteTag(tag.id)}
+                      className="text-muted-foreground hover:text-destructive transition-colors leading-none"
+                      aria-label={`Delete ${tag.label}`}
+                    />
+                  }
                 >
                   ×
-                </button>
+                </IconTooltip>
               </span>
             )
           )}
