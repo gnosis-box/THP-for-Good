@@ -387,6 +387,7 @@ Spec [`spec/landing-marketing-ux.md`](spec/landing-marketing-ux.md) · epics [FE
 | **IMPL-A-07** | [#135](https://github.com/gnosis-box/THP-for-Good/issues/135) — `generateMetadata` + OG for `/` and `/expert/[id]` | `impl/a-07-og-metadata` |
 | **IMPL-A-08** | [#136](https://github.com/gnosis-box/THP-for-Good/issues/136) — expert Share (Web Share API + clipboard) | `impl/a-08-expert-share` |
 | **IMPL-A-09** | [#140](https://github.com/gnosis-box/THP-for-Good/issues/140) — `llms.txt`, robots/sitemap, JSON-LD (AI crawlers allowed) | `impl/a-09-ai-agent-metadata` |
+| **IMPL-A-10** | [#142](https://github.com/gnosis-box/THP-for-Good/issues/142) — opaque expert profile URLs (slug/hash, not `/expert/1`) | `impl/a-10-expert-profile-slug` |
 
 **Do not** open duplicate IMPLs for hero/OG/share/AI metadata — FEAT issues stay open until children close.
 

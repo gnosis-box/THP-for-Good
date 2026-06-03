@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Globe } from 'lucide-react';
 import { highlightPillClass } from '@/components/ui-patterns/highlight-pill';
+import { IconTooltip } from '@/components/ui-patterns/IconTooltip';
+import { UI_COPY } from '@/lib/ui-copy';
 import { formatSessionLanguages } from '@/lib/languages';
 import { cn } from '@/lib/utils';
 
@@ -182,19 +184,28 @@ export function ExpertLanguageTags({
       <Globe className="size-3.5 shrink-0 opacity-80 sm:size-4" aria-hidden />
       <span className="min-w-0 truncate">{displayText}</span>
       {hiddenCount > 0 ? (
-        <button
-          type="button"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            setExpanded((open) => !open);
-          }}
-          className="shrink-0 text-xs font-medium text-foreground underline-offset-2 hover:underline touch-manipulation"
-          aria-expanded={expanded}
-          aria-label={expanded ? 'Collapse languages' : `Show ${hiddenCount} more languages`}
+        <IconTooltip
+          content={
+            expanded ? UI_COPY.languages.tooltipCollapse : UI_COPY.languages.tooltipMore(hiddenCount)
+          }
+          render={
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setExpanded((open) => !open);
+              }}
+              className="shrink-0 text-xs font-medium text-foreground underline-offset-2 hover:underline touch-manipulation"
+              aria-expanded={expanded}
+              aria-label={
+                expanded ? 'Collapse languages' : `Show ${hiddenCount} more languages`
+              }
+            />
+          }
         >
           {expanded ? 'Less' : `+${hiddenCount}`}
-        </button>
+        </IconTooltip>
       ) : null}
     </p>
   );
