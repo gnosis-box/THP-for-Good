@@ -2,8 +2,8 @@
 
 > **Epic:** [FEAT-A-03 #117](https://github.com/gnosis-box/THP-for-Good/issues/117) (marketing discoverability)  
 > **Builds on:** [IMPL-A-07 #135](https://github.com/gnosis-box/THP-for-Good/issues/135) — OG/Twitter (`lib/site-metadata.ts`, PR #139)  
-> **Suggested branch:** `impl/a-09-ai-agent-metadata`  
-> **Suggested issue:** create `IMPL-A-09` after PR #139 merge (or stack on same review stream if preferred)
+> **Issue:** [IMPL-A-09 #140](https://github.com/gnosis-box/THP-for-Good/issues/140)  
+> **Branch:** `impl/a-09-ai-agent-metadata` (stacked in [PR #139](https://github.com/gnosis-box/THP-for-Good/pull/139))
 
 ## Goal
 
