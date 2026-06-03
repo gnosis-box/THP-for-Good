@@ -5,7 +5,7 @@ export const DEFAULT_APP_ORIGIN = 'https://thp.gnosis.box';
 /** Public brand image for Open Graph / Twitter cards */
 export const DEFAULT_OG_IMAGE_PATH = '/thp-logo.png';
 
-const DEFAULT_DESCRIPTION =
+export const SITE_DESCRIPTION =
   'Book practical 1:1 support with THP experts, pay in CRC, and fund future learners.';
 
 export function getAppOrigin(): string {
@@ -55,18 +55,18 @@ export const rootSiteMetadata: Metadata = {
     default: SITE_NAME,
     template: `%s · ${SITE_NAME}`,
   },
-  description: DEFAULT_DESCRIPTION,
+  description: SITE_DESCRIPTION,
   alternates: {
     canonical: '/',
   },
   openGraph: buildDefaultOpenGraph({
     url: '/',
     title: SITE_NAME,
-    description: DEFAULT_DESCRIPTION,
+    description: SITE_DESCRIPTION,
   }),
   twitter: buildDefaultTwitter({
     title: SITE_NAME,
-    description: DEFAULT_DESCRIPTION,
+    description: SITE_DESCRIPTION,
   }),
 };
 
@@ -90,6 +90,6 @@ export function buildExpertMetaDescription(bio: string | null, skills: string[])
 /** Minimal metadata for missing expert routes (no expert-specific preview). */
 export const expertNotFoundMetadata: Metadata = {
   title: 'Expert not found',
-  description: DEFAULT_DESCRIPTION,
+  description: SITE_DESCRIPTION,
   robots: { index: false, follow: false },
 };

@@ -18,7 +18,9 @@ import {
 import { UI_COPY } from '@/lib/ui-copy';
 import { HomeHero } from '@/components/home/HomeHero';
 import { ExpertBrowser } from '@/components/experts/ExpertBrowser';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { Skeleton } from '@/components/ui/skeleton';
+import { buildHomeJsonLd } from '@/lib/structured-data';
 
 export async function generateMetadata(): Promise<Metadata> {
   const hero = UI_COPY.home.hero;
@@ -72,19 +74,22 @@ export default async function HomePage({
   const treasuryBalanceCrc = await getFastTreasurySnapshot();
 
   return (
-    <div className="flex w-full flex-col gap-8">
-      <HomeHero paidSessions={enrichment.paidBookingCount} treasuryBalanceCrc={treasuryBalanceCrc} />
-      <Suspense
-        fallback={
-          <div className="flex flex-col gap-4">
-            <Skeleton className="h-11 w-full rounded-lg" />
-            <Skeleton className="h-10 w-32 rounded-lg" />
-            <Skeleton className="h-40 w-full rounded-xl" />
-          </div>
-        }
-      >
-        <ExpertBrowser experts={experts} tags={tags} />
-      </Suspense>
-    </div>
+    <>
+      <JsonLd data={buildHomeJsonLd()} />
+      <div className="flex w-full flex-col gap-8">
+        <HomeHero paidSessions={enrichment.paidBookingCount} treasuryBalanceCrc={treasuryBalanceCrc} />
+        <Suspense
+          fallback={
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-11 w-full rounded-lg" />
+              <Skeleton className="h-10 w-32 rounded-lg" />
+              <Skeleton className="h-40 w-full rounded-xl" />
+            </div>
+          }
+        >
+          <ExpertBrowser experts={experts} tags={tags} />
+        </Suspense>
+      </div>
+    </>
   );
 }

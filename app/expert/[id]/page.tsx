@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { ExpertDetail } from '@/components/experts/ExpertDetail';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getExpertById } from '@/lib/db';
 import {
   buildDefaultOpenGraph,
@@ -10,6 +11,7 @@ import {
   DEFAULT_OG_IMAGE_PATH,
   expertNotFoundMetadata,
 } from '@/lib/site-metadata';
+import { buildExpertJsonLd } from '@/lib/structured-data';
 
 type ExpertPageProps = {
   params: Promise<{ id: string }>;
@@ -68,5 +70,10 @@ export default async function ExpertPage({ params }: ExpertPageProps) {
     notFound();
   }
 
-  return <ExpertDetail expert={expert} />;
+  return (
+    <>
+      <JsonLd data={buildExpertJsonLd(expert)} />
+      <ExpertDetail expert={expert} />
+    </>
+  );
 }
