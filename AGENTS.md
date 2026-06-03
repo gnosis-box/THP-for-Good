@@ -389,6 +389,8 @@ Spec [`spec/landing-marketing-ux.md`](spec/landing-marketing-ux.md) · epics [FE
 | **IMPL-A-09** | [#140](https://github.com/gnosis-box/THP-for-Good/issues/140) — `llms.txt`, robots/sitemap, JSON-LD (AI crawlers allowed) | `impl/a-09-ai-agent-metadata` |
 | **IMPL-A-10** | [#142](https://github.com/gnosis-box/THP-for-Good/issues/142) — opaque expert profile URLs (slug/hash, not `/expert/1`) | `impl/a-10-expert-profile-slug` |
 
+**Public expert URLs:** `/expert/{public_slug}` (8-char slug in `experts.public_slug`). Legacy `/expert/{numericId}` **308** → canonical slug. APIs/bookings still use numeric `expert_id`. Helper: [`lib/expert-public-slug.ts`](lib/expert-public-slug.ts) · `expertPublicPath()`.
+
 **Do not** open duplicate IMPLs for hero/OG/share/AI metadata — FEAT issues stay open until children close.
 
 ## Graphify (agent knowledge graph)

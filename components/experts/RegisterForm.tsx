@@ -220,7 +220,7 @@ export function RegisterForm() {
         }
         const updated = (await res.json()) as ExpertRow;
         setExistingExpert(updated);
-        router.push(`/expert/${updated.id}`);
+        router.push(`/expert/${updated.public_slug}`);
         return;
       }
 
@@ -239,8 +239,8 @@ export function RegisterForm() {
         throw new Error(json.error ?? 'Registration failed');
       }
 
-      const { id } = (await res.json()) as { id: number };
-      router.push(`/expert/${id}`);
+      const { public_slug } = (await res.json()) as { public_slug: string };
+      router.push(`/expert/${public_slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
@@ -272,7 +272,7 @@ export function RegisterForm() {
       >
         {isEditMode && existingExpert ? (
           <Link
-            href={`/expert/${existingExpert.id}`}
+            href={`/expert/${existingExpert.public_slug}`}
             className="text-sm text-foreground underline-offset-4 hover:underline"
           >
             {UI_COPY.register.viewPublicProfile}

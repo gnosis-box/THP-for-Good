@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 import { getAllExperts } from '@/lib/db';
+import { expertPublicPath } from '@/lib/expert-public-slug';
 import { getAppOrigin } from '@/lib/site-metadata';
 
 export const dynamic = 'force-dynamic';
@@ -27,7 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const expertEntries: MetadataRoute.Sitemap = getAllExperts({ includeInactive: false }).map(
     (expert) => ({
-      url: `${origin}/expert/${expert.id}`,
+      url: `${origin}${expertPublicPath(expert.public_slug)}`,
       lastModified,
       changeFrequency: 'weekly',
       priority: 0.7,

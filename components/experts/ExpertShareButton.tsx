@@ -6,21 +6,23 @@ import { Button } from '@/components/ui/button';
 import { IconTooltip } from '@/components/ui-patterns/IconTooltip';
 import { useToast } from '@/components/ui/toast';
 import { trackUmamiEvent } from '@/lib/analytics-umami';
+import { expertPublicPath } from '@/lib/expert-public-slug';
 import { UI_COPY } from '@/lib/ui-copy';
 
 type Props = {
   expertId: number;
+  publicSlug: string;
   expertName: string;
   className?: string;
 };
 
-function buildExpertProfileUrl(expertId: number): string {
-  const path = `/expert/${expertId}`;
+function buildExpertProfileUrl(publicSlug: string): string {
+  const path = expertPublicPath(publicSlug);
   if (typeof window === 'undefined') return path;
   return `${window.location.origin}${path}`;
 }
 
-export function ExpertShareButton({ expertId, expertName, className }: Props) {
+export function ExpertShareButton({ expertId, publicSlug, expertName, className }: Props) {
   const { showToast } = useToast();
   const copy = UI_COPY.expertShare;
 
@@ -31,7 +33,7 @@ export function ExpertShareButton({ expertId, expertName, className }: Props) {
   }
 
   async function handleShare() {
-    const url = buildExpertProfileUrl(expertId);
+    const url = buildExpertProfileUrl(publicSlug);
     const payload = {
       title: copy.shareTitle(expertName),
       text: copy.shareText(expertName),

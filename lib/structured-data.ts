@@ -1,4 +1,5 @@
 import type { ExpertRow } from '@/lib/db';
+import { expertPublicPath } from '@/lib/expert-public-slug';
 import {
   buildExpertMetaDescription,
   DEFAULT_OG_IMAGE_PATH,
@@ -66,7 +67,7 @@ export function buildHomeJsonLd(): JsonLdGraph[] {
 
 export function buildExpertJsonLd(expert: ExpertRow): JsonLdGraph[] {
   const origin = getAppOrigin();
-  const url = `${origin}/expert/${expert.id}`;
+  const url = `${origin}${expertPublicPath(expert.public_slug)}`;
   const description = buildExpertMetaDescription(expert.bio, expert.skills);
 
   return [

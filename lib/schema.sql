@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS skill_tags (
 
 CREATE TABLE IF NOT EXISTS experts (
   id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+  public_slug          TEXT    UNIQUE,
   circles_address      TEXT    UNIQUE NOT NULL,
   name                 TEXT    NOT NULL,
   bio                  TEXT,

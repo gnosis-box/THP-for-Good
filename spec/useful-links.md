@@ -57,7 +57,7 @@ Central index of project, product, and ecosystem URLs.
 | Route | Purpose |
 |-------|---------|
 | `/` | Expert browser (home) |
-| `/expert/[id]` | Book / PAY flow |
+| `/expert/[slug]` | Book / PAY flow (opaque `public_slug`; legacy numeric id redirects) |
 | `/expert/register` | Offer expertise (self-register) |
 | `/calls` | Emitted + Received sessions; post-call TRUST |
 | `/admin` | Admin panel (hidden from public nav) |

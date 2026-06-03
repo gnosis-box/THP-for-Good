@@ -58,6 +58,7 @@ export function ExpertDetailCardContent({ expert, trustStats, reducedMotion }: P
             <div className="flex shrink-0 items-center gap-0.5">
               <ExpertShareButton
                 expertId={expert.id}
+                publicSlug={expert.public_slug}
                 expertName={expert.name}
                 className="size-9 shrink-0"
               />

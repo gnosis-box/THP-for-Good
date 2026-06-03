@@ -33,7 +33,7 @@ ${hero.subtitle}
 - Offer your expertise: ${absoluteUrl(origin, '/expert/register')}
 - DAO governance: ${absoluteUrl(origin, '/dao')}
 - My calls: ${absoluteUrl(origin, '/calls')}
-- Expert profile pattern: ${absoluteUrl(origin, '/expert/{id}')}
+- Expert profile pattern: ${absoluteUrl(origin, '/expert/{slug}')} (opaque public slug, not numeric id)
 
 ## Circles context
 

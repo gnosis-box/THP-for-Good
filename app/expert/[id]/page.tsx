@@ -1,9 +1,14 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 
 import { ExpertDetail } from '@/components/experts/ExpertDetail';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { getExpertById } from '@/lib/db';
+import { getExpertById, getExpertByPublicSlug, type ExpertRow } from '@/lib/db';
+import {
+  expertPublicPath,
+  isLegacyNumericExpertId,
+  isValidPublicSlug,
+} from '@/lib/expert-public-slug';
 import {
   buildDefaultOpenGraph,
   buildDefaultTwitter,
@@ -17,27 +22,26 @@ type ExpertPageProps = {
   params: Promise<{ id: string }>;
 };
 
-function parseExpertId(id: string): number | null {
-  const expertId = Number.parseInt(id, 10);
-  if (!Number.isFinite(expertId) || expertId <= 0) return null;
-  return expertId;
+function resolveExpertFromSegment(segment: string): ExpertRow | null {
+  if (isLegacyNumericExpertId(segment)) {
+    return getExpertById(Number.parseInt(segment, 10)) ?? null;
+  }
+  if (!isValidPublicSlug(segment)) {
+    return null;
+  }
+  return getExpertByPublicSlug(segment) ?? null;
 }
 
 export async function generateMetadata({ params }: ExpertPageProps): Promise<Metadata> {
   const { id } = await params;
-  const expertId = parseExpertId(id);
-  if (expertId === null) {
-    return expertNotFoundMetadata;
-  }
-
-  const expert = getExpertById(expertId);
+  const expert = resolveExpertFromSegment(id);
   if (!expert) {
     return expertNotFoundMetadata;
   }
 
   const title = `${expert.name} — THP expert`;
   const description = buildExpertMetaDescription(expert.bio, expert.skills);
-  const path = `/expert/${expert.id}`;
+  const path = expertPublicPath(expert.public_slug);
 
   return {
     title,
@@ -58,16 +62,14 @@ export async function generateMetadata({ params }: ExpertPageProps): Promise<Met
 
 export default async function ExpertPage({ params }: ExpertPageProps) {
   const { id } = await params;
-  const expertId = parseExpertId(id);
-
-  if (expertId === null) {
-    notFound();
-  }
-
-  const expert = getExpertById(expertId);
+  const expert = resolveExpertFromSegment(id);
 
   if (!expert) {
     notFound();
+  }
+
+  if (isLegacyNumericExpertId(id) && id !== expert.public_slug) {
+    permanentRedirect(expertPublicPath(expert.public_slug));
   }
 
   return (
