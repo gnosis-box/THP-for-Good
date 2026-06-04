@@ -38,45 +38,38 @@ export function WalletStatus() {
     }
   }, [isConnected, address]);
 
-  const tooltipContent =
-    mounted && isConnected && address
-      ? UI_COPY.wallet.tooltipConnected(address)
-      : UI_COPY.wallet.tooltipDisconnected;
+  const connected = mounted && isConnected && !!address;
+  const tooltipContent = connected
+    ? UI_COPY.wallet.tooltipConnected(address!)
+    : UI_COPY.wallet.tooltipDisconnected;
 
-  const badge = (
-    <Badge
-      variant={mounted && isConnected ? 'default' : 'outline'}
-      className={cn(
-        badgeClassName,
-        mounted && !isConnected && idleBadgeClassName,
-        showConnectFade && motionClass('', 'motion-wallet-in', reducedMotion),
-      )}
-      aria-label={
-        mounted
-          ? isConnected && address
-            ? `Wallet connected: ${address}`
-            : 'Wallet not connected'
-          : 'Wallet status'
+  return (
+    <IconTooltip
+      content={tooltipContent}
+      render={
+        <Badge
+          variant={connected ? 'default' : 'outline'}
+          className={cn(
+            badgeClassName,
+            !connected && idleBadgeClassName,
+            showConnectFade && motionClass('', 'motion-wallet-in', reducedMotion),
+          )}
+          aria-label={
+            connected ? `Wallet connected: ${address}` : 'Wallet not connected'
+          }
+        />
       }
     >
       <span
         className={
           'mr-1.5 inline-block size-2 shrink-0 rounded-full ' +
-          (mounted && isConnected ? 'bg-success' : 'bg-subtle-foreground/80')
+          (connected ? 'bg-success' : 'bg-subtle-foreground/80')
         }
         aria-hidden
       />
       <span className="truncate">
         {mounted ? (address ? shortenAddress(address, 4) : 'Not connected') : '…'}
       </span>
-    </Badge>
+    </IconTooltip>
   );
-
-  if (!mounted) {
-    return (
-      <IconTooltip content={UI_COPY.wallet.tooltipDisconnected} render={badge} />
-    );
-  }
-
-  return <IconTooltip content={tooltipContent} render={badge} />;
 }
