@@ -86,6 +86,16 @@ export const UI_COPY = {
     about: 'About',
     skills: 'Skills',
   },
+  expertDetail: {
+    sessionPricing: 'Session & pricing',
+    languages: 'Languages',
+    availability: 'Availability',
+    availabilityReady:
+      'Choose a time slot below, then book and pay in CRC through your Circles wallet.',
+    faqPayment: 'How do I pay?',
+    faqPaymentAnswer:
+      'Connect your Circles wallet on THP for Good and pay in CRC when you confirm your booking.',
+  },
   expertShare: {
     label: 'Share expert profile',
     tooltip: 'Share profile link',

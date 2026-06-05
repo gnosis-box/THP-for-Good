@@ -1,5 +1,6 @@
 import type { ExpertRow } from '@/lib/db';
 import { expertPublicPath } from '@/lib/expert-public-slug';
+import { languageLabel } from '@/lib/languages';
 import {
   buildExpertMetaDescription,
   DEFAULT_OG_IMAGE_PATH,
@@ -67,20 +68,44 @@ export function buildHomeJsonLd(): JsonLdGraph[] {
 
 export function buildExpertJsonLd(expert: ExpertRow): JsonLdGraph[] {
   const origin = getAppOrigin();
-  const url = `${origin}${expertPublicPath(expert.public_slug)}`;
+  const siteUrl = `${origin}/`;
+  const expertPath = expertPublicPath(expert.public_slug);
+  const expertUrl = `${origin}${expertPath}`;
   const description = buildExpertMetaDescription(expert.bio, expert.skills);
+  const languageLabels =
+    expert.call_languages.length > 0
+      ? expert.call_languages
+      : expert.spoken_languages.filter((code) => code === 'en' || code === 'fr');
+  const knowsLanguage = languageLabels.map(languageLabel);
 
   return [
+    ...buildHomeJsonLd(),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+        { '@type': 'ListItem', position: 2, name: 'Experts', item: `${origin}/#experts` },
+        { '@type': 'ListItem', position: 3, name: expert.name, item: expertUrl },
+      ],
+    },
     {
       '@context': 'https://schema.org',
       '@type': 'ProfilePage',
-      url,
+      url: expertUrl,
       name: `${expert.name} — THP expert`,
+      isPartOf: {
+        '@type': 'WebSite',
+        name: SITE_NAME,
+        url: siteUrl,
+      },
       mainEntity: {
         '@type': 'Person',
         name: expert.name,
         description,
-        url,
+        url: expertUrl,
+        ...(expert.skills.length > 0 ? { knowsAbout: expert.skills } : {}),
+        ...(languageLabels.length > 0 ? { knowsLanguage } : {}),
       },
     },
   ];

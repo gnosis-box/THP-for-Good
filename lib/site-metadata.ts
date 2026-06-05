@@ -70,6 +70,9 @@ export const rootSiteMetadata: Metadata = {
   }),
 };
 
+/** Google/Social snippet limit — keep meta descriptions at or below this length. */
+export const META_DESCRIPTION_MAX = 160;
+
 export function truncateForMeta(text: string, maxLen: number): string {
   const normalized = text.replace(/\s+/g, ' ').trim();
   if (normalized.length <= maxLen) return normalized;
@@ -77,14 +80,19 @@ export function truncateForMeta(text: string, maxLen: number): string {
 }
 
 export function buildExpertMetaDescription(bio: string | null, skills: string[]): string {
+  const fallback = 'Book a 1:1 THP expert session. Pay in CRC on Circles.';
   const skillSnippet =
-    skills.length > 0 ? `Skills: ${skills.slice(0, 5).join(', ')}.` : '';
-  const bioPart = bio?.trim()
-    ? truncateForMeta(bio, 140)
-    : 'Book a 1:1 session with this THP expert and pay in CRC.';
+    skills.length > 0 ? ` Skills: ${skills.slice(0, 3).join(', ')}.` : '';
 
-  if (!skillSnippet) return bioPart;
-  return truncateForMeta(`${bioPart} ${skillSnippet}`, 200);
+  const bioPart = bio?.trim()
+    ? truncateForMeta(bio, META_DESCRIPTION_MAX - skillSnippet.length)
+    : fallback;
+
+  if (!skillSnippet) {
+    return truncateForMeta(bioPart, META_DESCRIPTION_MAX);
+  }
+
+  return truncateForMeta(`${bioPart}${skillSnippet}`, META_DESCRIPTION_MAX);
 }
 
 /** Minimal metadata for missing expert routes (no expert-specific preview). */
