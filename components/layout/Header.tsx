@@ -16,9 +16,10 @@ export function Header() {
           >
             <Image
               src="/thp-logo.png"
-              alt=""
+              alt="THP for Good"
               width={28}
               height={28}
+              priority
               className="size-7 shrink-0 rounded-sm border border-border"
               style={{ height: 'auto', width: 'auto', maxHeight: 28, maxWidth: 28 }}
             />

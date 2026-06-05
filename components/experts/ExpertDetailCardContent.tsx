@@ -1,5 +1,7 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CrcAmount } from '@/components/ui-patterns/CrcAmount';
 import { ExpertShareButton } from '@/components/experts/ExpertShareButton';
@@ -7,7 +9,7 @@ import { ExpertSkillTags, ExpertLanguageTags, ExpertSplitShare } from '@/compone
 import { ExpertTrustControl } from '@/components/ui-patterns/ExpertTrustControl';
 import { TrustedByCount } from '@/components/ui-patterns/TrustedByCount';
 import { UI_COPY } from '@/lib/ui-copy';
-import { getDisplayCallLanguages } from '@/lib/languages';
+import { formatSessionLanguages, getDisplayCallLanguages, languageLabel } from '@/lib/languages';
 import { motionClass } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import type { ExpertTrustStatsState } from '@/hooks/use-expert-trust-stats';
@@ -19,13 +21,49 @@ type Props = {
   reducedMotion: boolean;
 };
 
+function expertHasAvailability(expert: ExpertRow): boolean {
+  return Boolean(
+    expert.cal_event_type_id ||
+      expert.google_calendar_id?.trim() ||
+      expert.calendar_link?.trim(),
+  );
+}
+
+function ExpertDetailSection({
+  title,
+  children,
+  className,
+}: {
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'border-t border-border px-3 py-2.5 text-center sm:px-4 sm:py-3',
+        className,
+      )}
+    >
+      <h2 className="text-sm font-semibold">{title}</h2>
+      <div className="mx-auto mt-1.5 max-w-prose text-sm leading-relaxed text-muted-foreground">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 /** Expert detail page card — sections Skills / About; not used on home list. */
 export function ExpertDetailCardContent({ expert, trustStats, reducedMotion }: Props) {
   const share = expert.expert_share_percent ?? 20;
+  const treasuryPercent = 100 - share;
   const sessionLanguages = getDisplayCallLanguages(expert);
   const hasLanguages = sessionLanguages.length > 0;
+  const languageListText = formatSessionLanguages(sessionLanguages, 'full');
   const imageUrl = trustStats.status === 'ready' ? trustStats.imageUrl : undefined;
   const showTrustedBy = trustStats.status !== 'error';
+  const hasAvailability = expertHasAvailability(expert);
+  const copy = UI_COPY.expertDetail;
 
   return (
     <>
@@ -84,20 +122,50 @@ export function ExpertDetailCardContent({ expert, trustStats, reducedMotion }: P
           )}
         </div>
       </div>
+
+      <ExpertDetailSection title={copy.sessionPricing}>
+        <p>
+          Book a <strong>1:1 session</strong> with <strong>{expert.name}</strong>, a{' '}
+          <strong>THP for Good expert</strong> on <strong>Circles</strong>. Each session costs{' '}
+          <strong>{expert.price_crc} CRC</strong>. <strong>{treasuryPercent}%</strong> funds future
+          THP learners and <strong>{share}%</strong> goes to the expert.
+        </p>
+      </ExpertDetailSection>
+
       {expert.skills.length > 0 ? (
-        <div className="border-t border-border px-3 py-2 text-center sm:px-4 sm:py-2.5">
-          <h2 className="text-sm font-semibold">{UI_COPY.booking.skills}</h2>
-          <ExpertSkillTags skills={expert.skills} className="mt-1 justify-center" />
-        </div>
+        <ExpertDetailSection title={UI_COPY.booking.skills}>
+          <ExpertSkillTags skills={expert.skills} asList className="mt-0 justify-center" />
+        </ExpertDetailSection>
       ) : null}
-      {expert.bio ? (
-        <div className="border-t border-border px-3 pb-3 pt-2.5 text-center sm:px-4 sm:pb-4 sm:pt-3">
-          <h2 className="text-sm font-semibold">{UI_COPY.booking.about}</h2>
-          <p className="mx-auto mt-1 max-w-prose whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-            {expert.bio}
+
+      {hasLanguages ? (
+        <ExpertDetailSection title={copy.languages}>
+          <p>
+            Sessions are available in <strong>{languageListText}</strong>.
           </p>
-        </div>
+          <ul className="mt-2 list-inside list-disc text-left sm:text-center">
+            {sessionLanguages.map((code) => (
+              <li key={code}>{languageLabel(code)}</li>
+            ))}
+          </ul>
+        </ExpertDetailSection>
       ) : null}
+
+      {expert.bio ? (
+        <ExpertDetailSection title={UI_COPY.booking.about}>
+          <p className="whitespace-pre-line">{expert.bio}</p>
+        </ExpertDetailSection>
+      ) : null}
+
+      <ExpertDetailSection title={copy.availability}>
+        <p>
+          {hasAvailability ? copy.availabilityReady : UI_COPY.booking.noCalVisitor}
+        </p>
+        <p className="mt-2">
+          <strong>{copy.faqPayment}</strong> {copy.faqPaymentAnswer}
+        </p>
+      </ExpertDetailSection>
+
       <ExpertSplitShare expertPercent={share} variant="footer" />
     </>
   );

@@ -12,9 +12,11 @@ type SkillTagsProps = {
   skills: string[];
   className?: string;
   maxVisible?: number;
+  /** Render skills as a semantic list for detail pages and SEO. */
+  asList?: boolean;
 };
 
-export function ExpertSkillTags({ skills, className, maxVisible }: SkillTagsProps) {
+export function ExpertSkillTags({ skills, className, maxVisible, asList = false }: SkillTagsProps) {
   const [expanded, setExpanded] = useState(false);
 
   if (skills.length === 0) return null;
@@ -25,12 +27,21 @@ export function ExpertSkillTags({ skills, className, maxVisible }: SkillTagsProp
   const hiddenCount = hasCap && !expanded ? skills.length - maxVisible! : 0;
   const hiddenSkills = hasCap && !expanded ? skills.slice(maxVisible!) : [];
 
+  const Wrapper = asList ? 'ul' : 'div';
+  const Item = asList ? 'li' : 'span';
+
   return (
-    <div className={cn('flex flex-wrap items-center gap-1.5', className)} aria-label="Expertise">
+    <Wrapper
+      className={cn(
+        asList ? 'list-none space-y-1.5' : 'flex flex-wrap items-center gap-1.5',
+        className,
+      )}
+      aria-label="Expertise"
+    >
       {visibleSkills.map((skill) => (
-        <span key={skill} className={highlightPillClass('skill', 'text-xs')}>
-          {skill}
-        </span>
+        <Item key={skill} className={cn(asList && 'flex justify-center')}>
+          <span className={highlightPillClass('skill', 'text-xs')}>{skill}</span>
+        </Item>
       ))}
       {hiddenCount > 0 ? (
         <button
@@ -57,7 +68,7 @@ export function ExpertSkillTags({ skills, className, maxVisible }: SkillTagsProp
           </span>
         </button>
       ) : null}
-    </div>
+    </Wrapper>
   );
 }
 
