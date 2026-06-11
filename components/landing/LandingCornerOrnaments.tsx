@@ -4,13 +4,56 @@ import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { motionClass } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
-function CornerRing({
+type SwirlPixel = {
+  x: number;
+  y: number;
+  size: number;
+  opacity: number;
+  delay: number;
+};
+
+/**
+ * Deterministic pixel positions along a logarithmic-ish spiral, snapped to a
+ * grid so the trail reads as "pixel volutes" rather than a smooth curve.
+ */
+function buildSwirlPixels(): SwirlPixel[] {
+  const GRID = 6;
+  const TURNS = 3;
+  const STEPS = 52;
+  const pixels: SwirlPixel[] = [];
+  const seen = new Set<string>();
+
+  for (let i = 0; i < STEPS; i++) {
+    const t = i / (STEPS - 1);
+    const theta = t * TURNS * Math.PI * 2;
+    const radius = 5 + t * 50;
+    const gx = Math.round((60 + Math.cos(theta) * radius) / GRID) * GRID;
+    const gy = Math.round((60 + Math.sin(theta) * radius) / GRID) * GRID;
+    const key = `${gx},${gy}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    pixels.push({
+      x: gx,
+      y: gy,
+      size: t < 0.45 ? 5 : 4,
+      opacity: Math.max(0.12, 0.75 - t * 0.6),
+      delay: i * 70,
+    });
+  }
+
+  return pixels;
+}
+
+const SWIRL_PIXELS = buildSwirlPixels();
+
+function CornerSwirl({
   className,
-  driftClass,
+  spinClass,
   reducedMotion,
 }: {
   className?: string;
-  driftClass: string;
+  spinClass: string;
   reducedMotion: boolean;
 }) {
   return (
@@ -19,32 +62,31 @@ function CornerRing({
       aria-hidden
       className={cn(
         'h-28 w-28 sm:h-32 sm:w-32',
-        motionClass('', driftClass, reducedMotion),
+        motionClass('', spinClass, reducedMotion),
         className,
       )}
     >
-      <circle
-        cx="60"
-        cy="60"
-        r="52"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1"
-        strokeDasharray="82 245"
-        strokeLinecap="round"
-        className="opacity-40"
-      />
-      <circle
-        cx="60"
-        cy="60"
-        r="38"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1"
-        strokeDasharray="60 179"
-        strokeLinecap="round"
-        className="opacity-25"
-      />
+      {SWIRL_PIXELS.map((px) => (
+        <rect
+          key={`${px.x}-${px.y}`}
+          x={px.x - px.size / 2}
+          y={px.y - px.size / 2}
+          width={px.size}
+          height={px.size}
+          rx={0.5}
+          fill="currentColor"
+          className={motionClass('', 'landing-pixel-twinkle', reducedMotion)}
+          style={
+            reducedMotion
+              ? { opacity: px.opacity }
+              : ({
+                  opacity: px.opacity,
+                  '--px-op': px.opacity,
+                  animationDelay: `${px.delay}ms`,
+                } as React.CSSProperties)
+          }
+        />
+      ))}
     </svg>
   );
 }
@@ -55,17 +97,17 @@ export function LandingCornerOrnaments() {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-56" aria-hidden>
       <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-primary/25 blur-3xl landing-corner-glow" />
-      <CornerRing
-        driftClass="landing-corner-drift"
+      <CornerSwirl
+        spinClass="landing-swirl-spin"
         reducedMotion={reducedMotion}
-        className="absolute bottom-4 left-2 text-primary sm:bottom-6 sm:left-6"
+        className="absolute bottom-3 left-1 text-primary sm:bottom-5 sm:left-5"
       />
 
       <div className="absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-accent/20 blur-3xl landing-corner-glow [animation-delay:2.5s]" />
-      <CornerRing
-        driftClass="landing-corner-drift-reverse"
+      <CornerSwirl
+        spinClass="landing-swirl-spin-reverse"
         reducedMotion={reducedMotion}
-        className="absolute bottom-4 right-2 text-accent sm:bottom-6 sm:right-6"
+        className="absolute bottom-3 right-1 text-accent sm:bottom-5 sm:right-5"
       />
     </div>
   );
