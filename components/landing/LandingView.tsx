@@ -4,14 +4,14 @@ import { SITE_NAME } from '@/lib/site-metadata';
 
 export function LandingView() {
   return (
-    <div className="relative -mx-4 flex min-h-[calc(100dvh-7.5rem)] flex-col items-center justify-center px-4 md:-mx-6">
+    <div className="relative flex min-h-[calc(100dvh-3.5rem)] flex-col items-center justify-center px-5 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] pt-[max(1.5rem,env(safe-area-inset-top,0px))] supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:pb-32 md:min-h-[calc(100dvh-4rem)]">
       <LandingCornerOrnaments />
 
-      <div className="motion-fade-up relative z-10 flex max-w-xl flex-col items-center gap-4 text-center">
-        <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
+      <div className="motion-fade-up relative z-10 flex w-full max-w-[16.5rem] flex-col items-center gap-3 text-center sm:max-w-md sm:gap-4">
+        <h1 className="font-heading text-[clamp(1.75rem,7.5vw,3.75rem)] font-bold leading-[1.08] tracking-tight text-balance text-foreground">
           {SITE_NAME}
         </h1>
-        <p className="max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">
+        <p className="max-w-[14rem] text-base leading-relaxed text-pretty text-muted-foreground sm:max-w-md sm:text-lg">
           {UI_COPY.landing.subtitle}
         </p>
       </div>
