@@ -517,23 +517,31 @@
     }
   }
 
-  @keyframes landing-corner-drift {
-    0%,
-    100% {
-      transform: translate(0, 0) rotate(0deg);
+  @keyframes landing-swirl-spin {
+    from {
+      transform: rotate(0deg);
     }
-    50% {
-      transform: translate(6px, -8px) rotate(6deg);
+    to {
+      transform: rotate(360deg);
     }
   }
 
-  @keyframes landing-corner-drift-reverse {
+  @keyframes landing-swirl-spin-reverse {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+
+  @keyframes landing-pixel-twinkle {
     0%,
     100% {
-      transform: translate(0, 0) rotate(0deg);
+      opacity: calc(var(--px-op, 0.6) * 0.3);
     }
     50% {
-      transform: translate(-6px, -8px) rotate(-6deg);
+      opacity: var(--px-op, 0.6);
     }
   }
 
@@ -541,12 +549,16 @@
     animation: landing-corner-glow 5s ease-in-out infinite;
   }
 
-  .landing-corner-drift {
-    animation: landing-corner-drift 7s ease-in-out infinite;
+  .landing-swirl-spin {
+    animation: landing-swirl-spin 64s linear infinite;
   }
 
-  .landing-corner-drift-reverse {
-    animation: landing-corner-drift-reverse 7s ease-in-out infinite;
+  .landing-swirl-spin-reverse {
+    animation: landing-swirl-spin-reverse 64s linear infinite;
+  }
+
+  .landing-pixel-twinkle {
+    animation: landing-pixel-twinkle 3.2s ease-in-out infinite;
   }
 }
 
