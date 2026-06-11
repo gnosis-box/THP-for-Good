@@ -504,6 +504,50 @@
     overflow: hidden;
     padding: 0 1rem 1rem;
   }
+
+  @keyframes landing-corner-glow {
+    0%,
+    100% {
+      opacity: 0.28;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.48;
+      transform: scale(1.06);
+    }
+  }
+
+  @keyframes landing-corner-drift {
+    0%,
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate(6px, -8px) rotate(6deg);
+    }
+  }
+
+  @keyframes landing-corner-drift-reverse {
+    0%,
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate(-6px, -8px) rotate(-6deg);
+    }
+  }
+
+  .landing-corner-glow {
+    animation: landing-corner-glow 5s ease-in-out infinite;
+  }
+
+  .landing-corner-drift {
+    animation: landing-corner-drift 7s ease-in-out infinite;
+  }
+
+  .landing-corner-drift-reverse {
+    animation: landing-corner-drift-reverse 7s ease-in-out infinite;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

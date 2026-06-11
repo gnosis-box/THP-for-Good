@@ -1,6 +1,9 @@
 /** User-facing UI copy outside payment/trust (English UI). */
 
 export const UI_COPY = {
+  landing: {
+    subtitle: 'Find an expert, offer your expertise',
+  },
   home: {
     title: 'Find an EXPERT to help you',
     subtitle: 'Book a 1:1 session. Pay in CRC. Fund the next student.',
