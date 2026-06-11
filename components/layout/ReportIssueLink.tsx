@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { FeedbackSheet } from '@/components/feedback/FeedbackSheet';
+import { LANDING_PATH } from '@/components/layout/AppShellMain';
 import { UI_COPY } from '@/lib/ui-copy';
 
 const DEFAULT_REPORT_URL =
@@ -33,6 +34,8 @@ export function ReportIssueLink() {
     () => buildReportUrl(pathname, isMiniappHost),
     [pathname, isMiniappHost],
   );
+
+  if (pathname === LANDING_PATH) return null;
 
   return (
     <>

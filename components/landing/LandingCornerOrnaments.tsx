@@ -1,5 +1,7 @@
 'use client';
 
+import type { CSSProperties } from 'react';
+
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { motionClass } from '@/lib/motion';
 import { cn } from '@/lib/utils';
@@ -61,7 +63,7 @@ function CornerSwirl({
       viewBox="0 0 120 120"
       aria-hidden
       className={cn(
-        'h-28 w-28 sm:h-32 sm:w-32',
+        'h-[4.75rem] w-[4.75rem] sm:h-28 sm:w-28 md:h-32 md:w-32',
         motionClass('', spinClass, reducedMotion),
         className,
       )}
@@ -83,7 +85,7 @@ function CornerSwirl({
                   opacity: px.opacity,
                   '--px-op': px.opacity,
                   animationDelay: `${px.delay}ms`,
-                } as React.CSSProperties)
+                } as CSSProperties)
           }
         />
       ))}
@@ -95,19 +97,22 @@ export function LandingCornerOrnaments() {
   const reducedMotion = usePrefersReducedMotion();
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-56" aria-hidden>
-      <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-primary/25 blur-3xl landing-corner-glow" />
+    <div
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-36 pb-[env(safe-area-inset-bottom,0px)] sm:h-48 md:h-56"
+      aria-hidden
+    >
+      <div className="absolute -bottom-14 -left-14 size-40 rounded-full bg-primary/20 blur-2xl landing-corner-glow sm:-bottom-20 sm:-left-20 sm:size-56 sm:blur-3xl sm:bg-primary/25" />
       <CornerSwirl
         spinClass="landing-swirl-spin"
         reducedMotion={reducedMotion}
-        className="absolute bottom-3 left-1 text-primary sm:bottom-5 sm:left-5"
+        className="absolute bottom-2 left-0 text-primary sm:bottom-4 sm:left-3 md:bottom-5 md:left-5"
       />
 
-      <div className="absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-accent/20 blur-3xl landing-corner-glow [animation-delay:2.5s]" />
+      <div className="absolute -bottom-14 -right-14 size-40 rounded-full bg-accent/15 blur-2xl landing-corner-glow [animation-delay:2.5s] sm:-bottom-20 sm:-right-20 sm:size-56 sm:bg-accent/20 sm:blur-3xl" />
       <CornerSwirl
         spinClass="landing-swirl-spin-reverse"
         reducedMotion={reducedMotion}
-        className="absolute bottom-3 right-1 text-accent sm:bottom-5 sm:right-5"
+        className="absolute bottom-2 right-0 text-accent sm:bottom-4 sm:right-3 md:bottom-5 md:right-5"
       />
     </div>
   );
