@@ -18,7 +18,11 @@ function luminance(r, g, b) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-function recolor(inputPath, outputPath, darkColor, lightColor) {
+function colorsEqual(a, b) {
+  return a.r === b.r && a.g === b.g && a.b === b.b;
+}
+
+function recolor(inputPath, outputPath, darkColor, lightColor, transparentColor) {
   const data = fs.readFileSync(inputPath);
   const png = PNG.sync.read(data);
 
@@ -34,6 +38,12 @@ function recolor(inputPath, outputPath, darkColor, lightColor) {
 
       const lum = luminance(r, g, b);
       const target = lum < 128 ? darkColor : lightColor;
+
+      if (transparentColor && colorsEqual(target, transparentColor)) {
+        png.data[i + 3] = 0;
+        continue;
+      }
+
       png.data[i] = target.r;
       png.data[i + 1] = target.g;
       png.data[i + 2] = target.b;
@@ -58,7 +68,7 @@ if (!fs.existsSync(input)) {
   process.exit(1);
 }
 
-// Version A: dark → green, light → beige
-recolor(input, outGreenBeige, GREEN, BEIGE);
-// Version B: inverted — dark → beige, light → green
-recolor(input, outBeigeGreen, BEIGE, GREEN);
+// Version A: dark → green (transparent), light → beige
+recolor(input, outGreenBeige, GREEN, BEIGE, GREEN);
+// Version B: inverted — dark → beige (transparent), light → green
+recolor(input, outBeigeGreen, BEIGE, GREEN, BEIGE);
