@@ -4,16 +4,15 @@ import Image from 'next/image';
 export function LandingBackgroundLogo() {
   return (
     <div
-      className="pointer-events-none absolute inset-y-0 left-0 z-0 w-[78%] overflow-hidden sm:w-[62%] md:w-[52%]"
+      className="pointer-events-none absolute top-1/2 left-0 z-0 isolate h-[min(86dvh,36rem)] w-[min(86dvh,36rem)] -translate-x-[46%] -translate-y-1/2 sm:h-[min(90dvh,42rem)] sm:w-[min(90dvh,42rem)] sm:-translate-x-[43%] md:h-[min(94dvh,48rem)] md:w-[min(94dvh,48rem)] md:-translate-x-[40%]"
       aria-hidden
     >
       <Image
         src="/landing-watermark-logo.png"
         alt=""
-        width={720}
-        height={720}
-        sizes="(max-width: 640px) 78vw, 52vw"
-        className="absolute top-1/2 left-0 h-[min(84dvh,38rem)] w-auto max-w-none -translate-x-[48%] -translate-y-1/2 opacity-[0.14] mix-blend-lighten [mask-image:linear-gradient(to_right,black_50%,transparent_92%)] sm:h-[min(90dvh,44rem)] sm:-translate-x-[45%] sm:opacity-[0.16] md:h-[min(94dvh,50rem)] md:-translate-x-[42%] md:opacity-[0.18]"
+        fill
+        sizes="(max-width: 640px) 90vw, 50vw"
+        className="object-contain object-center opacity-[0.13] [filter:brightness(0)_invert(1)] [mask-image:linear-gradient(to_right,black_48%,transparent_92%)] sm:opacity-[0.15] md:opacity-[0.17]"
       />
     </div>
   );
