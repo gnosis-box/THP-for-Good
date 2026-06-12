@@ -1,7 +1,8 @@
 /**
- * Recolor two-tone THP logo: dark → colorA, light → colorB (hoodie).
- * Background fill (colorA) is made transparent; dark edge pixels touching
- * the hoodie are recolored to hoodie color for a visible rim.
+ * Recolor two-tone THP logo inside a hexagonal fond.
+ * - Dark fond → background hue (then transparent)
+ * - Light hoodie → hoodie hue
+ * - Rim: fond pixels on the outer hex edge (touching transparent outside) → hoodie
  *
  * Usage: node scripts/recolor-thp-logo.mjs [input.png] [out-a.png] [out-b.png]
  */
@@ -13,15 +14,11 @@ const GREEN = { r: 0x5a, g: 0x9f, b: 0x76 }; // --primary #5a9f76
 const BEIGE = { r: 0xc4, g: 0x9a, b: 0x62 }; // --accent #c49a62
 const BORDER_PASSES = 2;
 
-const NEIGHBORS8 = [
-  [-1, -1],
+const NEIGHBORS4 = [
   [-1, 0],
-  [-1, 1],
+  [1, 0],
   [0, -1],
   [0, 1],
-  [1, -1],
-  [1, 0],
-  [1, 1],
 ];
 
 function luminance(r, g, b) {
@@ -50,35 +47,64 @@ function setPixel(png, x, y, color) {
   png.data[i + 3] = color.a ?? 255;
 }
 
-/** Dark pixels adjacent to hoodie color → hoodie (rim on the background side). */
-function addHoodieBorder(png, backgroundColor, hoodieColor) {
+function isTransparent(png, x, y) {
+  if (x < 0 || y < 0 || x >= png.width || y >= png.height) return true;
+  return getPixel(png, x, y).a === 0;
+}
+
+function isBackground(png, x, y, backgroundColor) {
+  if (x < 0 || y < 0 || x >= png.width || y >= png.height) return false;
+  const c = getPixel(png, x, y);
+  return c.a > 0 && colorsEqual(c, backgroundColor);
+}
+
+/**
+ * Paint a rim along the outer hexagonal fond edge (pixels touching transparent
+ * outside the logo), expanding inward through fond only — not around the hoodie.
+ */
+function addHexFondBorder(png, backgroundColor, hoodieColor) {
   const w = png.width;
   const h = png.height;
+  const painted = new Uint8Array(w * h);
+  const queue = [];
 
-  for (let pass = 0; pass < BORDER_PASSES; pass++) {
-    const toPaint = [];
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (!isBackground(png, x, y, backgroundColor)) continue;
 
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        const c = getPixel(png, x, y);
-        if (c.a === 0 || !colorsEqual(c, backgroundColor)) continue;
-
-        for (const [dx, dy] of NEIGHBORS8) {
-          const nx = x + dx;
-          const ny = y + dy;
-          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
-          const nc = getPixel(png, nx, ny);
-          if (nc.a > 0 && colorsEqual(nc, hoodieColor)) {
-            toPaint.push([x, y]);
-            break;
-          }
+      for (const [dx, dy] of NEIGHBORS4) {
+        if (isTransparent(png, x + dx, y + dy)) {
+          queue.push(y * w + x);
+          break;
         }
       }
     }
+  }
 
-    for (const [x, y] of toPaint) {
+  for (let pass = 0; pass < BORDER_PASSES && queue.length > 0; pass++) {
+    const nextQueue = [];
+
+    for (const idx of queue) {
+      if (painted[idx]) continue;
+      painted[idx] = 1;
+
+      const x = idx % w;
+      const y = Math.floor(idx / w);
       setPixel(png, x, y, hoodieColor);
+
+      for (const [dx, dy] of NEIGHBORS4) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        const ni = ny * w + nx;
+        if (painted[ni]) continue;
+        if (!isBackground(png, nx, ny, backgroundColor)) continue;
+        nextQueue.push(ni);
+      }
     }
+
+    queue.length = 0;
+    queue.push(...nextQueue);
   }
 }
 
@@ -108,7 +134,7 @@ function recolor(inputPath, outputPath, backgroundColor, hoodieColor) {
     }
   }
 
-  addHoodieBorder(png, backgroundColor, hoodieColor);
+  addHexFondBorder(png, backgroundColor, hoodieColor);
   makeBackgroundTransparent(png, backgroundColor);
 
   fs.writeFileSync(outputPath, PNG.sync.write(png));
@@ -128,6 +154,5 @@ if (!fs.existsSync(input)) {
   process.exit(1);
 }
 
-// Hoodie = light areas in source (beige in A, green in B).
 recolor(input, outGreenBeige, GREEN, BEIGE);
 recolor(input, outBeigeGreen, BEIGE, GREEN);
