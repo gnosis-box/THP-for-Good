@@ -1,5 +1,6 @@
 import { LandingBackgroundLogo } from '@/components/landing/LandingBackgroundLogo';
 import { LandingCornerOrnaments } from '@/components/landing/LandingCornerOrnaments';
+import { LandingJoinCta } from '@/components/landing/LandingJoinCta';
 import { UI_COPY } from '@/lib/ui-copy';
 import { SITE_NAME } from '@/lib/site-metadata';
 
@@ -16,6 +17,7 @@ export function LandingView() {
         <p className="max-w-[14rem] text-base leading-relaxed text-pretty text-muted-foreground sm:max-w-md sm:text-lg">
           {UI_COPY.landing.subtitle}
         </p>
+        <LandingJoinCta />
       </div>
     </div>
   );

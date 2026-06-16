@@ -12,7 +12,7 @@ export function LandingBackgroundLogo() {
         alt=""
         fill
         sizes="(max-width: 640px) 90vw, 50vw"
-        className="object-contain object-center opacity-[0.13] [filter:brightness(0)_invert(1)] [mask-image:linear-gradient(to_right,black_48%,transparent_92%)] sm:opacity-[0.15] md:opacity-[0.17]"
+        className="object-contain object-center opacity-[0.13] [mask-image:linear-gradient(to_right,black_48%,transparent_92%)] sm:opacity-[0.15] md:opacity-[0.17]"
       />
     </div>
   );
