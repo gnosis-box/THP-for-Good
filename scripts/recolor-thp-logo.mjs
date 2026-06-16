@@ -12,6 +12,8 @@ import { PNG } from '/tmp/png-tools/node_modules/pngjs/lib/png.js';
 
 const GREEN = { r: 0x5a, g: 0x9f, b: 0x76 }; // --primary #5a9f76
 const BEIGE = { r: 0xc4, g: 0x9a, b: 0x62 }; // --accent #c49a62
+const DARK_GREEN = { r: 0x29, g: 0x4c, b: 0x33 }; // beige-green hoodie #294C33
+const GOLD_OCHRE = { r: 0xb9, g: 0x87, b: 0x46 }; // green-beige hoodie #B98746
 const BORDER_PASSES = 2;
 
 const NEIGHBORS4 = [
@@ -154,5 +156,5 @@ if (!fs.existsSync(input)) {
   process.exit(1);
 }
 
-recolor(input, outGreenBeige, GREEN, BEIGE);
-recolor(input, outBeigeGreen, BEIGE, GREEN);
+recolor(input, outGreenBeige, GREEN, GOLD_OCHRE);
+recolor(input, outBeigeGreen, BEIGE, DARK_GREEN);

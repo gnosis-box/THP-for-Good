@@ -3,6 +3,7 @@
 export const UI_COPY = {
   landing: {
     subtitle: 'Find an expert, offer your expertise',
+    ctaJoinChain: 'Join the chain',
   },
   home: {
     title: 'Find an EXPERT to help you',
