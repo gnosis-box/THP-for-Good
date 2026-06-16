@@ -98,7 +98,7 @@ export function LandingCornerOrnaments() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-36 pb-[env(safe-area-inset-bottom,0px)] sm:h-48 md:h-56"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-36 pb-[env(safe-area-inset-bottom,0px)] sm:h-48 md:h-56"
       aria-hidden
     >
       <div className="absolute -bottom-14 -left-14 size-40 rounded-full bg-primary/20 blur-2xl landing-corner-glow sm:-bottom-20 sm:-left-20 sm:size-56 sm:blur-3xl sm:bg-primary/25" />

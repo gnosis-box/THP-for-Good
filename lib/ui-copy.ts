@@ -4,6 +4,26 @@ export const UI_COPY = {
   landing: {
     subtitle: 'Find an expert, offer your expertise',
     ctaJoinChain: 'Join the chain',
+    scrollHint: 'Scroll for more',
+    promiseSection: {
+      problemTitle: 'Learning web3 alone is slow—and hard to trust',
+      promise:
+        'THP for Good connects you with vetted experts for 1:1 help. Pay in CRC inside Circles and fund the next learner with every session.',
+      features: [
+        {
+          title: 'Find trusted experts',
+          body: 'Browse skills, session languages, and trust signals from the Circles network.',
+        },
+        {
+          title: 'Book & pay in CRC',
+          body: 'Pick a slot, pay in community currency—no card flow required in the miniapp.',
+        },
+        {
+          title: 'Fund future learners',
+          body: 'At least half of each session supports the THP treasury for the next cohort.',
+        },
+      ] as const,
+    },
   },
   home: {
     title: 'Find an EXPERT to help you',
