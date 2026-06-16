@@ -13,7 +13,9 @@ export function AppShellMain({ children }: { children: ReactNode }) {
 
   if (isLanding) {
     return (
-      <main className="relative flex min-h-0 flex-1 flex-col overflow-x-hidden">{children}</main>
+      <main className="relative flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+        {children}
+      </main>
     );
   }
 
