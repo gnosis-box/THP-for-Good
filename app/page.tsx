@@ -17,6 +17,7 @@ import {
 } from '@/lib/site-metadata';
 import { UI_COPY } from '@/lib/ui-copy';
 import { HomeHero } from '@/components/home/HomeHero';
+import { MiniappLandingRedirect } from '@/components/landing/MiniappLandingRedirect';
 import { ExpertBrowser } from '@/components/experts/ExpertBrowser';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -75,6 +76,9 @@ export default async function HomePage({
 
   return (
     <>
+      <Suspense fallback={null}>
+        <MiniappLandingRedirect />
+      </Suspense>
       <JsonLd data={buildHomeJsonLd()} />
       <div className="flex w-full flex-col gap-8">
         <HomeHero paidSessions={enrichment.paidBookingCount} treasuryBalanceCrc={treasuryBalanceCrc} />
