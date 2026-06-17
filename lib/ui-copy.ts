@@ -24,6 +24,9 @@ export const UI_COPY = {
         },
       ] as const,
     },
+    closingSection: {
+      lead: 'Join the THP Circles group to book sessions, pay in CRC, and grow the trust network.',
+    },
   },
   home: {
     title: 'Find an EXPERT to help you',
