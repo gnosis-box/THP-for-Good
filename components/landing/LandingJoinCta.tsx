@@ -18,7 +18,7 @@ export function LandingJoinCta() {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border px-5',
+        'group inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border px-5',
         'text-sm font-medium transition-colors duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
         isMiniappHost
@@ -27,7 +27,10 @@ export function LandingJoinCta() {
       )}
     >
       {UI_COPY.landing.ctaJoinChain}
-      <ArrowUpRight className="size-3.5 opacity-70" aria-hidden />
+      <ArrowUpRight
+        className="size-3.5 opacity-70 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+        aria-hidden
+      />
       <span className="sr-only">(opens in a new tab)</span>
     </Link>
   );
