@@ -504,62 +504,6 @@
     overflow: hidden;
     padding: 0 1rem 1rem;
   }
-
-  @keyframes landing-corner-glow {
-    0%,
-    100% {
-      opacity: 0.28;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.48;
-      transform: scale(1.06);
-    }
-  }
-
-  @keyframes landing-swirl-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @keyframes landing-swirl-spin-reverse {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(-360deg);
-    }
-  }
-
-  @keyframes landing-pixel-twinkle {
-    0%,
-    100% {
-      opacity: calc(var(--px-op, 0.6) * 0.3);
-    }
-    50% {
-      opacity: var(--px-op, 0.6);
-    }
-  }
-
-  .landing-corner-glow {
-    animation: landing-corner-glow 5s ease-in-out infinite;
-  }
-
-  .landing-swirl-spin {
-    animation: landing-swirl-spin 64s linear infinite;
-  }
-
-  .landing-swirl-spin-reverse {
-    animation: landing-swirl-spin-reverse 64s linear infinite;
-  }
-
-  .landing-pixel-twinkle {
-    animation: landing-pixel-twinkle 3.2s ease-in-out infinite;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

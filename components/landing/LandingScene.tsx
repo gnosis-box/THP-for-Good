@@ -15,7 +15,7 @@ export function LandingScene({ children }: { children: ReactNode }) {
         'relative flex w-full flex-1 flex-col items-center px-5',
         'supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))]',
         'supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))]',
-        'pb-[calc(7rem+env(safe-area-inset-bottom,0px))] pt-[max(1.5rem,env(safe-area-inset-top,0px))] sm:px-8 sm:pb-32',
+        'pb-[calc(2rem+env(safe-area-inset-bottom,0px))] pt-[max(1.5rem,env(safe-area-inset-top,0px))] sm:px-8 sm:pb-10',
         isMiniappHost
           ? 'min-h-0 justify-start pt-8 sm:pt-10'
           : 'min-h-[calc(100dvh-3.5rem)] justify-center',
