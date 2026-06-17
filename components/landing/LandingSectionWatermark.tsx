@@ -16,6 +16,15 @@ export function LandingSectionWatermark({
   src: string;
 }) {
   const { isMiniappHost } = useWallet();
+  const isBeigeGreenLogo = src.includes('beige-green');
+
+  const opacityClass = isBeigeGreenLogo
+    ? isMiniappHost
+      ? 'opacity-[0.28] sm:opacity-[0.32] md:opacity-[0.36]'
+      : 'opacity-[0.16] sm:opacity-[0.18] md:opacity-[0.20]'
+    : isMiniappHost
+      ? 'opacity-[0.24] sm:opacity-[0.28] md:opacity-[0.32]'
+      : 'opacity-[0.13] sm:opacity-[0.15] md:opacity-[0.17]';
 
   return (
     <div
@@ -37,9 +46,7 @@ export function LandingSectionWatermark({
           side === 'left'
             ? '[mask-image:linear-gradient(to_right,black_48%,transparent_92%)]'
             : '[mask-image:linear-gradient(to_left,black_48%,transparent_92%)]',
-          isMiniappHost
-            ? 'opacity-[0.24] sm:opacity-[0.28] md:opacity-[0.32]'
-            : 'opacity-[0.13] sm:opacity-[0.15] md:opacity-[0.17]',
+          opacityClass,
         )}
       />
     </div>
