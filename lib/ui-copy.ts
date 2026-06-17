@@ -2,10 +2,12 @@
 
 export const UI_COPY = {
   landing: {
+    eyebrow: 'Powered by Circles',
     subtitle: 'Find an expert, offer your expertise',
     ctaJoinChain: 'Join the chain',
     scrollHint: 'Scroll for more',
     promiseSection: {
+      kicker: 'Why THP for Good',
       problemTitle: 'Learning web3 alone is slow—and hard to trust',
       promise:
         'THP for Good connects you with vetted experts for 1:1 help. Pay in CRC inside Circles and fund the next learner with every session.',
@@ -25,6 +27,7 @@ export const UI_COPY = {
       ] as const,
     },
     closingSection: {
+      title: 'Ready to join the chain?',
       lead: 'Join the THP Circles group to book sessions, pay in CRC, and grow the trust network.',
     },
   },
