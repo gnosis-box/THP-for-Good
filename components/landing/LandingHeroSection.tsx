@@ -1,4 +1,3 @@
-import { LandingCornerOrnaments } from '@/components/landing/LandingCornerOrnaments';
 import { LandingJoinCta } from '@/components/landing/LandingJoinCta';
 import { LandingScene } from '@/components/landing/LandingScene';
 import { LandingScrollHint } from '@/components/landing/LandingScrollHint';
@@ -25,7 +24,6 @@ export function LandingHeroSection() {
           <LandingScrollHint />
         </div>
       </LandingScene>
-      <LandingCornerOrnaments />
     </section>
   );
 }
