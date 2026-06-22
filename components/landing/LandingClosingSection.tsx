@@ -13,17 +13,17 @@ export function LandingClosingSection() {
     >
       <div className="mx-auto flex w-full max-w-lg flex-col items-center gap-5 text-center md:max-w-2xl">
         <ScrollReveal delay={0}>
-          <h2 className="font-heading text-[clamp(1.75rem,5.5vw,2.75rem)] font-bold leading-[1.08] tracking-tight text-balance text-[#294C33]">
+          <h2 className="font-heading text-[clamp(1.75rem,5.5vw,2.75rem)] font-bold leading-[1.08] tracking-tight text-balance text-[#141f1c]">
             {title}
           </h2>
         </ScrollReveal>
         <ScrollReveal delay={0.08}>
-          <p className="mx-auto max-w-md text-base leading-relaxed text-pretty text-[#294C33]/85 sm:text-lg">
+          <p className="mx-auto max-w-md text-base leading-relaxed text-pretty text-[#141f1c]/85 sm:text-lg">
             {lead}
           </p>
         </ScrollReveal>
         <ScrollReveal delay={0.16} className="pt-1">
-          <LandingJoinCta />
+          <LandingJoinCta onOchreBand />
         </ScrollReveal>
       </div>
     </section>
