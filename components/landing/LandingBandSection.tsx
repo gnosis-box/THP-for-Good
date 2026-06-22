@@ -5,6 +5,7 @@ import {
   landingBandSurfaceClass,
   landingSectionInnerClass,
   landingSectionShellClass,
+  landingSeamOverlapClass,
   type LandingBand,
 } from '@/components/landing/landing-theme';
 import { LandingSectionWatermark } from '@/components/landing/LandingSectionWatermark';
@@ -32,6 +33,7 @@ export function LandingBandSection({
       className={cn(
         landingSectionShellClass,
         landingBandSurfaceClass(band),
+        landingSeamOverlapClass,
         centered && 'items-center text-center',
         className,
       )}
