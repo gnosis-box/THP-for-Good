@@ -13,7 +13,7 @@ export function LandingHeroSection() {
       aria-label="Hero"
     >
       <LandingScene>
-        <LandingSectionWatermark side="left" src="/landing-watermark-logo.png" />
+        <LandingSectionWatermark side="left" src="/landing-watermark-logo.png" band="dark" />
         <div className="relative z-10 flex w-full max-w-[17rem] flex-col items-center gap-4 text-center sm:max-w-md sm:gap-5">
           <ScrollReveal delay={0}>
             <span className="inline-block text-[0.7rem] font-medium uppercase tracking-[0.22em] text-muted-foreground/80">

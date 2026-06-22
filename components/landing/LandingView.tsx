@@ -1,4 +1,5 @@
 import { LandingClosingSection } from '@/components/landing/LandingClosingSection';
+import { LandingGnosisSection } from '@/components/landing/LandingGnosisSection';
 import { LandingHeroSection } from '@/components/landing/LandingHeroSection';
 import { LandingPromiseSection } from '@/components/landing/LandingPromiseSection';
 
@@ -7,6 +8,7 @@ export function LandingView() {
     <div className="flex flex-col">
       <LandingHeroSection />
       <LandingPromiseSection />
+      <LandingGnosisSection />
       <LandingClosingSection />
     </div>
   );

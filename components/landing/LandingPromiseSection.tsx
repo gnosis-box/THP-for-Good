@@ -11,7 +11,7 @@ export function LandingPromiseSection() {
       className="relative min-h-[min(60dvh,32rem)] overflow-hidden bg-[#c49a62] px-5 py-16 pb-[max(4rem,env(safe-area-inset-bottom,0px))] supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:py-20 md:py-28"
       aria-label="Why THP for Good"
     >
-      <LandingSectionWatermark side="right" src="/thp-logo-beige-green.png" />
+      <LandingSectionWatermark side="right" src="/thp-logo-beige-green.png" band="ochre" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-lg flex-col gap-10 md:max-w-2xl md:gap-12">
         <header className="flex max-w-xl flex-col gap-4">

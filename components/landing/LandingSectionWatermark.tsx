@@ -8,26 +8,37 @@ import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { cn } from '@/lib/utils';
 
 type WatermarkSide = 'left' | 'right';
+type WatermarkBand = 'dark' | 'ochre';
+
+function resolveWatermarkBand(src: string, band?: WatermarkBand): WatermarkBand {
+  if (band) return band;
+  if (src.includes('beige-green')) return 'ochre';
+  return 'dark';
+}
 
 /** Large edge watermark — hoodie logo, half off-screen, faded on section bg. */
 export function LandingSectionWatermark({
   side,
   src,
+  band,
 }: {
   side: WatermarkSide;
   src: string;
+  /** Dark sections (hero, gnosis) vs ochre band (promise). Defaults from `src`. */
+  band?: WatermarkBand;
 }) {
   const { isMiniappHost } = useWallet();
   const reducedMotion = usePrefersReducedMotion();
-  const isBeigeGreenLogo = src.includes('beige-green');
+  const watermarkBand = resolveWatermarkBand(src, band);
 
-  const opacityClass = isBeigeGreenLogo
-    ? isMiniappHost
-      ? 'opacity-[0.28] sm:opacity-[0.32] md:opacity-[0.36]'
-      : 'opacity-[0.16] sm:opacity-[0.18] md:opacity-[0.20]'
-    : isMiniappHost
-      ? 'opacity-[0.24] sm:opacity-[0.28] md:opacity-[0.32]'
-      : 'opacity-[0.13] sm:opacity-[0.15] md:opacity-[0.17]';
+  const opacityClass =
+    watermarkBand === 'ochre'
+      ? isMiniappHost
+        ? 'opacity-[0.28] sm:opacity-[0.32] md:opacity-[0.36]'
+        : 'opacity-[0.16] sm:opacity-[0.18] md:opacity-[0.20]'
+      : isMiniappHost
+        ? 'opacity-[0.24] sm:opacity-[0.28] md:opacity-[0.32]'
+        : 'opacity-[0.13] sm:opacity-[0.15] md:opacity-[0.17]';
 
   // Position via Tailwind transform classes; motion animates opacity only so the
   // half-off-screen translate is never overridden.
