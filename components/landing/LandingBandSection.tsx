@@ -7,6 +7,7 @@ import {
   landingSectionShellClass,
   type LandingBand,
 } from '@/components/landing/landing-theme';
+import { LandingSectionTopWave } from '@/components/landing/LandingSectionTopWave';
 import { LandingSectionWatermark } from '@/components/landing/LandingSectionWatermark';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,8 @@ type LandingBandSectionProps = {
   ariaLabel: string;
   watermark?: { side: 'left' | 'right'; src: string };
   centered?: boolean;
+  /** Organic seam overlapping the previous scroll band. */
+  showTopWave?: boolean;
   className?: string;
   children: ReactNode;
 };
@@ -24,6 +27,7 @@ export function LandingBandSection({
   ariaLabel,
   watermark,
   centered = false,
+  showTopWave = false,
   className,
   children,
 }: LandingBandSectionProps) {
@@ -37,6 +41,7 @@ export function LandingBandSection({
       )}
       aria-label={ariaLabel}
     >
+      {showTopWave ? <LandingSectionTopWave band={band} /> : null}
       <div className={landingBandAtmosphereClass(band)} aria-hidden />
       {watermark ? (
         <LandingSectionWatermark side={watermark.side} src={watermark.src} band={band} />

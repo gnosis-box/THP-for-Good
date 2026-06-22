@@ -12,6 +12,7 @@ export function LandingThpCrcSection() {
     <LandingBandSection
       band="dark"
       ariaLabel="CRC at THP for Good"
+      showTopWave
       watermark={{ side: 'left', src: '/circles-owl-logo-beige.png' }}
     >
       <LandingSectionHeader band="dark" kicker={kicker} title={title} />

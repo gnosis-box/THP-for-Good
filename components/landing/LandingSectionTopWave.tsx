@@ -5,23 +5,26 @@ import { useId } from 'react';
 import { LANDING_BAND, type LandingBand } from '@/components/landing/landing-theme';
 import { cn } from '@/lib/utils';
 
-type LandingSectionDividerProps = {
-  /** Color of the section below the divider. */
-  to: LandingBand;
+type LandingSectionTopWaveProps = {
+  band: LandingBand;
   className?: string;
 };
 
 /**
- * Organic wave seam between alternating landing bands.
- * Static SVG — no layout shift, respects reduced motion by default.
+ * Wave cap anchored to the top of a band section — extends upward over the
+ * previous band so there is no transparent gutter (standalone dividers left a
+ * visible strip of the page background between sections).
  */
-export function LandingSectionDivider({ to, className }: LandingSectionDividerProps) {
-  const gradientId = `landing-divider-${useId().replace(/:/g, '')}`;
-  const fill = to === 'ochre' ? LANDING_BAND.ochre : LANDING_BAND.dark;
+export function LandingSectionTopWave({ band, className }: LandingSectionTopWaveProps) {
+  const gradientId = `landing-wave-${useId().replace(/:/g, '')}`;
+  const fill = band === 'ochre' ? 'var(--accent)' : 'var(--background)';
 
   return (
     <div
-      className={cn('relative -mt-px h-10 w-full shrink-0 overflow-hidden sm:h-14 md:h-16', className)}
+      className={cn(
+        'pointer-events-none absolute inset-x-0 top-0 z-20 h-10 -translate-y-[calc(100%-1px)] sm:h-14 md:h-16',
+        className,
+      )}
       aria-hidden
     >
       <svg
@@ -39,11 +42,11 @@ export function LandingSectionDivider({ to, className }: LandingSectionDividerPr
           </linearGradient>
         </defs>
         <path
-          d="M0,64 L0,28 C240,4 480,52 720,30 C960,8 1200,44 1440,22 L1440,64 Z"
+          d="M0,20 C240,52 480,8 720,36 C960,4 1200,40 1440,18 L1440,64 L0,64 Z"
           fill={fill}
         />
         <path
-          d="M0,28 C240,4 480,52 720,30 C960,8 1200,44 1440,22"
+          d="M0,20 C240,52 480,8 720,36 C960,4 1200,40 1440,18"
           fill="none"
           stroke={`url(#${gradientId})`}
           strokeWidth="1.25"
