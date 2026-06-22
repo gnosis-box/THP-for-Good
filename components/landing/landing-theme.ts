@@ -12,7 +12,7 @@ export type LandingBand = 'dark' | 'ochre';
 
 /** Shared vertical rhythm for scroll sections (hero excluded). */
 export const landingSectionShellClass =
-  'relative flex min-h-[min(64dvh,36rem)] flex-col justify-center overflow-hidden py-20 pb-[max(4rem,env(safe-area-inset-bottom,0px))] supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 md:py-24 lg:py-28';
+  'relative isolate flex min-h-[min(64dvh,36rem)] flex-col justify-center overflow-x-clip py-20 pb-[max(4rem,env(safe-area-inset-bottom,0px))] supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 md:py-24 lg:py-28';
 
 export const landingSectionInnerClass =
   'relative z-10 mx-auto flex w-full max-w-3xl flex-col gap-10 md:gap-12';
