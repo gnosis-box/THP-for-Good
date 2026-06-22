@@ -7,7 +7,7 @@ import {
   landingSectionShellClass,
   type LandingBand,
 } from '@/components/landing/landing-theme';
-import { LandingSectionTopWave } from '@/components/landing/LandingSectionTopWave';
+import { landingWaveOverlapClass, LandingSectionTopWave } from '@/components/landing/LandingSectionTopWave';
 import { LandingSectionWatermark } from '@/components/landing/LandingSectionWatermark';
 import { cn } from '@/lib/utils';
 
@@ -37,12 +37,13 @@ export function LandingBandSection({
         landingSectionShellClass,
         landingBandSurfaceClass(band),
         centered && 'items-center text-center',
+        showTopWave && landingWaveOverlapClass,
         className,
       )}
       aria-label={ariaLabel}
     >
       {showTopWave ? <LandingSectionTopWave band={band} /> : null}
-      <div className={landingBandAtmosphereClass(band)} aria-hidden />
+      <div className={cn(landingBandAtmosphereClass(band), 'overflow-hidden')} aria-hidden />
       {watermark ? (
         <LandingSectionWatermark side={watermark.side} src={watermark.src} band={band} />
       ) : null}
