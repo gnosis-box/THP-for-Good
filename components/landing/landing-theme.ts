@@ -12,7 +12,18 @@ export type LandingBand = 'dark' | 'ochre';
 
 /** Shared vertical rhythm for scroll sections (hero excluded). */
 export const landingSectionShellClass =
-  'relative isolate flex min-h-[min(64dvh,36rem)] flex-col justify-center overflow-x-clip py-20 pb-[max(4rem,env(safe-area-inset-bottom,0px))] supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 md:py-24 lg:py-28';
+  'relative isolate flex min-h-[min(64dvh,36rem)] flex-col justify-center overflow-hidden py-20 pb-[max(4rem,env(safe-area-inset-bottom,0px))] supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 md:py-24 lg:py-28';
+
+/** Subtle film grain — solarpunk atmosphere, not a visible texture block. */
+export const landingBandGrainClass =
+  'pointer-events-none absolute inset-0 opacity-[0.045] mix-blend-soft-light [background-image:url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20256%20256%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.85%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E")] [background-size:180px_180px]';
+
+/** Top mist — soft hand-off from the previous band colour (alternating dark ↔ ochre). */
+export function landingBandTopMistClass(band: LandingBand) {
+  return band === 'ochre'
+    ? 'pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#0a1210]/30 via-[#5a9f76]/[0.07] to-transparent sm:h-32 md:h-36'
+    : 'pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#c49a62]/22 via-[#5a9f76]/[0.06] to-transparent sm:h-32 md:h-36';
+}
 
 export const landingSectionInnerClass =
   'relative z-10 mx-auto flex w-full max-w-3xl flex-col gap-10 md:gap-12';
@@ -28,10 +39,10 @@ export function landingBandSurfaceClass(band: LandingBand) {
 
 export function landingBandAtmosphereClass(band: LandingBand) {
   return cn(
-    'pointer-events-none absolute inset-0 z-0',
+    'pointer-events-none absolute inset-0',
     band === 'ochre'
-      ? 'bg-gradient-to-b from-[#141f1c]/[0.04] via-transparent to-[#141f1c]/[0.02]'
-      : 'bg-gradient-to-b from-primary/[0.03] via-transparent to-transparent',
+      ? 'bg-gradient-to-b from-[#141f1c]/[0.06] via-transparent to-[#141f1c]/[0.04]'
+      : 'bg-gradient-to-b from-primary/[0.05] via-transparent to-primary/[0.02]',
   );
 }
 

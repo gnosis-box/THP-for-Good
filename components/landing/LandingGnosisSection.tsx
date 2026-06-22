@@ -11,7 +11,6 @@ export function LandingGnosisSection() {
     <LandingBandSection
       band="dark"
       ariaLabel="About Gnosis and CRC"
-      showTopWave
       watermark={{ side: 'left', src: '/circles-owl-logo-beige.png' }}
     >
       <LandingSectionHeader band="dark" kicker={kicker} title={title} />
