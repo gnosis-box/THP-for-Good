@@ -26,6 +26,12 @@ export const UI_COPY = {
         },
       ] as const,
     },
+    gnosisSection: {
+      kicker: 'About Gnosis',
+      title: 'People-powered money',
+      body:
+        'Gnosis is building people-powered money — not bank money. At its core is Circles, an open protocol where every person creates CRC (Circles) at a steady rate — about one unit per hour — without a central issuer deciding who gets access. CRC moves peer-to-peer through a trust network: you accept payments from people and communities you trust, and they accept yours.',
+    },
     closingSection: {
       title: 'Ready to join the chain?',
       lead: 'Join the THP Circles group to book sessions, pay in CRC, and grow the trust network.',
