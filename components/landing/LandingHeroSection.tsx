@@ -9,7 +9,7 @@ import { SITE_NAME } from '@/lib/site-metadata';
 export function LandingHeroSection() {
   return (
     <section
-      className="relative flex min-h-[calc(100dvh-3.5rem)] min-h-[calc(100svh-3.5rem)] shrink-0 flex-col md:min-h-[calc(100dvh-4rem)] md:min-h-[calc(100svh-4rem)]"
+      className="relative flex min-h-[calc(100dvh-3.5rem)] min-h-[calc(100svh-3.5rem)] shrink-0 flex-col bg-background md:min-h-[calc(100dvh-4rem)] md:min-h-[calc(100svh-4rem)]"
       aria-label="Hero"
     >
       <LandingScene>

@@ -23,15 +23,15 @@ export const landingTitleClass =
   'font-heading text-[clamp(1.65rem,4.8vw,2.65rem)] font-bold leading-[1.08] tracking-tight text-balance';
 
 export function landingBandSurfaceClass(band: LandingBand) {
-  return band === 'ochre' ? 'bg-[#c49a62]' : 'bg-background';
+  return band === 'ochre' ? 'bg-accent' : 'bg-background';
 }
 
 export function landingBandAtmosphereClass(band: LandingBand) {
   return cn(
-    'pointer-events-none absolute inset-0',
+    'pointer-events-none absolute inset-0 z-0',
     band === 'ochre'
-      ? 'bg-gradient-to-b from-[#141f1c]/[0.05] via-transparent to-[#141f1c]/[0.03]'
-      : 'bg-gradient-to-b from-primary/[0.04] via-transparent to-transparent',
+      ? 'bg-gradient-to-b from-[#141f1c]/[0.04] via-transparent to-[#141f1c]/[0.02]'
+      : 'bg-gradient-to-b from-primary/[0.03] via-transparent to-transparent',
   );
 }
 

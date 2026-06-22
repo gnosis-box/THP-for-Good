@@ -10,6 +10,7 @@ export function LandingCrcSection() {
     <LandingBandSection
       band="ochre"
       ariaLabel="About CRC"
+      showTopWave
       watermark={{ side: 'right', src: '/circles-owl-logo-beige-green.png' }}
     >
       <LandingSectionHeader band="ochre" kicker={kicker} title={title} />
