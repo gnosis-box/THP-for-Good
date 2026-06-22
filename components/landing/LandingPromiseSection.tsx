@@ -10,7 +10,6 @@ export function LandingPromiseSection() {
     <LandingBandSection
       band="ochre"
       ariaLabel="Why THP for Good"
-      showTopWave
       watermark={{ side: 'right', src: '/thp-logo-beige-green.png' }}
     >
       <LandingSectionHeader band="ochre" kicker={kicker} title={problemTitle} lead={promise} />
