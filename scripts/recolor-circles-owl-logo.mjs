@@ -1,11 +1,12 @@
 /**
- * Recolor Circles owl logo (blue ink on orange→purple gradient) to beige on transparent.
- * Matches the hoodie hue from thp-logo-green-beige.png (#B98746).
+ * Recolor Circles owl logo (blue ink on orange→purple gradient) to theme hues on transparent.
+ * - green-beige → hoodie #B98746 (matches thp-logo-green-beige.png)
+ * - beige-green → hoodie #294C33 (matches thp-logo-beige-green.png)
  *
  * Background pixels are detected by comparing each row to the vertical gradient
  * sampled from the left/right image edges (outside the circular logo).
  *
- * Usage: node scripts/recolor-circles-owl-logo.mjs [input] [output.png]
+ * Usage: node scripts/recolor-circles-owl-logo.mjs [input] [out-green-beige.png] [out-beige-green.png]
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,14 +17,17 @@ const sharp = require('/tmp/png-tools/node_modules/sharp');
 const { PNG } = require('/tmp/png-tools/node_modules/pngjs/lib/png.js');
 
 const GOLD_OCHRE = { r: 0xb9, g: 0x87, b: 0x46 }; // green-beige hoodie #B98746
+const DARK_GREEN = { r: 0x29, g: 0x4c, b: 0x33 }; // beige-green hoodie #294C33
 const GRADIENT_DISTANCE_THRESHOLD = 45;
 const EDGE_COLUMNS = 3;
 
 const input =
   process.argv[2] ??
   '/home/dim/.cursor/projects/home-dim-THP-for-Good/assets/c__Users_dimit_AppData_Roaming_Cursor_User_workspaceStorage_f41e28e3033c92969009141ae36800ed_images_ih2bo9v1JcT5j0Q9eDKMq6DQeg-a537c2a5-881e-4693-b596-beff35baf8e4.png';
-const output =
-  process.argv[3] ?? path.join(process.cwd(), 'public/circles-owl-logo-beige.png');
+const outGreenBeige =
+  process.argv[3] ?? path.join(process.cwd(), 'public/circles-owl-logo-green-beige.png');
+const outBeigeGreen =
+  process.argv[4] ?? path.join(process.cwd(), 'public/circles-owl-logo-beige-green.png');
 
 function colorDistance(a, b) {
   return Math.sqrt((a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2);
@@ -51,7 +55,7 @@ function sampleVerticalGradient(data, width, height) {
   return gradient;
 }
 
-async function recolorOwlLogo(inputPath, outputPath) {
+async function recolorOwlLogo(inputPath, outputPath, inkColor) {
   if (!fs.existsSync(inputPath)) {
     console.error(`Input not found: ${inputPath}`);
     process.exit(1);
@@ -78,9 +82,9 @@ async function recolorOwlLogo(inputPath, outputPath) {
         png.data[i + 2] = 0;
         png.data[i + 3] = 0;
       } else {
-        png.data[i] = GOLD_OCHRE.r;
-        png.data[i + 1] = GOLD_OCHRE.g;
-        png.data[i + 2] = GOLD_OCHRE.b;
+        png.data[i] = inkColor.r;
+        png.data[i + 1] = inkColor.g;
+        png.data[i + 2] = inkColor.b;
         png.data[i + 3] = 255;
       }
     }
@@ -90,4 +94,5 @@ async function recolorOwlLogo(inputPath, outputPath) {
   console.log(`Wrote ${outputPath} (${width}x${height})`);
 }
 
-await recolorOwlLogo(input, output);
+await recolorOwlLogo(input, outGreenBeige, GOLD_OCHRE);
+await recolorOwlLogo(input, outBeigeGreen, DARK_GREEN);

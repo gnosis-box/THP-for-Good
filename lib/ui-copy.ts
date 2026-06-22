@@ -32,6 +32,60 @@ export const UI_COPY = {
       body:
         'Gnosis is building people-powered money — not bank money. At its core is Circles, an open protocol where every person creates CRC (Circles) at a steady rate — about one unit per hour — without a central issuer deciding who gets access. CRC moves peer-to-peer through a trust network: you accept payments from people and communities you trust, and they accept yours.',
     },
+    crcSection: {
+      kicker: 'About CRC',
+      title: 'Why community currency matters',
+      features: [
+        {
+          title: 'Decentralized creation',
+          body: 'No central bank decides who gets to hold it. Everyone registered on Circles emits their share.',
+        },
+        {
+          title: 'Trust-based circulation',
+          body: 'You accept CRC from people and communities you trust. Money follows real social ties—not just cash or debt.',
+        },
+        {
+          title: 'Community money',
+          body: 'Join a group like THP and share a common currency—useful to fund, reward, and cooperate inside a collective.',
+        },
+        {
+          title: 'Peer-to-peer payments',
+          body: 'Send CRC directly, without a classic bank intermediary on every transaction.',
+        },
+        {
+          title: 'Built-in reputation',
+          body: 'The trust network strengthens credibility: the more you are recognized, the wider you can exchange.',
+        },
+        {
+          title: 'Gnosis ecosystem',
+          body: 'Through the Gnosis app, CRC also powers a broader ecosystem—spending, card rewards, miniapps, and more.',
+        },
+      ] as const,
+    },
+    thpCrcSection: {
+      kicker: 'THP for Good',
+      title: 'What about THP for Good?',
+      features: [
+        {
+          title: 'Pay in community money',
+          body: 'Book an expert session in CRC—not with a bank card in euros.',
+        },
+        {
+          title: 'Fund the THP treasury',
+          body: 'Part of each session flows back to the shared pot for the next learners.',
+        },
+        {
+          title: 'Strengthen the network',
+          body: 'After a call, Circles trust solidifies the expert ↔ participant link.',
+        },
+        {
+          title: 'On-chain transparency',
+          body: 'CRC flows are traceable on-chain—the treasury and activity are verifiable.',
+        },
+      ] as const,
+      summary:
+        'In short: CRC is cooperative money—created by people, exchanged through trust, and at THP mobilized for mutual aid and learning.',
+    },
     closingSection: {
       title: 'Ready to join the chain?',
       lead: 'Join the THP Circles group to book sessions, pay in CRC, and grow the trust network.',
