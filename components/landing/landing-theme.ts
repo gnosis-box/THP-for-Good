@@ -14,85 +14,67 @@ export type LandingBand = 'dark' | 'ochre';
 
 /** Shared vertical rhythm for scroll sections (hero excluded). */
 export const landingSectionShellClass =
-  'relative isolate flex min-h-[min(64dvh,36rem)] flex-col justify-center overflow-x-clip py-20 pb-[max(4rem,env(safe-area-inset-bottom,0px))] supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 md:py-24 lg:py-28';
-
-/** Pull band up so the colour wash straddles the previous section edge. */
-export const landingBleedOverlapClass = '-mt-20 sm:-mt-28 md:-mt-32';
-
-/** Tall zone centred on the band boundary — hosts blurred radial washes. */
-export const landingColorBleedZoneClass =
-  'pointer-events-none absolute inset-x-[-12%] top-0 z-[2] h-36 -translate-y-[42%] sm:h-44 sm:-translate-y-[45%] md:h-52 md:-translate-y-[48%]';
+  'relative isolate flex min-h-[min(64dvh,36rem)] flex-col justify-center overflow-hidden py-20 pb-[max(4rem,env(safe-area-inset-bottom,0px))] supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 md:py-24 lg:py-28';
 
 const landingGrainBgClass =
   '[background-image:url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20256%20256%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.85%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E")]';
 
 /** Light grain across the section body. */
 export const landingBandGrainAmbientClass = cn(
-  'pointer-events-none absolute inset-0 opacity-[0.03] mix-blend-soft-light',
+  'pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-soft-light',
   landingGrainBgClass,
   '[background-size:200px_200px]',
 );
 
-/** Previous-band colour for watercolor bleed (alternating dark ↔ ochre). */
+/** Previous-band colour for top fade (alternating dark ↔ ochre). */
 export function landingBandPreviousColor(band: LandingBand) {
   return band === 'ochre' ? LANDING_BAND.dark : LANDING_BAND.ochre;
 }
 
-/** Base vertical wash — previous band tint fading into the current surface. */
-export function landingColorBleedWashStyle(band: LandingBand): CSSProperties {
+/**
+ * Section surface — gradient from previous band at the top into the current band.
+ * Avoids a hard horizontal line between stacked sections (no negative overlap).
+ */
+export function landingBandSurfaceStyle(band: LandingBand): CSSProperties {
+  const current = band === 'ochre' ? LANDING_BAND.ochre : LANDING_BAND.dark;
   const prev = landingBandPreviousColor(band);
+
   return {
-    background: `linear-gradient(to bottom, ${prev} 0%, ${prev}cc 12%, ${prev}66 28%, ${prev}22 48%, transparent 72%)`,
+    background: [
+      'linear-gradient(to bottom,',
+      `${prev} 0%,`,
+      `color-mix(in srgb, ${prev} 82%, ${current}) 10%,`,
+      `color-mix(in srgb, ${prev} 58%, ${current}) 18%,`,
+      `color-mix(in srgb, ${prev} 36%, ${current}) 26%,`,
+      `color-mix(in srgb, ${prev} 16%, ${current}) 34%,`,
+      `${current} 42%,`,
+      `${current} 100%)`,
+    ].join(' '),
   };
 }
 
-type BleedBlobPosition = 'left' | 'center' | 'right';
+/** Soft painterly wash — decorative only, contained in the top fade zone. */
+export const landingBandTopWashZoneClass =
+  'pointer-events-none absolute inset-x-0 top-0 z-0 h-[min(32vh,15rem)] overflow-hidden';
 
-/** Soft radial blob — offset horizontally for a non-linear, painterly edge. */
-export function landingColorBleedBlobStyle(
-  band: LandingBand,
-  position: BleedBlobPosition,
-): CSSProperties {
+export function landingBandTopWashStyle(band: LandingBand): CSSProperties {
   const prev = landingBandPreviousColor(band);
-  const x = position === 'left' ? '22%' : position === 'right' ? '78%' : '50%';
-  const spread = position === 'center' ? '95% 75%' : '80% 65%';
   return {
-    background: `radial-gradient(ellipse ${spread} at ${x} 18%, ${prev} 0%, ${prev}bb 22%, ${prev}55 40%, ${prev}18 58%, transparent 76%)`,
+    background: [
+      `radial-gradient(ellipse 90% 70% at 18% 0%, color-mix(in srgb, ${prev} 55%, transparent) 0%, transparent 68%),`,
+      `radial-gradient(ellipse 85% 65% at 82% 4%, color-mix(in srgb, ${prev} 45%, transparent) 0%, transparent 65%),`,
+      `radial-gradient(ellipse 100% 75% at 50% -5%, color-mix(in srgb, ${prev} 35%, transparent) 0%, transparent 72%)`,
+    ].join(' '),
   };
 }
-
-export const landingColorBleedBlobLayoutClass: Record<
-  BleedBlobPosition,
-  { className: string; blur: string; opacity: string }
-> = {
-  center: {
-    className: 'absolute inset-x-[8%] top-0 h-[130%]',
-    blur: 'blur-3xl',
-    opacity: 'opacity-90',
-  },
-  left: {
-    className: 'absolute left-0 top-0 h-[115%] w-[62%]',
-    blur: 'blur-3xl',
-    opacity: 'opacity-70',
-  },
-  right: {
-    className: 'absolute right-0 top-0 h-[115%] w-[62%]',
-    blur: 'blur-3xl',
-    opacity: 'opacity-65',
-  },
-};
 
 export const landingSectionInnerClass =
-  'relative z-10 mx-auto flex w-full max-w-3xl flex-col gap-10 md:gap-12';
+  'relative z-20 mx-auto flex w-full max-w-3xl flex-col gap-10 md:gap-12';
 
 export const landingSectionHeaderClass = 'flex max-w-2xl flex-col gap-4';
 
 export const landingTitleClass =
   'font-heading text-[clamp(1.65rem,4.8vw,2.65rem)] font-bold leading-[1.08] tracking-tight text-balance';
-
-export function landingBandSurfaceClass(band: LandingBand) {
-  return band === 'ochre' ? 'bg-accent' : 'bg-background';
-}
 
 export function landingBandAtmosphereClass(band: LandingBand) {
   return cn(

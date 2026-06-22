@@ -2,10 +2,9 @@ import type { ReactNode } from 'react';
 
 import { LandingBandAtmosphere } from '@/components/landing/LandingBandAtmosphere';
 import {
-  landingBandSurfaceClass,
   landingSectionInnerClass,
   landingSectionShellClass,
-  landingBleedOverlapClass,
+  landingBandSurfaceStyle,
   type LandingBand,
 } from '@/components/landing/landing-theme';
 import { LandingSectionWatermark } from '@/components/landing/LandingSectionWatermark';
@@ -30,10 +29,9 @@ export function LandingBandSection({
 }: LandingBandSectionProps) {
   return (
     <section
+      style={landingBandSurfaceStyle(band)}
       className={cn(
         landingSectionShellClass,
-        landingBandSurfaceClass(band),
-        landingBleedOverlapClass,
         centered && 'items-center text-center',
         className,
       )}
