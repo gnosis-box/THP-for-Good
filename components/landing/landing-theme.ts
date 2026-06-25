@@ -31,31 +31,35 @@ export function landingBandPreviousColor(band: LandingBand) {
   return band === 'ochre' ? LANDING_BAND.dark : LANDING_BAND.ochre;
 }
 
+/** Height of the top colour hand-off — fixed, not % of section min-height. */
+export const LANDING_BAND_FADE_HEIGHT = '5.5rem';
+
 /**
- * Section surface — gradient from previous band at the top into the current band.
- * Avoids a hard horizontal line between stacked sections (no negative overlap).
+ * Section surface — short top strip fades from previous band into current colour.
+ * Solid fill below keeps the rest of the section untinted.
  */
 export function landingBandSurfaceStyle(band: LandingBand): CSSProperties {
   const current = band === 'ochre' ? LANDING_BAND.ochre : LANDING_BAND.dark;
   const prev = landingBandPreviousColor(band);
 
   return {
-    background: [
+    backgroundColor: current,
+    backgroundImage: [
       'linear-gradient(to bottom,',
       `${prev} 0%,`,
-      `color-mix(in srgb, ${prev} 82%, ${current}) 10%,`,
-      `color-mix(in srgb, ${prev} 58%, ${current}) 18%,`,
-      `color-mix(in srgb, ${prev} 36%, ${current}) 26%,`,
-      `color-mix(in srgb, ${prev} 16%, ${current}) 34%,`,
-      `${current} 42%,`,
+      `color-mix(in srgb, ${prev} 72%, ${current}) 38%,`,
+      `color-mix(in srgb, ${prev} 28%, ${current}) 72%,`,
       `${current} 100%)`,
     ].join(' '),
+    backgroundSize: `100% ${LANDING_BAND_FADE_HEIGHT}`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'top center',
   };
 }
 
-/** Soft painterly wash — decorative only, contained in the top fade zone. */
+/** Soft painterly wash — matches the fixed fade strip height. */
 export const landingBandTopWashZoneClass =
-  'pointer-events-none absolute inset-x-0 top-0 z-0 h-[min(32vh,15rem)] overflow-hidden';
+  'pointer-events-none absolute inset-x-0 top-0 z-0 h-[5.5rem] overflow-hidden';
 
 export function landingBandTopWashStyle(band: LandingBand): CSSProperties {
   const prev = landingBandPreviousColor(band);
