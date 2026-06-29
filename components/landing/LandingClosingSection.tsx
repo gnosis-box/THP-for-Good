@@ -8,7 +8,7 @@ export function LandingClosingSection() {
   const { title, lead } = UI_COPY.landing.closingSection;
 
   return (
-    <LandingBandSection band="ochre" ariaLabel="Join the chain" centered>
+    <LandingBandSection band="ochre" ariaLabel="Join the chain" centered tone="cta">
       <LandingSectionHeader band="ochre" title={title} lead={lead} align="center" />
       <ScrollReveal delay={0.16} className="pt-1">
         <LandingJoinCta onOchreBand />
