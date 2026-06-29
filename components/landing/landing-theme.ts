@@ -12,9 +12,16 @@ export const LANDING_BAND = {
 
 export type LandingBand = 'dark' | 'ochre';
 
-/** Shared vertical rhythm for scroll sections (hero excluded). */
-export const landingSectionShellClass =
-  'relative isolate flex min-h-[min(64dvh,36rem)] flex-col justify-center overflow-hidden py-20 pb-[max(4rem,env(safe-area-inset-bottom,0px))] supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 md:py-24 lg:py-28';
+/** Shared vertical rhythm — explanatory bands (hero + closing CTA excluded). */
+export const landingBandContentSectionShellClass =
+  'relative isolate flex h-[min(68dvh,38rem)] flex-col justify-center overflow-hidden px-5 py-14 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:py-16 md:py-[4.5rem]';
+
+/** Closing CTA — shorter, not locked to content-band height. */
+export const landingBandCtaSectionShellClass =
+  'relative isolate flex min-h-[min(44dvh,24rem)] flex-col justify-center overflow-hidden px-5 py-14 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:py-16';
+
+/** Equal inset from top/bottom for band watermarks — synced with shell padding rhythm. */
+export const landingBandWatermarkInsetClass = 'top-14 bottom-14 sm:top-16 sm:bottom-16 md:top-[4.5rem] md:bottom-[4.5rem]';
 
 const landingGrainBgClass =
   '[background-image:url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20256%20256%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.85%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E")]';
@@ -31,8 +38,8 @@ export function landingBandPreviousColor(band: LandingBand) {
   return band === 'ochre' ? LANDING_BAND.dark : LANDING_BAND.ochre;
 }
 
-/** Height of the top colour hand-off — fixed, not % of section min-height. */
-export const LANDING_BAND_FADE_HEIGHT = '5.5rem';
+/** Height of the top colour hand-off — narrow strip at the band edge. */
+export const LANDING_BAND_FADE_HEIGHT = '2.5rem';
 
 /**
  * Section surface — short top strip fades from previous band into current colour.
@@ -47,8 +54,7 @@ export function landingBandSurfaceStyle(band: LandingBand): CSSProperties {
     backgroundImage: [
       'linear-gradient(to bottom,',
       `${prev} 0%,`,
-      `color-mix(in srgb, ${prev} 72%, ${current}) 38%,`,
-      `color-mix(in srgb, ${prev} 28%, ${current}) 72%,`,
+      `color-mix(in srgb, ${prev} 55%, ${current}) 55%,`,
       `${current} 100%)`,
     ].join(' '),
     backgroundSize: `100% ${LANDING_BAND_FADE_HEIGHT}`,
@@ -59,7 +65,7 @@ export function landingBandSurfaceStyle(band: LandingBand): CSSProperties {
 
 /** Soft painterly wash — matches the fixed fade strip height. */
 export const landingBandTopWashZoneClass =
-  'pointer-events-none absolute inset-x-0 top-0 z-0 h-[5.5rem] overflow-hidden';
+  'pointer-events-none absolute inset-x-0 top-0 z-0 h-[2.5rem] overflow-hidden';
 
 export function landingBandTopWashStyle(band: LandingBand): CSSProperties {
   const prev = landingBandPreviousColor(band);

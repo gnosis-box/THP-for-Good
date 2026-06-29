@@ -2,8 +2,9 @@ import type { ReactNode } from 'react';
 
 import { LandingBandAtmosphere } from '@/components/landing/LandingBandAtmosphere';
 import {
+  landingBandContentSectionShellClass,
+  landingBandCtaSectionShellClass,
   landingSectionInnerClass,
-  landingSectionShellClass,
   landingBandSurfaceStyle,
   type LandingBand,
 } from '@/components/landing/landing-theme';
@@ -15,6 +16,8 @@ type LandingBandSectionProps = {
   ariaLabel: string;
   watermark?: { side: 'left' | 'right'; src: string };
   centered?: boolean;
+  /** `content` = uniform explanatory band height; `cta` = closing section. */
+  tone?: 'content' | 'cta';
   className?: string;
   children: ReactNode;
 };
@@ -24,6 +27,7 @@ export function LandingBandSection({
   ariaLabel,
   watermark,
   centered = false,
+  tone = 'content',
   className,
   children,
 }: LandingBandSectionProps) {
@@ -31,7 +35,7 @@ export function LandingBandSection({
     <section
       style={landingBandSurfaceStyle(band)}
       className={cn(
-        landingSectionShellClass,
+        tone === 'cta' ? landingBandCtaSectionShellClass : landingBandContentSectionShellClass,
         centered && 'items-center text-center',
         className,
       )}
@@ -39,7 +43,12 @@ export function LandingBandSection({
     >
       <LandingBandAtmosphere band={band} />
       {watermark ? (
-        <LandingSectionWatermark side={watermark.side} src={watermark.src} band={band} />
+        <LandingSectionWatermark
+          layout="band"
+          side={watermark.side}
+          src={watermark.src}
+          band={band}
+        />
       ) : null}
       <div className={cn(landingSectionInnerClass, centered && 'items-center')}>{children}</div>
     </section>

@@ -13,7 +13,7 @@ export function LandingBandAtmosphere({ band }: { band: LandingBand }) {
       <div className={landingBandAtmosphereClass(band)} />
       <div className={landingBandGrainAmbientClass} />
       <div className={landingBandTopWashZoneClass}>
-        <div className="absolute inset-0 blur-2xl" style={landingBandTopWashStyle(band)} />
+        <div className="absolute inset-0 blur-xl" style={landingBandTopWashStyle(band)} />
       </div>
     </div>
   );
