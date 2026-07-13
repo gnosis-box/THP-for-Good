@@ -20,7 +20,7 @@ export function LandingThpCrcSection() {
         features={features}
         columns="two"
         footer={
-          <ScrollReveal delay={0.2}>
+          <ScrollReveal once delay={0.2}>
             <p className={landingLeadClass('dark')}>{summary}</p>
           </ScrollReveal>
         }

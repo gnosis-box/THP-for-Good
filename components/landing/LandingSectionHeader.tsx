@@ -34,18 +34,18 @@ export function LandingSectionHeader({
   return (
     <header className={cn(landingSectionHeaderClass, centered && 'mx-auto items-center text-center')}>
       {kicker ? (
-        <ScrollReveal delay={0}>
+        <ScrollReveal once delay={0}>
           <span className={landingKickerClass(band)}>
             <span className={landingKickerRuleClass(band)} aria-hidden />
             {kicker}
           </span>
         </ScrollReveal>
       ) : null}
-      <ScrollReveal delay={kicker ? 0.08 : 0}>
+      <ScrollReveal once delay={kicker ? 0.08 : 0}>
         <h2 className={landingHeadingClass(band)}>{title}</h2>
       </ScrollReveal>
       {lead ? (
-        <ScrollReveal delay={kicker ? 0.14 : 0.08}>
+        <ScrollReveal once delay={kicker ? 0.14 : 0.08}>
           <p className={cn(landingLeadClass(band), centered && 'mx-auto')}>{lead}</p>
         </ScrollReveal>
       ) : null}

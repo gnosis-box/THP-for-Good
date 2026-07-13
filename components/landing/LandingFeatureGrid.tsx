@@ -32,7 +32,7 @@ export function LandingFeatureGrid({
     <>
       <ul
         className={cn(
-          'grid gap-4 sm:gap-5',
+          'grid gap-x-8 gap-y-6 sm:gap-y-8',
           columns === 'three' ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2',
         )}
       >
@@ -40,6 +40,7 @@ export function LandingFeatureGrid({
           <ScrollReveal
             as="li"
             key={feature.title}
+            once
             delay={0.05 * index}
             className={landingFeatureCardClass(band)}
           >

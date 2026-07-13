@@ -10,7 +10,7 @@ export function LandingClosingSection() {
   return (
     <LandingBandSection band="ochre" ariaLabel="Join the chain" centered tone="cta">
       <LandingSectionHeader band="ochre" title={title} lead={lead} align="center" />
-      <ScrollReveal delay={0.16} className="pt-1">
+      <ScrollReveal once delay={0.16} className="pt-1">
         <LandingJoinCta onOchreBand />
       </ScrollReveal>
     </LandingBandSection>
