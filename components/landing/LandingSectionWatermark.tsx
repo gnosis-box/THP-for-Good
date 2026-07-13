@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { motion } from 'motion/react';
 
-import { landingBandWatermarkInsetClass } from '@/components/landing/landing-theme';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { cn } from '@/lib/utils';
@@ -48,11 +47,10 @@ export function LandingSectionWatermark({
   const positionClass =
     layout === 'band'
       ? cn(
-          'pointer-events-none absolute z-0 isolate aspect-square',
-          landingBandWatermarkInsetClass,
+          'pointer-events-none absolute top-1/2 z-0 isolate size-[20rem] sm:size-[26rem] md:size-[30rem]',
           side === 'left'
-            ? 'left-0 -translate-x-[46%] sm:-translate-x-[43%] md:-translate-x-[40%]'
-            : 'right-0 translate-x-[46%] sm:translate-x-[43%] md:translate-x-[40%]',
+            ? 'left-0 -translate-x-[46%] -translate-y-1/2 sm:-translate-x-[43%] md:-translate-x-[40%]'
+            : 'right-0 translate-x-[46%] -translate-y-1/2 sm:translate-x-[43%] md:translate-x-[40%]',
         )
       : cn(
           'pointer-events-none absolute top-1/2 z-0 isolate h-[min(86dvh,36rem)] w-[min(86dvh,36rem)] -translate-y-1/2 sm:h-[min(90dvh,42rem)] sm:w-[min(90dvh,42rem)] md:h-[min(94dvh,48rem)] md:w-[min(94dvh,48rem)]',

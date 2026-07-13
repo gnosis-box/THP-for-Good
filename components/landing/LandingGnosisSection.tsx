@@ -14,7 +14,7 @@ export function LandingGnosisSection() {
       watermark={{ side: 'left', src: '/circles-owl-logo-beige.png' }}
     >
       <LandingSectionHeader band="dark" kicker={kicker} title={title} />
-      <ScrollReveal delay={0.14}>
+      <ScrollReveal once delay={0.14}>
         <p className={landingLeadClass('dark')}>{body}</p>
       </ScrollReveal>
     </LandingBandSection>

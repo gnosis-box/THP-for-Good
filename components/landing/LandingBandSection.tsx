@@ -4,8 +4,8 @@ import { LandingBandAtmosphere } from '@/components/landing/LandingBandAtmospher
 import {
   landingBandContentSectionShellClass,
   landingBandCtaSectionShellClass,
+  landingBandSheetClass,
   landingSectionInnerClass,
-  landingBandSurfaceStyle,
   type LandingBand,
 } from '@/components/landing/landing-theme';
 import { LandingSectionWatermark } from '@/components/landing/LandingSectionWatermark';
@@ -16,7 +16,7 @@ type LandingBandSectionProps = {
   ariaLabel: string;
   watermark?: { side: 'left' | 'right'; src: string };
   centered?: boolean;
-  /** `content` = uniform explanatory band height; `cta` = closing section. */
+  /** `content` = explanatory band; `cta` = closing section (last sheet). */
   tone?: 'content' | 'cta';
   className?: string;
   children: ReactNode;
@@ -33,9 +33,9 @@ export function LandingBandSection({
 }: LandingBandSectionProps) {
   return (
     <section
-      style={landingBandSurfaceStyle(band)}
       className={cn(
         tone === 'cta' ? landingBandCtaSectionShellClass : landingBandContentSectionShellClass,
+        landingBandSheetClass(band),
         centered && 'items-center text-center',
         className,
       )}

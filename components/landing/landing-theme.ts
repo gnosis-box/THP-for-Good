@@ -1,5 +1,3 @@
-import type { CSSProperties } from 'react';
-
 import { cn } from '@/lib/utils';
 
 /** Landing band palette — aligned with solarpunk.tokens.css */
@@ -12,16 +10,33 @@ export const LANDING_BAND = {
 
 export type LandingBand = 'dark' | 'ochre';
 
-/** Shared vertical rhythm — explanatory bands (hero + closing CTA excluded). */
+/**
+ * Stacked-sheet hand-off: each band rises over the previous one with large
+ * rounded top corners and a soft cast shadow. Later siblings paint above
+ * earlier ones (positioned, DOM order), so no explicit z-index is needed.
+ */
+const landingSheetEdgeClass =
+  '-mt-10 rounded-t-[2.5rem] sm:rounded-t-[3rem] md:rounded-t-[3.5rem]';
+
+export function landingBandSheetClass(band: LandingBand) {
+  return cn(
+    landingSheetEdgeClass,
+    band === 'ochre'
+      ? 'bg-[#c49a62] shadow-[0_-24px_48px_-24px_rgba(4,10,8,0.55),inset_0_1px_0_rgba(255,255,255,0.28)]'
+      : 'bg-[#0a1210] shadow-[0_-24px_48px_-24px_rgba(4,10,8,0.65),inset_0_1px_0_rgba(255,255,255,0.06)]',
+  );
+}
+
+/**
+ * Shared vertical rhythm — padding-driven, no fixed heights. Bottom padding is
+ * larger than top to compensate for the next sheet's 2.5rem overlap.
+ */
 export const landingBandContentSectionShellClass =
-  'relative isolate flex h-[min(68dvh,38rem)] flex-col justify-center overflow-hidden px-5 py-14 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:py-16 md:py-[4.5rem]';
+  'relative isolate flex flex-col overflow-hidden px-5 pt-16 pb-24 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:pt-20 sm:pb-28 md:pt-24 md:pb-32';
 
-/** Closing CTA — shorter, not locked to content-band height. */
+/** Closing CTA — last sheet, no overlap below it to compensate for. */
 export const landingBandCtaSectionShellClass =
-  'relative isolate flex min-h-[min(44dvh,24rem)] flex-col justify-center overflow-hidden px-5 py-14 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:py-16';
-
-/** Equal inset from top/bottom for band watermarks — synced with shell padding rhythm. */
-export const landingBandWatermarkInsetClass = 'top-14 bottom-14 sm:top-16 sm:bottom-16 md:top-[4.5rem] md:bottom-[4.5rem]';
+  'relative isolate flex flex-col overflow-hidden px-5 pt-16 pb-20 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:pt-20 sm:pb-24';
 
 const landingGrainBgClass =
   '[background-image:url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20256%20256%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.85%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E")]';
@@ -33,58 +48,13 @@ export const landingBandGrainAmbientClass = cn(
   '[background-size:200px_200px]',
 );
 
-/** Previous-band colour for top fade (alternating dark ↔ ochre). */
-export function landingBandPreviousColor(band: LandingBand) {
-  return band === 'ochre' ? LANDING_BAND.dark : LANDING_BAND.ochre;
-}
-
-/** Height of the top colour hand-off — narrow strip at the band edge. */
-export const LANDING_BAND_FADE_HEIGHT = '2.5rem';
-
-/**
- * Section surface — short top strip fades from previous band into current colour.
- * Solid fill below keeps the rest of the section untinted.
- */
-export function landingBandSurfaceStyle(band: LandingBand): CSSProperties {
-  const current = band === 'ochre' ? LANDING_BAND.ochre : LANDING_BAND.dark;
-  const prev = landingBandPreviousColor(band);
-
-  return {
-    backgroundColor: current,
-    backgroundImage: [
-      'linear-gradient(to bottom,',
-      `${prev} 0%,`,
-      `color-mix(in srgb, ${prev} 55%, ${current}) 55%,`,
-      `${current} 100%)`,
-    ].join(' '),
-    backgroundSize: `100% ${LANDING_BAND_FADE_HEIGHT}`,
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'top center',
-  };
-}
-
-/** Soft painterly wash — matches the fixed fade strip height. */
-export const landingBandTopWashZoneClass =
-  'pointer-events-none absolute inset-x-0 top-0 z-0 h-[2.5rem] overflow-hidden';
-
-export function landingBandTopWashStyle(band: LandingBand): CSSProperties {
-  const prev = landingBandPreviousColor(band);
-  return {
-    background: [
-      `radial-gradient(ellipse 90% 70% at 18% 0%, color-mix(in srgb, ${prev} 55%, transparent) 0%, transparent 68%),`,
-      `radial-gradient(ellipse 85% 65% at 82% 4%, color-mix(in srgb, ${prev} 45%, transparent) 0%, transparent 65%),`,
-      `radial-gradient(ellipse 100% 75% at 50% -5%, color-mix(in srgb, ${prev} 35%, transparent) 0%, transparent 72%)`,
-    ].join(' '),
-  };
-}
-
 export const landingSectionInnerClass =
   'relative z-20 mx-auto flex w-full max-w-3xl flex-col gap-10 md:gap-12';
 
 export const landingSectionHeaderClass = 'flex max-w-2xl flex-col gap-4';
 
 export const landingTitleClass =
-  'font-heading text-[clamp(1.65rem,4.8vw,2.65rem)] font-bold leading-[1.08] tracking-tight text-balance';
+  'font-heading text-[clamp(1.75rem,5vw,2.85rem)] font-bold leading-[1.08] tracking-tight text-balance';
 
 export function landingBandAtmosphereClass(band: LandingBand) {
   return cn(
@@ -117,26 +87,23 @@ export function landingLeadClass(band: LandingBand) {
   );
 }
 
+/** Editorial feature row — hairline top rule, no box, no hover chrome. */
 export function landingFeatureCardClass(band: LandingBand) {
   return cn(
-    'group flex flex-col gap-3 rounded-2xl border px-5 py-5',
-    'transition-[transform,background-color,border-color,box-shadow] duration-200',
-    'hover:-translate-y-0.5 hover:shadow-sm motion-reduce:hover:translate-y-0',
-    band === 'ochre'
-      ? 'border-[#141f1c]/15 bg-[#141f1c]/[0.06] hover:border-[#141f1c]/28 hover:bg-[#141f1c]/[0.1]'
-      : 'border-border/70 bg-[#141f1c]/35 backdrop-blur-[2px] hover:border-border hover:bg-[#141f1c]/50',
+    'flex flex-col gap-2.5 border-t pt-5',
+    band === 'ochre' ? 'border-[#141f1c]/25' : 'border-white/10',
   );
 }
 
 export function landingFeatureIndexClass(band: LandingBand) {
   return cn(
     'font-mono text-xs font-medium tabular-nums',
-    band === 'ochre' ? 'text-[#141f1c]/50' : 'text-muted-foreground/55',
+    band === 'ochre' ? 'text-[#141f1c]/50' : 'text-[#5a9f76]',
   );
 }
 
 export function landingFeatureTitleClass(band: LandingBand) {
-  return cn('text-sm font-semibold', band === 'ochre' ? 'text-[#141f1c]' : 'text-foreground');
+  return cn('text-base font-semibold', band === 'ochre' ? 'text-[#141f1c]' : 'text-foreground');
 }
 
 export function landingFeatureBodyClass(band: LandingBand) {
