@@ -4,9 +4,9 @@ import { LandingBandAtmosphere } from '@/components/landing/LandingBandAtmospher
 import {
   landingBandContentSectionShellClass,
   landingBandCtaSectionShellClass,
-  landingBandSheetClass,
+  landingBandSurfaceClass,
+  landingSeamWrapperClass,
   landingSectionInnerClass,
-  landingSheetOverlapClass,
   type LandingBand,
 } from '@/components/landing/landing-theme';
 import { LandingSectionWatermark } from '@/components/landing/LandingSectionWatermark';
@@ -16,7 +16,7 @@ type LandingBandSectionProps = {
   band: LandingBand;
   ariaLabel: string;
   watermark?: { side: 'left' | 'right'; src: string };
-  /** Medallion straddling the seam with the previous band (e.g. `<LandingSeamBadge />`). */
+  /** Marker straddling the seam rule with the previous band (e.g. `<LandingSeamBadge />`). */
   seamBadge?: ReactNode;
   centered?: boolean;
   /** `content` = explanatory band; `cta` = closing section (last sheet). */
@@ -36,12 +36,12 @@ export function LandingBandSection({
   children,
 }: LandingBandSectionProps) {
   return (
-    <div className={landingSheetOverlapClass}>
+    <div className={landingSeamWrapperClass}>
       {seamBadge}
       <section
         className={cn(
           tone === 'cta' ? landingBandCtaSectionShellClass : landingBandContentSectionShellClass,
-          landingBandSheetClass(band),
+          landingBandSurfaceClass(band),
           centered && 'items-center text-center',
           className,
         )}
