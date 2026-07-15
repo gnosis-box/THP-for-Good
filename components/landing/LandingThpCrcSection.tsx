@@ -1,7 +1,6 @@
 import { LandingBandSection } from '@/components/landing/LandingBandSection';
 import { LandingFeatureGrid } from '@/components/landing/LandingFeatureGrid';
 import { landingLeadClass } from '@/components/landing/landing-theme';
-import { LandingSeamBadge } from '@/components/landing/LandingSeamBadge';
 import { LandingSectionHeader } from '@/components/landing/LandingSectionHeader';
 import { ScrollReveal } from '@/components/motion/scroll-reveal';
 import { UI_COPY } from '@/lib/ui-copy';
@@ -14,7 +13,6 @@ export function LandingThpCrcSection() {
       band="dark"
       ariaLabel="CRC at THP for Good"
       watermark={{ side: 'left', src: '/circles-owl-logo-beige.png' }}
-      seamBadge={<LandingSeamBadge label="04" />}
     >
       <LandingSectionHeader band="dark" kicker={kicker} title={title} />
       <LandingFeatureGrid
