@@ -11,36 +11,25 @@ export const LANDING_BAND = {
 export type LandingBand = 'dark' | 'ochre';
 
 /**
- * Stacked-sheet hand-off: each band rises over the previous one with large
- * rounded top corners and a soft cast shadow. Later siblings paint above
- * earlier ones (positioned, DOM order), so no explicit z-index is needed.
+ * Editorial seam hand-off: bands butt flush against each other and the join is
+ * a single crisp accent rule — no overlap, no rounded corners, no cast shadow.
  *
- * The overlap lives on a wrapper (not the clipped section) so a seam badge
- * can straddle the sheet's top edge without being cut by `overflow-hidden`.
+ * The wrapper stays so a seam marker can straddle the band's top edge without
+ * being cut by the section's `overflow-hidden`.
  */
-export const landingSheetOverlapClass = 'relative -mt-10';
+export const landingSeamWrapperClass = 'relative';
 
-const landingSheetEdgeClass = 'rounded-t-[2.5rem] sm:rounded-t-[3rem] md:rounded-t-[3.5rem]';
-
-export function landingBandSheetClass(band: LandingBand) {
-  return cn(
-    landingSheetEdgeClass,
-    band === 'ochre'
-      ? 'bg-[#c49a62] shadow-[0_-24px_48px_-24px_rgba(4,10,8,0.55),inset_0_1px_0_rgba(255,255,255,0.28)]'
-      : 'bg-[#0a1210] shadow-[0_-24px_48px_-24px_rgba(4,10,8,0.65),inset_0_1px_0_rgba(255,255,255,0.06)]',
-  );
+export function landingBandSurfaceClass(band: LandingBand) {
+  return cn('border-t border-[#5a9f76]', band === 'ochre' ? 'bg-[#c49a62]' : 'bg-[#0a1210]');
 }
 
-/**
- * Shared vertical rhythm — padding-driven, no fixed heights. Bottom padding is
- * larger than top to compensate for the next sheet's 2.5rem overlap.
- */
+/** Shared vertical rhythm — padding-driven, no fixed heights, symmetric top/bottom. */
 export const landingBandContentSectionShellClass =
-  'relative isolate flex flex-col overflow-hidden px-5 pt-16 pb-24 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:pt-20 sm:pb-28 md:pt-24 md:pb-32';
+  'relative isolate flex flex-col overflow-hidden px-5 py-16 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:py-20 md:py-24';
 
-/** Closing CTA — last sheet, no overlap below it to compensate for. */
+/** Closing CTA — last band, slightly tighter rhythm. */
 export const landingBandCtaSectionShellClass =
-  'relative isolate flex flex-col overflow-hidden px-5 pt-16 pb-20 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:pt-20 sm:pb-24';
+  'relative isolate flex flex-col overflow-hidden px-5 py-16 supports-[padding:max(0px)]:px-[max(1.25rem,env(safe-area-inset-left))] supports-[padding:max(0px)]:pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8 sm:py-20';
 
 const landingGrainBgClass =
   '[background-image:url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20256%20256%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.85%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E")]';
