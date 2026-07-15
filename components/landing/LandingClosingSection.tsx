@@ -14,7 +14,7 @@ export function LandingClosingSection() {
       ariaLabel="Join the chain"
       centered
       tone="cta"
-      seamBadge={<LandingSeamBadge variant="join" />}
+      seamBadge={<LandingSeamBadge />}
     >
       <LandingSectionHeader band="ochre" title={title} lead={lead} align="center" />
       <ScrollReveal once delay={0.16} className="pt-1">
