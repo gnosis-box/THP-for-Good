@@ -14,9 +14,13 @@ export type LandingBand = 'dark' | 'ochre';
  * Stacked-sheet hand-off: each band rises over the previous one with large
  * rounded top corners and a soft cast shadow. Later siblings paint above
  * earlier ones (positioned, DOM order), so no explicit z-index is needed.
+ *
+ * The overlap lives on a wrapper (not the clipped section) so a seam badge
+ * can straddle the sheet's top edge without being cut by `overflow-hidden`.
  */
-const landingSheetEdgeClass =
-  '-mt-10 rounded-t-[2.5rem] sm:rounded-t-[3rem] md:rounded-t-[3.5rem]';
+export const landingSheetOverlapClass = 'relative -mt-10';
+
+const landingSheetEdgeClass = 'rounded-t-[2.5rem] sm:rounded-t-[3rem] md:rounded-t-[3.5rem]';
 
 export function landingBandSheetClass(band: LandingBand) {
   return cn(
