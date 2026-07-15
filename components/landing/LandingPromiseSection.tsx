@@ -1,5 +1,6 @@
 import { LandingBandSection } from '@/components/landing/LandingBandSection';
 import { LandingFeatureGrid } from '@/components/landing/LandingFeatureGrid';
+import { LandingSeamBadge } from '@/components/landing/LandingSeamBadge';
 import { LandingSectionHeader } from '@/components/landing/LandingSectionHeader';
 import { UI_COPY } from '@/lib/ui-copy';
 
@@ -11,6 +12,7 @@ export function LandingPromiseSection() {
       band="ochre"
       ariaLabel="Why THP for Good"
       watermark={{ side: 'right', src: '/thp-logo-beige-green.png' }}
+      seamBadge={<LandingSeamBadge label="01" />}
     >
       <LandingSectionHeader band="ochre" kicker={kicker} title={problemTitle} lead={promise} />
       <LandingFeatureGrid band="ochre" features={features} columns="three" />
