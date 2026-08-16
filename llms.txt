@@ -1,0 +1,77 @@
+# THP-for-Good
+
+> Embedded Miniapps Boilerplate (Circles) — Next.js 16 + shadcn/ui (Base UI) + TypeScript starter for building Circles miniapps, evolved into the THP-for-Good app: landing, expert profiles, booking, DAO, stats, admin. Host pushes the wallet via iframe (no connect button); the SDK handles transactions and signing. Light theme only; pnpm; Turbopack default. Durable docs English; chat with the operator French.
+
+## Root
+
+- [README.md](README.md): Repository overview — quickstart, wallet connection, playground testing, marketplace listing
+- [AGENTS.md](AGENTS.md): Agent guide — stack rules (Next.js 16, Tailwind v4, light-only theme), SDK pitfalls, project structure
+- [CLAUDE.md](CLAUDE.md): Claude Code-oriented notes
+- [CONTRIBUTING.md](CONTRIBUTING.md): Contribution guidelines (multi-contributor repo — PRs to `dev`, no direct pushes)
+
+## App routes
+
+- [app/page.tsx](app/page.tsx): Dashboard — ConnectionCard, SignInDemo, NavCards
+- [app/landing/page.tsx](app/landing/page.tsx): Marketing landing — senior-polish editorial bands, ochre promise section, Join-the-chain CTA, Circles owl watermarks
+- [app/profile/page.tsx](app/profile/page.tsx): Profile lookup page
+- [app/expert/[id]/page.tsx](app/expert/[id]/page.tsx): Expert profile page — share button (Web Share fallback), contextual tooltips, opaque slugs, SEO/AI metadata
+- [app/expert/register/page.tsx](app/expert/register/page.tsx): Expert registration flow
+- [app/api/bookings](app/api/bookings): Booking API routes — post-pay hardening, FK split mentors/experts
+- [app/actions/page.tsx](app/actions/page.tsx): `sendTransactions` code sample
+- [app/stats/page.tsx](app/stats/page.tsx): Stats / analytics views
+- [app/admin/page.tsx](app/admin/page.tsx): Admin panel (admin-wallet gated)
+- [app/dao/page.tsx](app/dao/page.tsx): DAO views
+- [app/calls/page.tsx](app/calls/page.tsx): Calls views
+- [app/history/page.tsx](app/history/page.tsx): History views
+- [app/about/page.tsx](app/about/page.tsx): About page
+
+## Specs & plans
+
+- [spec/PRD-MVP.md](spec/PRD-MVP.md): Product requirements — MVP scope
+- [spec/landing-marketing-ux.md](spec/landing-marketing-ux.md): Landing marketing UX spec (senior polish direction)
+- [spec/invitation-links-ux.md](spec/invitation-links-ux.md): Invitation links UX
+- [spec/skills-languages-ux.md](spec/skills-languages-ux.md): Expert skill management & language UX
+- [spec/a07-og-metadata-plan.md](spec/a07-og-metadata-plan.md): OpenGraph metadata plan (IMPL-A-07)
+- [spec/a09-ai-agent-metadata-plan.md](spec/a09-ai-agent-metadata-plan.md): AI/agent discoverability metadata plan (IMPL-A-09)
+- [spec/live-crc-counter.md](spec/live-crc-counter.md): Live CRC treasury counter spec
+- [spec/analytics-strategy.md](spec/analytics-strategy.md): Analytics strategy
+- [spec/design-tokens.md](spec/design-tokens.md): Design tokens
+- [spec/solarpunk-theme-decisions.md](spec/solarpunk-theme-decisions.md): Solarpunk theme decisions (chroma budget, muted brand palette)
+- [spec/motion-design-audit.md](spec/motion-design-audit.md): Motion design audit
+- [spec/deploy.md](spec/deploy.md): Deployment notes
+- [spec/seed.md](spec/seed.md): Seed data notes
+- [docs/spike-cal-diy.md](docs/spike-cal-diy.md): Spike — calendar DIY
+- [docs/spike-split-pay.md](docs/spike-split-pay.md): Spike — split payment
+- [docs/spike-trust-eligible-balance.md](docs/spike-trust-eligible-balance.md): Spike — trust-eligible balance
+
+## Wallet & SDK
+
+- [components/wallet/WalletProvider.tsx](components/wallet/WalletProvider.tsx): React context around `onWalletChange` — canonical SDK import pattern
+- [hooks/use-wallet.ts](hooks/use-wallet.ts): `useWallet()` re-export
+- [lib/nav.ts](lib/nav.ts): `NAV` array — single source of truth for sidebar/drawer/page-nav
+- [app/actions/page.tsx](app/actions/page.tsx): `sendTransactions` code sample
+
+## Component families
+
+- [components/landing/](components/landing/): Landing sections — hero, promise band, About CRC/THP CRC, closing CTA, band seams/mist/grain
+- [components/experts/](components/experts/): Expert profile UI — share, tooltips, skill management
+- [components/booking/](components/booking/): Booking flow components
+- [components/dao/](components/dao/): DAO views
+- [components/analytics/](components/analytics/): Analytics components
+- [components/admin/](components/admin/): Admin panel components
+- [components/seo/](components/seo/): SEO metadata components (OG, AI metadata)
+- [components/layout/](components/layout/): App shell — header, sidebar, mobile nav
+- [components/brand/](components/brand/): Brand marks (Circles logo, THP logo recolor scripts)
+
+## Config
+
+- [next.config.ts](next.config.ts): Next.js config — CSP `frame-ancestors` header for the Circles playground iframe
+- [package.json](package.json): Scripts and dependencies (pnpm)
+- [tsconfig.json](tsconfig.json): TypeScript config — path alias `@/*`
+
+## Optional
+
+- [components.json](components.json): shadcn/ui configuration
+- [.env.example](.env.example): Environment variables template
+- [scripts/recolor-thp-logo.mjs](scripts/recolor-thp-logo.mjs): THP logo recolor utility
+- [scripts/recolor-circles-owl-logo.mjs](scripts/recolor-circles-owl-logo.mjs): Circles owl logo recolor utility
